@@ -499,7 +499,7 @@ public class ReportRunner {
 		StringBuilder labelledValues = new StringBuilder(1024);
 
 		if (CollectionUtils.isNotEmpty(reportRules) && user == null) {
-			throw new IllegalStateException("Report has rules but no user supplied");
+			throw new RuntimeException("Report has rules but no user supplied");
 		}
 
 		// for each rule build and add the AND column IN (list) string to the query
@@ -1094,7 +1094,7 @@ public class ReportRunner {
 			throws SQLException {
 
 		if (report == null) {
-			throw new IllegalStateException("report is null");
+			throw new RuntimeException("report is null");
 		}
 
 		useRules = report.isUsesRules();
@@ -1156,7 +1156,7 @@ public class ReportRunner {
 				//xdocreport may only have template queries
 				return;
 			} else {
-				throw new IllegalStateException("Datasource not found");
+				throw new RuntimeException("Datasource not found");
 			}
 		}
 
@@ -1187,7 +1187,7 @@ public class ReportRunner {
 		logger.debug("dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE) = {}", dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
 		if (!dmd.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
 			if (reportType.requiresScrollableResultSet()) {
-				throw new IllegalStateException("Report type requires scrollable resultset but database doesn't support this");
+				throw new RuntimeException("Report type requires scrollable resultset but database doesn't support this");
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
@@ -1556,13 +1556,13 @@ public class ReportRunner {
 		if (StringUtils.startsWith(exp, "#") && StringUtils.endsWith(exp, "#") && StringUtils.length(exp) > 2) {
 			//expression is a report parameter. get the value to use
 			if (reportParamsMap == null) {
-				throw new IllegalStateException("Report parameters not available");
+				throw new RuntimeException("Report parameters not available");
 			}
 
 			String paramName = exp.substring(1, exp.length() - 1);
 			ReportParameter reportParam = reportParamsMap.get(paramName);
 			if (reportParam == null) {
-				throw new IllegalStateException("Parameter not found: " + paramName);
+				throw new RuntimeException("Parameter not found: " + paramName);
 			}
 
 			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();

@@ -173,7 +173,7 @@ public class JxlsOutput {
 
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 
 			//set objects to be passed to jxls
@@ -204,7 +204,7 @@ public class JxlsOutput {
 				fullAreaConfigFilename = templatesPath + areaConfigFilename;
 				File areaConfigFile = new File(fullAreaConfigFilename);
 				if (!areaConfigFile.exists()) {
-					throw new IllegalStateException("Area config file not found: " + fullAreaConfigFilename);
+					throw new RuntimeException("Area config file not found: " + fullAreaConfigFilename);
 				}
 			}
 

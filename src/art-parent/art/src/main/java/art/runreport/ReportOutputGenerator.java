@@ -927,7 +927,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generatePivotTableJsOutput");
 
 		if (isJob) {
-			throw new IllegalStateException("PivotTable.js output not supported for jobs");
+			throw new RuntimeException("PivotTable.js output not supported for jobs");
 		}
 
 		request.setAttribute("reportType", reportType);
@@ -965,7 +965,7 @@ public class ReportOutputGenerator {
 		if (StringUtils.isNotBlank(templateFileName)) {
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
@@ -980,7 +980,7 @@ public class ReportOutputGenerator {
 			String fullCssFileName = jsTemplatesPath + cssFileName;
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
-				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
 			}
 			request.setAttribute("cssFileName", cssFileName);
 		}
@@ -1000,7 +1000,7 @@ public class ReportOutputGenerator {
 
 			File dataFile = new File(fullDataFileName);
 			if (!dataFile.exists()) {
-				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+				throw new RuntimeException("Data file not found: " + fullDataFileName);
 			}
 
 			request.setAttribute("dataFileName", dataFileName);
@@ -1496,7 +1496,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateReactPivotReport");
 
 		if (isJob) {
-			throw new IllegalStateException("ReactPivot report type not supported for jobs");
+			throw new RuntimeException("ReactPivot report type not supported for jobs");
 		}
 
 		rs = reportRunner.getResultSet();
@@ -1525,7 +1525,7 @@ public class ReportOutputGenerator {
 
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 		}
 
 		String outputDivId = "reactPivotOutput-" + RandomStringUtils.randomAlphanumeric(5);
@@ -1544,7 +1544,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateDygraphReport");
 
 		if (isJob) {
-			throw new IllegalStateException("Dygraphs report types not supported for jobs");
+			throw new RuntimeException("Dygraphs report types not supported for jobs");
 		}
 
 		request.setAttribute("reportType", reportType);
@@ -1589,7 +1589,7 @@ public class ReportOutputGenerator {
 		if (StringUtils.isNotBlank(templateFileName)) {
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
@@ -1617,7 +1617,7 @@ public class ReportOutputGenerator {
 
 			File dataFile = new File(fullDataFileName);
 			if (!dataFile.exists()) {
-				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+				throw new RuntimeException("Data file not found: " + fullDataFileName);
 			}
 
 			request.setAttribute("dataFileName", dataFileName);
@@ -1637,7 +1637,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateDataTablesOutput");
 
 		if (isJob) {
-			throw new IllegalStateException("DataTables report types not supported for jobs");
+			throw new RuntimeException("DataTables report types not supported for jobs");
 		}
 
 		request.setAttribute("reportType", reportType);
@@ -1671,7 +1671,7 @@ public class ReportOutputGenerator {
 		if (StringUtils.isNotBlank(templateFileName)) {
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
@@ -1706,7 +1706,7 @@ public class ReportOutputGenerator {
 
 			File dataFile = new File(fullDataFileName);
 			if (!dataFile.exists()) {
-				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+				throw new RuntimeException("Data file not found: " + fullDataFileName);
 			}
 
 			request.setAttribute("dataFileName", dataFileName);
@@ -1868,7 +1868,7 @@ public class ReportOutputGenerator {
 		Objects.requireNonNull(c3Options, "c3Options must not be null");
 
 		if (isJob) {
-			throw new IllegalStateException("C3.js output not supported for jobs");
+			throw new RuntimeException("C3.js output not supported for jobs");
 		}
 
 		rs = reportRunner.getResultSet();
@@ -1924,7 +1924,7 @@ public class ReportOutputGenerator {
 			String fullTemplateFileName = jsTemplatesPath + templateFileName;
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
@@ -1939,7 +1939,7 @@ public class ReportOutputGenerator {
 			String fullCssFileName = jsTemplatesPath + cssFileName;
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
-				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
 			}
 			request.setAttribute("cssFileName", cssFileName);
 		}
@@ -1975,7 +1975,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateChartJsReport");
 
 		if (isJob) {
-			throw new IllegalStateException("Chart.js report type not supported for jobs");
+			throw new RuntimeException("Chart.js report type not supported for jobs");
 		}
 
 		rs = reportRunner.getResultSet();
@@ -2004,7 +2004,7 @@ public class ReportOutputGenerator {
 
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 		}
 
 		ChartJsOptions options;
@@ -2033,7 +2033,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateDatamapReport");
 
 		if (isJob) {
-			throw new IllegalStateException("Datamaps report types not supported for jobs");
+			throw new RuntimeException("Datamaps report types not supported for jobs");
 		}
 
 		request.setAttribute("reportType", reportType);
@@ -2067,7 +2067,7 @@ public class ReportOutputGenerator {
 
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 		}
 
 		DatamapsOptions options;
@@ -2088,7 +2088,7 @@ public class ReportOutputGenerator {
 		String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
 		File datamapsJsFile = new File(fullDatamapsJsFileName);
 		if (!datamapsJsFile.exists()) {
-			throw new IllegalStateException("Datamaps js file not found: " + fullDatamapsJsFileName);
+			throw new RuntimeException("Datamaps js file not found: " + fullDatamapsJsFileName);
 		}
 
 		String dataFileName = options.getDataFile();
@@ -2096,7 +2096,7 @@ public class ReportOutputGenerator {
 			String fullDataFileName = jsTemplatesPath + dataFileName;
 			File dataFile = new File(fullDataFileName);
 			if (!dataFile.exists()) {
-				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+				throw new RuntimeException("Data file not found: " + fullDataFileName);
 			}
 		}
 
@@ -2106,7 +2106,7 @@ public class ReportOutputGenerator {
 
 			File mapFile = new File(fullMapFileName);
 			if (!mapFile.exists()) {
-				throw new IllegalStateException("Map file not found: " + fullMapFileName);
+				throw new RuntimeException("Map file not found: " + fullMapFileName);
 			}
 		}
 
@@ -2116,7 +2116,7 @@ public class ReportOutputGenerator {
 
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
-				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
 			}
 		}
 
@@ -2136,7 +2136,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateWebMapReport");
 
 		if (isJob) {
-			throw new IllegalStateException("Report type not supported for jobs: " + reportType);
+			throw new RuntimeException("Report type not supported for jobs: " + reportType);
 		}
 
 		rs = reportRunner.getResultSet();
@@ -2165,7 +2165,7 @@ public class ReportOutputGenerator {
 
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
-			throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 		}
 
 		WebMapOptions options;
@@ -2183,7 +2183,7 @@ public class ReportOutputGenerator {
 
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
-				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
 			}
 		}
 
@@ -2192,7 +2192,7 @@ public class ReportOutputGenerator {
 			String fullDataFileName = jsTemplatesPath + dataFileName;
 			File dataFile = new File(fullDataFileName);
 			if (!dataFile.exists()) {
-				throw new IllegalStateException("Data file not found: " + fullDataFileName);
+				throw new RuntimeException("Data file not found: " + fullDataFileName);
 			}
 		}
 
@@ -2203,7 +2203,7 @@ public class ReportOutputGenerator {
 					String fullJsFileName = jsTemplatesPath + jsFileName;
 					File jsFile = new File(fullJsFileName);
 					if (!jsFile.exists()) {
-						throw new IllegalStateException("Js file not found: " + fullJsFileName);
+						throw new RuntimeException("Js file not found: " + fullJsFileName);
 					}
 				}
 			}
@@ -2216,7 +2216,7 @@ public class ReportOutputGenerator {
 					String fullListCssFileName = jsTemplatesPath + listCssFileName;
 					File listCssFile = new File(fullListCssFileName);
 					if (!listCssFile.exists()) {
-						throw new IllegalStateException("Css file not found: " + fullListCssFileName);
+						throw new RuntimeException("Css file not found: " + fullListCssFileName);
 					}
 				}
 			}
@@ -2465,7 +2465,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generateOrgChartReport");
 
 		if (isJob) {
-			throw new IllegalStateException("OrgChart report types not supported for jobs");
+			throw new RuntimeException("OrgChart report types not supported for jobs");
 		}
 
 		request.setAttribute("reportType", reportType);
@@ -2513,7 +2513,7 @@ public class ReportOutputGenerator {
 
 			File cssFile = new File(fullCssFileName);
 			if (!cssFile.exists()) {
-				throw new IllegalStateException("Css file not found: " + fullCssFileName);
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
 			}
 		}
 
@@ -2525,7 +2525,7 @@ public class ReportOutputGenerator {
 			String fullTemplateFileName = jsTemplatesPath + templateFileName;
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 		}
 
@@ -2664,7 +2664,7 @@ public class ReportOutputGenerator {
 		logger.debug("Entering generatePlotlyReport");
 
 		if (isJob) {
-			throw new IllegalStateException("Plotly.js report not supported for jobs");
+			throw new RuntimeException("Plotly.js report not supported for jobs");
 		}
 
 		rs = reportRunner.getResultSet();
@@ -2749,7 +2749,7 @@ public class ReportOutputGenerator {
 			String fullTemplateFileName = jsTemplatesPath + templateFileName;
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}

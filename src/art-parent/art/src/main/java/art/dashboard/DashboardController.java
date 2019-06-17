@@ -229,7 +229,7 @@ public class DashboardController {
 							String fullCssFileName = jsTemplatesPath + cssFileName;
 							File cssFile = new File(fullCssFileName);
 							if (!cssFile.exists()) {
-								throw new IllegalStateException("Css file not found: " + fullCssFileName);
+								throw new RuntimeException("Css file not found: " + fullCssFileName);
 							}
 							request.setAttribute("cssFileName", cssFileName);
 						}

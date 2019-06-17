@@ -430,7 +430,7 @@ public class ImportRecordsController {
 						encryptorsFile.delete();
 						copyEncryptorFiles(encryptors, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+						throw new RuntimeException("File not found: " + encryptorsFilePath);
 					}
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
@@ -448,7 +448,7 @@ public class ImportRecordsController {
 						encryptorsFile.delete();
 						copyEncryptorFiles(encryptors, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + encryptorsFilePath);
+						throw new RuntimeException("File not found: " + encryptorsFilePath);
 					}
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
@@ -609,7 +609,7 @@ public class ImportRecordsController {
 						userGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
 						userGroupsFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + userGroupsFilePath);
+						throw new RuntimeException("File not found: " + userGroupsFilePath);
 					}
 
 					Map<Integer, UserGroup> userGroupsMap = new HashMap<>();
@@ -627,7 +627,7 @@ public class ImportRecordsController {
 							int parentId = role.getParentId();
 							UserGroup userGroup = userGroupsMap.get(parentId);
 							if (userGroup == null) {
-								throw new IllegalStateException("User Group not found. Parent Id = " + parentId);
+								throw new RuntimeException("User Group not found. Parent Id = " + parentId);
 							} else {
 								List<Role> roles = userGroup.getRoles();
 								if (roles == null) {
@@ -649,7 +649,7 @@ public class ImportRecordsController {
 							int parentId = permission.getParentId();
 							UserGroup userGroup = userGroupsMap.get(parentId);
 							if (userGroup == null) {
-								throw new IllegalStateException("User Group not found. Parent Id = " + parentId);
+								throw new RuntimeException("User Group not found. Parent Id = " + parentId);
 							} else {
 								List<Permission> permissions = userGroup.getPermissions();
 								if (permissions == null) {
@@ -708,7 +708,7 @@ public class ImportRecordsController {
 						schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
 						schedulesFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + schedulesFilePath);
+						throw new RuntimeException("File not found: " + schedulesFilePath);
 					}
 
 					String holidaysFilePath = artTempPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
@@ -725,7 +725,7 @@ public class ImportRecordsController {
 							int parentId = holiday.getParentId();
 							Schedule schedule = schedulesMap.get(parentId);
 							if (schedule == null) {
-								throw new IllegalStateException("Schedule not found. Parent Id = " + parentId);
+								throw new RuntimeException("Schedule not found. Parent Id = " + parentId);
 							} else {
 								List<Holiday> sharedHolidays = schedule.getSharedHolidays();
 								if (sharedHolidays == null) {
@@ -784,7 +784,7 @@ public class ImportRecordsController {
 						users = csvRoutines.parseAll(User.class, usersFile);
 						usersFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + usersFilePath);
+						throw new RuntimeException("File not found: " + usersFilePath);
 					}
 
 					Map<Integer, User> usersMap = new HashMap<>();
@@ -802,7 +802,7 @@ public class ImportRecordsController {
 							int parentId = userGroup.getParentId();
 							User user = usersMap.get(parentId);
 							if (user == null) {
-								throw new IllegalStateException("User not found. Parent Id = " + parentId);
+								throw new RuntimeException("User not found. Parent Id = " + parentId);
 							} else {
 								List<UserGroup> userGroups = user.getUserGroups();
 								if (userGroups == null) {
@@ -824,7 +824,7 @@ public class ImportRecordsController {
 							int parentId = role.getParentId();
 							User user = usersMap.get(parentId);
 							if (user == null) {
-								throw new IllegalStateException("User not found. Parent Id = " + parentId);
+								throw new RuntimeException("User not found. Parent Id = " + parentId);
 							} else {
 								List<Role> roles = user.getRoles();
 								if (roles == null) {
@@ -846,7 +846,7 @@ public class ImportRecordsController {
 							int parentId = permission.getParentId();
 							User user = usersMap.get(parentId);
 							if (user == null) {
-								throw new IllegalStateException("User not found. Parent Id = " + parentId);
+								throw new RuntimeException("User not found. Parent Id = " + parentId);
 							} else {
 								List<Permission> permissions = user.getPermissions();
 								if (permissions == null) {
@@ -944,7 +944,7 @@ public class ImportRecordsController {
 						parametersFile.delete();
 						copyParameterFiles(parameters, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + parametersFilePath);
+						throw new RuntimeException("File not found: " + parametersFilePath);
 					}
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
@@ -962,7 +962,7 @@ public class ImportRecordsController {
 						parametersFile.delete();
 						copyParameterFiles(parameters, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + parametersFilePath);
+						throw new RuntimeException("File not found: " + parametersFilePath);
 					}
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
@@ -1024,7 +1024,7 @@ public class ImportRecordsController {
 						reportsFile.delete();
 						copyReportFiles(reports, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + reportsFilePath);
+						throw new RuntimeException("File not found: " + reportsFilePath);
 					}
 				} else {
 					throw new IllegalArgumentException("Unexpected file extension: " + extension);
@@ -1043,7 +1043,7 @@ public class ImportRecordsController {
 						reportsFile.delete();
 						copyReportFiles(reports, artTempPath, file);
 					} else {
-						throw new IllegalStateException("File not found: " + reportsFilePath);
+						throw new RuntimeException("File not found: " + reportsFilePath);
 					}
 
 					Map<Integer, Report> reportsMap = new HashMap<>();
@@ -1061,7 +1061,7 @@ public class ImportRecordsController {
 							int parentId = reportGroup.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<ReportGroup> reportGroups = report.getReportGroups();
 								if (reportGroups == null) {
@@ -1083,7 +1083,7 @@ public class ImportRecordsController {
 							int parentId = reportParam.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<ReportParameter> reportParams = report.getReportParams();
 								if (reportParams == null) {
@@ -1105,7 +1105,7 @@ public class ImportRecordsController {
 							int parentId = userRuleValue.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<UserRuleValue> userRuleValues = report.getUserRuleValues();
 								if (userRuleValues == null) {
@@ -1127,7 +1127,7 @@ public class ImportRecordsController {
 							int parentId = userGroupRuleValue.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
 								if (userGroupRuleValues == null) {
@@ -1149,7 +1149,7 @@ public class ImportRecordsController {
 							int parentId = reportRule.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<ReportRule> reportRules = report.getReportRules();
 								if (reportRules == null) {
@@ -1171,7 +1171,7 @@ public class ImportRecordsController {
 							int parentId = userReportRight.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<UserReportRight> userReportRights = report.getUserReportRights();
 								if (userReportRights == null) {
@@ -1193,7 +1193,7 @@ public class ImportRecordsController {
 							int parentId = userGroupReportRight.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
 								if (userGroupReportRights == null) {
@@ -1220,7 +1220,7 @@ public class ImportRecordsController {
 							int parentId = drilldown.getParentId();
 							Report report = reportsMap.get(parentId);
 							if (report == null) {
-								throw new IllegalStateException("Report not found. Parent Id = " + parentId);
+								throw new RuntimeException("Report not found. Parent Id = " + parentId);
 							} else {
 								List<Drilldown> drilldowns = report.getDrilldowns();
 								if (drilldowns == null) {
@@ -1244,7 +1244,7 @@ public class ImportRecordsController {
 								int parentId = drilldownReportParam.getParentId();
 								Report drilldownReport = drilldownReportsMap.get(parentId);
 								if (drilldownReport == null) {
-									throw new IllegalStateException("Drilldown report not found. Parent Id = " + parentId);
+									throw new RuntimeException("Drilldown report not found. Parent Id = " + parentId);
 								} else {
 									List<ReportParameter> reportParams = drilldownReport.getReportParams();
 									if (reportParams == null) {
@@ -1538,7 +1538,7 @@ public class ImportRecordsController {
 						roles = csvRoutines.parseAll(Role.class, rolesFile);
 						rolesFile.delete();
 					} else {
-						throw new IllegalStateException("File not found: " + rolesFilePath);
+						throw new RuntimeException("File not found: " + rolesFilePath);
 					}
 
 					String permissionsFileName = artTempPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
@@ -1555,7 +1555,7 @@ public class ImportRecordsController {
 							int parentId = permission.getParentId();
 							Role role = rolesMap.get(parentId);
 							if (role == null) {
-								throw new IllegalStateException("Role not found. Parent Id = " + parentId);
+								throw new RuntimeException("Role not found. Parent Id = " + parentId);
 							} else {
 								List<Permission> rolePermissions = role.getPermissions();
 								if (rolePermissions == null) {

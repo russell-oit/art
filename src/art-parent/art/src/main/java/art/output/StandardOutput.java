@@ -976,12 +976,12 @@ public abstract class StandardOutput {
 	 * @param report the report being run
 	 * @param rsmd the resultset metadata object
 	 * @param columnTypes the column types of the resultset
-	 * @throws IllegalStateException
+	 * @throws RuntimeException
 	 * @throws SQLException
 	 */
 	private void initializeColumnFormatters(Report report, ResultSetMetaData rsmd,
 			Map<Integer, ColumnTypeDefinition> columnTypes)
-			throws IllegalStateException, SQLException {
+			throws RuntimeException, SQLException {
 
 		List<String> columnNames = getColumnNames(rsmd);
 		initializeColumnFormatters(report, columnNames, columnTypes);
@@ -994,11 +994,11 @@ public abstract class StandardOutput {
 	 * @param report the report being run
 	 * @param columnNames the column names
 	 * @param columnTypes the column types
-	 * @throws IllegalStateException
+	 * @throws RuntimeException
 	 */
 	private void initializeColumnFormatters(Report report, List<String> columnNames,
 			Map<Integer, ColumnTypeDefinition> columnTypes)
-			throws IllegalStateException {
+			throws RuntimeException {
 
 		Locale columnFormatLocale;
 		String reportLocale = report.getLocale();
@@ -1057,7 +1057,7 @@ public abstract class StandardOutput {
 							columnFormatters.put(i, numberFormatter);
 							break;
 						default:
-							throw new IllegalStateException("Formatting not supported for column: " + i + " or " + columnName);
+							throw new RuntimeException("Formatting not supported for column: " + i + " or " + columnName);
 					}
 				}
 			}

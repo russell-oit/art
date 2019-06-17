@@ -854,7 +854,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				if ((secondaryDataset instanceof CategoryDataset)) {
 					categoryDataset = (CategoryDataset) secondaryDataset;
 				} else {
-					throw new IllegalStateException("Invalid secondary chart: " + secondaryChart.getTitle());
+					throw new RuntimeException("Invalid secondary chart: " + secondaryChart.getTitle());
 				}
 				categoryPlot.setDataset(count, categoryDataset);
 				categoryPlot.mapDatasetToRangeAxis(count, count);
@@ -881,7 +881,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				if ((secondaryDataset instanceof XYDataset)) {
 					xyDateset = (XYDataset) secondaryDataset;
 				} else {
-					throw new IllegalStateException("Invalid secondary chart: " + secondaryChart.getTitle());
+					throw new RuntimeException("Invalid secondary chart: " + secondaryChart.getTitle());
 				}
 				xyPlot.setDataset(count, xyDateset);
 				xyPlot.mapDatasetToRangeAxis(count, count);

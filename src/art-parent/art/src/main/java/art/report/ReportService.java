@@ -1326,7 +1326,7 @@ public class ReportService {
 	 * incremented by 1. null if this is not required
 	 * @return the number of records copied
 	 * @throws SQLException
-	 * @throws IllegalStateException if connection to the art database is not
+	 * @throws RuntimeException if connection to the art database is not
 	 * available
 	 */
 	private int copyTableRow(Connection conn, String tableName, String keyColumnName,

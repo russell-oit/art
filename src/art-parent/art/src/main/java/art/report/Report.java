@@ -1570,7 +1570,7 @@ public class Report implements Serializable {
 			String publicKeyFilePath = templatesPath + publicKeyFileName;
 			File publicKeyFile = new File(publicKeyFilePath);
 			if (!publicKeyFile.exists()) {
-				throw new IllegalStateException("Public key file not found: " + publicKeyFilePath);
+				throw new RuntimeException("Public key file not found: " + publicKeyFilePath);
 			}
 
 			publicKey = new Key(publicKeyFile);
@@ -1582,7 +1582,7 @@ public class Report implements Serializable {
 			String signingKeyFilePath = templatesPath + signingKeyFileName;
 			File signingKeyFile = new File(signingKeyFilePath);
 			if (!signingKeyFile.exists()) {
-				throw new IllegalStateException("Signing key file not found: " + signingKeyFilePath);
+				throw new RuntimeException("Signing key file not found: " + signingKeyFilePath);
 			}
 
 			signingKey = new Key(signingKeyFile, encryptor.getOpenPgpSigningKeyPassphrase());

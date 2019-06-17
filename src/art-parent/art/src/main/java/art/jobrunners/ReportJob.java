@@ -394,7 +394,7 @@ public class ReportJob implements org.quartz.Job {
 			if (report == null) {
 				throw new IllegalArgumentException("Pre/Post run report not found: " + reportId);
 			} else if (!reportService.canUserRunReport(jobUser, reportId)) {
-				throw new IllegalStateException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
+				throw new RuntimeException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
 			}
 			ReportRunner reportRunner = prepareReportRunner(jobUser, report);
 			try {
@@ -935,7 +935,7 @@ public class ReportJob implements org.quartz.Job {
 						identity = jsonKey.getClient_email();
 						credential = jsonKey.getPrivate_key();
 					} else {
-						throw new IllegalStateException("JSON Key file not found: " + jsonKeyFilePath);
+						throw new RuntimeException("JSON Key file not found: " + jsonKeyFilePath);
 					}
 					break;
 				default:
@@ -3396,10 +3396,10 @@ public class ReportJob implements org.quartz.Job {
 				File file = new File(outputFileName);
 				desktop.print(file);
 			} else {
-				throw new IllegalStateException("Desktop print not supported");
+				throw new RuntimeException("Desktop print not supported");
 			}
 		} else {
-			throw new IllegalStateException("Desktop not supported");
+			throw new RuntimeException("Desktop not supported");
 		}
 	}
 
@@ -3425,7 +3425,7 @@ public class ReportJob implements org.quartz.Job {
 			if (jobEmailTemplateFile.exists()) {
 				finalMessage = jobTemplateEngine.process(jobEmailTemplateFileName, ctx);
 			} else {
-				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
+				throw new RuntimeException("Email template file not found: " + jobEmailTemplateFilePath);
 			}
 		}
 

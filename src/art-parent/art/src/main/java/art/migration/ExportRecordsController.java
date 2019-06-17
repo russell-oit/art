@@ -337,7 +337,7 @@ public class ExportRecordsController {
 
 		Settings settings = settingsService.getSettings();
 		if (settings == null) {
-			throw new IllegalStateException("No settings to export");
+			throw new RuntimeException("No settings to export");
 		}
 		settings.encryptPasswords();
 
