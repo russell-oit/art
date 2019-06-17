@@ -1758,7 +1758,8 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns a copy of this report with only some fields filled
+	 * Returns a copy of this report with only some fields filled to avoid
+	 * exposing passwords
 	 *
 	 * @return a copy of this report with only some fields filled
 	 */
@@ -1782,7 +1783,7 @@ public class Report implements Serializable {
 	/**
 	 * Returns a copy of this report with password fields set to null
 	 *
-	 * @return a copy of this report with only some fields filled
+	 * @return a copy of this report with password fields set to null
 	 */
 	@JsonIgnore
 	public Report getCleanReport() {

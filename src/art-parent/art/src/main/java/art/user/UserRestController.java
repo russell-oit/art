@@ -22,6 +22,7 @@ import art.general.ApiResponse;
 import art.utils.ApiHelper;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +69,13 @@ public class UserRestController {
 			} else {
 				users = userService.getUsersByActiveStatus(active);
 			}
-			return ApiHelper.getOkResponseEntity(users);
+
+			List<User> cleanUsers = new ArrayList<>();
+			for (User user : users) {
+				User cleanUser = user.getCleanUser();
+				cleanUsers.add(cleanUser);
+			}
+			return ApiHelper.getOkResponseEntity(cleanUsers);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);
@@ -84,7 +91,8 @@ public class UserRestController {
 			if (user == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				return ApiHelper.getOkResponseEntity(user);
+				User cleanUser = user.getCleanUser();
+				return ApiHelper.getOkResponseEntity(cleanUser);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -101,7 +109,8 @@ public class UserRestController {
 			if (user == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				return ApiHelper.getOkResponseEntity(user);
+				User cleanUser = user.getCleanUser();
+				return ApiHelper.getOkResponseEntity(cleanUser);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -154,7 +163,8 @@ public class UserRestController {
 
 			UriComponents uriComponents = b.path("/api/users/{id}").buildAndExpand(newId);
 			URI uri = uriComponents.toUri();
-			return ApiHelper.getCreatedResponseEntity(uri, user);
+			User cleanUser = user.getCleanUser();
+			return ApiHelper.getCreatedResponseEntity(uri, cleanUser);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);
@@ -169,13 +179,27 @@ public class UserRestController {
 
 		try {
 			user.setUserId(id);
+
 			if (user.isClearTextPassword()) {
 				user.encryptPassword();
+			} else {
+				User currentUser = userService.getUser(id);
+				if (currentUser == null) {
+					return ApiHelper.getNotFoundResponseEntity();
+				} else {
+					//use current password if nothing passed
+					if (StringUtils.isEmpty(user.getPassword())) {
+						user.setPassword(currentUser.getPassword());
+						user.setPasswordAlgorithm(currentUser.getPasswordAlgorithm());
+					}
+				}
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			userService.updateUser(user, sessionUser);
-			return ApiHelper.getOkResponseEntity(user);
+			
+			User cleanUser = user.getCleanUser();
+			return ApiHelper.getOkResponseEntity(cleanUser);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);

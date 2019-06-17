@@ -25,6 +25,7 @@ import art.reportgroup.ReportGroup;
 import art.role.Role;
 import art.usergroup.UserGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rits.cloning.Cloner;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
@@ -855,6 +856,22 @@ public class User implements Serializable {
 		user.setActive(active);
 
 		return user;
+	}
+
+	/**
+	 * Returns a copy of this user with the password fields set to null
+	 *
+	 * @return a copy of this user with the password field set to null
+	 */
+	@JsonIgnore
+	public User getCleanUser() {
+		Cloner cloner = new Cloner();
+		User copy = cloner.deepClone(this);
+
+		copy.password = null;
+		copy.passwordAlgorithm = null;
+
+		return copy;
 	}
 
 	/**
