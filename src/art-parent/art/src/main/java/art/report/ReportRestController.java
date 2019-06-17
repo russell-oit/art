@@ -136,11 +136,26 @@ public class ReportRestController {
 
 			if (report.isClearTextPasswords()) {
 				report.encryptPasswords();
+			} else {
+				Report currentReport = reportService.getReport(id);
+				if (currentReport == null) {
+					return ApiHelper.getNotFoundResponseEntity();
+				} else {
+					//use current passwords if nothing passed
+					if (StringUtils.isEmpty(report.getOpenPassword())) {
+						report.setOpenPassword(currentReport.getOpenPassword());
+						report.encryptOpenPassword();
+					}
+					if (StringUtils.isEmpty(report.getModifyPassword())) {
+						report.setModifyPassword(currentReport.getModifyPassword());
+						report.encryptModifyPassword();
+					}
+				}
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			reportService.updateReport(report, sessionUser);
-			
+
 			Report cleanReport = report.getCleanReport();
 			return ApiHelper.getOkResponseEntity(cleanReport);
 		} catch (Exception ex) {

@@ -1662,6 +1662,24 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Encrypts the open password field
+	 *
+	 * @throws Exception
+	 */
+	public void encryptOpenPassword() throws Exception {
+		openPassword = AesEncryptor.encrypt(openPassword);
+	}
+
+	/**
+	 * Encrypts the modify password field
+	 *
+	 * @throws Exception
+	 */
+	public void encryptModifyPassword() throws Exception {
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	}
+
+	/**
 	 * Encrypts password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
