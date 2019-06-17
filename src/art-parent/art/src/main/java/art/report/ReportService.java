@@ -223,25 +223,25 @@ public class ReportService {
 			report.setChartOptions(chartOptions);
 		}
 	}
-	
+
 	/**
 	 * Maps a resultset to an object
 	 */
 	private class BasicReportMapper extends ReportMapper {
-		
+
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			Report report=loadBasicReport(rs);
+			Report report = loadBasicReport(rs);
 			return type.cast(report);
 		}
 	}
 
 	/**
 	 * Returns an object with basic properties loaded from a resultset
-	 * 
+	 *
 	 * @param rs the resultset
 	 * @return the loaded object
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private Report loadBasicReport(ResultSet rs) throws SQLException {
 		Report report = new Report();
@@ -315,7 +315,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns all reports with only basic properties filled
 	 *
@@ -649,17 +649,17 @@ public class ReportService {
 	/**
 	 * Returns a report
 	 *
-	 * @param reportName the report name
+	 * @param name the report name
 	 * @return report if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
-	public Report getReport(String reportName) throws SQLException {
-		logger.debug("Entering getReport: reportName={}", reportName);
+	public Report getReport(String name) throws SQLException {
+		logger.debug("Entering getReport: name={}", name);
 
 		String sql = SQL_SELECT_ALL + " WHERE NAME=?";
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
-		Report report = dbService.query(sql, h, reportName);
+		Report report = dbService.query(sql, h, name);
 
 		return report;
 	}
@@ -1789,26 +1789,74 @@ public class ReportService {
 	}
 
 	/**
-	 * Returns <code>true</code> if a report name exists
+	 * Returns <code>true</code> if a report with the given name exists
 	 *
-	 * @param reportName the user id
-	 * @return <code>true</code> if a report name exists
+	 * @param name the report name
+	 * @return <code>true</code> if a report with the given name exists
 	 * @throws SQLException
 	 */
 	@Cacheable(value = "reports")
-	public boolean reportNameExists(String reportName) throws SQLException {
-		logger.debug("Entering reportNameExists: reportName='{}'", reportName);
+	public boolean reportExists(String name) throws SQLException {
+		logger.debug("Entering reportExists: name='{}'", name);
 
 		String sql = "SELECT COUNT(*) FROM ART_QUERIES"
 				+ " WHERE NAME=?";
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCount = dbService.query(sql, h, reportName);
+		Number recordCount = dbService.query(sql, h, name);
 
 		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Enables a report
+	 *
+	 * @param id the report id
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void enableReport(int id, User actionUser) throws SQLException {
+		logger.debug("Entering enableReport: id={}, actionUser={}", id, actionUser);
+
+		String sql = "UPDATE ART_QUERIES SET ACTIVE=1,"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
+				+ " WHERE QUERY_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			actionUser.getUsername(),
+			id
+		};
+
+		dbService.update(sql, values);
+	}
+
+	/**
+	 * Disables a report
+	 *
+	 * @param id the report id
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void disableReport(int id, User actionUser) throws SQLException {
+		logger.debug("Entering disableReport: id={}, actionUser={}", id, actionUser);
+
+		String sql = "UPDATE ART_QUERIES SET ACTIVE=0,"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
+				+ " WHERE QUERY_ID=?";
+
+		Object[] values = {
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			actionUser.getUsername(),
+			id
+		};
+
+		dbService.update(sql, values);
 	}
 
 }

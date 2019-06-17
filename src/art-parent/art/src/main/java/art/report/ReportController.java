@@ -1217,7 +1217,7 @@ public class ReportController {
 					reportNameNotProvided = true;
 				}
 			} else {
-				reportNameExists = reportService.reportNameExists(name);
+				reportNameExists = reportService.reportExists(name);
 			}
 
 			if (reportNameNotProvided) {
@@ -1371,7 +1371,7 @@ public class ReportController {
 					reportNameNotProvided = true;
 				}
 			} else {
-				reportNameExists = reportService.reportNameExists(name);
+				reportNameExists = reportService.reportExists(name);
 			}
 
 			if (reportNameNotProvided) {

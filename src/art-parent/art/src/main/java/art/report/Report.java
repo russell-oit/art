@@ -45,6 +45,7 @@ import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rits.cloning.Cloner;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
@@ -1687,6 +1688,14 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Clears password fields
+	 */
+	public void clearPasswords() {
+		openPassword = null;
+		modifyPassword = null;
+	}
+
+	/**
 	 * Encrypts all passwords fields in the report including for datasources etc
 	 *
 	 * @throws java.lang.Exception
@@ -1731,8 +1740,7 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Returns a copy of this report with only some fields filled to avoid
-	 * exposing passwords
+	 * Returns a copy of this report with only some fields filled
 	 *
 	 * @return a copy of this report with only some fields filled
 	 */
@@ -1751,6 +1759,24 @@ public class Report implements Serializable {
 		basic.setViewReportId(viewReportId);
 
 		return basic;
+	}
+
+	/**
+	 * Returns a copy of this report with password fields set to null
+	 *
+	 * @return a copy of this report with only some fields filled
+	 */
+	@JsonIgnore
+	public Report getCleanReport() {
+		Cloner cloner = new Cloner();
+		Report copy = cloner.deepClone(this);
+
+		copy.clearPasswords();
+		copy.datasource = null;
+		copy.encryptor = null;
+		copy.reportParams = null;
+
+		return copy;
 	}
 
 	/**
