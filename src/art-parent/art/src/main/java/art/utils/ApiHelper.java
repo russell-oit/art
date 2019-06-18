@@ -45,6 +45,8 @@ public class ApiHelper {
 	 */
 	public static void outputApiResponse(ApiResponse apiResponse,
 			HttpServletResponse response) {
+		
+		//https://www.baeldung.com/spring-response-entity
 
 		try {
 			String jsonString = ArtUtils.objectToJson(apiResponse);
@@ -56,12 +58,101 @@ public class ApiHelper {
 	}
 
 	/**
+	 * Outputs an error to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param exception the exception
+	 */
+	public static void outputErrorResponse(HttpServletResponse response,
+			Exception exception) {
+
+		String message = exception.getMessage();
+		outputErrorResponse(response, message);
+	}
+
+	/**
+	 * Outputs an error to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param message the error message
+	 */
+	public static void outputErrorResponse(HttpServletResponse response,
+			String message) {
+
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			apiResponse.setArtStatus(ApiStatus.ERROR);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs a not found response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 */
+	public static void outputNotFoundResponse(HttpServletResponse response) {
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(HttpStatus.NOT_FOUND.value());
+			apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs an OK response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param data the data to include in the response
+	 */
+	public static void outputOkResponse(HttpServletResponse response, Object data) {
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setHttpStatus(HttpStatus.OK.value());
+			apiResponse.setArtStatus(ApiStatus.OK);
+			apiResponse.setData(data);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.OK.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
 	 * Returns a response entity object to use with an error response
 	 *
 	 * @param exception the exception
-	 * @return the reponse entity object
+	 * @return the response entity object
 	 */
 	public static ResponseEntity<ApiResponse> getErrorResponseEntity(Exception exception) {
+		String message = exception.getMessage();
+		return getErrorResponseEntity(message);
+	}
+
+	/**
+	 * Returns a response entity object to use with an error response
+	 *
+	 * @param message the error message
+	 * @return the response entity object
+	 */
+	public static ResponseEntity<ApiResponse> getErrorResponseEntity(String message) {
 		ApiResponse apiResponse = new ApiResponse();
 		apiResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		apiResponse.setArtStatus(ApiStatus.ERROR);
