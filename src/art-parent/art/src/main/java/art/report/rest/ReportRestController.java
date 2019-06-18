@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.report;
+package art.report.rest;
 
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
@@ -23,6 +23,8 @@ import art.enums.ReportType;
 import art.general.ActionResult;
 import art.general.ApiResponse;
 import art.output.StandardOutput;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
