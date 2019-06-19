@@ -59,6 +59,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -755,6 +756,27 @@ public class ArtUtils {
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		return mapper;
+	}
+
+	/**
+	 * Returns the base url for a request
+	 *
+	 * @param request the http servlet request
+	 * @return the base url
+	 */
+	public static String getBaseUrl(HttpServletRequest request) {
+		if (request == null) {
+			return null;
+		}
+
+		//https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url
+		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests/16675399
+		String baseUrl = request.getScheme() + "://"
+				+ request.getServerName()
+				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+				+ request.getContextPath();
+
+		return baseUrl;
 	}
 
 }

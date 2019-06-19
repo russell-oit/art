@@ -1112,12 +1112,8 @@ public class ReportOutputGenerator {
 				standardOutput.setDrilldowns(drilldownService.getDrilldowns(report.getReportId()));
 			}
 
-			//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
 			if (request != null) {
-				String requestBaseUrl = request.getScheme() + "://"
-						+ request.getServerName()
-						+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-						+ request.getContextPath();
+				String requestBaseUrl = ArtUtils.getBaseUrl(request);
 				standardOutput.setRequestBaseUrl(requestBaseUrl);
 			}
 
@@ -1424,7 +1420,7 @@ public class ReportOutputGenerator {
 		} else {
 			rowsRetrieved = groovyDataSize;
 		}
-		
+
 		if (!isJob && !reportFormat.isHtml()) {
 			displayFileLink(fileName);
 		}
@@ -1454,7 +1450,7 @@ public class ReportOutputGenerator {
 		} else {
 			rowsRetrieved = groovyDataSize;
 		}
-		
+
 		if (!isJob && !reportFormat.isHtml()) {
 			displayFileLink(fileName);
 		}

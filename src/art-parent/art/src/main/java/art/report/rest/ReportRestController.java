@@ -35,6 +35,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
 import art.utils.ArtLogsHelper;
+import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -341,7 +342,7 @@ public class ReportRestController {
 
 			RunReportResponseObject responseObject = new RunReportResponseObject();
 			String urlFileName = Encode.forUriComponent(fileName);
-			String url = getBaseUrl(request) + "/export/reports/" + urlFileName;
+			String url = ArtUtils.getBaseUrl(request) + "/export/reports/" + urlFileName;
 			responseObject.setFileName(fileName);
 			responseObject.setUrl(url);
 			ApiHelper.outputOkResponse(response, responseObject);
@@ -353,23 +354,6 @@ public class ReportRestController {
 				reportRunner.close();
 			}
 		}
-	}
-
-	/**
-	 * Returns the base url for a request
-	 *
-	 * @param request the http servlet request
-	 * @return the base url
-	 */
-	private String getBaseUrl(HttpServletRequest request) {
-		//https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url
-		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests/16675399
-		String baseUrl = request.getScheme() + "://"
-				+ request.getServerName()
-				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-				+ request.getContextPath();
-
-		return baseUrl;
 	}
 
 }
