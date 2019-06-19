@@ -352,7 +352,6 @@ public class ReportRestController {
 				String url = ArtUtils.getBaseUrl(request) + "/export/reports/" + urlFileName;
 				responseObject.setFileName(fileName);
 				responseObject.setUrl(url);
-				ApiHelper.outputOkResponse(response, responseObject);
 			}
 			ApiHelper.outputOkResponse(response, responseObject);
 		} catch (Exception ex) {
