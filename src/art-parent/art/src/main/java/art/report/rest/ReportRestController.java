@@ -305,6 +305,7 @@ public class ReportRestController {
 
 			Instant queryEnd = Instant.now();
 
+			Integer rowsRetrieved = null;
 			Integer rowsUpdated = null;
 			String fileName = null;
 			if (reportType == ReportType.Update) {
@@ -327,7 +328,9 @@ public class ReportRestController {
 				ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
 						reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
 
-				if (!outputResult.isSuccess()) {
+				if (outputResult.isSuccess()) {
+					rowsRetrieved = outputResult.getRowCount();
+				} else {
 					ApiHelper.outputErrorResponse(response, outputResult.getMessage());
 					return;
 				}
@@ -347,6 +350,7 @@ public class ReportRestController {
 
 			RunReportResponseObject responseObject = new RunReportResponseObject();
 			responseObject.setRowsUpdated(rowsUpdated);
+			responseObject.setRowsRetrieved(rowsRetrieved);
 			if (fileName != null) {
 				String urlFileName = Encode.forUriComponent(fileName);
 				String url = ArtUtils.getBaseUrl(request) + "/export/reports/" + urlFileName;

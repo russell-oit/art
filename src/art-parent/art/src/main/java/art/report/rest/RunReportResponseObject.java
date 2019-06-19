@@ -26,6 +26,7 @@ public class RunReportResponseObject {
 	
 	private String fileName;
 	private String url;
+	private Integer rowsRetrieved;
 	private Integer rowsUpdated;
 
 	/**
@@ -68,6 +69,20 @@ public class RunReportResponseObject {
 	 */
 	public void setRowsUpdated(Integer rowsUpdated) {
 		this.rowsUpdated = rowsUpdated;
+	}
+
+	/**
+	 * @return the rowsRetrieved
+	 */
+	public Integer getRowsRetrieved() {
+		return rowsRetrieved;
+	}
+
+	/**
+	 * @param rowsRetrieved the rowsRetrieved to set
+	 */
+	public void setRowsRetrieved(Integer rowsRetrieved) {
+		this.rowsRetrieved = rowsRetrieved;
 	}
 	
 }
