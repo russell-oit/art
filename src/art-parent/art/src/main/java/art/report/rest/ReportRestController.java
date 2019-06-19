@@ -234,7 +234,7 @@ public class ReportRestController {
 			HttpSession session, HttpServletRequest request, Locale locale,
 			HttpServletResponse response) {
 
-		logger.debug("Entering runReport");
+		logger.debug("Entering runReport: reportId={}", reportId);
 
 		ReportRunner reportRunner = null;
 
@@ -273,7 +273,7 @@ public class ReportRestController {
 				reportFormat = ReportFormat.toEnum(reportFormatString);
 			}
 
-			if (reportFormat.isHtml()) {
+			if (reportType != ReportType.Update && reportFormat.isHtml()) {
 				String message = "report format not allowed: " + reportFormat;
 				ApiHelper.outputInvalidValueResponse(response, message);
 				return;
@@ -293,9 +293,7 @@ public class ReportRestController {
 
 			reportRunner = new ReportRunner();
 			reportRunner.setUser(sessionUser);
-
 			reportRunner.setReport(report);
-
 			reportRunner.setReportParamsMap(reportParamsMap);
 
 			int resultSetType = runReportHelper.getResultSetType(reportType);
@@ -307,29 +305,36 @@ public class ReportRestController {
 
 			Instant queryEnd = Instant.now();
 
-			FilenameHelper filenameHelper = new FilenameHelper();
-			String fileName = filenameHelper.getFilename(report, locale, reportFormat);
-			String exportPath = Config.getReportsExportPath();
-			String outputFileName = exportPath + fileName;
+			Integer rowsUpdated = null;
+			String fileName = null;
+			if (reportType == ReportType.Update) {
+				reportRunner.getResultSet();
+				rowsUpdated = reportRunner.getUpdateCount();
+			} else {
+				FilenameHelper filenameHelper = new FilenameHelper();
+				fileName = filenameHelper.getFilename(report, locale, reportFormat);
+				String exportPath = Config.getReportsExportPath();
+				String outputFileName = exportPath + fileName;
 
-			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-			reportOutputGenerator.setDrilldownService(drilldownService);
-			reportOutputGenerator.setRequest(request);
-			reportOutputGenerator.setResponse(response);
-			reportOutputGenerator.setServletContext(servletContext);
-			reportOutputGenerator.setIsJob(true);
+				reportOutputGenerator.setDrilldownService(drilldownService);
+				reportOutputGenerator.setRequest(request);
+				reportOutputGenerator.setResponse(response);
+				reportOutputGenerator.setServletContext(servletContext);
+				reportOutputGenerator.setIsJob(true);
 
-			ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
-					reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
+				ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
+						reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser, messageSource);
 
-			if (!outputResult.isSuccess()) {
-				ApiHelper.outputErrorResponse(response, outputResult.getMessage());
-				return;
+				if (!outputResult.isSuccess()) {
+					ApiHelper.outputErrorResponse(response, outputResult.getMessage());
+					return;
+				}
+
+				//encrypt file if applicable
+				report.encryptFile(outputFileName);
 			}
-
-			//encrypt file if applicable
-			report.encryptFile(outputFileName);
 
 			Instant overallEnd = Instant.now();
 			Duration overallDuration = Duration.between(overallStart, overallEnd);
@@ -341,10 +346,14 @@ public class ReportRestController {
 			ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 
 			RunReportResponseObject responseObject = new RunReportResponseObject();
-			String urlFileName = Encode.forUriComponent(fileName);
-			String url = ArtUtils.getBaseUrl(request) + "/export/reports/" + urlFileName;
-			responseObject.setFileName(fileName);
-			responseObject.setUrl(url);
+			responseObject.setRowsUpdated(rowsUpdated);
+			if (fileName != null) {
+				String urlFileName = Encode.forUriComponent(fileName);
+				String url = ArtUtils.getBaseUrl(request) + "/export/reports/" + urlFileName;
+				responseObject.setFileName(fileName);
+				responseObject.setUrl(url);
+				ApiHelper.outputOkResponse(response, responseObject);
+			}
 			ApiHelper.outputOkResponse(response, responseObject);
 		} catch (Exception ex) {
 			logger.error("Error", ex);

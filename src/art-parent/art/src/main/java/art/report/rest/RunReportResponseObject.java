@@ -26,6 +26,7 @@ public class RunReportResponseObject {
 	
 	private String fileName;
 	private String url;
+	private Integer rowsUpdated;
 
 	/**
 	 * @return the fileName
@@ -53,6 +54,20 @@ public class RunReportResponseObject {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * @return the rowsUpdated
+	 */
+	public Integer getRowsUpdated() {
+		return rowsUpdated;
+	}
+
+	/**
+	 * @param rowsUpdated the rowsUpdated to set
+	 */
+	public void setRowsUpdated(Integer rowsUpdated) {
+		this.rowsUpdated = rowsUpdated;
 	}
 	
 }
