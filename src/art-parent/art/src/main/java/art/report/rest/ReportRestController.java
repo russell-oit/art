@@ -22,7 +22,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.general.ActionResult;
 import art.general.ApiResponse;
-import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -50,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -238,14 +238,27 @@ public class ReportRestController {
 		ReportRunner reportRunner = null;
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
 			Report report = reportService.getReport(reportId);
 			if (report == null) {
 				ApiHelper.outputNotFoundResponse(response);
 				return;
 			}
 
-			Instant overallStart = Instant.now();
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			if (!sessionUser.hasConfigureReportsPermission()) {
+				if (!report.isActive()) {
+					String message = "report disabled";
+					ApiHelper.outputUnauthorizedResponse(response, message);
+					return;
+				}
+
+				if (!reportService.canUserRunReport(sessionUser, reportId)) {
+					String message = "no permission";
+					ApiHelper.outputUnauthorizedResponse(response, message);
+					return;
+				}
+			}
 
 			ReportType reportType = report.getReportType();
 
@@ -259,26 +272,15 @@ public class ReportRestController {
 				reportFormat = ReportFormat.toEnum(reportFormatString);
 			}
 
-			//response.setContentType("application/json; charset=UTF-8");
-			//PrintWriter writer = response.getWriter();
-			//StringWriter writer=new StringWriter();
-			//PrintWriter writer = null;
-			PrintWriter writer;
-
-			if (reportType.isStandardOutput() && reportFormat.hasStandardOutputInstance()) {
-				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-				boolean isJob = false;
-				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
-
-				String contentType = standardOutput.getContentType();
-
-				//set the content type according to the report output class
-				response.setContentType(contentType);
-				writer = response.getWriter();
-			} else {
-				response.setContentType("text/html; charset=UTF-8");
-				writer = response.getWriter();
+			if (reportFormat.isHtml()) {
+				String message = "report format not allowed: " + reportFormat;
+				ApiHelper.outputInvalidValueResponse(response, message);
+				return;
 			}
+
+			Instant overallStart = Instant.now();
+
+			PrintWriter writer = response.getWriter();
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessor.setSuppliedReport(report);
@@ -306,9 +308,9 @@ public class ReportRestController {
 
 			FilenameHelper filenameHelper = new FilenameHelper();
 			String baseFileName = filenameHelper.getBaseFilename(report, locale);
-			String exportPath = Config.getReportsExportPath();
 			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 			String fileName = baseFileName + "." + extension;
+			String exportPath = Config.getReportsExportPath();
 			String outputFileName = exportPath + fileName;
 
 			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
@@ -340,7 +342,10 @@ public class ReportRestController {
 			ArtLogsHelper.logReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTimeSeconds, fetchTimeSeconds, reportFormat.getValue(), reportParamsList);
 
 			RunReportResponseObject responseObject = new RunReportResponseObject();
+			String urlFileName = Encode.forUriComponent(fileName);
+			String url = getBaseUrl(request) + "/export/reports/" + urlFileName;
 			responseObject.setFileName(fileName);
+			responseObject.setUrl(url);
 			ApiHelper.outputOkResponse(response, responseObject);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
@@ -350,6 +355,23 @@ public class ReportRestController {
 				reportRunner.close();
 			}
 		}
+	}
+
+	/**
+	 * Returns the base url for a request
+	 *
+	 * @param request the http servlet request
+	 * @return the base url
+	 */
+	private String getBaseUrl(HttpServletRequest request) {
+		//https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url
+		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests/16675399
+		String baseUrl = request.getScheme() + "://"
+				+ request.getServerName()
+				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+				+ request.getContextPath();
+
+		return baseUrl;
 	}
 
 }
