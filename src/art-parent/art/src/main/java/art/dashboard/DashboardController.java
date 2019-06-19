@@ -180,10 +180,8 @@ public class DashboardController {
 
 			if (reportFormat == ReportFormat.pdf) {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				String baseFileName = filenameHelper.getBaseFilename(report, locale);
+				String fileName = filenameHelper.getFilename(report, locale, reportFormat);
 				String exportPath = Config.getReportsExportPath();
-				String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-				String fileName = baseFileName + "." + extension;
 				String outputFileName = exportPath + fileName;
 
 				String dynamicOpenPassword = null;

@@ -27,7 +27,6 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
-import art.servlets.Config;
 import art.user.User;
 import art.utils.FilenameHelper;
 import java.io.File;
@@ -173,11 +172,7 @@ public class PdfDashboard {
 						reportRunner.execute(resultSetType);
 
 						FilenameHelper filenameHelper = new FilenameHelper();
-						String baseFileName = filenameHelper.getBaseFilename(report, locale);
-						String exportPath = Config.getReportsExportPath();
-						String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-						String fileName = baseFileName + "." + extension;
-						String reportFileName = exportPath + fileName;
+						String reportFileName = filenameHelper.getFullFilename(report, locale, reportFormat);
 
 						ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 

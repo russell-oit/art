@@ -2627,10 +2627,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFilename = filenameHelper.getBaseFilename(job, locale);
-			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-
-			fileName = baseFilename + "." + extension;
+			fileName = filenameHelper.getFilename(job, locale, reportFormat);
 		}
 
 		logger.debug("fileName = '{}'", fileName);
@@ -2730,7 +2727,7 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job, report, reportType);
+			standardOutput.generateBurstOutput(rs, reportFormat, job);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);

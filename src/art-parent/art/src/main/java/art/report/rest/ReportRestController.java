@@ -307,9 +307,7 @@ public class ReportRestController {
 			Instant queryEnd = Instant.now();
 
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFileName = filenameHelper.getBaseFilename(report, locale);
-			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-			String fileName = baseFileName + "." + extension;
+			String fileName = filenameHelper.getFilename(report, locale, reportFormat);
 			String exportPath = Config.getReportsExportPath();
 			String outputFileName = exportPath + fileName;
 
