@@ -1,5 +1,6 @@
 {
 	"showErrors": true,
+	"showErrorsApi": true,
 	"enableDirectParameterSubstitution": true,
 	"exportDirectory": "",
 	"workDirectory": "",

@@ -6,6 +6,8 @@ ART 4.3
 * Log job runs to the art_logs table
 * Renamed query_id column in art_logs table to item_id
 * Added a REST endpoint for reports
+* Added showErrorsApi custom setting
+* Added allowRepositoryLogin custom setting
 * Updated poi, jxls, jasperreports, xdocreports
 
 ART 4.2
