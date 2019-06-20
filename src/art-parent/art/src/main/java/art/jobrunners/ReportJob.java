@@ -1937,29 +1937,6 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Updates the last run date and run details fields
-	 */
-	private void updateIncompleteRun() {
-		logger.debug("Entering updateIncompleteRun");
-
-		//update job details
-		String sql = "UPDATE ART_JOBS SET LAST_END_DATE=?,"
-				+ " LAST_RUN_DETAILS=? WHERE JOB_ID=?";
-
-		Object[] values = {
-			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-			runDetails,
-			jobId
-		};
-
-		try {
-			dbService.update(sql, values);
-		} catch (SQLException ex) {
-			logError(ex);
-		}
-	}
-
-	/**
 	 * Runs a dynamic recipients job
 	 *
 	 */
