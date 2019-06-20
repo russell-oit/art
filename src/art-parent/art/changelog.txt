@@ -1,3 +1,15 @@
+ART 4.3
+* Added file and fileZip report formats for FreeMarker, Velocity and Thymeleaf report types
+* Removed pdf export by default for htmlDataTable report format
+* Enable use of oauth with gmail smtp server
+* Allow use of clear text password when loading the art-database.json file
+* Log job runs to the art_logs table
+* Renamed query_id column in art_logs table to item_id
+* Added a REST endpoint for reports
+* Added showErrorsApi custom setting
+* Added allowRepositoryLogin custom setting
+* Updated poi, jxls, jasperreports, xdocreports
+
 ART 4.2
 * Added use_api permission
 * Better handle dates for MongoDB reports

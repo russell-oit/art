@@ -56,7 +56,7 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
@@ -968,8 +968,8 @@ public class JobService {
 
 		String jobName = "job" + jobId;
 
-		JobDetail quartzJob = newJob(ReportJob.class)
-				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
+		JobDetail quartzJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity(jobName, ArtUtils.JOB_GROUP)
 				.usingJobData("jobId", jobId)
 				.build();
 

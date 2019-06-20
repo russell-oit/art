@@ -310,15 +310,12 @@
 				} else if (reportTypeId === 117 || reportTypeId === 118) {
 					//jxls
 					list.append(new Option('${xlsxText}', 'xlsx'));
-				} else if (reportTypeId === 122) {
-					//freemarker
+				} else if (reportTypeId === 122 || reportTypeId === 131
+						|| reportTypeId === 153) {
+					//freemarker, thymeleaf, velocity
 					list.append(new Option('${htmlText}', 'html'));
-				} else if (reportTypeId === 131) {
-					//thymeleaf
-					list.append(new Option('${htmlText}', 'html'));
-				} else if (reportTypeId === 153) {
-					//velocity
-					list.append(new Option('${htmlText}', 'html'));
+					list.append(new Option('${fileText}', 'file'));
+					list.append(new Option('${fileZipText}', 'fileZip'));
 				} else if (reportTypeId === 123 || reportTypeId === 124) {
 					//xdocreport docx
 					list.append(new Option('${docxText}', 'docx'));
@@ -452,10 +449,8 @@
 
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
-				if (reportTypeId === 122
-						|| reportTypeId === 131 || reportTypeId === 153
-						|| reportTypeId === 117 || reportTypeId === 118) {
-					//freemarker, thymeleaf, velocity, jxls
+				if (reportTypeId === 117 || reportTypeId === 118) {
+					//jxls
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

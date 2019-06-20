@@ -53,12 +53,13 @@ import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
 import art.user.User;
-import art.utils.ArtHelper;
+import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
+import art.utils.MailService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -110,6 +111,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -172,17 +175,16 @@ public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
 
-	private String fileName;
+	private String fileName = "";
 	private String jobAuditKey;
 	private art.job.Job job;
 	private Timestamp jobStartDate;
 	private JobType jobType;
 	private int jobId;
-	private String runDetails;
-	private String runMessage;
+	private String runDetails = "";
+	private String runMessage = "";
 	private Locale locale;
 	private ch.qos.logback.classic.Logger progressLogger;
-	private long runStartTimeMillis;
 	private FileAppender<ILoggingEvent> progressFileAppender;
 	private JobOptions jobOptions;
 
@@ -207,25 +209,26 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	ReportService reportService;
 
+	@Autowired
+	private MailService mailService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
-		runStartTimeMillis = System.currentTimeMillis();
+		Instant start = Instant.now();
 
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		jobId = dataMap.getInt("jobId");
+		String runUsername = dataMap.getString("username");
 
 		initializeProgressLogger();
 
 		progressLogger.info("Started");
 
 		try {
-			if (!Config.getSettings().isSchedulingEnabled()) {
-				jobLogAndClose("Scheduling not enabled");
-				return;
-			}
+			boolean runJob = true;
 
 			try {
 				job = jobService.getJob(jobId);
@@ -233,50 +236,14 @@ public class ReportJob implements org.quartz.Job {
 				logError(ex);
 			}
 
-			if (job == null) {
-				logger.warn("Job not found: {}", jobId);
-				jobLogAndClose("Job not found");
-				return;
-			}
-
-			Report report = job.getReport();
-			if (report == null) {
-				logger.warn("Job report not found. Job Id {}", jobId);
-				jobLogAndClose("Job report not found");
-				return;
-			}
-
-			User user = job.getUser();
-			if (user == null) {
-				logger.warn("Job user not found. Job Id {}", jobId);
-				jobLogAndClose("Job user not found");
-				return;
-			}
-
-			jobType = job.getJobType();
-
-			fileName = "";
-			runDetails = "";
-			runMessage = "";
-
-			String systemLocale = Config.getSettings().getSystemLocale();
-			logger.debug("systemLocale='{}'", systemLocale);
-
-			locale = ArtUtils.getLocaleFromString(systemLocale);
-
-			String options = job.getOptions();
-			if (StringUtils.isBlank(options)) {
-				jobOptions = new JobOptions();
-			} else {
-				jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
-			}
-
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			boolean tempJob = dataMap.getBooleanValue("tempJob");
 			Date nextRunDate = null;
 			if (tempJob) {
 				//temp job. use existing next run date
-				nextRunDate = job.getNextRunDate();
+				if (job != null) {
+					nextRunDate = job.getNextRunDate();
+				}
 			} else {
 				//not a temp job. set new next run date
 				//get least next run date as job may have multiple triggers
@@ -291,29 +258,73 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 
-			//set overall job start time in the jobs table
+			//set overall job start time and next run date in the jobs table
 			beforeExecution(nextRunDate);
 
-			if (!job.isActive()) {
-				runMessage = "jobs.message.jobDisabled";
-			} else if (!job.getReport().isActive()) {
-				runMessage = "jobs.message.reportDisabled";
-			} else if (!job.getUser().isActive()) {
-				runMessage = "jobs.message.ownerDisabled";
+			if (job == null) {
+				logger.warn("Job not found. Job Id {}", jobId);
+				runMessage = "jobs.message.jobNotFound";
+				progressLogger.info("Job not found");
+				runJob = false;
 			} else {
-				runPreRunReports();
-				if (job.getRecipientsReportId() > 0) {
-					//job has dynamic recipients
-					runDynamicRecipientsJob();
+				if (!Config.getSettings().isSchedulingEnabled()) {
+					logger.info("Scheduling disabled. Job Id {}", jobId);
+					runMessage = "jobs.message.schedulingDisabled";
+					progressLogger.info("Scheduling disabled");
+					runJob = false;
 				} else {
-					//job doesn't have dynamic recipients
-					runNormalJob();
+					Report report = job.getReport();
+					User user = job.getUser();
+					if (report == null) {
+						logger.warn("Job report not found. Job Id {}", jobId);
+						runMessage = "jobs.message.reportNotFound";
+						progressLogger.info("Job report not found");
+						runJob = false;
+					} else if (user == null) {
+						logger.warn("Job user not found. Job Id {}", jobId);
+						runMessage = "jobs.message.userNotFound";
+						progressLogger.info("Job user not found");
+						runJob = false;
+					}
 				}
 			}
 
-			sendFileToDestinations();
-			runBatchFile();
-			runPostRunReports();
+			if (runJob) {
+				jobType = job.getJobType();
+
+				String systemLocale = Config.getSettings().getSystemLocale();
+				logger.debug("systemLocale='{}'", systemLocale);
+
+				locale = ArtUtils.getLocaleFromString(systemLocale);
+
+				String options = job.getOptions();
+				if (StringUtils.isBlank(options)) {
+					jobOptions = new JobOptions();
+				} else {
+					jobOptions = ArtUtils.jsonToObject(options, JobOptions.class);
+				}
+
+				if (!job.isActive()) {
+					runMessage = "jobs.message.jobDisabled";
+				} else if (!job.getReport().isActive()) {
+					runMessage = "jobs.message.reportDisabled";
+				} else if (!job.getUser().isActive()) {
+					runMessage = "jobs.message.ownerDisabled";
+				} else {
+					runPreRunReports();
+					if (job.getRecipientsReportId() > 0) {
+						//job has dynamic recipients
+						runDynamicRecipientsJob();
+					} else {
+						//job doesn't have dynamic recipients
+						runNormalJob();
+					}
+				}
+
+				sendFileToDestinations();
+				runBatchFile();
+				runPostRunReports();
+			}
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
 		}
@@ -323,12 +334,22 @@ public class ReportJob implements org.quartz.Job {
 
 		sendErrorNotification();
 
-		long runEndTimeMillis = System.currentTimeMillis();
+		Instant end = Instant.now();
+		Duration duration = Duration.between(start, end);
+
+		String logMessage = runMessage + " " + runDetails + " " + fileName;
+		logMessage = StringUtils.trim(logMessage);
+
+		if (runUsername == null) {
+			runUsername = "scheduler";
+		}
+
+		ArtLogsHelper.logJobRun(runUsername, jobId, logMessage, (int) duration.getSeconds());
 
 		//https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/time/DurationFormatUtils.html
 		String durationFormat = "m':'s':'S";
-		String duration = DurationFormatUtils.formatPeriod(runStartTimeMillis, runEndTimeMillis, durationFormat);
-		progressLogger.info("Completed. Time taken - {}", duration);
+		String formattedDuration = DurationFormatUtils.formatDuration(duration.toMillis(), durationFormat);
+		progressLogger.info("Completed. Time taken - {}", formattedDuration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
 	}
@@ -373,7 +394,7 @@ public class ReportJob implements org.quartz.Job {
 			if (report == null) {
 				throw new IllegalArgumentException("Pre/Post run report not found: " + reportId);
 			} else if (!reportService.canUserRunReport(jobUser, reportId)) {
-				throw new IllegalStateException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
+				throw new RuntimeException("Job owner doesn't have access to pre/post run report: " + jobUser.getUsername() + " - " + reportId);
 			}
 			ReportRunner reportRunner = prepareReportRunner(jobUser, report);
 			try {
@@ -393,27 +414,31 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 */
 	private void sendErrorNotification() {
-		String errorNotificationTo = job.getErrorNotificationTo();
-		if (StringUtils.isBlank(errorNotificationTo)) {
-			return;
-		}
+		logger.debug("Entering sendErrorNotification");
 
-		if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
-			if (!Config.getCustomSettings().isEnableEmailing()) {
-				logger.info("Emailing disabled. Job Id {}", jobId);
-			} else {
-				ArtHelper artHelper = new ArtHelper();
-				Mailer mailer = artHelper.getMailer();
-				mailer.setDebug(logger.isDebugEnabled());
+		try {
+			if (job == null) {
+				return;
+			}
 
-				String[] emailsArray = separateEmails(errorNotificationTo);
-				String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
+			String errorNotificationTo = job.getErrorNotificationTo();
+			if (StringUtils.isBlank(errorNotificationTo)) {
+				return;
+			}
 
-				mailer.setTo(emailsArray);
-				mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
-				mailer.setSubject(subject);
+			if (StringUtils.startsWith(runDetails, "<b>Error:</b>")) {
+				if (!Config.getCustomSettings().isEnableEmailing()) {
+					logger.info("Emailing disabled. Job Id {}", jobId);
+				} else {
+					Mailer mailer = mailService.getMailer();
 
-				try {
+					String[] emailsArray = separateEmails(errorNotificationTo);
+					String subject = "ART [Job Error]: " + job.getName() + " (" + jobId + ")";
+
+					mailer.setTo(emailsArray);
+					mailer.setFrom(Config.getSettings().getErrorNotificationFrom());
+					mailer.setSubject(subject);
+
 					Context ctx = new Context(locale);
 					ctx.setVariable("error", runDetails);
 					ctx.setVariable("job", job);
@@ -423,25 +448,11 @@ public class ReportJob implements org.quartz.Job {
 					mailer.setMessage(message);
 
 					mailer.send();
-				} catch (IOException | MessagingException | RuntimeException ex) {
-					logError(ex);
 				}
 			}
+		} catch (IOException | MessagingException | RuntimeException ex) {
+			logError(ex);
 		}
-	}
-
-	/**
-	 * Logs a message to the progress logger and closes the job log file
-	 * appender
-	 *
-	 * @param message the message to log
-	 */
-	private void jobLogAndClose(String message) {
-		runDetails = message;
-		progressLogger.info(runDetails);
-		progressLogger.detachAndStopAllAppenders();
-		progressLogger.setLevel(Level.OFF);
-		updateIncompleteRun();
 	}
 
 	/**
@@ -924,7 +935,7 @@ public class ReportJob implements org.quartz.Job {
 						identity = jsonKey.getClient_email();
 						credential = jsonKey.getPrivate_key();
 					} else {
-						throw new IllegalStateException("JSON Key file not found: " + jsonKeyFilePath);
+						throw new RuntimeException("JSON Key file not found: " + jsonKeyFilePath);
 					}
 					break;
 				default:
@@ -1635,7 +1646,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer, int value,
 			Map<String, ReportParameter> reportParamsMap)
-			throws TemplateException, IOException, ParseException {
+			throws TemplateException, IOException, ParseException, SQLException {
 
 		Map<String, String> recipientColumns = null;
 		prepareTemplateAlertMailer(reportType, mailer, value, recipientColumns, reportParamsMap);
@@ -1654,7 +1665,7 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareTemplateAlertMailer(ReportType reportType, Mailer mailer,
 			int value, Map<String, String> recipientColumns,
 			Map<String, ReportParameter> reportParamsMap)
-			throws TemplateException, IOException, ParseException {
+			throws TemplateException, IOException, ParseException, SQLException {
 
 		logger.debug("Entering prepareTemplateAlertMailer: reportType={}, "
 				+ "value={}", reportType, value);
@@ -1914,29 +1925,6 @@ public class ReportJob implements org.quartz.Job {
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			fileName,
 			runMessage,
-			runDetails,
-			jobId
-		};
-
-		try {
-			dbService.update(sql, values);
-		} catch (SQLException ex) {
-			logError(ex);
-		}
-	}
-
-	/**
-	 * Updates the last run date and run details fields
-	 */
-	private void updateIncompleteRun() {
-		logger.debug("Entering updateIncompleteRun");
-
-		//update job details
-		String sql = "UPDATE ART_JOBS SET LAST_END_DATE=?,"
-				+ " LAST_RUN_DETAILS=? WHERE JOB_ID=?";
-
-		Object[] values = {
-			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			runDetails,
 			jobId
 		};
@@ -2410,14 +2398,16 @@ public class ReportJob implements org.quartz.Job {
 	 * @param cc
 	 * @param bcc
 	 * @param reportParamsList the report parameters used to run the job
-	 * @throws IOException
+	 * @param reportParamsMap
+	 * @throws Exception
 	 */
 	private void processAndSendEmail(Map<String, Map<String, String>> recipientDetails,
 			String message, String outputFileName, boolean recipientFilterPresent,
 			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
 			String userEmail, String cc, String bcc,
 			List<ReportParameter> reportParamsList,
-			Map<String, ReportParameter> reportParamsMap) throws IOException, ParseException {
+			Map<String, ReportParameter> reportParamsMap)
+			throws Exception {
 
 		logger.debug("Entering processAndSendEmail");
 
@@ -2614,10 +2604,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFilename = filenameHelper.getBaseFilename(job, locale);
-			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
-
-			fileName = baseFilename + "." + extension;
+			fileName = filenameHelper.getFilename(job, locale, reportFormat);
 		}
 
 		logger.debug("fileName = '{}'", fileName);
@@ -2717,7 +2704,7 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job, report, reportType);
+			standardOutput.generateBurstOutput(rs, reportFormat, job);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);
@@ -2854,13 +2841,12 @@ public class ReportJob implements org.quartz.Job {
 	 * @param ccs
 	 * @param bccs
 	 * @param reportParamsMap map containing report parameters
-	 * @throws IOException
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
 			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
 			String[] tos, String[] ccs, String[] bccs, Map<String, ReportParameter> reportParamsMap)
-			throws IOException, SQLException, TemplateException, ParseException {
+			throws Exception {
 		/*
 		 * ALERT if the resultset is not null and the first column is a
 		 * positive integer => send the alert email
@@ -3099,22 +3085,19 @@ public class ReportJob implements org.quartz.Job {
 	 * Returns a mailer object that can be used to send emails
 	 *
 	 * @return a mailer object that can be used to send emails
+	 * @throws java.lang.IOException
 	 */
-	private Mailer getMailer() {
+	private Mailer getMailer() throws Exception {
 		logger.debug("Entering getMailer");
 
 		Mailer mailer;
 
-		ArtHelper artHelper = new ArtHelper();
-
 		SmtpServer jobSmtpServer = job.getSmtpServer();
 		if (jobSmtpServer != null && jobSmtpServer.isActive()) {
-			mailer = artHelper.getMailer(jobSmtpServer);
+			mailer = mailService.getMailer(jobSmtpServer);
 		} else {
-			mailer = artHelper.getMailer();
+			mailer = mailService.getMailer();
 		}
-
-		mailer.setDebug(logger.isDebugEnabled());
 
 		return mailer;
 	}
@@ -3387,10 +3370,10 @@ public class ReportJob implements org.quartz.Job {
 				File file = new File(outputFileName);
 				desktop.print(file);
 			} else {
-				throw new IllegalStateException("Desktop print not supported");
+				throw new RuntimeException("Desktop print not supported");
 			}
 		} else {
-			throw new IllegalStateException("Desktop not supported");
+			throw new RuntimeException("Desktop not supported");
 		}
 	}
 
@@ -3416,7 +3399,7 @@ public class ReportJob implements org.quartz.Job {
 			if (jobEmailTemplateFile.exists()) {
 				finalMessage = jobTemplateEngine.process(jobEmailTemplateFileName, ctx);
 			} else {
-				throw new IllegalStateException("Email template file not found: " + jobEmailTemplateFilePath);
+				throw new RuntimeException("Email template file not found: " + jobEmailTemplateFilePath);
 			}
 		}
 

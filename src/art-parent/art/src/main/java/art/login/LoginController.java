@@ -17,6 +17,7 @@
  */
 package art.login;
 
+import art.login.method.InternalLogin;
 import art.connectionpool.DbConnections;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.Config;
@@ -309,15 +310,17 @@ public class LoginController {
 		if (!result.isAuthenticated()) {
 			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user
-			if (isValidRepositoryUser(username, password)) {
-				loginMethod = ArtAuthenticationMethod.Repository;
-				user = User.createRepositoryUser();
+			if (Config.getCustomSettings().isAllowRepositoryLogin()) {
+				if (isValidRepositoryUser(username, password)) {
+					loginMethod = ArtAuthenticationMethod.Repository;
+					user = User.createRepositoryUser();
 
-				result = new LoginResult();
-				result.setAuthenticated(true);
+					result = new LoginResult();
+					result.setAuthenticated(true);
 
-				//log access using repository user
-				loginHelper.logSuccess(loginMethod, username, ip);
+					//log access using repository user
+					loginHelper.logSuccess(loginMethod, username, ip);
+				}
 			}
 		}
 

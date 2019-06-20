@@ -20,7 +20,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <%@attribute name="headContent" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
-<t:genericPage title="ART - ${title}">
+<t:genericPage title="${title} - ART">
 	<jsp:attribute name="headContent">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.7/js/bootstrap.min.js"></script>

@@ -341,8 +341,8 @@ public class SettingsController {
 
 			List<SmtpServer> smtpServers = smtpServerService.getAllSmtpServers();
 			for (SmtpServer smtpServer : smtpServers) {
-				if (!smtpServer.hasNullPassword()) {
-					smtpServer.encryptPassword(newEncryptionKey, newEncryptionPasswordConfig);
+				if (!smtpServer.hasNullPasswords()) {
+					smtpServer.encryptPasswords(newEncryptionKey, newEncryptionPasswordConfig);
 					smtpServerService.updateSmtpServer(smtpServer, sessionUser, conn);
 				}
 			}

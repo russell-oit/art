@@ -109,6 +109,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
+									<%-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_dropdown_multilevel_css&stacked=h --%>
 									<c:if test="${sessionUser.hasPermission('configure_datasources')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/datasources">
@@ -305,14 +306,12 @@ Header that appears at the top of all pages, except the login and logs pages
 								<ul class="dropdown-menu">
 									<li>
 										<a href="${pageContext.request.contextPath}/docs/index.html">
-											<i class="fa fa-book"></i> 
 											<spring:message code="header.link.documentation"/>
 										</a>
 									</li>
 									<c:if test="${sessionUser.hasPermission('view_logs')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/logs">
-												<i class="fa fa-bars"></i> 
 												<spring:message code="header.link.logs"/>
 											</a>
 										</li>
@@ -346,7 +345,6 @@ Header that appears at the top of all pages, except the login and logs pages
 								<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.passwordChangeAllowed}">
 									<li>
 										<a href="${pageContext.request.contextPath}/password">
-											<i class="fa fa-lock"></i> 
 											<spring:message code="header.link.password"/>
 										</a>
 									</li>

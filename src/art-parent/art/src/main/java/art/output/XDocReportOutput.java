@@ -178,7 +178,7 @@ public class XDocReportOutput {
 			//check if template file exists
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				throw new IllegalStateException("Template file not found: " + fullTemplateFileName);
+				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 
 			//load doc
@@ -262,7 +262,7 @@ public class XDocReportOutput {
 			try (OutputStream out = new FileOutputStream(new File(outputFileName))) {
 				if ((reportType.isXDocReportDocx() && reportFormat == ReportFormat.docx)
 						|| (reportType.isXDocReportOdt() && reportFormat == ReportFormat.odt)
-						|| (reportType.isXDocReportPptx() && reportFormat == ReportFormat.pptx)) {
+						|| reportType.isXDocReportPptx()) {
 					//no conversion
 					xdocReport.process(context, out);
 				} else {
@@ -290,7 +290,7 @@ public class XDocReportOutput {
 								throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
 						}
 					} else {
-						throw new IllegalArgumentException("Unexpected report type: " + reportType);
+						throw new IllegalArgumentException("Unexpected report type/report format: " + reportType + "/" + reportFormat);
 					}
 
 					xdocReport.convert(context, options, out);

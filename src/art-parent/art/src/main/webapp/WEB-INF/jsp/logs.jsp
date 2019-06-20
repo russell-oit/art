@@ -10,7 +10,6 @@ Display application logs
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
-<%@taglib uri="/WEB-INF/tlds/functions.tld" prefix="f" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -185,40 +184,15 @@ Display application logs
 						<tr class="${encode:forHtmlAttribute(log.level)}">
 							<td></td> <%-- details control column --%>
 							<td data-sort="${log.timeStamp}">
-								<fmt:formatDate value="${f:getDate(log.timeStamp)}" pattern="${dateDisplayPattern}"/>
+								<fmt:formatDate value="${log.date}" pattern="${dateDisplayPattern}"/>
 							</td>
-							<td><encode:forHtmlContent value="${log.level}"/></td>
-							<td><encode:forHtmlContent value="${log.loggerName}"/></td>
-							<td><encode:forHtmlContent value="${log.formattedMessage}"/></td>
-							<td><encode:forHtmlContent value="${log.MDCPropertyMap['user']}"/></td>
-							<td><encode:forHtmlContent value="${log.MDCPropertyMap['requestURI']}"/></td>
-							<td><encode:forHtmlContent value="${log.MDCPropertyMap['remoteAddr']}"/></td>
-							<td>
-								<%-- based on ch.qos.logback.classic.html.DefaultThrowableRenderer --%>
-								<c:set var="throwable" value="${log.throwableProxy}" />
-								<c:if test="${throwable != null}">
-									<c:forEach begin="0" end="5" varStatus="loop">
-										<c:if test="${throwable != null}">
-											<c:set var="commonFrames" value="${throwable.commonFrames}" />
-											<c:if test="${commonFrames gt 0}">
-												<br> <spring:message code="logs.text.causedBy"/>: 
-											</c:if>
-											${throwable.className}: <encode:forHtmlContent value="${throwable.message}"/>
-											<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
-											<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
-												<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
-											</c:forEach>
-											<c:if test="${commonFrames gt 0}">
-												<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} <spring:message code="logs.text.commonFramesOmitted"/> 
-											</c:if>
-										</c:if>
-										<c:if test="${loop.last && throwable != null}">
-											<spring:message code="logs.text.moreCausesNotListed"/>...
-										</c:if>
-										<c:set var="throwable" value="${throwable.cause}" />
-									</c:forEach>
-								</c:if>
-							</td>
+							<td>${encode:forHtmlContent(log.level)}</td>
+							<td>${encode:forHtmlContent(log.loggerName)}</td>
+							<td>${encode:forHtmlContent(log.formattedMessage)}</td>
+							<td>${encode:forHtmlContent(log.MDCPropertyMap['user'])}</td>
+							<td>${encode:forHtmlContent(log.MDCPropertyMap['requestURI'])}</td>
+							<td>${encode:forHtmlContent(log.MDCPropertyMap['remoteAddr'])}</td>
+							<td>${encode:forHtmlContent(log.formattedException)}</td>
 						</tr>
 					</c:forEach>
 				</tbody>

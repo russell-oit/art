@@ -214,7 +214,7 @@ public class DbConnections {
 		logger.debug("Entering getConnectionPool: datasourceId={}", datasourceId);
 
 		if (connectionPoolMap == null) {
-			throw new IllegalStateException("connectionPoolMap is null");
+			throw new RuntimeException("connectionPoolMap is null");
 		}
 
 		ConnectionPool pool = connectionPoolMap.get(datasourceId);
@@ -235,7 +235,7 @@ public class DbConnections {
 		logger.debug("Entering getConnectionPool: datasourceName='{}'", datasourceName);
 
 		if (connectionPoolMap == null) {
-			throw new IllegalStateException("connectionPoolMap is null");
+			throw new RuntimeException("connectionPoolMap is null");
 		}
 
 		ConnectionPool connectionPool = null;

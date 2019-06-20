@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>4.2</version>
+		<version>4.3</version>
 	</parent>
 	
 	<artifactId>saiku-service-art</artifactId>
@@ -15,7 +15,7 @@
 	<description>Enabler for saiku ui</description>
 	
 	<properties>
-		<poi.version>3.17</poi.version>
+		<poi.version>4.0.1</poi.version>
 	</properties>
 	
 	<build>

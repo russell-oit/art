@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>ART - JPivot Busy</title>
+        <title>JPivot Busy - ART</title>
 
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">

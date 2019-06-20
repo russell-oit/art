@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import org.apache.poi.xssf.usermodel.IndexedColorMap;
 
 /**
  * Created with IntelliJ IDEA. User: sramazzina Date: 21/06/12 Time: 7.35 To
@@ -669,16 +670,27 @@ public class ExcelWorksheetBuilder {
                         colorCode = cssColorCodesProperties.getProperty(colorCode);
                     }
 
-                    int redCode   = Integer.parseInt(colorCode.substring(1, 3), 16);
-                    int greenCode = Integer.parseInt(colorCode.substring(3, 5), 16);
-                    int blueCode  = Integer.parseInt(colorCode.substring(5, 7), 16);
-
                     numberCSClone.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+					
+					//https://stackoverflow.com/questions/10912578/apache-poi-xssfcolor-from-hex-code
+					IndexedColorMap colorMap;
+					if (excelWorkbook instanceof XSSFWorkbook) {
+						colorMap = ((XSSFWorkbook)excelWorkbook).getStylesSource().getIndexedColors();
+					} else {
+						colorMap = null;
+					}
+					
+					//https://stackoverflow.com/questions/10912578/apache-poi-xssfcolor-from-hex-code
+					byte redCode   = Byte.parseByte(colorCode.substring(1, 3), 16);
+                    byte greenCode = Byte.parseByte(colorCode.substring(3, 5), 16);
+                    byte blueCode  = Byte.parseByte(colorCode.substring(5, 7), 16);
+					
+					byte[] rgb = {redCode, greenCode, blueCode};
+					
+					XSSFColor xssfColor = new XSSFColor(rgb, colorMap);
 
-                    ((XSSFCellStyle) numberCSClone).setFillForegroundColor(
-                            new XSSFColor(new java.awt.Color(redCode, greenCode, blueCode)));
-                    ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(
-                            new XSSFColor(new java.awt.Color(redCode, greenCode, blueCode)));
+                    ((XSSFCellStyle) numberCSClone).setFillForegroundColor(xssfColor);
+                    ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(xssfColor);
                 } catch (Exception e) {
 					log.error("Error", e);
                     // we tried to set the color, no luck, lets continue

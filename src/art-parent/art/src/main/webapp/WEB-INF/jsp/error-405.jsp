@@ -14,7 +14,7 @@ Error page for 405 errors (method not allowed)
     <head>
         <meta charset='utf-8'>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ART - Method Not Allowed</title>
+        <title>Method Not Allowed - ART</title>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>

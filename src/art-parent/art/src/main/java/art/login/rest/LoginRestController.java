@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.login;
+package art.login.rest;
 
-import art.general.JwtResponseData;
+import art.login.method.InternalLogin;
+import art.login.LoginResult;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/login")
 public class LoginRestController {
+	//https://stackoverflow.com/questions/3226282/are-there-best-practices-for-java-package-organization
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginRestController.class);
 
@@ -58,9 +60,9 @@ public class LoginRestController {
 				User user = loginResult.getUser();
 				if (loginResult.isAuthenticated() && user.hasPermission("use_api")) {
 					String jwt = generateToken(username, jwtSecret);
-					JwtResponseData jwtResponseData = new JwtResponseData();
-					jwtResponseData.setAccessToken(jwt);
-					return ApiHelper.getOkResponseEntity(jwtResponseData);
+					LoginResponseData loginResponseData = new LoginResponseData();
+					loginResponseData.setAccessToken(jwt);
+					return ApiHelper.getOkResponseEntity(loginResponseData);
 				}
 			}
 

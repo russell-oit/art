@@ -59,6 +59,7 @@ public class AjaxTableHelper {
 	public String processName(String name, Date creationDate, Date updateDate) {
 		String encodedName = Encode.forHtml(name);
 
+		//https://stackoverflow.com/questions/11143253/is-it-ok-to-compare-an-int-and-a-long-in-java
 		final int NEW_OR_UPDATED_LIMIT_DAYS = 7;
 		if (ArtUtils.daysUntilToday(creationDate) <= NEW_OR_UPDATED_LIMIT_DAYS) {
 			encodedName += " " + newSpan;

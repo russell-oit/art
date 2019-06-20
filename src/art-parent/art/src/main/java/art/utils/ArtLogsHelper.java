@@ -92,6 +92,21 @@ public class ArtLogsHelper {
 	}
 
 	/**
+	 * Logs a job run
+	 *
+	 * @param user the username of the user who initiated the job
+	 * @param jobId the job id
+	 * @param message the result of the job run
+	 * @param totalTimeSeconds
+	 */
+	public static void logJobRun(String user, int jobId, String message, Integer totalTimeSeconds) {
+		String event = "job";
+		String ip = null;
+		Integer fetchTimeSeconds = null;
+		log(user, event, ip, message, jobId, totalTimeSeconds, fetchTimeSeconds);
+	}
+
+	/**
 	 * Logs an event
 	 *
 	 * @param user the username
@@ -121,22 +136,22 @@ public class ArtLogsHelper {
 	/**
 	 * Logs an event
 	 *
-	 * @param user the username of user who executed the report
+	 * @param user the username of user who performed the event
 	 * @param event the type of event
-	 * @param ip the ip address from which report was run
+	 * @param ip the ip address from which the event was initiated
 	 * @param message the log message
-	 * @param reportId the id of the report that was run
+	 * @param itemId the id of the report or job that was run
 	 * @param totalTimeSeconds the total time to run the report and display the
-	 * results (in seconds)
+	 * results (in seconds), or total time of the job run
 	 * @param fetchTimeSeconds the time to fetch the results from the database
 	 * (in seconds)
 	 */
 	public static void log(String user, String event, String ip, String message,
-			Integer reportId, Integer totalTimeSeconds, Integer fetchTimeSeconds) {
+			Integer itemId, Integer totalTimeSeconds, Integer fetchTimeSeconds) {
 
 		try {
 			String sql = "INSERT INTO ART_LOGS"
-					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
+					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, ITEM_ID,"
 					+ " TOTAL_TIME, FETCH_TIME, MESSAGE)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
 
@@ -148,7 +163,7 @@ public class ArtLogsHelper {
 				user,
 				event,
 				ip,
-				reportId,
+				itemId,
 				totalTimeSeconds,
 				fetchTimeSeconds,
 				message};

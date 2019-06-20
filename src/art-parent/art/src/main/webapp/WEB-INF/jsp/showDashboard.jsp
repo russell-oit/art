@@ -18,7 +18,7 @@
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
 
-        <title>ART - ${reportName}</title>
+        <title>${reportName} - ART</title>
 
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">

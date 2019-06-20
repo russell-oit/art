@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.general;
+package art.login.rest;
 
 /**
- * Response data when returning jwt credentials
+ * Response data for rest login
  * 
  * @author Timothy Anyona
  */
-public class JwtResponseData {
+public class LoginResponseData {
 	
 	private String accessToken;
 

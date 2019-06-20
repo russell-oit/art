@@ -45,6 +45,7 @@ import art.utils.ArtUtils;
 import art.utils.XmlParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rits.cloning.Cloner;
 import com.univocity.parsers.annotations.Nested;
 import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
@@ -214,6 +215,22 @@ public class Report implements Serializable {
 	private boolean overwriteFiles;
 	@JsonIgnore
 	private Integer limit;
+	@JsonIgnore
+	private boolean selfServicePreview;
+
+	/**
+	 * @return the selfServicePreview
+	 */
+	public boolean isSelfServicePreview() {
+		return selfServicePreview;
+	}
+
+	/**
+	 * @param selfServicePreview the selfServicePreview to set
+	 */
+	public void setSelfServicePreview(boolean selfServicePreview) {
+		this.selfServicePreview = selfServicePreview;
+	}
 
 	/**
 	 * @return the description2
@@ -1554,7 +1571,7 @@ public class Report implements Serializable {
 			String publicKeyFilePath = templatesPath + publicKeyFileName;
 			File publicKeyFile = new File(publicKeyFilePath);
 			if (!publicKeyFile.exists()) {
-				throw new IllegalStateException("Public key file not found: " + publicKeyFilePath);
+				throw new RuntimeException("Public key file not found: " + publicKeyFilePath);
 			}
 
 			publicKey = new Key(publicKeyFile);
@@ -1566,7 +1583,7 @@ public class Report implements Serializable {
 			String signingKeyFilePath = templatesPath + signingKeyFileName;
 			File signingKeyFile = new File(signingKeyFilePath);
 			if (!signingKeyFile.exists()) {
-				throw new IllegalStateException("Signing key file not found: " + signingKeyFilePath);
+				throw new RuntimeException("Signing key file not found: " + signingKeyFilePath);
 			}
 
 			signingKey = new Key(signingKeyFile, encryptor.getOpenPgpSigningKeyPassphrase());
@@ -1645,6 +1662,24 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Encrypts the open password field
+	 *
+	 * @throws Exception
+	 */
+	public void encryptOpenPassword() throws Exception {
+		openPassword = AesEncryptor.encrypt(openPassword);
+	}
+
+	/**
+	 * Encrypts the modify password field
+	 *
+	 * @throws Exception
+	 */
+	public void encryptModifyPassword() throws Exception {
+		modifyPassword = AesEncryptor.encrypt(modifyPassword);
+	}
+
+	/**
 	 * Encrypts password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
@@ -1668,6 +1703,14 @@ public class Report implements Serializable {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Clears password fields
+	 */
+	public void clearPasswords() {
+		openPassword = null;
+		modifyPassword = null;
 	}
 
 	/**
@@ -1735,6 +1778,26 @@ public class Report implements Serializable {
 		basic.setViewReportId(viewReportId);
 
 		return basic;
+	}
+
+	/**
+	 * Returns a copy of this report with password fields set to null
+	 *
+	 * @return a copy of this report with password fields set to null
+	 */
+	@JsonIgnore
+	public Report getCleanReport() {
+		//https://stackoverflow.com/questions/45834393/hiding-sensitive-information-in-response
+		//https://www.baeldung.com/entity-to-and-from-dto-for-a-java-spring-application
+		Cloner cloner = new Cloner();
+		Report copy = cloner.deepClone(this);
+
+		copy.clearPasswords();
+		copy.datasource = null;
+		copy.encryptor = null;
+		copy.reportParams = null;
+
+		return copy;
 	}
 
 	/**

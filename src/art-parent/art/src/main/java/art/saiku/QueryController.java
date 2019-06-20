@@ -152,7 +152,7 @@ public class QueryController {
 			@PathVariable("hierarchy") String hierarchyName,
 			@PathVariable("level") String levelName,
 			@RequestParam(value = "result", defaultValue = "true") Boolean result,
-			@PathVariable("search") String searchString,
+			@RequestParam(value = "search", defaultValue = "") String searchString,
 			@RequestParam(value = "searchLimit", defaultValue = "-1") Integer searchLimit) {
 
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
@@ -443,7 +443,7 @@ public class QueryController {
 	@GetMapping("/{queryname}/export/html")
 	public ResponseEntity<String> exporQuerytHtml(HttpSession session,
 			@PathVariable("queryname") String queryname,
-			@PathVariable("format") String format,
+			@RequestParam(value = "format", defaultValue = "") String format,
 			@RequestParam(value = "css", defaultValue = "false") Boolean css,
 			@RequestParam(value = "tableonly", defaultValue = "false") Boolean tableonly,
 			@RequestParam(value = "wrapcontent", defaultValue = "true") Boolean wrapcontent) throws IOException {
@@ -458,7 +458,7 @@ public class QueryController {
 	@PostMapping("/export/html")
 	public ResponseEntity<String> exportHtml(HttpSession session,
 			@RequestBody ThinQuery tq,
-			@PathVariable("format") String format,
+			@RequestParam(value = "format", defaultValue = "") String format,
 			@RequestParam(value = "css", defaultValue = "false") Boolean css,
 			@RequestParam(value = "tableonly", defaultValue = "false") Boolean tableonly,
 			@RequestParam(value = "wrapcontent", defaultValue = "true") Boolean wrapcontent) throws IOException {

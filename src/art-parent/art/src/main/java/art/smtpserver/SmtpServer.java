@@ -62,6 +62,102 @@ public class SmtpServer implements Serializable {
 	private String updatedBy;
 	@Parsed
 	private boolean clearTextPassword;
+	@Parsed
+	private boolean useOAuth2;
+	@Parsed
+	private String oauthClientId;
+	@Parsed
+	private String oauthClientSecret;
+	@Parsed
+	private String oauthRefreshToken;
+	@Parsed
+	private String oauthAccessToken;
+	@Parsed
+	private Date oauthAccessTokenExpiry;
+
+	/**
+	 * @return the oauthAccessTokenExpiry
+	 */
+	public Date getOauthAccessTokenExpiry() {
+		return oauthAccessTokenExpiry;
+	}
+
+	/**
+	 * @param oauthAccessTokenExpiry the oauthAccessTokenExpiry to set
+	 */
+	public void setOauthAccessTokenExpiry(Date oauthAccessTokenExpiry) {
+		this.oauthAccessTokenExpiry = oauthAccessTokenExpiry;
+	}
+
+	/**
+	 * @return the useOAuth2
+	 */
+	public boolean isUseOAuth2() {
+		return useOAuth2;
+	}
+
+	/**
+	 * @param useOAuth2 the useOAuth2 to set
+	 */
+	public void setUseOAuth2(boolean useOAuth2) {
+		this.useOAuth2 = useOAuth2;
+	}
+
+	/**
+	 * @return the oauthClientId
+	 */
+	public String getOauthClientId() {
+		return oauthClientId;
+	}
+
+	/**
+	 * @param oauthClientId the oauthClientId to set
+	 */
+	public void setOauthClientId(String oauthClientId) {
+		this.oauthClientId = oauthClientId;
+	}
+
+	/**
+	 * @return the oauthClientSecret
+	 */
+	public String getOauthClientSecret() {
+		return oauthClientSecret;
+	}
+
+	/**
+	 * @param oauthClientSecret the oauthClientSecret to set
+	 */
+	public void setOauthClientSecret(String oauthClientSecret) {
+		this.oauthClientSecret = oauthClientSecret;
+	}
+
+	/**
+	 * @return the oauthRefreshToken
+	 */
+	public String getOauthRefreshToken() {
+		return oauthRefreshToken;
+	}
+
+	/**
+	 * @param oauthRefreshToken the oauthRefreshToken to set
+	 */
+	public void setOauthRefreshToken(String oauthRefreshToken) {
+		this.oauthRefreshToken = oauthRefreshToken;
+	}
+
+	/**
+	 * @return the oauthAccessToken
+	 */
+	public String getOauthAccessToken() {
+		return oauthAccessToken;
+	}
+
+	/**
+	 * @param oauthAccessToken the oauthAccessToken to set
+	 */
+	public void setOauthAccessToken(String oauthAccessToken) {
+		this.oauthAccessToken = oauthAccessToken;
+	}
 
 	/**
 	 * @return the clearTextPassword
@@ -332,44 +428,51 @@ public class SmtpServer implements Serializable {
 	}
 
 	/**
-	 * Decrypts the password field
+	 * Decrypts password fields
 	 *
 	 * @throws java.lang.Exception
 	 */
-	public void decryptPassword() throws Exception {
+	public void decryptPasswords() throws Exception {
 		password = AesEncryptor.decrypt(password);
+		oauthClientSecret = AesEncryptor.decrypt(oauthClientSecret);
+		oauthRefreshToken = AesEncryptor.decrypt(oauthRefreshToken);
+		oauthAccessToken = AesEncryptor.decrypt(oauthAccessToken);
 	}
 
 	/**
-	 * Encrypts the password field
+	 * Encrypts password fields
 	 *
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword() throws Exception {
+	public void encryptPasswords() throws Exception {
 		String key = null;
 		EncryptionPassword encryptionPassword = null;
-		encryptPassword(key, encryptionPassword);
+		encryptPasswords(key, encryptionPassword);
 	}
 
 	/**
-	 * Encrypts the password field
+	 * Encrypts password fields
 	 *
 	 * @param key the key to use. If null, the current key will be used
 	 * @param encryptionPassword the encryption password configuration. null if
 	 * to use current
 	 * @throws java.lang.Exception
 	 */
-	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
+	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
 		password = AesEncryptor.encrypt(password, key, encryptionPassword);
+		oauthClientSecret = AesEncryptor.encrypt(oauthClientSecret, key, encryptionPassword);
+		oauthRefreshToken = AesEncryptor.encrypt(oauthRefreshToken, key, encryptionPassword);
+		oauthAccessToken = AesEncryptor.encrypt(oauthAccessToken, key, encryptionPassword);
 	}
-	
+
 	/**
-	 * Returns <code>true</code> if the password field is null
+	 * Returns <code>true</code> if password fields are null
 	 *
-	 * @return <code>true</code> if the password field is null
+	 * @return <code>true</code> if password fields are null
 	 */
-	public boolean hasNullPassword() {
-		if (password == null) {
+	public boolean hasNullPasswords() {
+		if (password == null && oauthClientSecret == null
+				&& oauthRefreshToken == null && oauthAccessToken == null) {
 			return true;
 		} else {
 			return false;

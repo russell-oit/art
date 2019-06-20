@@ -315,8 +315,6 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case JxlsArt:
 			case JxlsTemplate:
-			case FreeMarker:
-			case Thymeleaf:
 			case ReactPivot:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
@@ -336,12 +334,13 @@ public class RunReportHelper {
 			case SaikuReport:
 			case SaikuConnection:
 			case MongoDB:
-			case Velocity:
 			case OrgChartDatabase:
 			case OrgChartJson:
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case XDocReportFreeMarkerPptx:
+			case XDocReportVelocityPptx:
 				enableReportFormats = false;
 				break;
 			default:
@@ -597,10 +596,6 @@ public class RunReportHelper {
 					formats.add("pdf");
 					formats.add("html");
 					break;
-				case XDocReportFreeMarkerPptx:
-				case XDocReportVelocityPptx:
-					formats.add("pptx");
-					break;
 				case Dashboard:
 				case GridstackDashboard:
 					formats.add("html");
@@ -623,6 +618,14 @@ public class RunReportHelper {
 					break;
 				case File:
 					formats.add("html");
+					formats.add("file");
+					formats.add("fileZip");
+					break;
+				case FreeMarker:
+				case Velocity:
+				case Thymeleaf:
+					formats.add("html");
+					formats.add("htmlFancy");
 					formats.add("file");
 					formats.add("fileZip");
 					break;
@@ -1376,6 +1379,8 @@ public class RunReportHelper {
 			reportFormat = ReportFormat.pdf;
 		} else if (reportType.isStandardOutput() || reportType.isReportEngine()) {
 			reportFormat = ReportFormat.htmlFancy;
+		} else if (reportType.isXDocReportPptx()) {
+			reportFormat = ReportFormat.pptx;
 		} else {
 			reportFormat = ReportFormat.html;
 		}

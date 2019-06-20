@@ -55,9 +55,9 @@
 
 				$('#testConnection').on('click', function () {
 					var action = '${action}';
-					var id = 0;
+					var smtpServerId = 0;
 					if (action === 'edit' || action === 'copy') {
-						id = $("#smtpServerId").val();
+						smtpServerId = $("#smtpServerId").val();
 					}
 					var server = $("#server").val();
 					var port = $("#port").val();
@@ -66,15 +66,21 @@
 					var username = $("#username").val();
 					var password = $("#password").val();
 					var useBlankPassword = $("#useBlankPassword").is(":checked");
+					var useOAuth2 = $("#useOAuth2").is(":checked");
+					var oauthClientId = $("#oauthClientId").val();
+					var oauthClientSecret = $("#oauthClientSecret").val();
+					var oauthRefreshToken = $("#oauthRefreshToken").val();
 
 					$.ajax({
 						type: "POST",
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/testSmtpServer",
-						data: {id: id, server: server, port: port,
+						data: {smtpServerId: smtpServerId, server: server, port: port,
 							useStartTls: useStartTls, useSmtpAuthentication: useSmtpAuthentication,
 							username: username, password: password,
-							useBlankPassword: useBlankPassword, action: action},
+							useBlankPassword: useBlankPassword, useOAuth2: useOAuth2,
+							oauthClientId: oauthClientId, oauthClientSecret: oauthClientSecret,
+							oauthRefreshToken: oauthRefreshToken, action: action},
 						success: function (response) {
 							if (response.success) {
 								notifyActionSuccessReusable("${connectionSuccessfulText}");
@@ -92,18 +98,23 @@
 					$(this).parent().hide();
 				});
 
-				$('#useSmtpAuthentication').on('switchChange.bootstrapSwitch', function (event, state) {
-					toggleCredentialsFieldsEnabled();
-				});
-
-				// enable/disable on page load
-				toggleCredentialsFieldsEnabled();
-
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
 					offText: '${noText}'
 				});
+
+				$('#useSmtpAuthentication').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleCredentialsFieldsEnabled();
+				});
+
+				$('#useOAuth2').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleVisibleFields();
+				});
+
+				// enable/disable on page load
+				toggleCredentialsFieldsEnabled();
+				toggleVisibleFields();
 
 				$('#name').trigger("focus");
 
@@ -112,8 +123,29 @@
 			function toggleCredentialsFieldsEnabled() {
 				if ($('#useSmtpAuthentication').is(':checked')) {
 					$('#credentialsFields').prop('disabled', false);
+					//https://stackoverflow.com/questions/32540041/disabling-and-enabling-bootstrap-switch-using-jquery
+					$("#useOAuth2").bootstrapSwitch('disabled', false);
 				} else {
 					$('#credentialsFields').prop('disabled', true);
+					$("#useOAuth2").bootstrapSwitch('disabled', true);
+				}
+			}
+
+			function toggleVisibleFields() {
+				var oauth = $('#useOAuth2').is(':checked');
+
+				//show/hide password field
+				if (oauth) {
+					$('#passwordDiv').hide();
+				} else {
+					$('#passwordDiv').show();
+				}
+
+				//show/hide oauth fields
+				if (oauth) {
+					$('#oauthFields').show();
+				} else {
+					$('#oauthFields').hide();
 				}
 			}
 		</script>
@@ -159,6 +191,7 @@
 				</div>
 
 				<input type="hidden" name="action" value="${action}">
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -240,6 +273,16 @@
 						</div>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="useOAuth2">
+						<spring:message code="smtpServers.label.useGoogleOAuth2"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="useOAuth2" id="useOAuth2" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
 
 				<fieldset id="credentialsFields">
 					<div class="form-group">
@@ -251,7 +294,7 @@
 							<form:errors path="username" cssClass="error"/>
 						</div>
 					</div>
-					<div class="form-group">
+					<div id="passwordDiv" class="form-group">
 						<label class="control-label col-md-4" for="password">
 							<spring:message code="page.label.password"/>
 						</label>
@@ -275,6 +318,36 @@
 							<form:errors path="password" cssClass="error"/>
 						</div>
 					</div>
+
+					<fieldset id="oauthFields">
+						<div class="form-group">
+							<label class="control-label col-md-4" for="oauthClientId">
+								<spring:message code="smtpServers.label.oauthClientId"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="oauthClientId" maxlength="200" class="form-control"/>
+								<form:errors path="oauthClientId" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="oauthClientSecret">
+								<spring:message code="smtpServers.label.oauthClientSecret"/>
+							</label>
+							<div class="col-md-8">
+								<form:password path="oauthClientSecret" maxlength="100" class="form-control"/>
+								<form:errors path="oauthClientSecret" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="oauthRefreshToken">
+								<spring:message code="smtpServers.label.oauthRefreshToken"/>
+							</label>
+							<div class="col-md-8">
+								<form:password path="oauthRefreshToken" maxlength="200" class="form-control"/>
+								<form:errors path="oauthRefreshToken" cssClass="error"/>
+							</div>
+						</div>
+					</fieldset>
 				</fieldset>
 
 				<div class="form-group">

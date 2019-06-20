@@ -19,6 +19,7 @@ package art.utils;
 
 import art.enums.ApiStatus;
 import art.general.ApiResponse;
+import art.servlets.Config;
 import java.io.IOException;
 import java.net.URI;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,7 @@ import org.springframework.http.ResponseEntity;
  * @author Timothy Anyona
  */
 public class ApiHelper {
+	//https://www.baeldung.com/spring-response-entity
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiHelper.class);
 
@@ -56,15 +58,167 @@ public class ApiHelper {
 	}
 
 	/**
+	 * Outputs an error to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param exception the exception
+	 */
+	public static void outputErrorResponse(HttpServletResponse response,
+			Exception exception) {
+
+		String message = exception.getMessage();
+		outputErrorResponse(response, message);
+	}
+
+	/**
+	 * Outputs an error to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param message the error message
+	 */
+	public static void outputErrorResponse(HttpServletResponse response,
+			String message) {
+
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+
+			apiResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			apiResponse.setArtStatus(ApiStatus.ERROR);
+
+			if (Config.getCustomSettings().isShowErrorsApi()) {
+				apiResponse.setMessage(message);
+			}
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs a not found response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 */
+	public static void outputNotFoundResponse(HttpServletResponse response) {
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+
+			apiResponse.setHttpStatus(HttpStatus.NOT_FOUND.value());
+			apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs an OK response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param data the data to include in the response
+	 */
+	public static void outputOkResponse(HttpServletResponse response, Object data) {
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+
+			apiResponse.setHttpStatus(HttpStatus.OK.value());
+			apiResponse.setArtStatus(ApiStatus.OK);
+			apiResponse.setData(data);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.OK.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs an invalid value response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param message the message to include in the response
+	 */
+	public static void outputInvalidValueResponse(HttpServletResponse response,
+			String message) {
+
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+
+			apiResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
+			apiResponse.setArtStatus(ApiStatus.INVALID_VALUE);
+			apiResponse.setMessage(message);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
+	 * Outputs an unauthorized response to the http servlet response
+	 *
+	 * @param response the http servlet response
+	 * @param message the message to include in the response
+	 */
+	public static void outputUnauthorizedResponse(HttpServletResponse response,
+			String message) {
+
+		try {
+			ApiResponse apiResponse = new ApiResponse();
+
+			apiResponse.setHttpStatus(HttpStatus.UNAUTHORIZED.value());
+			apiResponse.setArtStatus(ApiStatus.UNAUTHORIZED);
+			apiResponse.setMessage(message);
+
+			String jsonString = ArtUtils.objectToJson(apiResponse);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			response.getWriter().write(jsonString);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+
+	/**
 	 * Returns a response entity object to use with an error response
 	 *
 	 * @param exception the exception
-	 * @return the reponse entity object
+	 * @return the response entity object
 	 */
 	public static ResponseEntity<ApiResponse> getErrorResponseEntity(Exception exception) {
+		String message = exception.getMessage();
+		return getErrorResponseEntity(message);
+	}
+
+	/**
+	 * Returns a response entity object to use with an error response
+	 *
+	 * @param message the error message
+	 * @return the response entity object
+	 */
+	public static ResponseEntity<ApiResponse> getErrorResponseEntity(String message) {
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		apiResponse.setArtStatus(ApiStatus.ERROR);
+
+		if (Config.getCustomSettings().isShowErrorsApi()) {
+			apiResponse.setMessage(message);
+		}
+
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
 	}
 
@@ -86,9 +240,11 @@ public class ApiHelper {
 	 */
 	public static ResponseEntity<?> getOkResponseEntity(Object data) {
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.OK.value());
 		apiResponse.setArtStatus(ApiStatus.OK);
 		apiResponse.setData(data);
+
 		return ResponseEntity.ok(apiResponse);
 	}
 
@@ -114,9 +270,11 @@ public class ApiHelper {
 			ApiStatus artStatus, String message) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.UNAUTHORIZED.value());
 		apiResponse.setArtStatus(artStatus);
 		apiResponse.setMessage(message);
+
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
 	}
 
@@ -140,9 +298,11 @@ public class ApiHelper {
 			String message) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.NOT_FOUND.value());
 		apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
 		apiResponse.setMessage(message);
+
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
 	}
 
@@ -170,10 +330,12 @@ public class ApiHelper {
 			String message, Object data) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.CONFLICT.value());
 		apiResponse.setArtStatus(ApiStatus.LINKED_RECORDS_EXIST);
 		apiResponse.setMessage(message);
 		apiResponse.setData(data);
+
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
 	}
 
@@ -199,9 +361,11 @@ public class ApiHelper {
 			Object data) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.CREATED.value());
 		apiResponse.setArtStatus(ApiStatus.OK);
 		apiResponse.setData(data);
+
 		return ResponseEntity.created(uri).body(apiResponse);
 	}
 
@@ -225,9 +389,11 @@ public class ApiHelper {
 			String message) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.CONFLICT.value());
 		apiResponse.setArtStatus(ApiStatus.RECORD_EXISTS);
 		apiResponse.setMessage(message);
+
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiResponse);
 	}
 
@@ -241,9 +407,11 @@ public class ApiHelper {
 			String message) {
 
 		ApiResponse apiResponse = new ApiResponse();
+
 		apiResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
 		apiResponse.setArtStatus(ApiStatus.INVALID_VALUE);
 		apiResponse.setMessage(message);
+
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
 	}
 

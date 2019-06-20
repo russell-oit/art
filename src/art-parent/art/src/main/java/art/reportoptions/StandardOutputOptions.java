@@ -32,6 +32,7 @@ public class StandardOutputOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private List<String> imageColumns;
+	private HtmlDataTableOutputOptions dtExtraOptions;
 
 	/**
 	 * @return the imageColumns
@@ -45,6 +46,20 @@ public class StandardOutputOptions implements Serializable {
 	 */
 	public void setImageColumns(List<String> imageColumns) {
 		this.imageColumns = imageColumns;
+	}
+
+	/**
+	 * @return the dtExtraOptions
+	 */
+	public HtmlDataTableOutputOptions getDtExtraOptions() {
+		return dtExtraOptions;
+	}
+
+	/**
+	 * @param dtExtraOptions the dtExtraOptions to set
+	 */
+	public void setDtExtraOptions(HtmlDataTableOutputOptions dtExtraOptions) {
+		this.dtExtraOptions = dtExtraOptions;
 	}
 
 }

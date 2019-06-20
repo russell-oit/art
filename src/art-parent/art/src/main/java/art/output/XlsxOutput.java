@@ -190,7 +190,6 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
@@ -203,7 +202,6 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		cell = row.createCell(cellNumber++);
-		cell.setCellType(CellType.STRING);
 		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
@@ -213,7 +211,6 @@ public class XlsxOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			if (numberStyle == null) {
 				cell.setCellStyle(bodyStyle);
@@ -263,7 +260,6 @@ public class XlsxOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellType(CellType.NUMERIC);
 			cell.setCellValue(value);
 			cell.setCellStyle(totalStyle);
 		}

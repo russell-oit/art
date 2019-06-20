@@ -196,7 +196,7 @@ public class FixedWidthOutput {
 				}
 			}
 		} else {
-			throw new IllegalStateException("fieldLengths or fieldLengthsByName not defined");
+			throw new RuntimeException("fieldLengths or fieldLengthsByName not defined");
 		}
 
 		List<Map<String, List<String>>> fieldAlignmentByName = fixedWidthOptions.getFieldAlignmentByName();

@@ -19,7 +19,7 @@ package art.springconfig;
 
 import art.enums.ApiStatus;
 import art.general.ApiResponse;
-import art.login.InternalLogin;
+import art.login.method.InternalLogin;
 import art.login.LoginResult;
 import art.servlets.Config;
 import art.user.User;

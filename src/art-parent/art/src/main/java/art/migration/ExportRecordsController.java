@@ -337,7 +337,7 @@ public class ExportRecordsController {
 
 		Settings settings = settingsService.getSettings();
 		if (settings == null) {
-			throw new IllegalStateException("No settings to export");
+			throw new RuntimeException("No settings to export");
 		}
 		settings.encryptPasswords();
 
@@ -631,7 +631,7 @@ public class ExportRecordsController {
 		String ids = exportRecords.getIds();
 		List<SmtpServer> smtpServers = smtpServerService.getSmtpServers(ids);
 		for (SmtpServer smtpServer : smtpServers) {
-			smtpServer.encryptPassword();
+			smtpServer.encryptPasswords();
 		}
 
 		MigrationLocation location = exportRecords.getLocation();

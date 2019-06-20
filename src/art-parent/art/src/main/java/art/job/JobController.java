@@ -59,14 +59,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.TriggerKey.triggerKey;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,28 +234,15 @@ public class JobController {
 
 	@RequestMapping(value = "/runJob", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse runJob(@RequestParam("id") Integer id, HttpServletRequest request) {
+	AjaxResponse runJob(@RequestParam("id") Integer id, HttpSession session) {
 		logger.debug("Entering runJob: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			String runId = id + "-" + ArtUtils.getUniqueId();
-
-			JobDetail tempJob = newJob(ReportJob.class)
-					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
-					.usingJobData("jobId", id)
-					.usingJobData("tempJob", Boolean.TRUE)
-					.build();
-
-			// create SimpleTrigger that will fire once, immediately		        
-			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
-					.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"))
-					.startNow()
-					.build();
-
-			Scheduler scheduler = SchedulerUtils.getScheduler();
-			scheduler.scheduleJob(tempJob, tempTrigger);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			Date runDate = null;
+			scheduleTempJob(id, runDate, sessionUser);
 			response.setSuccess(true);
 		} catch (SchedulerException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -271,7 +256,7 @@ public class JobController {
 	public @ResponseBody
 	AjaxResponse runLaterJob(@RequestParam("runLaterJobId") Integer runLaterJobId,
 			@RequestParam("runLaterDate") String runLaterDate,
-			HttpServletRequest request) {
+			HttpSession session) {
 
 		logger.debug("Entering runLaterJob: runLaterJobId={}, runLaterDate='{}'",
 				runLaterJobId, runLaterDate);
@@ -279,25 +264,13 @@ public class JobController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			String runId = runLaterJobId + "-" + ArtUtils.getUniqueId();
-
-			JobDetail tempJob = newJob(ReportJob.class)
-					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
-					.usingJobData("jobId", runLaterJobId)
-					.usingJobData("tempJob", Boolean.TRUE)
-					.build();
+			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			ExpressionHelper expressionHelper = new ExpressionHelper();
 			Date runDate = expressionHelper.convertStringToDate(runLaterDate);
 
-			// create SimpleTrigger that will fire once at the given date		        
-			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
-					.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"))
-					.startAt(runDate)
-					.build();
+			scheduleTempJob(runLaterJobId, runDate, sessionUser);
 
-			Scheduler scheduler = SchedulerUtils.getScheduler();
-			scheduler.scheduleJob(tempJob, tempTrigger);
 			response.setSuccess(true);
 		} catch (SchedulerException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
@@ -305,6 +278,48 @@ public class JobController {
 		}
 
 		return response;
+	}
+
+	/**
+	 * Schedules a run job or run later job
+	 *
+	 * @param jobId the job id
+	 * @param runDate the run date, or null if to run immediately
+	 * @param sessionUser the session user
+	 * @throws SchedulerException
+	 */
+	private void scheduleTempJob(Integer jobId, Date runDate, User sessionUser)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleTempJob: jobId={}, runDate={},"
+				+ " sessionUser={}", jobId, runDate, sessionUser);
+
+		String runId = jobId + "-" + ArtUtils.getUniqueId();
+
+		String username = sessionUser.getUsername();
+
+		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.usingJobData("jobId", jobId)
+				.usingJobData("username", username)
+				.usingJobData("tempJob", Boolean.TRUE)
+				.build();
+
+		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
+
+		if (runDate == null) {
+			//create SimpleTrigger that will fire once, immediately
+			triggerBuilder.startNow();
+		} else {
+			//create SimpleTrigger that will fire once at the given date
+			triggerBuilder.startAt(runDate);
+		}
+
+		Trigger tempTrigger = triggerBuilder.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempJob, tempTrigger);
 	}
 
 	@RequestMapping(value = "/addJob", method = {RequestMethod.GET, RequestMethod.POST})

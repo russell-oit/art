@@ -21,7 +21,7 @@ Login page
 
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
-<t:genericPage title="ART - ${pageTitle}">
+<t:genericPage title="${pageTitle} - ART">
 	<jsp:attribute name="metaContent">
 		<meta http-equiv="pragma" content="no-cache">
 		<meta http-equiv="cache-control" content="no-cache, must-revalidate">

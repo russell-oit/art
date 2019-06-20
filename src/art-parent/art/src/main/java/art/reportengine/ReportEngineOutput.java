@@ -303,7 +303,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			report.execute();
 		} else if (reportType == ReportType.ReportEngineFile) {
 			if (CollectionUtils.isEmpty(dataColumns)) {
-				throw new IllegalStateException("dataColumns not specified");
+				throw new RuntimeException("dataColumns not specified");
 			}
 			int columnCount = dataColumns.size();
 			if (CollectionUtils.isNotEmpty(groupColumns)) {
@@ -332,7 +332,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullTemplateFileName);
+						throw new RuntimeException("Data file not found: " + fullTemplateFileName);
 					}
 
 					String encoding = "UTF-8";
@@ -557,7 +557,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 			report.execute();
 		} else if (reportType == ReportType.ReportEngineFile) {
 			if (CollectionUtils.isEmpty(dataColumns)) {
-				throw new IllegalStateException("dataColumns not specified");
+				throw new RuntimeException("dataColumns not specified");
 			}
 
 			int columnCount;
@@ -592,7 +592,7 @@ public class ReportEngineOutput extends AbstractReportOutput {
 
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
-						throw new IllegalStateException("Data file not found: " + fullTemplateFileName);
+						throw new RuntimeException("Data file not found: " + fullTemplateFileName);
 					}
 
 					String encoding = "UTF-8";

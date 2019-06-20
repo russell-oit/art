@@ -589,7 +589,7 @@ public class ReportParameter implements Serializable {
 
 		Object value = getEffectiveActualParameterValue();
 		if (parameterType == null) {
-			throw new IllegalStateException("Unexpected parameter type: " + parameterType);
+			throw new RuntimeException("Unexpected parameter type: " + parameterType);
 		} else {
 			switch (parameterType) {
 				case SingleValue:
@@ -644,7 +644,7 @@ public class ReportParameter implements Serializable {
 
 					return finalValues;
 				default:
-					throw new IllegalStateException("Unexpected parameter type: " + parameterType);
+					throw new RuntimeException("Unexpected parameter type: " + parameterType);
 			}
 		}
 	}
