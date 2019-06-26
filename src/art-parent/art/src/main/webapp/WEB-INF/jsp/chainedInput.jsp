@@ -27,12 +27,18 @@ Display report parameter that uses dropdown input
 	//https://sourceforge.net/p/art/discussion/352129/thread/3320849d/
 	//https://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html
 	//https://api.jquery.com/category/selectors/
-	$("#${encode:forJavaScript(reportParam.htmlElementName)}").remoteChained({
-		parents: "${encode:forJavaScript(reportParam.chainedParentsHtmlIds)}",
-		url: "${pageContext.request.contextPath}/getLovValues?reportId=${reportParam.parameter.lovReport.reportId}",
-				loading: "${loadingText}...",
-				depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
-			});
+	var url = "${pageContext.request.contextPath}/getLovValues?reportId=${reportParam.parameter.lovReport.reportId}";
+
+	<c:forEach var="defaultValue" items="${reportParam.defaultValues}">
+		url += "&defaultValues=" + ${encode:forUriComponent(defaultValue)};
+	</c:forEach>
+
+		$("#${encode:forJavaScript(reportParam.htmlElementName)}").remoteChained({
+			parents: "${encode:forJavaScript(reportParam.chainedParentsHtmlIds)}",
+			url: url,
+			loading: "${loadingText}...",
+			depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
+		});
 </script>
 
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>

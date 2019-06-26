@@ -718,4 +718,76 @@ public class ReportParameter implements Serializable {
 				return false;
 		}
 	}
+
+	/**
+	 * Returns all the possible default values
+	 * 
+	 * @return all the possible default values
+	 * @throws IOException 
+	 */
+	public List<String> getDefaultValues() throws IOException {
+		List<String> defaultValues = new ArrayList<>();
+
+		ParameterType parameterType = parameter.getParameterType();
+
+		switch (parameterType) {
+			case SingleValue:
+				//compare lov value to actual parameter value - default value or passed value
+				if (passedParameterValues == null) {
+					String defaultValue = parameter.getDefaultValue();
+					if (StringUtils.isNotEmpty(defaultValue)) {
+						defaultValues.add(defaultValue);
+					}
+
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.isNotEmpty(value)) {
+								defaultValues.add(value);
+							}
+						}
+					}
+				} else {
+					String htmlValue = getHtmlValue();
+					if (StringUtils.isNotEmpty(htmlValue)) {
+						defaultValues.add(htmlValue);
+					}
+				}
+
+				break;
+			case MultiValue:
+				//compare lov value to default values or passed values
+				if (passedParameterValues == null) {
+					String defaultValueSetting = parameter.getDefaultValue();
+					if (StringUtils.isNotEmpty(defaultValueSetting)) {
+						String defaultValuesArray[] = defaultValueSetting.split("\\r?\\n");
+						for (String defaultValue : defaultValuesArray) {
+							if (StringUtils.isNotEmpty(defaultValue)) {
+								defaultValues.add(defaultValue);
+							}
+						}
+					}
+
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.isNotEmpty(value)) {
+								defaultValues.add(value);
+							}
+						}
+					}
+				} else {
+					for (String passedValue : passedParameterValues) {
+						if (StringUtils.isNotEmpty(passedValue)) {
+							defaultValues.add(passedValue);
+						}
+					}
+				}
+
+				break;
+			default:
+				break;
+		}
+
+		return defaultValues;
+	}
+	
 }

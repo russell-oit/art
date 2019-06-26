@@ -1462,6 +1462,7 @@ public class ReportController {
 	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Map<String, String>> getLovValues(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "defaultValues", required = false) List<String> defaultValues,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
 		logger.debug("Entering getLovValues: reportId={}", reportId);
@@ -1497,6 +1498,14 @@ public class ReportController {
 			String encodedValue = Encode.forHtmlContent(entry.getValue());
 			value.put(encodedKey, encodedValue);
 			list.add(value);
+		}
+
+		if (defaultValues != null) {
+			for (String defaultValue : defaultValues) {
+				Map<String, String> value = new HashMap<>();
+				value.put("selected", defaultValue);
+				list.add(value);
+			}
 		}
 
 		return list;
