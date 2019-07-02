@@ -1,5 +1,6 @@
 ART 4.4
 * Allow chained parameters to use default values
+* Updated jackson
 
 ART 4.3
 * Added file and fileZip report formats for FreeMarker, Velocity and Thymeleaf report types
