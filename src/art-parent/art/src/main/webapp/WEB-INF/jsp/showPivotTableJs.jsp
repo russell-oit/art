@@ -52,8 +52,8 @@
 <%-- c3 0.4 doesn't work with d3 4.x --%>
 <%-- https://github.com/nicolaskruchten/pivottable/issues/579 --%>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.js"></script>

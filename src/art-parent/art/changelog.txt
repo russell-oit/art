@@ -1,5 +1,6 @@
 ART 4.4
 * Allow chained parameters to use default values
+* Fix for large c3.js chart width in tabbed dashboard
 * Updated jackson, jongo
 
 ART 4.3

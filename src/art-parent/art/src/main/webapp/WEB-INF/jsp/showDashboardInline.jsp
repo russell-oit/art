@@ -233,6 +233,10 @@
 				intervalIds[contentDivId] = setIntervalId;
 			}
 		});
+		
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			$(window).trigger('resize');
+		});
 	});
 </script>
 
