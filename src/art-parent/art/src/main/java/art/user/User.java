@@ -24,6 +24,7 @@ import art.permission.Permission;
 import art.reportgroup.ReportGroup;
 import art.role.Role;
 import art.usergroup.UserGroup;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rits.cloning.Cloner;
 import com.univocity.parsers.annotations.Nested;
@@ -54,6 +55,7 @@ public class User implements Serializable {
 	private AccessLevel accessLevel;
 	@Parsed
 	private String email;
+	@JsonAlias({"name"}) //enable import from art-basic
 	@Parsed
 	private String fullName;
 	@Parsed
@@ -62,6 +64,7 @@ public class User implements Serializable {
 	private String passwordAlgorithm;
 	@Parsed
 	private String startReport; //can contain only report id or report id with parameters e.g. 1?p-param1=value
+	@JsonAlias({"enabled"})
 	@Parsed
 	private boolean active = true;
 	@Parsed
@@ -859,7 +862,7 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Returns a copy of this user with the password fields set to null
+	 * Returns a copy of this user with the password field set to null
 	 *
 	 * @return a copy of this user with the password field set to null
 	 */
