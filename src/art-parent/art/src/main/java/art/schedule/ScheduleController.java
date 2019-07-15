@@ -216,8 +216,8 @@ public class ScheduleController {
 
 	@RequestMapping(value = "/saveSchedule", method = RequestMethod.POST)
 	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);

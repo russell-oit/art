@@ -144,9 +144,9 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam("action") String action,
-			@RequestParam("parent") Integer parent,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			@RequestParam("parent") Integer parent) {
 
 		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
 				drilldown, action, parent);
@@ -220,7 +220,7 @@ public class DrilldownController {
 
 	@RequestMapping(value = "/moveDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse moveDrilldown(Model model, 
+	AjaxResponse moveDrilldown(Model model,
 			@RequestParam("id") Integer id,
 			@RequestParam("fromPosition") Integer fromPosition,
 			@RequestParam("toPosition") Integer toPosition,

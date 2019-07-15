@@ -171,9 +171,9 @@ public class RuleController {
 
 	@RequestMapping(value = "/saveRule", method = RequestMethod.POST)
 	public String saveRule(@ModelAttribute("rule") @Valid Rule rule,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
 			@RequestParam("returnReportId") Integer returnReportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
 		logger.debug("Entering saveRule: rule={}, action='{}',"

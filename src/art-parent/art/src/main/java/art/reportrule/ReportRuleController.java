@@ -118,7 +118,7 @@ public class ReportRuleController {
 		logger.debug("Entering addReportRule: reportId={}", reportId);
 
 		model.addAttribute("reportRule", new ReportRule());
-		
+
 		return showEditReportRule("add", model, reportId);
 	}
 
@@ -144,9 +144,9 @@ public class ReportRuleController {
 
 	@RequestMapping(value = "/saveReportRule", method = RequestMethod.POST)
 	public String saveReportRule(@ModelAttribute("reportRule") @Valid ReportRule reportRule,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam("action") String action,
-			@RequestParam("reportId") Integer reportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			@RequestParam("reportId") Integer reportId) {
 
 		logger.debug("Entering saveReportRule: reportRule={}, action='{}', reportId={}", reportRule, action, reportId);
 

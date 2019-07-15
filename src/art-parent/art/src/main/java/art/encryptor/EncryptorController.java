@@ -173,8 +173,8 @@ public class EncryptorController {
 
 	@RequestMapping(value = "/saveEncryptor", method = RequestMethod.POST)
 	public String saveEncryptor(@ModelAttribute("encryptor") @Valid Encryptor encryptor,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			@RequestParam(value = "publicKeyFile", required = false) MultipartFile publicKeyFile,
 			@RequestParam(value = "signingKeyFile", required = false) MultipartFile signingKeyFile,
 			HttpSession session, Locale locale) {

@@ -171,9 +171,9 @@ public class ReportParameterController {
 
 	@RequestMapping(value = "/saveReportParameter", method = RequestMethod.POST)
 	public String saveReportParameter(@ModelAttribute("reportParameter") @Valid ReportParameter reportParameter,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam("action") String action,
-			@RequestParam("reportId") Integer reportId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			@RequestParam("reportId") Integer reportId) {
 
 		logger.debug("Entering saveReportParameter: reportParameter={}, action='{}', "
 				+ "reportId={}", reportParameter, action, reportId);

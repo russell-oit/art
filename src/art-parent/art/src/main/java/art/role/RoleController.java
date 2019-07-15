@@ -178,8 +178,8 @@ public class RoleController {
 
 	@RequestMapping(value = "/saveRole", method = RequestMethod.POST)
 	public String saveRole(@ModelAttribute("role") @Valid Role role,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session) {
 
 		logger.debug("Entering saveRole: role={}, action='{}'", role, action);

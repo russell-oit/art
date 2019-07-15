@@ -72,7 +72,7 @@ public class LoggerController {
 
 	/**
 	 * Returns <code>true</code> if the given logback logger has appenders
-	 * 
+	 *
 	 * @param log the logback logger
 	 * @return <code>true</code> if the given logback logger has appenders
 	 */
@@ -101,14 +101,14 @@ public class LoggerController {
 		logger.debug("Entering addLogger");
 
 		model.addAttribute("log", new art.logger.Logger());
-		
+
 		return showEditLogger("add", model);
 	}
 
 	@RequestMapping(value = "/saveLogger", method = RequestMethod.POST)
 	public String saveLogger(@ModelAttribute("log") @Valid art.logger.Logger log,
-			@RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action) {
 
 		logger.debug("Entering saveLogger: log={}, action='{}'", log, action);
 
@@ -150,7 +150,7 @@ public class LoggerController {
 		}
 
 		model.addAttribute("log", log);
-		
+
 		return showEditLogger("edit", model);
 	}
 
@@ -166,7 +166,7 @@ public class LoggerController {
 
 		model.addAttribute("levels", LoggerLevel.list());
 		model.addAttribute("action", action);
-		
+
 		return "editLogger";
 	}
 }

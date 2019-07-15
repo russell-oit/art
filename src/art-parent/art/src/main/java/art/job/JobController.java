@@ -363,8 +363,8 @@ public class JobController {
 
 	@RequestMapping(value = "/saveJob", method = RequestMethod.POST)
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
-			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			@RequestParam(value = "emailTemplateFile", required = false) MultipartFile emailTemplateFile,
 			HttpSession session, HttpServletRequest request, Locale locale) {
 
