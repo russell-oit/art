@@ -163,9 +163,13 @@ public class ExportController {
 			//http://www.rgagnon.com/javadetails/java-0487.html
 			//https://howtodoinjava.com/spring/spring-mvc/spring-mvc-download-file-controller-example/
 			Tika tika = new Tika();
-			String mimeType = tika.detect(file.getName());
+			String filename = file.getName();
+			String mimeType = tika.detect(filename);
 
 			response.setContentType(mimeType);
+			if (!StringUtils.containsIgnoreCase(mimeType, "html")) {
+				response.addHeader("Content-Disposition", "attachment; filename=" + filename);
+			}
 
 			FileInputStream fs = null;
 			OutputStream os = null;
