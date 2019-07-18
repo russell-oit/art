@@ -21,7 +21,6 @@
 	${panelTitle}
 </c:set>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 
@@ -67,7 +66,7 @@
 							<span class="btn btn-default btn-file">
 								<span class="fileinput-new">${selectFileText}</span>
 								<span class="fileinput-exists">${changeText}</span>
-								<input type="file" name="importFile">
+								<input type="file" name="importFile" accept=".json, .csv, .zip">
 							</span>
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
