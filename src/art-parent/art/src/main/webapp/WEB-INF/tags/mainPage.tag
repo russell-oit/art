@@ -27,10 +27,12 @@ bootstrap js, jquery js, datatables css, datatables js
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
+		<jsp:invoke fragment="headContent"/>
+	</jsp:attribute>
+
+	<jsp:attribute name="metaContent">
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
-
-		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
