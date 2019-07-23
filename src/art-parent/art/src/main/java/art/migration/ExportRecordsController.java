@@ -77,6 +77,8 @@ import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.File;
@@ -242,7 +244,7 @@ public class ExportRecordsController {
 						exportSettings(exportRecords, file, sessionUser, conn);
 						break;
 					case Datasources:
-						exportDatasources(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportDatasources(exportRecords, file, sessionUser, conn);
 						break;
 					case Destinations:
 						exportDestinations(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -361,12 +363,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportDatasources(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
+			User sessionUser, Connection conn)
 			throws Exception {
 
 		logger.debug("Entering exportDatasources");
@@ -383,11 +384,14 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
+						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
 						break;
 					case csv:
-						csvRoutines.writeAll(datasources, Datasource.class, file);
+						//https://gist.github.com/shsdev/11392809
+						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+						CsvSchema schema = ExportRecords.getDatasourceCsvSchema(csvMapper);
+						csvMapper.writer(schema).writeValue(file, datasources);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

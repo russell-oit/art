@@ -73,7 +73,10 @@ import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
@@ -213,7 +216,7 @@ public class ImportRecordsController {
 						importSettings(tempFile, sessionUser, conn, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importDatasources(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Destinations:
 						importDestinations(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -313,12 +316,11 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
 	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
 
@@ -326,12 +328,21 @@ public class ImportRecordsController {
 		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
+				ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
 				datasources = mapper.readValue(file, new TypeReference<List<Datasource>>() {
 				});
 				break;
 			case csv:
-				datasources = csvRoutines.parseAll(Datasource.class, file);
+				//https://github.com/FasterXML/jackson-dataformats-text/tree/master/csv
+				//https://stackoverflow.com/questions/52239104/jackson-csv-parser-chokes-on-comma-separated-value-files-if-is-in-a-field-ev
+				//https://czetsuya-tech.blogspot.com/2017/03/how-to-read-and-write-csv-using-jackson.html
+				//https://itexpertsconsultant.wordpress.com/2016/08/03/how-to-readwrite-csv-file-to-map-in-java/
+				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+				CsvSchema schema = ExportRecords.getDatasourceCsvSchema(csvMapper);
+				MappingIterator<Datasource> it = csvMapper.readerFor(Datasource.class)
+						.with(schema)
+						.readValues(file);
+				datasources = it.readAll();
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

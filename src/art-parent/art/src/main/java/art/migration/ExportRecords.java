@@ -21,6 +21,8 @@ import art.datasource.Datasource;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.Serializable;
 
 /**
@@ -128,5 +130,18 @@ public class ExportRecords implements Serializable {
 	 */
 	public void setDatasource(Datasource datasource) {
 		this.datasource = datasource;
+	}
+
+	/**
+	 * Returns a csv schema to be used for importing/exporting datasource
+	 * records to csv
+	 *
+	 * @param csvMapper the csv mapper object
+	 * @return the csv schema to be used for importing/exporting datasource
+	 * records
+	 */
+	public static CsvSchema getDatasourceCsvSchema(CsvMapper csvMapper) {
+		CsvSchema schema = csvMapper.schemaFor(Datasource.class).withHeader();
+		return schema;
 	}
 }
