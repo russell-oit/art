@@ -373,8 +373,7 @@ public class ExportRecordsController {
 	 * @throws Exception
 	 */
 	private void exportDatasources(ExportRecords exportRecords, File file,
-			User sessionUser, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportDatasources");
 
@@ -439,11 +438,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
+						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
 						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
 						break;
 					case csv:
-						csvRoutines.writeAll(destinations, Destination.class, file);
+						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Destination.class);
+						csvMapper.writer(schema).writeValue(file, destinations);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

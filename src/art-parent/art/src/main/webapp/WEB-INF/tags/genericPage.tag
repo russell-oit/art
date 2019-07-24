@@ -27,7 +27,7 @@ Includes bootstrap css, font awesome css, art css
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<title>${title}</title>
-
+		
 		<jsp:invoke fragment="metaContent"/>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">

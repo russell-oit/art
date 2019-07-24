@@ -222,7 +222,7 @@ public class ImportRecordsController {
 						importDatasources(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Destinations:
-						importDestinations(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importDestinations(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Encryptors:
 						importEncryptors(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -391,16 +391,15 @@ public class ImportRecordsController {
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
 	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
 		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
 
 		List<Destination> destinations;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
@@ -408,7 +407,12 @@ public class ImportRecordsController {
 				});
 				break;
 			case csv:
-				destinations = csvRoutines.parseAll(Destination.class, file);
+				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Destination.class);
+				MappingIterator<Destination> it = csvMapper.readerFor(Destination.class)
+						.with(schema)
+						.readValues(file);
+				destinations = it.readAll();
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

@@ -141,6 +141,7 @@ public class ExportRecords implements Serializable {
 	 */
 	public static CsvSchema getCsvSchema(CsvMapper csvMapper, Class<?> type) {
 		//https://stackoverflow.com/questions/15144641/what-is-the-difference-between-class-clazz-and-class-clazz-in-java/15144835
+		//https://github.com/FasterXML/jackson-dataformat-csv/issues/112
 		CsvSchema schema = csvMapper.schemaFor(type).withHeader().withNullValue("NULL");
 		return schema;
 	}
