@@ -253,7 +253,7 @@ public class ExportRecordsController {
 						exportReportGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case SmtpServers:
-						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportSmtpServers(exportRecords, file, sessionUser, conn);
 						break;
 					case UserGroups:
 						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -609,13 +609,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportSmtpServers(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportSmtpServers");
 
@@ -631,11 +629,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, smtpServers);
+						exportToJson(file, smtpServers);
 						break;
 					case csv:
-						csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+						exportToCsv(file, smtpServers, SmtpServer.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

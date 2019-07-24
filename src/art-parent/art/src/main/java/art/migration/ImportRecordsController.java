@@ -234,7 +234,7 @@ public class ImportRecordsController {
 						importReportGroups(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case SmtpServers:
-						importSmtpServers(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importSmtpServers(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case UserGroups:
 						importUserGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -547,25 +547,23 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importSmtpServers(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importSmtpServers: sessionUser={}", sessionUser);
+		logger.debug("Entering importSmtpServers: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<SmtpServer> smtpServers;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				smtpServers = mapper.readValue(file, new TypeReference<List<SmtpServer>>() {
+				smtpServers = importFromJson(file, new TypeReference<List<SmtpServer>>() {
 				});
 				break;
 			case csv:
-				smtpServers = csvRoutines.parseAll(SmtpServer.class, file);
+				smtpServers = importValuesFromCsv(file, SmtpServer.class);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
