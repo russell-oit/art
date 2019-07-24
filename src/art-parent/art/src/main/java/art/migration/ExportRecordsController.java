@@ -250,7 +250,7 @@ public class ExportRecordsController {
 						exportHolidays(exportRecords, file, sessionUser, conn);
 						break;
 					case ReportGroups:
-						exportReportGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportReportGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case SmtpServers:
 						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -573,8 +573,7 @@ public class ExportRecordsController {
 	 * @throws IOException
 	 */
 	private void exportReportGroups(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportReportGroups");
 
@@ -587,11 +586,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, reportGroups);
+						exportToJson(file, reportGroups);
 						break;
 					case csv:
-						csvRoutines.writeAll(reportGroups, ReportGroup.class, file);
+						exportToCsv(file, reportGroups, ReportGroup.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
