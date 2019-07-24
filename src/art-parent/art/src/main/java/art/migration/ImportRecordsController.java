@@ -225,7 +225,7 @@ public class ImportRecordsController {
 						importDestinations(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Encryptors:
-						importEncryptors(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importEncryptors(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Holidays:
 						importHolidays(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -303,17 +303,13 @@ public class ImportRecordsController {
 		logger.debug("Entering importSettings: sessionUser={}, fileFormat={}",
 				sessionUser, fileFormat);
 
-		Class<Settings> type = Settings.class;
 		Settings settings;
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
-				settings = mapper.readValue(file, type);
+				settings = importFromJson(file, Settings.class);
 				break;
 			case csv:
-				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
-				settings = csvMapper.readerFor(type).with(schema).readValue(file);
+				settings = importValueFromCsv(file, Settings.class);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -347,21 +343,11 @@ public class ImportRecordsController {
 		List<Datasource> datasources;
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
-				datasources = mapper.readValue(file, new TypeReference<List<Datasource>>() {
+				datasources = importFromJson(file, new TypeReference<List<Datasource>>() {
 				});
 				break;
 			case csv:
-				//https://github.com/FasterXML/jackson-dataformats-text/tree/master/csv
-				//https://stackoverflow.com/questions/52239104/jackson-csv-parser-chokes-on-comma-separated-value-files-if-is-in-a-field-ev
-				//https://czetsuya-tech.blogspot.com/2017/03/how-to-read-and-write-csv-using-jackson.html
-				//https://itexpertsconsultant.wordpress.com/2016/08/03/how-to-readwrite-csv-file-to-map-in-java/
-				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Datasource.class);
-				MappingIterator<Datasource> it = csvMapper.readerFor(Datasource.class)
-						.with(schema)
-						.readValues(file);
-				datasources = it.readAll();
+				datasources = importValuesFromCsv(file, Datasource.class);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -397,22 +383,17 @@ public class ImportRecordsController {
 	private void importDestinations(File file, User sessionUser, Connection conn,
 			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importDestinations: sessionUser={}", sessionUser);
+		logger.debug("Entering importDestinations: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Destination> destinations;
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				destinations = mapper.readValue(file, new TypeReference<List<Destination>>() {
+				destinations = importFromJson(file, new TypeReference<List<Destination>>() {
 				});
 				break;
 			case csv:
-				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Destination.class);
-				MappingIterator<Destination> it = csvMapper.readerFor(Destination.class)
-						.with(schema)
-						.readValues(file);
-				destinations = it.readAll();
+				destinations = importValuesFromCsv(file, Destination.class);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -433,33 +414,30 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importEncryptors(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importEncryptors: sessionUser={}", sessionUser);
+		logger.debug("Entering importEncryptors: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Encryptor> encryptors;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
 
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-					encryptors = mapper.readValue(file, new TypeReference<List<Encryptor>>() {
+					encryptors = importFromJson(file, new TypeReference<List<Encryptor>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
 					File encryptorsFile = new File(encryptorsFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME, encryptorsFile);
 					if (unpacked) {
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						encryptors = mapper.readValue(encryptorsFile, new TypeReference<List<Encryptor>>() {
+						encryptors = importFromJson(encryptorsFile, new TypeReference<List<Encryptor>>() {
 						});
 						encryptorsFile.delete();
 						copyEncryptorFiles(encryptors, artTempPath, file);
@@ -472,13 +450,13 @@ public class ImportRecordsController {
 				break;
 			case csv:
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					encryptors = csvRoutines.parseAll(Encryptor.class, file);
+					encryptors = importValuesFromCsv(file, Encryptor.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String encryptorsFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
 					File encryptorsFile = new File(encryptorsFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME, encryptorsFile);
 					if (unpacked) {
-						encryptors = csvRoutines.parseAll(Encryptor.class, encryptorsFile);
+						encryptors = importValuesFromCsv(encryptorsFile, Encryptor.class);
 						encryptorsFile.delete();
 						copyEncryptorFiles(encryptors, artTempPath, file);
 					} else {
@@ -1609,6 +1587,69 @@ public class ImportRecordsController {
 		}
 
 		roleService.importRoles(roles, sessionUser, conn);
+	}
+
+	/**
+	 * Imports values from a file in json format
+	 *
+	 * @param <T>
+	 * @param file the file to import from
+	 * @param type the type of object contained in the file
+	 * @return a list of objects as contained in the file
+	 * @throws IOException
+	 */
+	private <T> T importFromJson(File file, Class<T> type) throws IOException {
+		ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+		return mapper.readValue(file, type);
+	}
+
+	/**
+	 * Imports values from a file in json format
+	 *
+	 * @param <T>
+	 * @param file the file to import from
+	 * @param type the type of object contained in the file
+	 * @return a list of objects as contained in the file
+	 * @throws IOException
+	 */
+	private <T> T importFromJson(File file, TypeReference type) throws IOException {
+		ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+		return mapper.readValue(file, type);
+	}
+
+	/**
+	 * Imports values from a file in csv format
+	 *
+	 * @param <T>
+	 * @param file the file to import from
+	 * @param type the type of object contained in the file
+	 * @return a list of objects as contained in the file
+	 * @throws IOException
+	 */
+	private <T> List<T> importValuesFromCsv(File file, Class<T> type) throws IOException {
+		//https://github.com/FasterXML/jackson-dataformats-text/tree/master/csv
+		//https://stackoverflow.com/questions/52239104/jackson-csv-parser-chokes-on-comma-separated-value-files-if-is-in-a-field-ev
+		//https://czetsuya-tech.blogspot.com/2017/03/how-to-read-and-write-csv-using-jackson.html
+		//https://itexpertsconsultant.wordpress.com/2016/08/03/how-to-readwrite-csv-file-to-map-in-java/
+		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
+		MappingIterator<T> it = csvMapper.readerFor(type).with(schema).readValues(file);
+		return it.readAll();
+	}
+
+	/**
+	 * Imports values from a file in csv format
+	 *
+	 * @param <T>
+	 * @param file the file to import from
+	 * @param type the type of object contained in the file
+	 * @return an object as contained in the file
+	 * @throws IOException
+	 */
+	private <T> T importValueFromCsv(File file, Class<T> type) throws IOException {
+		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
+		return csvMapper.readerFor(type).with(schema).readValue(file);
 	}
 
 }

@@ -241,10 +241,10 @@ public class ExportRecordsController {
 						exportDatasources(exportRecords, file, sessionUser, conn);
 						break;
 					case Destinations:
-						exportDestinations(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportDestinations(exportRecords, file, sessionUser, conn);
 						break;
 					case Encryptors:
-						exportFilePath = exportEncryptors(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportEncryptors(exportRecords, sessionUser, conn);
 						break;
 					case Holidays:
 						exportHolidays(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -343,13 +343,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
+						exportToJson(file, settings);
 						break;
 					case csv:
-						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Settings.class);
-						csvMapper.writer(schema).writeValue(file, settings);
+						exportToCsv(file, settings, Settings.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -389,14 +386,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
+						exportToJson(file, datasources);
 						break;
 					case csv:
-						//https://gist.github.com/shsdev/11392809
-						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Datasource.class);
-						csvMapper.writer(schema).writeValue(file, datasources);
+						exportToCsv(file, datasources, Datasource.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -416,13 +409,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportDestinations(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportDestinations");
 
@@ -438,13 +429,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
+						exportToJson(file, destinations);
 						break;
 					case csv:
-						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Destination.class);
-						csvMapper.writer(schema).writeValue(file, destinations);
+						exportToCsv(file, destinations, Destination.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -463,14 +451,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportEncryptors(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportEncryptors");
 
@@ -497,8 +483,7 @@ public class ExportRecordsController {
 					case json:
 						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
 						encryptorsFile = new File(encryptorsFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(encryptorsFile, encryptors);
+						exportToJson(encryptorsFile, encryptors);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(encryptorsFilePath);
 							exportFilePath = zipFilePath;
@@ -511,7 +496,7 @@ public class ExportRecordsController {
 					case csv:
 						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
 						encryptorsFile = new File(encryptorsFilePath);
-						csvRoutines.writeAll(encryptors, Encryptor.class, encryptorsFile);
+						exportToCsv(encryptorsFile, encryptors, Encryptor.class);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(encryptorsFilePath);
 							exportFilePath = zipFilePath;
@@ -1608,6 +1593,33 @@ public class ExportRecordsController {
 		}
 
 		return exportFilePath;
+	}
+
+	/**
+	 * Exports values to a file in json format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @throws java.io.IOException
+	 */
+	public void exportToJson(File file, Object value) throws IOException {
+		ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter().writeValue(file, value);
+	}
+
+	/**
+	 * Exports values to a file in csv format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @param type the type of object
+	 * @throws IOException
+	 */
+	private void exportToCsv(File file, Object value, Class<?> type) throws IOException {
+		//https://gist.github.com/shsdev/11392809
+		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
+		csvMapper.writer(schema).writeValue(file, value);
 	}
 
 }

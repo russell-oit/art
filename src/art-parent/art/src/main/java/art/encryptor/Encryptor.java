@@ -21,7 +21,6 @@ import art.encryption.AesEncryptor;
 import art.enums.EncryptorType;
 import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -33,39 +32,27 @@ import java.util.Date;
 public class Encryptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
+	
 	private int encryptorId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
-	@Parsed
 	private boolean active = true;
-	@Parsed
 	private EncryptorType encryptorType = EncryptorType.AESCrypt;
-	@Parsed
 	private String aesCryptPassword;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
-	@Parsed
 	private String openPgpPublicKeyFile;
-	@Parsed
 	private String openPgpPublicKeyString;
-	@Parsed
 	private String openPgpSigningKeyFile;
-	@Parsed
 	private String openPgpSigningKeyPassphrase;
-	@Parsed
 	private String openPassword;
-	@Parsed
 	private String modifyPassword;
 	@JsonIgnore
 	private boolean useNoneOpenPassword; //only for use with ui
 	@JsonIgnore
 	private boolean useNoneModifyPassword; //only for use with ui
-	@Parsed
 	private boolean clearTextPasswords;
 	@JsonIgnore
 	private boolean overwriteFiles;
