@@ -133,15 +133,15 @@ public class ExportRecords implements Serializable {
 	}
 
 	/**
-	 * Returns a csv schema to be used for importing/exporting datasource
-	 * records to csv
+	 * Returns a csv schema to be used for importing/exporting records to csv
 	 *
 	 * @param csvMapper the csv mapper object
-	 * @return the csv schema to be used for importing/exporting datasource
-	 * records
+	 * @param type the class for which the schema is to be built
+	 * @return the csv schema to be used for importing/exporting records
 	 */
-	public static CsvSchema getDatasourceCsvSchema(CsvMapper csvMapper) {
-		CsvSchema schema = csvMapper.schemaFor(Datasource.class).withHeader();
+	public static CsvSchema getCsvSchema(CsvMapper csvMapper, Class<?> type) {
+		//https://stackoverflow.com/questions/15144641/what-is-the-difference-between-class-clazz-and-class-clazz-in-java/15144835
+		CsvSchema schema = csvMapper.schemaFor(type).withHeader().withNullValue("NULL");
 		return schema;
 	}
 }

@@ -201,22 +201,16 @@ public class ExportRecordsController {
 		try {
 			MigrationRecordType recordType = exportRecords.getRecordType();
 			String extension;
-			switch (recordType) {
-				case Settings:
+			MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+			switch (fileFormat) {
+				case json:
 					extension = ".json";
 					break;
+				case csv:
+					extension = ".csv";
+					break;
 				default:
-					MigrationFileFormat fileFormat = exportRecords.getFileFormat();
-					switch (fileFormat) {
-						case json:
-							extension = ".json";
-							break;
-						case csv:
-							extension = ".csv";
-							break;
-						default:
-							throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
-					}
+					throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 			}
 
 			String baseExportFilename = "art-export-" + recordType;
@@ -346,8 +340,20 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+						mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
+						break;
+					case csv:
+						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Settings.class);
+						csvMapper.writer(schema).writeValue(file, settings);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				settingsService.importSettings(settings, sessionUser, conn);
@@ -390,7 +396,7 @@ public class ExportRecordsController {
 					case csv:
 						//https://gist.github.com/shsdev/11392809
 						CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-						CsvSchema schema = ExportRecords.getDatasourceCsvSchema(csvMapper);
+						CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Datasource.class);
 						csvMapper.writer(schema).writeValue(file, datasources);
 						break;
 					default:

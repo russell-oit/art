@@ -73,23 +73,21 @@
 						</div>
 					</div>
 				</div>
-				<c:if test="${importRecords.recordType != 'Settings'}">
-					<div id="fileFormatDiv" class="form-group">
-						<label class="control-label col-md-4">
-							<spring:message code="reports.label.format"/>
-						</label>
-						<div class="col-md-8">
-							<c:forEach var="fileFormat" items="${fileFormats}">
-								<label class="radio-inline">
-									<form:radiobutton path="fileFormat"
-													  value="${fileFormat}"/>
-									${fileFormat.description}
-								</label>
-							</c:forEach>
-							<form:errors path="fileFormat" cssClass="error"/>
-						</div>
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.label.format"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="fileFormat" items="${fileFormats}">
+							<label class="radio-inline">
+								<form:radiobutton path="fileFormat"
+												  value="${fileFormat}"/>
+								${fileFormat.description}
+							</label>
+						</c:forEach>
+						<form:errors path="fileFormat" cssClass="error"/>
 					</div>
-				</c:if>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

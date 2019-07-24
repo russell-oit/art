@@ -210,13 +210,16 @@ public class ImportRecordsController {
 
 			Connection conn = DbConnections.getArtDbConnection();
 
+			MigrationFileFormat fileFormat = importRecords.getFileFormat();
+			MigrationRecordType recordType = importRecords.getRecordType();
+
 			try {
-				switch (importRecords.getRecordType()) {
+				switch (recordType) {
 					case Settings:
-						importSettings(tempFile, sessionUser, conn, session);
+						importSettings(tempFile, sessionUser, conn, fileFormat, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn, importRecords);
+						importDatasources(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Destinations:
 						importDestinations(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -290,16 +293,32 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
+	 * @param fileFormat the format of the file
 	 * @param session the http session
 	 * @throws Exception
 	 */
 	private void importSettings(File file, User sessionUser, Connection conn,
-			HttpSession session) throws Exception {
+			MigrationFileFormat fileFormat, HttpSession session) throws Exception {
 
-		logger.debug("Entering importSettings: sessionUser={}", sessionUser);
+		logger.debug("Entering importSettings: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
-		ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-		Settings settings = mapper.readValue(file, Settings.class);
+		Class<Settings> type = Settings.class;
+		Settings settings;
+		switch (fileFormat) {
+			case json:
+				ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+				settings = mapper.readValue(file, type);
+				break;
+			case csv:
+				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
+				settings = csvMapper.readerFor(type).with(schema).readValue(file);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
 		if (settings.isClearTextPasswords()) {
 			settings.encryptPasswords();
 		}
@@ -316,16 +335,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importDatasources: sessionUser={}", sessionUser);
+		logger.debug("Entering importDatasources: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Datasource> datasources;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
@@ -338,7 +357,7 @@ public class ImportRecordsController {
 				//https://czetsuya-tech.blogspot.com/2017/03/how-to-read-and-write-csv-using-jackson.html
 				//https://itexpertsconsultant.wordpress.com/2016/08/03/how-to-readwrite-csv-file-to-map-in-java/
 				CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
-				CsvSchema schema = ExportRecords.getDatasourceCsvSchema(csvMapper);
+				CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, Datasource.class);
 				MappingIterator<Datasource> it = csvMapper.readerFor(Datasource.class)
 						.with(schema)
 						.readValues(file);
