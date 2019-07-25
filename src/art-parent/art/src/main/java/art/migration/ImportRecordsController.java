@@ -241,7 +241,7 @@ public class ImportRecordsController {
 						importUserGroups(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Schedules:
-						importSchedules(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importSchedules(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Users:
 						importUsers(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -682,27 +682,25 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws SQLException
 	 */
 	private void importSchedules(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			MigrationFileFormat fileFormat) throws SQLException, IOException {
 
-		logger.debug("Entering importSchedules: sessionUser={}", sessionUser);
+		logger.debug("Entering importSchedules: sessionUser={}, fileFormat",
+				sessionUser, fileFormat);
 
 		List<Schedule> schedules;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				schedules = mapper.readValue(file, new TypeReference<List<Schedule>>() {
+				schedules = importFromJson(file, new TypeReference<List<Schedule>>() {
 				});
 				break;
 			case csv:
 				String extension = FilenameUtils.getExtension(file.getName());
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					schedules = csvRoutines.parseAll(Schedule.class, file);
+					schedules = importValuesFromCsv(file, Schedule.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
 					boolean unpacked;
@@ -710,7 +708,7 @@ public class ImportRecordsController {
 					File schedulesFile = new File(schedulesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_SCHEDULES_FILENAME, schedulesFile);
 					if (unpacked) {
-						schedules = csvRoutines.parseAll(Schedule.class, schedulesFile);
+						schedules = importValuesFromCsv(schedulesFile, Schedule.class);
 						schedulesFile.delete();
 					} else {
 						throw new RuntimeException("File not found: " + schedulesFilePath);
@@ -720,7 +718,7 @@ public class ImportRecordsController {
 					File holidaysFile = new File(holidaysFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_HOLIDAYS_FILENAME, holidaysFile);
 					if (unpacked) {
-						List<Holiday> holidays = csvRoutines.parseAll(Holiday.class, holidaysFile);
+						List<Holiday> holidays = importValuesFromCsv(holidaysFile, Holiday.class);
 						holidaysFile.delete();
 						Map<Integer, Schedule> schedulesMap = new HashMap<>();
 						for (Schedule schedule : schedules) {

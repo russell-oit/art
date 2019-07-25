@@ -260,7 +260,7 @@ public class ExportRecordsController {
 						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case Schedules:
-						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportSchedules(exportRecords, file, sessionUser, conn);
 						break;
 					case Users:
 						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn, file);
@@ -748,16 +748,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportSchedules(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportSchedules(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportSchedules");
 
@@ -773,14 +771,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, schedules);
+						exportToJson(file, schedules);
 						exportFilePath = recordsExportPath + "art-export-Schedules.json";
 						break;
 					case csv:
 						String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
 						File schedulesFile = new File(schedulesFilePath);
-						csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
+						exportToCsv(schedulesFile, schedules, Schedule.class);
 						List<Holiday> holidays = new ArrayList<>();
 						for (Schedule schedule : schedules) {
 							List<Holiday> sharedHolidays = schedule.getSharedHolidays();
@@ -792,7 +789,7 @@ public class ExportRecordsController {
 						if (CollectionUtils.isNotEmpty(holidays)) {
 							String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
 							File holidaysFile = new File(holidaysFilePath);
-							csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
+							exportToCsv(holidaysFile, holidays, Holiday.class);
 							exportFilePath = recordsExportPath + "art-export-Schedules.zip";
 							ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
 							schedulesFile.delete();
