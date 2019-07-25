@@ -90,8 +90,6 @@ import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.univocity.parsers.csv.CsvRoutines;
-import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -233,10 +231,6 @@ public class ExportRecordsController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			CsvWriterSettings writerSettings = new CsvWriterSettings();
-			writerSettings.setHeaderWritingEnabled(true);
-			CsvRoutines csvRoutines = new CsvRoutines(writerSettings);
-
 			Connection conn = null;
 			if (exportRecords.getLocation() == MigrationLocation.Datasource) {
 				Datasource datasource = exportRecords.getDatasource();
@@ -285,7 +279,7 @@ public class ExportRecordsController {
 						exportFilePath = exportReports(exportRecords, sessionUser, conn);
 						break;
 					case Roles:
-						exportFilePath = exportRoles(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportRoles(exportRecords, file, sessionUser, conn);
 						break;
 					default:
 						break;
@@ -578,7 +572,6 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
@@ -1513,16 +1506,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportRoles(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportRoles(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportRoles");
 
@@ -1538,14 +1529,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, roles);
+						exportToJson(file, roles);
 						exportFilePath = recordsExportPath + "art-export-Roles.json";
 						break;
 					case csv:
 						String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 						File rolesFile = new File(rolesFilePath);
-						csvRoutines.writeAll(roles, Role.class, rolesFile);
+						exportToCsv(rolesFile, roles, Role.class);
 						List<Permission> permissions = new ArrayList<>();
 						for (Role role : roles) {
 							List<Permission> rolePermissions = role.getPermissions();
@@ -1557,7 +1547,7 @@ public class ExportRecordsController {
 						if (CollectionUtils.isNotEmpty(permissions)) {
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
-							csvRoutines.writeAll(permissions, Permission.class, permissionsFile);
+							exportToCsv(permissionsFile, permissions, Permission.class);
 							exportFilePath = recordsExportPath + "art-export-Roles.zip";
 							ArtUtils.zipFiles(exportFilePath, rolesFilePath, permissionsFilePath);
 							rolesFile.delete();

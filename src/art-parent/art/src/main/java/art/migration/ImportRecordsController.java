@@ -88,9 +88,6 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.univocity.parsers.csv.CsvParserSettings;
-import com.univocity.parsers.csv.CsvRoutines;
-import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -211,14 +208,6 @@ public class ImportRecordsController {
 			File tempFile = new File(tempFilename);
 			importFile.transferTo(tempFile);
 
-			CsvWriterSettings writerSettings = new CsvWriterSettings();
-			writerSettings.setHeaderWritingEnabled(true);
-
-			CsvParserSettings parserSettings = new CsvParserSettings();
-			parserSettings.setLineSeparatorDetectionEnabled(true);
-
-			CsvRoutines csvRoutines = new CsvRoutines(parserSettings, writerSettings);
-
 			Connection conn = DbConnections.getArtDbConnection();
 
 			MigrationFileFormat fileFormat = importRecords.getFileFormat();
@@ -266,7 +255,7 @@ public class ImportRecordsController {
 						importReports(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Roles:
-						importRoles(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importRoles(tempFile, sessionUser, conn, fileFormat);
 						break;
 					default:
 						break;
@@ -387,7 +376,6 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
 	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
@@ -1510,27 +1498,25 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws SQLException
 	 */
 	private void importRoles(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			MigrationFileFormat fileFormat) throws SQLException, IOException {
 
-		logger.debug("Entering importRoles: sessionUser={}", sessionUser);
+		logger.debug("Entering importRoles: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Role> roles;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				roles = mapper.readValue(file, new TypeReference<List<Role>>() {
+				roles = importFromJson(file, new TypeReference<List<Role>>() {
 				});
 				break;
 			case csv:
 				String extension = FilenameUtils.getExtension(file.getName());
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					roles = csvRoutines.parseAll(Role.class, file);
+					roles = importValuesFromCsv(file, Role.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
 					boolean unpacked;
@@ -1538,7 +1524,7 @@ public class ImportRecordsController {
 					File rolesFile = new File(rolesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
 					if (unpacked) {
-						roles = csvRoutines.parseAll(Role.class, rolesFile);
+						roles = importValuesFromCsv(rolesFile, Role.class);
 						rolesFile.delete();
 					} else {
 						throw new RuntimeException("File not found: " + rolesFilePath);
@@ -1548,7 +1534,7 @@ public class ImportRecordsController {
 					File permissionsFile = new File(permissionsFileName);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
 					if (unpacked) {
-						List<Permission> permissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						List<Permission> permissions = importValuesFromCsv(permissionsFile, Permission.class);
 						permissionsFile.delete();
 						Map<Integer, Role> rolesMap = new HashMap<>();
 						for (Role role : roles) {
