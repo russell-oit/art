@@ -17,7 +17,6 @@
  */
 package art.permission;
 
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -29,11 +28,8 @@ public class Permission implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Parsed
 	private int parentId; //used for import/export of linked records
-	@Parsed
 	private int permissionId;
-	@Parsed
 	private String name;
 
 	/**

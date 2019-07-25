@@ -70,6 +70,7 @@ import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.user.UserService;
 import art.usergroup.UserGroup;
+import art.usergroup.UserGroupCsvExportMixIn;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -237,7 +238,7 @@ public class ImportRecordsController {
 						importSmtpServers(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case UserGroups:
-						importUserGroups(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importUserGroups(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Schedules:
 						importSchedules(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -584,27 +585,25 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws SQLException
 	 */
 	private void importUserGroups(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			MigrationFileFormat fileFormat) throws SQLException, IOException {
 
-		logger.debug("Entering importUserGroups: sessionUser={}", sessionUser);
+		logger.debug("Entering importUserGroups: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<UserGroup> userGroups;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				userGroups = mapper.readValue(file, new TypeReference<List<UserGroup>>() {
+				userGroups = importFromJson(file, new TypeReference<List<UserGroup>>() {
 				});
 				break;
 			case csv:
 				String extension = FilenameUtils.getExtension(file.getName());
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					userGroups = csvRoutines.parseAll(UserGroup.class, file);
+					userGroups = importValuesFromCsv(file, UserGroup.class, UserGroupCsvExportMixIn.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
 					boolean unpacked;
@@ -612,7 +611,7 @@ public class ImportRecordsController {
 					File userGroupsFile = new File(userGroupsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPS_FILENAME, userGroupsFile);
 					if (unpacked) {
-						userGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+						userGroups = importValuesFromCsv(userGroupsFile, UserGroup.class, UserGroupCsvExportMixIn.class);
 						userGroupsFile.delete();
 					} else {
 						throw new RuntimeException("File not found: " + userGroupsFilePath);
@@ -627,7 +626,7 @@ public class ImportRecordsController {
 					File rolesFile = new File(rolesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
 					if (unpacked) {
-						List<Role> allRoles = csvRoutines.parseAll(Role.class, rolesFile);
+						List<Role> allRoles = importValuesFromCsv(rolesFile, Role.class);
 						rolesFile.delete();
 						for (Role role : allRoles) {
 							int parentId = role.getParentId();
@@ -649,7 +648,7 @@ public class ImportRecordsController {
 					File permissionsFile = new File(permissionsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
 					if (unpacked) {
-						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						List<Permission> allPermissions = importValuesFromCsv(permissionsFile, Permission.class);
 						permissionsFile.delete();
 						for (Permission permission : allPermissions) {
 							int parentId = permission.getParentId();
@@ -1621,11 +1620,29 @@ public class ImportRecordsController {
 	 * @throws IOException
 	 */
 	private <T> List<T> importValuesFromCsv(File file, Class<T> type) throws IOException {
+		Class<?> mixIn = null;
+		return importValuesFromCsv(file, type, mixIn);
+	}
+
+	/**
+	 * Imports values from a file in csv format
+	 *
+	 * @param <T>
+	 * @param file the file to import from
+	 * @param type the type of object contained in the file
+	 * @param mixIn a mixin to apply
+	 * @return a list of objects as contained in the file
+	 * @throws IOException
+	 */
+	private <T> List<T> importValuesFromCsv(File file, Class<T> type, Class<?> mixIn) throws IOException {
 		//https://github.com/FasterXML/jackson-dataformats-text/tree/master/csv
 		//https://stackoverflow.com/questions/52239104/jackson-csv-parser-chokes-on-comma-separated-value-files-if-is-in-a-field-ev
 		//https://czetsuya-tech.blogspot.com/2017/03/how-to-read-and-write-csv-using-jackson.html
 		//https://itexpertsconsultant.wordpress.com/2016/08/03/how-to-readwrite-csv-file-to-map-in-java/
 		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		if (mixIn != null) {
+			csvMapper.addMixIn(type, mixIn);
+		}
 		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
 		MappingIterator<T> it = csvMapper.readerFor(type).with(schema).readValues(file);
 		return it.readAll();

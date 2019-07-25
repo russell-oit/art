@@ -38,21 +38,15 @@ public class UserGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	// Properties --------------------------------------------------------------
-	@Parsed
 	private int parentId; //used for import/export of linked records e.g. users
-	@Parsed
 	private int userGroupId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
-	@Parsed
 	private String startReport;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 	private List<Role> roles;
 	private List<Permission> permissions;

@@ -74,6 +74,7 @@ import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.user.UserService;
 import art.usergroup.UserGroup;
+import art.usergroup.UserGroupCsvExportMixIn;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -256,7 +257,7 @@ public class ExportRecordsController {
 						exportSmtpServers(exportRecords, file, sessionUser, conn);
 						break;
 					case UserGroups:
-						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case Schedules:
 						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
@@ -652,15 +653,13 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportUserGroups(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportUserGroups");
 
@@ -676,14 +675,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, userGroups);
+						exportToJson(file, userGroups);
 						exportFilePath = recordsExportPath + "art-export-UserGroups.json";
 						break;
 					case csv:
 						String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 						File userGroupsFile = new File(userGroupsFilePath);
-						csvRoutines.writeAll(userGroups, UserGroup.class, userGroupsFile);
+						exportToCsv(userGroupsFile, userGroups, UserGroup.class, UserGroupCsvExportMixIn.class);
 
 						List<Role> allRoles = new ArrayList<>();
 						for (UserGroup userGroup : userGroups) {
@@ -711,14 +709,14 @@ public class ExportRecordsController {
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
-								csvRoutines.writeAll(allRoles, Role.class, rolesFile);
+								exportToCsv(rolesFile, allRoles, Role.class);
 								filesToZip.add(rolesFilePath);
 							}
 
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							if (CollectionUtils.isNotEmpty(allPermissions)) {
-								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								exportToCsv(permissionsFile, allPermissions, Permission.class);
 								filesToZip.add(permissionsFilePath);
 							}
 
@@ -1608,8 +1606,27 @@ public class ExportRecordsController {
 	 * @throws IOException
 	 */
 	private void exportToCsv(File file, Object value, Class<?> type) throws IOException {
+		Class<?> mixIn = null;
+		exportToCsv(file, value, type, mixIn);
+	}
+
+	/**
+	 * Exports values to a file in csv format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @param type the type of object
+	 * @param mixIn a mixin to apply
+	 * @throws IOException
+	 */
+	private void exportToCsv(File file, Object value, Class<?> type, Class<?> mixIn)
+			throws IOException {
+
 		//https://gist.github.com/shsdev/11392809
 		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		if (mixIn != null) {
+			csvMapper.addMixIn(type, mixIn);
+		}
 		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
 		csvMapper.writer(schema).writeValue(file, value);
 	}
