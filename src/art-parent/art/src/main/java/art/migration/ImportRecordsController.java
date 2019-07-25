@@ -68,6 +68,7 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.user.UserCsvExportMixIn;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupCsvExportMixIn;
@@ -244,7 +245,7 @@ public class ImportRecordsController {
 						importSchedules(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Users:
-						importUsers(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importUsers(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Rules:
 						importRules(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -756,27 +757,25 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws SQLException
 	 */
 	private void importUsers(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			MigrationFileFormat fileFormat) throws SQLException, IOException {
 
-		logger.debug("Entering importUsers: sessionUser={}", sessionUser);
+		logger.debug("Entering importUsers: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<User> users;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				users = mapper.readValue(file, new TypeReference<List<User>>() {
+				users = importFromJson(file, new TypeReference<List<User>>() {
 				});
 				break;
 			case csv:
 				String extension = FilenameUtils.getExtension(file.getName());
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					users = csvRoutines.parseAll(User.class, file);
+					users = importValuesFromCsv(file, User.class, UserCsvExportMixIn.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String artTempPath = Config.getArtTempPath();
 					boolean unpacked;
@@ -784,7 +783,7 @@ public class ImportRecordsController {
 					File usersFile = new File(usersFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERS_FILENAME, usersFile);
 					if (unpacked) {
-						users = csvRoutines.parseAll(User.class, usersFile);
+						users = importValuesFromCsv(usersFile, User.class, UserCsvExportMixIn.class);
 						usersFile.delete();
 					} else {
 						throw new RuntimeException("File not found: " + usersFilePath);
@@ -799,7 +798,7 @@ public class ImportRecordsController {
 					File userGroupsFile = new File(userGroupsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPS_FILENAME, userGroupsFile);
 					if (unpacked) {
-						List<UserGroup> allUserGroups = csvRoutines.parseAll(UserGroup.class, userGroupsFile);
+						List<UserGroup> allUserGroups = importValuesFromCsv(userGroupsFile, UserGroup.class, UserGroupCsvExportMixIn.class);
 						userGroupsFile.delete();
 						for (UserGroup userGroup : allUserGroups) {
 							int parentId = userGroup.getParentId();
@@ -821,7 +820,7 @@ public class ImportRecordsController {
 					File rolesFile = new File(rolesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_ROLES_FILENAME, rolesFile);
 					if (unpacked) {
-						List<Role> allRoles = csvRoutines.parseAll(Role.class, rolesFile);
+						List<Role> allRoles = importValuesFromCsv(rolesFile, Role.class);
 						rolesFile.delete();
 						for (Role role : allRoles) {
 							int parentId = role.getParentId();
@@ -843,7 +842,7 @@ public class ImportRecordsController {
 					File permissionsFile = new File(permissionsFileName);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_PERMISSIONS_FILENAME, permissionsFile);
 					if (unpacked) {
-						List<Permission> allPermissions = csvRoutines.parseAll(Permission.class, permissionsFile);
+						List<Permission> allPermissions = importValuesFromCsv(permissionsFile, Permission.class);
 						permissionsFile.delete();
 						for (Permission permission : allPermissions) {
 							int parentId = permission.getParentId();

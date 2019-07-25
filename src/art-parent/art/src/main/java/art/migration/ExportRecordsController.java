@@ -72,6 +72,7 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.user.UserCsvExportMixIn;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupCsvExportMixIn;
@@ -263,7 +264,7 @@ public class ExportRecordsController {
 						exportFilePath = exportSchedules(exportRecords, file, sessionUser, conn);
 						break;
 					case Users:
-						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportUsers(exportRecords, file, sessionUser, conn);
 						break;
 					case Rules:
 						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
@@ -817,16 +818,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportUsers(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportUsers(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
 
@@ -842,14 +841,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
+						exportToJson(file, users);
 						exportFilePath = recordsExportPath + "art-export-Users.json";
 						break;
 					case csv:
 						String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
 						File usersFile = new File(usersFilePath);
-						csvRoutines.writeAll(users, User.class, usersFile);
+						exportToCsv(usersFile, users, User.class, UserCsvExportMixIn.class);
 
 						List<UserGroup> allUserGroups = new ArrayList<>();
 						for (User user : users) {
@@ -887,21 +885,21 @@ public class ExportRecordsController {
 							String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 							File userGroupsFile = new File(userGroupsFilePath);
 							if (CollectionUtils.isNotEmpty(allUserGroups)) {
-								csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+								exportToCsv(userGroupsFile, allUserGroups, UserGroup.class, UserGroupCsvExportMixIn.class);
 								filesToZip.add(userGroupsFilePath);
 							}
 
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
-								csvRoutines.writeAll(allRoles, Role.class, rolesFile);
+								exportToCsv(rolesFile, allRoles, Role.class);
 								filesToZip.add(rolesFilePath);
 							}
 
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							if (CollectionUtils.isNotEmpty(allPermissions)) {
-								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								exportToCsv(permissionsFile, allPermissions, Permission.class);
 								filesToZip.add(permissionsFilePath);
 							}
 

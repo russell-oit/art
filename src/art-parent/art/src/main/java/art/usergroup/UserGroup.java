@@ -17,12 +17,9 @@
  */
 package art.usergroup;
 
-import art.migration.PrefixTransformer;
 import art.permission.Permission;
 import art.reportgroup.ReportGroup;
 import art.role.Role;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

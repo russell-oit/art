@@ -19,7 +19,6 @@ package art.user;
 
 import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
-import art.migration.PrefixTransformer;
 import art.permission.Permission;
 import art.reportgroup.ReportGroup;
 import art.role.Role;
@@ -27,8 +26,6 @@ import art.usergroup.UserGroup;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rits.cloning.Cloner;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,29 +42,21 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
 	private static final int INITIAL_SETUP_USER_ID = -1;
 	private static final int REPOSITORY_USER_ID = -2;
-	@Parsed
+	
 	private int userId;
-	@Parsed
 	private String username;
-	@Parsed
 	private AccessLevel accessLevel;
-	@Parsed
 	private String email;
 	@JsonAlias({"name"}) //enable import from art-basic
-	@Parsed
 	private String fullName;
-	@Parsed
 	private String password;
-	@Parsed
 	private String passwordAlgorithm;
-	@Parsed
 	private String startReport; //can contain only report id or report id with parameters e.g. 1?p-param1=value
 	@JsonAlias({"enabled"})
-	@Parsed
 	private boolean active = true;
-	@Parsed
 	private boolean canChangePassword = true;
 	private Date creationDate;
 	private Date updateDate;
@@ -81,13 +70,9 @@ public class User implements Serializable {
 	private String updatedBy;
 	@JsonIgnore
 	private boolean generateAndSend; //only used for user interface logic
-	@Parsed
 	private boolean clearTextPassword; //used to allow import with clear text passwords
-	@Parsed
 	private boolean publicUser;
-	@Parsed
 	private String description;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultReportGroup")
 	private ReportGroup defaultReportGroup;
 	private List<UserGroup> userGroups;
 	private List<Role> roles;
