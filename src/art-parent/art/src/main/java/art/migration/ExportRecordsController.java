@@ -267,7 +267,7 @@ public class ExportRecordsController {
 						exportFilePath = exportUsers(exportRecords, file, sessionUser, conn);
 						break;
 					case Rules:
-						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportRules(exportRecords, file, sessionUser, conn);
 						break;
 					case Parameters:
 						exportFilePath = exportParameters(exportRecords, sessionUser, csvRoutines, conn);
@@ -933,14 +933,12 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportRules(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportRules");
 
@@ -953,11 +951,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, rules);
+						exportToJson(file, rules);
 						break;
 					case csv:
-						csvRoutines.writeAll(rules, Rule.class, file);
+						exportToCsv(file, rules, Rule.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);

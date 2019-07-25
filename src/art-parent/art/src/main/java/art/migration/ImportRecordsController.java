@@ -882,25 +882,23 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws SQLException
 	 */
 	private void importRules(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws SQLException, IOException {
+			MigrationFileFormat fileFormat) throws SQLException, IOException {
 
-		logger.debug("Entering importRules: sessionUser={}", sessionUser);
+		logger.debug("Entering importRules: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Rule> rules;
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				rules = mapper.readValue(file, new TypeReference<List<Rule>>() {
+				rules = importFromJson(file, new TypeReference<List<Rule>>() {
 				});
 				break;
 			case csv:
-				rules = csvRoutines.parseAll(Rule.class, file);
+				rules = importValuesFromCsv(file, Rule.class);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
