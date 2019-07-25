@@ -17,12 +17,9 @@
  */
 package art.accessright;
 
-import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.usergroup.UserGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -34,9 +31,7 @@ public class UserGroupReportRight implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Parsed
 	private int parentId; //used for import/export of linked records e.g. reports
-	@Nested(headerTransformer = PrefixTransformer.class, args = "userGroup")
 	private UserGroup userGroup;
 	@JsonIgnore
 	private Report report;

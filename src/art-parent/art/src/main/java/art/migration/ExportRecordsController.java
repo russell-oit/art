@@ -19,7 +19,9 @@ package art.migration;
 
 import art.accessright.AccessRightService;
 import art.accessright.UserGroupReportRight;
+import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
+import art.accessright.UserReportRightCsvExportMixIn;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -27,6 +29,7 @@ import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
 import art.drilldown.Drilldown;
+import art.drilldown.DrilldownCsvExportMixIn;
 import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
@@ -42,6 +45,7 @@ import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
 import art.report.Report;
+import art.report.ReportCsvExportMixIn;
 import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
@@ -55,8 +59,10 @@ import art.reportoptions.OrgChartOptions;
 import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterCsvExportMixIn;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleCsvExportMixIn;
 import art.reportrule.ReportRuleService;
 import art.role.Role;
 import art.role.RoleService;
@@ -64,7 +70,9 @@ import art.rule.Rule;
 import art.rule.RuleService;
 import art.ruleValue.RuleValueService;
 import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserGroupRuleValueCsvExportMixIn;
 import art.ruleValue.UserRuleValue;
+import art.ruleValue.UserRuleValueCsvExportMixIn;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -274,7 +282,7 @@ public class ExportRecordsController {
 						exportFilePath = exportParameters(exportRecords, sessionUser, conn);
 						break;
 					case Reports:
-						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportReports(exportRecords, sessionUser, conn);
 						break;
 					case Roles:
 						exportFilePath = exportRoles(exportRecords, sessionUser, csvRoutines, conn, file);
@@ -1050,14 +1058,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportReports(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportReports");
 
@@ -1167,8 +1173,7 @@ public class ExportRecordsController {
 					case json:
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(reportsFile, reports);
+						exportToJson(reportsFile, reports);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(reportsFilePath);
 							exportFilePath = zipFilePath;
@@ -1181,7 +1186,7 @@ public class ExportRecordsController {
 					case csv:
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
-						csvRoutines.writeAll(reports, Report.class, reportsFile);
+						exportToCsv(reportsFile, reports, Report.class, ReportCsvExportMixIn.class);
 
 						if (CollectionUtils.isNotEmpty(allReportGroups)
 								|| CollectionUtils.isNotEmpty(allReportParams)
@@ -1222,46 +1227,46 @@ public class ExportRecordsController {
 							File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 							if (CollectionUtils.isNotEmpty(allReportGroups)) {
-								csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+								exportToCsv(reportGroupsFile, allReportGroups, ReportGroup.class);
 								filesToZip.add(reportGroupsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allReportParams)) {
-								csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+								exportToCsv(reportParamsFile, allReportParams, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 								filesToZip.add(reportParamsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-								csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+								exportToCsv(userRuleValuesFile, allUserRuleValues, UserRuleValue.class, UserRuleValueCsvExportMixIn.class);
 								filesToZip.add(userRuleValuesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-								csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+								exportToCsv(userGroupRuleValuesFile, allUserGroupRuleValues, UserGroupRuleValue.class, UserGroupRuleValueCsvExportMixIn.class);
 								filesToZip.add(userGroupRuleValuesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allReportRules)) {
-								csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+								exportToCsv(reportRulesFile, allReportRules, ReportRule.class, ReportRuleCsvExportMixIn.class);
 								filesToZip.add(reportRulesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserReportRights)) {
-								csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+								exportToCsv(userReportRightsFile, allUserReportRights, UserReportRight.class, UserReportRightCsvExportMixIn.class);
 								filesToZip.add(userReportRightsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
-								csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+								exportToCsv(userGroupReportRightsFile, allUserGroupReportRights, UserGroupReportRight.class, UserGroupReportRightCsvExportMixIn.class);
 								filesToZip.add(userGroupReportRightsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-								csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+								exportToCsv(drilldownsFile, allDrilldowns, Drilldown.class, DrilldownCsvExportMixIn.class);
 								filesToZip.add(drilldownsFilePath);
 
 								if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-									csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+									exportToCsv(drilldownReportParamsFile, allDrilldownReportParams, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 									filesToZip.add(drilldownReportParamsFilePath);
 								}
 							}

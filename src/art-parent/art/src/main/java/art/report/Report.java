@@ -30,7 +30,6 @@ import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.Reporti18nOptions;
 import art.encryption.AESCrypt;
 import art.encryption.AesEncryptor;
-import art.migration.PrefixTransformer;
 import art.parameter.Parameter;
 import art.reportoptions.C3Options;
 import art.reportoptions.CloneOptions;
@@ -46,8 +45,6 @@ import art.utils.XmlParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rits.cloning.Cloner;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -78,41 +75,30 @@ import org.slf4j.LoggerFactory;
 public class Report implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Report.class);
-
+	
 	private static final long serialVersionUID = 1L;
-	@Parsed
+	
 	private int reportId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String shortDescription;
-	@Parsed
 	private String description;
 	@JsonIgnore
 	private int reportTypeId;
-	@Parsed
 	private String contactPerson;
-	@Parsed
 	private boolean usesRules;
-	@Parsed
 	private boolean parametersInOutput;
-	@Parsed
 	private String xAxisLabel;
-	@Parsed
 	private String yAxisLabel;
-	@Parsed
 	private String chartOptionsSetting;
-	@Parsed
 	private String template;
-	@Parsed
 	private int displayResultset;
-	@Parsed
 	private String xmlaDatasource;
-	@Parsed
 	private String xmlaCatalog;
 	private Date creationDate;
 	private Date updateDate;
-	@Parsed
+	private String createdBy;
+	private int createdById;
+	private String updatedBy;
 	private String reportSource;
 	@JsonIgnore
 	private boolean useBlankXmlaPassword;
@@ -120,52 +106,28 @@ public class Report implements Serializable {
 	private ChartOptions chartOptions;
 	@JsonIgnore
 	private String reportSourceHtml; //used with text reports
-	private String createdBy;
-	private int createdById;
-	private String updatedBy;
-	@Parsed
 	private ReportType reportType;
-	@Parsed
 	private int groupColumn;
-	@Parsed
 	private boolean active = true;
-	@Parsed
 	private boolean hidden;
-	@Parsed
 	private String defaultReportFormat;
-	@Parsed
 	private String secondaryCharts;
-	@Parsed
 	private String hiddenColumns;
-	@Parsed
 	private String totalColumns;
-	@Parsed
 	private String dateFormat;
-	@Parsed
 	private String numberFormat;
-	@Parsed
 	private String columnFormats;
-	@Parsed
 	private String locale;
-	@Parsed
 	private String nullNumberDisplay;
-	@Parsed
 	private String nullStringDisplay;
-	@Parsed
 	private int fetchSize;
-	@Parsed
 	private String options;
-	@Parsed
 	private PageOrientation pageOrientation = PageOrientation.Portrait;
-	@Parsed
 	private boolean omitTitleRow;
-	@Parsed
 	private boolean lovUseDynamicDatasource;
 	@JsonIgnore
 	private GeneralReportOptions generalOptions;
-	@Parsed
 	private String openPassword;
-	@Parsed
 	private String modifyPassword;
 	@JsonIgnore
 	private boolean useNoneOpenPassword; //only for use with ui
@@ -173,31 +135,21 @@ public class Report implements Serializable {
 	private boolean useNoneModifyPassword; //only for use with ui
 	@JsonIgnore
 	private Report sourceReport;
-	@Parsed
 	private int sourceReportId;
 	@JsonIgnore
 	private CloneOptions cloneOptions;
 	private List<ReportGroup> reportGroups;
-	@Parsed
 	private boolean clearTextPasswords;
 	@JsonIgnore
 	private Boolean testRun; //used for the test report functionality
-	@Parsed
 	private boolean useGroovy;
-	@Parsed
 	private String pivotTableJsSavedOptions;
-	@Parsed
 	private String gridstackSavedOptions;
 	private String name2; //used for holding a processed report name e.g. in self service dashboard reports list
-	@Parsed
 	private String comment;
-	@Parsed
 	private int viewReportId;
-	@Parsed
 	private String selfServiceOptions;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "datasource")
 	private Datasource datasource;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "encryptor")
 	private Encryptor encryptor;
 	private List<ReportParameter> reportParams; //used in import/export
 	private List<UserRuleValue> userRuleValues; //used in import/export

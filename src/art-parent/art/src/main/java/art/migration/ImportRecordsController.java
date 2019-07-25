@@ -18,7 +18,9 @@
 package art.migration;
 
 import art.accessright.UserGroupReportRight;
+import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
+import art.accessright.UserReportRightCsvExportMixIn;
 import art.artdatabase.ArtDatabase;
 import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
@@ -28,6 +30,7 @@ import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
 import art.drilldown.Drilldown;
+import art.drilldown.DrilldownCsvExportMixIn;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.EncryptorType;
@@ -41,6 +44,7 @@ import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
 import art.report.Report;
+import art.report.ReportCsvExportMixIn;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
@@ -53,13 +57,17 @@ import art.reportoptions.OrgChartOptions;
 import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterCsvExportMixIn;
 import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleCsvExportMixIn;
 import art.role.Role;
 import art.role.RoleService;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserGroupRuleValueCsvExportMixIn;
 import art.ruleValue.UserRuleValue;
+import art.ruleValue.UserRuleValueCsvExportMixIn;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -255,7 +263,7 @@ public class ImportRecordsController {
 						importParameters(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Reports:
-						importReports(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importReports(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Roles:
 						importRoles(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -991,33 +999,30 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importReports: sessionUser={}", sessionUser);
+		logger.debug("Entering importReports: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Report> reports;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
 
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-					reports = mapper.readValue(file, new TypeReference<List<Report>>() {
+					reports = importFromJson(file, new TypeReference<List<Report>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String reportsFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 					File reportsFile = new File(reportsFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME, reportsFile);
 					if (unpacked) {
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						reports = mapper.readValue(reportsFile, new TypeReference<List<Report>>() {
+						reports = importFromJson(reportsFile, new TypeReference<List<Report>>() {
 						});
 						reportsFile.delete();
 						copyReportFiles(reports, artTempPath, file);
@@ -1030,14 +1035,14 @@ public class ImportRecordsController {
 				break;
 			case csv:
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					reports = csvRoutines.parseAll(Report.class, file);
+					reports = importValuesFromCsv(file, Report.class, ReportCsvExportMixIn.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					boolean unpacked;
 					String reportsFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 					File reportsFile = new File(reportsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME, reportsFile);
 					if (unpacked) {
-						reports = csvRoutines.parseAll(Report.class, reportsFile);
+						reports = importValuesFromCsv(reportsFile, Report.class, ReportCsvExportMixIn.class);
 						reportsFile.delete();
 						copyReportFiles(reports, artTempPath, file);
 					} else {
@@ -1053,7 +1058,7 @@ public class ImportRecordsController {
 					File reportGroupsFile = new File(reportGroupsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTGROUPS_FILENAME, reportGroupsFile);
 					if (unpacked) {
-						List<ReportGroup> allReportGroups = csvRoutines.parseAll(ReportGroup.class, reportGroupsFile);
+						List<ReportGroup> allReportGroups = importValuesFromCsv(reportGroupsFile, ReportGroup.class);
 						reportGroupsFile.delete();
 						for (ReportGroup reportGroup : allReportGroups) {
 							int parentId = reportGroup.getParentId();
@@ -1075,7 +1080,7 @@ public class ImportRecordsController {
 					File reportParamsFile = new File(reportParamsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTPARAMETERS_FILENAME, reportParamsFile);
 					if (unpacked) {
-						List<ReportParameter> allReportParams = csvRoutines.parseAll(ReportParameter.class, reportParamsFile);
+						List<ReportParameter> allReportParams = importValuesFromCsv(reportParamsFile, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 						reportParamsFile.delete();
 						for (ReportParameter reportParam : allReportParams) {
 							int parentId = reportParam.getParentId();
@@ -1097,7 +1102,7 @@ public class ImportRecordsController {
 					File userRuleValuesFile = new File(userRuleValuesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERRULEVALUES_FILENAME, userRuleValuesFile);
 					if (unpacked) {
-						List<UserRuleValue> allUserRuleValues = csvRoutines.parseAll(UserRuleValue.class, userRuleValuesFile);
+						List<UserRuleValue> allUserRuleValues = importValuesFromCsv(userRuleValuesFile, UserRuleValue.class, UserRuleValueCsvExportMixIn.class);
 						userRuleValuesFile.delete();
 						for (UserRuleValue userRuleValue : allUserRuleValues) {
 							int parentId = userRuleValue.getParentId();
@@ -1119,7 +1124,7 @@ public class ImportRecordsController {
 					File userGroupRuleValuesFile = new File(userGroupRuleValuesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPRULEVALUES_FILENAME, userGroupRuleValuesFile);
 					if (unpacked) {
-						List<UserGroupRuleValue> allUserGroupRuleValues = csvRoutines.parseAll(UserGroupRuleValue.class, userGroupRuleValuesFile);
+						List<UserGroupRuleValue> allUserGroupRuleValues = importValuesFromCsv(userGroupRuleValuesFile, UserGroupRuleValue.class, UserGroupRuleValueCsvExportMixIn.class);
 						userGroupRuleValuesFile.delete();
 						for (UserGroupRuleValue userGroupRuleValue : allUserGroupRuleValues) {
 							int parentId = userGroupRuleValue.getParentId();
@@ -1141,7 +1146,7 @@ public class ImportRecordsController {
 					File reportRulesFile = new File(reportRulesFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_REPORTRULES_FILENAME, reportRulesFile);
 					if (unpacked) {
-						List<ReportRule> allReportRules = csvRoutines.parseAll(ReportRule.class, reportRulesFile);
+						List<ReportRule> allReportRules = importValuesFromCsv(reportRulesFile, ReportRule.class, ReportRuleCsvExportMixIn.class);
 						reportRulesFile.delete();
 						for (ReportRule reportRule : allReportRules) {
 							int parentId = reportRule.getParentId();
@@ -1163,7 +1168,7 @@ public class ImportRecordsController {
 					File userReportRightsFile = new File(userReportRightsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERREPORTRIGHTS_FILENAME, userReportRightsFile);
 					if (unpacked) {
-						List<UserReportRight> allUserReportRights = csvRoutines.parseAll(UserReportRight.class, userReportRightsFile);
+						List<UserReportRight> allUserReportRights = importValuesFromCsv(userReportRightsFile, UserReportRight.class, UserReportRightCsvExportMixIn.class);
 						userReportRightsFile.delete();
 						for (UserReportRight userReportRight : allUserReportRights) {
 							int parentId = userReportRight.getParentId();
@@ -1185,7 +1190,7 @@ public class ImportRecordsController {
 					File userGroupReportRightsFile = new File(userGroupReportRightsFilePath);
 					unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_USERGROUPREPORTRIGHTS_FILENAME, userGroupReportRightsFile);
 					if (unpacked) {
-						List<UserGroupReportRight> allUserGroupReportRights = csvRoutines.parseAll(UserGroupReportRight.class, userGroupReportRightsFile);
+						List<UserGroupReportRight> allUserGroupReportRights = importValuesFromCsv(userGroupReportRightsFile, UserGroupReportRight.class, UserGroupReportRightCsvExportMixIn.class);
 						userGroupReportRightsFile.delete();
 						for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
 							int parentId = userGroupReportRight.getParentId();
@@ -1212,7 +1217,7 @@ public class ImportRecordsController {
 					ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME, drilldownReportParamsFile);
 
 					if (drilldownsFile.exists()) {
-						List<Drilldown> allDrilldowns = csvRoutines.parseAll(Drilldown.class, drilldownsFile);
+						List<Drilldown> allDrilldowns = importValuesFromCsv(drilldownsFile, Drilldown.class, DrilldownCsvExportMixIn.class);
 						drilldownsFile.delete();
 						for (Drilldown drilldown : allDrilldowns) {
 							int parentId = drilldown.getParentId();
@@ -1236,7 +1241,7 @@ public class ImportRecordsController {
 								drilldownReportsMap.put(drilldownReport.getReportId(), drilldownReport);
 							}
 
-							List<ReportParameter> allDrilldownReportParams = csvRoutines.parseAll(ReportParameter.class, drilldownReportParamsFile);
+							List<ReportParameter> allDrilldownReportParams = importValuesFromCsv(drilldownReportParamsFile, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 							drilldownReportParamsFile.delete();
 							for (ReportParameter drilldownReportParam : allDrilldownReportParams) {
 								int parentId = drilldownReportParam.getParentId();
