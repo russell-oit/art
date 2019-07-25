@@ -38,6 +38,7 @@ import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.parameter.Parameter;
+import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
 import art.report.Report;
@@ -270,7 +271,7 @@ public class ExportRecordsController {
 						exportRules(exportRecords, file, sessionUser, conn);
 						break;
 					case Parameters:
-						exportFilePath = exportParameters(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportParameters(exportRecords, sessionUser, conn);
 						break;
 					case Reports:
 						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
@@ -973,14 +974,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportParameters(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportParameters");
 
@@ -1008,8 +1007,7 @@ public class ExportRecordsController {
 					case json:
 						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
 						parametersFile = new File(parametersFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(parametersFile, parameters);
+						exportToJson(parametersFile, parameters);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(parametersFilePath);
 							exportFilePath = zipFilePath;
@@ -1022,7 +1020,7 @@ public class ExportRecordsController {
 					case csv:
 						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
 						parametersFile = new File(parametersFilePath);
-						csvRoutines.writeAll(parameters, Parameter.class, parametersFile);
+						exportToCsv(parametersFile, parameters, Parameter.class, ParameterCsvExportMixIn.class);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(parametersFilePath);
 							exportFilePath = zipFilePath;

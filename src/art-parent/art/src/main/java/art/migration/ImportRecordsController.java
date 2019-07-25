@@ -37,6 +37,7 @@ import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.parameter.Parameter;
+import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
 import art.report.Report;
@@ -248,10 +249,10 @@ public class ImportRecordsController {
 						importUsers(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Rules:
-						importRules(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importRules(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Parameters:
-						importParameters(tempFile, sessionUser, conn, csvRoutines, importRecords);
+						importParameters(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Reports:
 						importReports(tempFile, sessionUser, conn, csvRoutines, importRecords);
@@ -913,33 +914,30 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param csvRoutines the CsvRoutines object to use
-	 * @param importRecords the import records object
+	 * @param fileFormat the format of the file
 	 * @throws Exception
 	 */
 	private void importParameters(File file, User sessionUser, Connection conn,
-			CsvRoutines csvRoutines, ImportRecords importRecords) throws Exception {
+			MigrationFileFormat fileFormat) throws Exception {
 
-		logger.debug("Entering importParameters: sessionUser={}", sessionUser);
+		logger.debug("Entering importParameters: sessionUser={}, fileFormat={}",
+				sessionUser, fileFormat);
 
 		List<Parameter> parameters;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
 
-		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
-					ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-					parameters = mapper.readValue(file, new TypeReference<List<Parameter>>() {
+					parameters = importFromJson(file, new TypeReference<List<Parameter>>() {
 					});
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String parametersFilePath = artTempPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
 					File parametersFile = new File(parametersFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME, parametersFile);
 					if (unpacked) {
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						parameters = mapper.readValue(parametersFile, new TypeReference<List<Parameter>>() {
+						parameters = importFromJson(parametersFile, new TypeReference<List<Parameter>>() {
 						});
 						parametersFile.delete();
 						copyParameterFiles(parameters, artTempPath, file);
@@ -952,13 +950,13 @@ public class ImportRecordsController {
 				break;
 			case csv:
 				if (StringUtils.equalsIgnoreCase(extension, "csv")) {
-					parameters = csvRoutines.parseAll(Parameter.class, file);
+					parameters = importValuesFromCsv(file, Parameter.class, ParameterCsvExportMixIn.class);
 				} else if (StringUtils.equalsIgnoreCase(extension, "zip")) {
 					String parametersFilePath = artTempPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
 					File parametersFile = new File(parametersFilePath);
 					boolean unpacked = ZipUtil.unpackEntry(file, ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME, parametersFile);
 					if (unpacked) {
-						parameters = csvRoutines.parseAll(Parameter.class, parametersFile);
+						parameters = importValuesFromCsv(parametersFile, Parameter.class, ParameterCsvExportMixIn.class);
 						parametersFile.delete();
 						copyParameterFiles(parameters, artTempPath, file);
 					} else {
