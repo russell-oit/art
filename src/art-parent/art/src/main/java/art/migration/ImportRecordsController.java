@@ -1589,7 +1589,7 @@ public class ImportRecordsController {
 	 * @return a list of objects as contained in the file
 	 * @throws IOException
 	 */
-	private <T> T importFromJson(File file, TypeReference type) throws IOException {
+	private <T> T importFromJson(File file, TypeReference<T> type) throws IOException {
 		ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
 		return mapper.readValue(file, type);
 	}
