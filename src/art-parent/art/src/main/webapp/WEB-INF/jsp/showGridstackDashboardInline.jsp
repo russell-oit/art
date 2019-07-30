@@ -349,6 +349,7 @@
 		//horizontal margin/padding not an api option. defaults to 20px (10px on the left + 10px on the right)
 		//can be overriden in css
 		//https://github.com/troolee/gridstack.js/issues/33
+		//https://github.com/gridstack/gridstack.js/issues/950
 		$('.grid-stack').gridstack({
 			width: ${dashboard.width},
 			alwaysShowResizeHandle: ${dashboard.alwaysShowResizeHandle},
@@ -360,7 +361,10 @@
 			animate: ${dashboard.animate},
 			disableDrag: ${dashboard.disableDrag},
 			disableResize: ${dashboard.disableResize},
-			verticalMargin: '${dashboard.verticalMargin}'
+			verticalMargin: '${dashboard.verticalMargin}',
+			draggable: {
+				helper: 'set to anything but "original"'
+			}
 		});
 
 		//https://stackoverflow.com/questions/26003591/c3-chart-sizing-is-too-big-when-initially-loaded/27180464
