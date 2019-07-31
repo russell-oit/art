@@ -1,6 +1,7 @@
 ART 4.4
 * Allow chained parameters to use default values
 * Fix for large c3.js chart width in tabbed dashboard
+* Fix for gridstack dashboard not showing properly inline in chrome
 * Updated jackson, jongo
 
 ART 4.3
