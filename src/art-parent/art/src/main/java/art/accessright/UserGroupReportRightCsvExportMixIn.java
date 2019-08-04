@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public abstract class UserGroupReportRightCsvExportMixIn extends UserGroupReportRight {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@JsonUnwrapped(prefix = "userGroup_")
 	private UserGroup userGroup;
 

@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public abstract class DrilldownCsvExportMixIn extends Drilldown {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@JsonUnwrapped(prefix = "drilldownReport_")
 	private Report drilldownReport;
 

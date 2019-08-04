@@ -30,6 +30,8 @@ public abstract class UserGroupCsvExportMixIn extends UserGroup {
 	//https://stackoverflow.com/questions/25425419/jackson-conditional-jsonunwrapped
 	//https://stackoverflow.com/questions/28857897/how-do-correctly-use-jackson-mixin-annotation-to-instantiate-a-third-party-class
 	//https://stackoverflow.com/questions/50589620/mixins-and-jackson-annotations
+	
+	private static final long serialVersionUID = 1L;
 
 	@JsonUnwrapped(prefix = "defaultReportGroup_")
 	private ReportGroup defaultReportGroup;

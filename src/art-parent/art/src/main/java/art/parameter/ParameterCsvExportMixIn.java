@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public abstract class ParameterCsvExportMixIn extends Parameter {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@JsonUnwrapped(prefix = "defaultValueReport_")
 	private Report defaultValueReport;
 	@JsonUnwrapped(prefix = "lovReport_")

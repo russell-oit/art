@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public abstract class UserGroupRuleValueCsvExportMixIn extends UserGroupRuleValue {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@JsonUnwrapped(prefix = "rule_")
 	private Rule rule;
 	@JsonUnwrapped(prefix = "userGroup_")

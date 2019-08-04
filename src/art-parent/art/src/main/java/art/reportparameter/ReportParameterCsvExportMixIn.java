@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Timothy Anyona
  */
 public abstract class ReportParameterCsvExportMixIn extends ReportParameter {
+	
+	private static final long serialVersionUID = 1L;
 
 	@JsonUnwrapped(prefix = "parameter_")
 	private Parameter parameter;
