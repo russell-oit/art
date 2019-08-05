@@ -48,8 +48,8 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.6.2/papaparse.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.12.4/css/bootstrap-select.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.12.4/js/bootstrap-select.min.js"></script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 

@@ -21,7 +21,6 @@ import art.encryption.AesEncryptor;
 import art.enums.DestinationType;
 import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -33,27 +32,17 @@ import java.util.Date;
 public class Destination implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
+
 	private int destinationId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
-	@Parsed
 	private boolean active = true;
-	@Parsed
 	private DestinationType destinationType;
-	@Parsed
 	private String server;
-	@Parsed
 	private int port;
-	@Parsed
 	private String user;
-	@Parsed
 	private String password;
-	@Parsed
 	private String path;
-	@Parsed
 	private String options;
 	private Date creationDate;
 	private String createdBy;
@@ -61,15 +50,10 @@ public class Destination implements Serializable {
 	private String updatedBy;
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
-	@Parsed
 	private String domain;
-	@Parsed
 	private String subDirectory;
-	@Parsed
 	private boolean createDirectories;
-	@Parsed
 	private boolean clearTextPassword;
-	@Parsed
 	private String googleJsonKeyFile;
 	@JsonIgnore
 	private boolean overwriteFiles;
@@ -443,7 +427,7 @@ public class Destination implements Serializable {
 	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
 		password = AesEncryptor.encrypt(password, key, encryptionPassword);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the password field is null
 	 *

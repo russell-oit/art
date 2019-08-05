@@ -167,8 +167,8 @@ public class UserGroupController {
 
 	@RequestMapping(value = "/saveUserGroup", method = RequestMethod.POST)
 	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session) {
 
 		logger.debug("Entering saveUserGroup: group={}, action='{}'", group, action);

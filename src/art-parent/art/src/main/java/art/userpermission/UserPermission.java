@@ -17,12 +17,8 @@
  */
 package art.userpermission;
 
-import art.migration.PrefixTransformer;
 import art.permission.Permission;
 import art.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -34,26 +30,8 @@ public class UserPermission implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Parsed
-	private int parentId; //used for import/export of linked records
-	@JsonIgnore
 	private User user;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "permission")
 	private Permission permission;
-
-	/**
-	 * @return the parentId
-	 */
-	public int getParentId() {
-		return parentId;
-	}
-
-	/**
-	 * @param parentId the parentId to set
-	 */
-	public void setParentId(int parentId) {
-		this.parentId = parentId;
-	}
 
 	/**
 	 * @return the user

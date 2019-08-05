@@ -17,10 +17,7 @@
  */
 package art.drilldown;
 
-import art.migration.PrefixTransformer;
 import art.report.Report;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 
 /**
@@ -32,25 +29,15 @@ public class Drilldown implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Parsed
 	private int parentId; //used for import/export of linked records e.g. reports
-	@Parsed
 	private int drilldownId;
-	@Parsed
 	private int parentReportId;
-	@Parsed
 	private int position;
-	@Parsed
 	private String headerText;
-	@Parsed
 	private String linkText;
-	@Parsed
 	private String reportFormat;
-	@Parsed
 	private boolean openInNewWindow;
-	@Parsed
 	private boolean allowSelectParameters;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "drilldownReport")
 	private Report drilldownReport;
 
 	/**

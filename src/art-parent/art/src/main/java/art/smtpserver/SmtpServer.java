@@ -20,7 +20,6 @@ package art.smtpserver;
 import art.encryption.AesEncryptor;
 import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,47 +31,30 @@ import java.util.Date;
 public class SmtpServer implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
+	
 	private int smtpServerId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
-	@Parsed
 	private boolean active = true;
-	@Parsed
 	private String server;
-	@Parsed
 	private int port = 25;
-	@Parsed
 	private boolean useStartTls;
-	@Parsed
 	private boolean useSmtpAuthentication;
-	@Parsed
 	private String username;
-	@Parsed
 	private String password;
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for username interface logic
-	@Parsed
 	private String from;
 	private Date creationDate;
 	private String createdBy;
 	private Date updateDate;
 	private String updatedBy;
-	@Parsed
 	private boolean clearTextPassword;
-	@Parsed
 	private boolean useOAuth2;
-	@Parsed
 	private String oauthClientId;
-	@Parsed
 	private String oauthClientSecret;
-	@Parsed
 	private String oauthRefreshToken;
-	@Parsed
 	private String oauthAccessToken;
-	@Parsed
 	private Date oauthAccessTokenExpiry;
 
 	/**

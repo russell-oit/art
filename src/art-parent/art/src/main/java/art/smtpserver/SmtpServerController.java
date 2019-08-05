@@ -186,8 +186,8 @@ public class SmtpServerController {
 
 	@RequestMapping(value = "/saveSmtpServer", method = RequestMethod.POST)
 	public String saveSmtpServer(@ModelAttribute("smtpServer") @Valid SmtpServer smtpServer,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session) {
 
 		logger.debug("Entering saveSmtpServer: smtpServer={}, action='{}'", smtpServer, action);

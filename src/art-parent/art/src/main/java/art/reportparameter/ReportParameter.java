@@ -19,13 +19,10 @@ package art.reportparameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
-import art.migration.PrefixTransformer;
 import art.parameter.Parameter;
 import art.report.Report;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,13 +44,10 @@ public class ReportParameter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Parsed
 	private int parentId; //used for import/export of linked records e.g. reports
-	@Parsed
 	private int reportParameterId;
 	@JsonIgnore
 	private Report report;
-	@Parsed
 	private int position;
 	@JsonIgnore
 	private String[] passedParameterValues; //used for run report logic
@@ -61,9 +55,7 @@ public class ReportParameter implements Serializable {
 	private Map<Object, String> lovValues; //store value and label for lov parameters
 	@JsonIgnore
 	private List<Object> actualParameterValues;
-	@Parsed
 	private String chainedParents;
-	@Parsed
 	private String chainedDepends;
 	@JsonIgnore
 	private boolean chainedParent;
@@ -71,7 +63,6 @@ public class ReportParameter implements Serializable {
 	private Map<String, String> lovValuesAsString;
 	@JsonIgnore
 	private Map<String, String> defaultValueLovValues;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "parameter")
 	private Parameter parameter;
 
 	/**
@@ -718,4 +709,76 @@ public class ReportParameter implements Serializable {
 				return false;
 		}
 	}
+
+	/**
+	 * Returns all the possible default values
+	 * 
+	 * @return all the possible default values
+	 * @throws IOException 
+	 */
+	public List<String> getDefaultValues() throws IOException {
+		List<String> defaultValues = new ArrayList<>();
+
+		ParameterType parameterType = parameter.getParameterType();
+
+		switch (parameterType) {
+			case SingleValue:
+				//compare lov value to actual parameter value - default value or passed value
+				if (passedParameterValues == null) {
+					String defaultValue = parameter.getDefaultValue();
+					if (StringUtils.isNotEmpty(defaultValue)) {
+						defaultValues.add(defaultValue);
+					}
+
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.isNotEmpty(value)) {
+								defaultValues.add(value);
+							}
+						}
+					}
+				} else {
+					String htmlValue = getHtmlValue();
+					if (StringUtils.isNotEmpty(htmlValue)) {
+						defaultValues.add(htmlValue);
+					}
+				}
+
+				break;
+			case MultiValue:
+				//compare lov value to default values or passed values
+				if (passedParameterValues == null) {
+					String defaultValueSetting = parameter.getDefaultValue();
+					if (StringUtils.isNotEmpty(defaultValueSetting)) {
+						String defaultValuesArray[] = defaultValueSetting.split("\\r?\\n");
+						for (String defaultValue : defaultValuesArray) {
+							if (StringUtils.isNotEmpty(defaultValue)) {
+								defaultValues.add(defaultValue);
+							}
+						}
+					}
+
+					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
+						for (String value : defaultValueLovValues.keySet()) {
+							if (StringUtils.isNotEmpty(value)) {
+								defaultValues.add(value);
+							}
+						}
+					}
+				} else {
+					for (String passedValue : passedParameterValues) {
+						if (StringUtils.isNotEmpty(passedValue)) {
+							defaultValues.add(passedValue);
+						}
+					}
+				}
+
+				break;
+			default:
+				break;
+		}
+
+		return defaultValues;
+	}
+	
 }

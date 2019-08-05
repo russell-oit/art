@@ -59,11 +59,7 @@
 				switch (location) {
 					case 'File':
 						$("#datasourceDiv").hide();
-						if (recordType === 'Settings') {
-							$("#fileFormatDiv").hide();
-						} else {
-							$("#fileFormatDiv").show();
-						}
+						$("#fileFormatDiv").show();
 						break;
 					case 'Datasource':
 						$("#datasourceDiv").show();

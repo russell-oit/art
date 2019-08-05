@@ -19,15 +19,12 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
-import art.migration.PrefixTransformer;
 import art.report.Report;
 import art.utils.ArtUtils;
 import art.utils.ExpressionHelper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.univocity.parsers.annotations.Nested;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
@@ -46,33 +43,20 @@ import org.apache.commons.lang3.StringUtils;
 public class Parameter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
 	private int parameterId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
-	@Parsed
 	private ParameterType parameterType;
-	@Parsed
 	private String label;
-	@Parsed
 	private String helpText;
-	@Parsed
 	private String placeholderText;
-	@Parsed
 	private ParameterDataType dataType;
-	@Parsed
 	private String defaultValue;
-	@Parsed
 	private boolean hidden;
-	@Parsed
 	private boolean fixedValue;
-	@Parsed
 	private boolean useLov;
 	@JsonIgnore
 	private boolean useRulesInLov;
-	@Parsed
 	private int drilldownColumnIndex;
 	@JsonIgnore
 	private boolean useDirectSubstitution;
@@ -80,21 +64,14 @@ public class Parameter implements Serializable {
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
-	@Parsed
 	private boolean shared;
-	@Parsed
 	private String options;
-	@Parsed
 	private String dateFormat;
 	@JsonIgnore
 	private ParameterOptions parameterOptions;
-	@Parsed
 	private boolean useDefaultValueInJobs;
-	@Parsed
 	private String template;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "defaultValueReport")
 	private Report defaultValueReport;
-	@Nested(headerTransformer = PrefixTransformer.class, args = "lovReport")
 	private Report lovReport;
 	private String name2; //used for holding a processed name
 	private String dtAction;

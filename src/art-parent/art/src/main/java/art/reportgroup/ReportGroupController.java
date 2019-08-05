@@ -145,8 +145,8 @@ public class ReportGroupController {
 
 	@RequestMapping(value = "/saveReportGroup", method = RequestMethod.POST)
 	public String saveReportGroup(@ModelAttribute("group") @Valid ReportGroup group,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session) {
 
 		logger.debug("Entering saveReportGroup: group={}, action='{}'", group, action);

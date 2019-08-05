@@ -32,8 +32,6 @@ Page to display success message
 								</a>
 							</div>
 
-							<c:set var="reportFileName" value="${exportFileName}" scope="session"/>
-
 							<script type="text/javascript">
 								var url = "${pageContext.request.contextPath}/export/records/${encode:forJavaScript(encode:forUriComponent(exportFileName))}";
 									window.open(url);

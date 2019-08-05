@@ -172,8 +172,8 @@ public class HolidayController {
 
 	@RequestMapping(value = "/saveHoliday", method = RequestMethod.POST)
 	public String saveHoliday(@ModelAttribute("holiday") @Valid Holiday holiday,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session) {
 
 		logger.debug("Entering saveHoliday: holiday={}, action='{}'", holiday, action);

@@ -21,8 +21,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
@@ -755,6 +757,42 @@ public class ArtUtils {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		return mapper;
+	}
+
+	/**
+	 * Returns a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing and doesn't include get() or set() methods that
+	 * don't have properties attached to them. Also serializes dates as strings.
+	 *
+	 * @return a Jackson ObjectMapper that only considers properties when
+	 * serializing/deserializing and serializes dates as strings
+	 */
+	public static ObjectMapper getMigrationObjectMapper() {
+		//https://stackoverflow.com/questions/28802544/java-8-localdate-jackson-format
+		//https://stackoverflow.com/questions/51527794/how-do-i-configure-jackson-serialization-on-localdatetime-and-localdate-for-java
+		ObjectMapper mapper = getPropertyOnlyObjectMapper();
+		return mapper;
+	}
+
+	/**
+	 * Returns a Jackson CsvMapper that only considers properties when
+	 * serializing/deserializing and doesn't include get() or set() methods that
+	 * don't have properties attached to them
+	 *
+	 * @return a Jackson CsvMapper that only considers properties when
+	 * serializing/deserializing
+	 */
+	public static CsvMapper getMigrationCsvMapper() {
+		//https://github.com/FasterXML/jackson-dataformats-text/tree/master/csv
+		//https://stackoverflow.com/questions/33752670/generating-a-csv-with-jackson-no-quoted-char
+		CsvMapper mapper = new CsvMapper();
+		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		//https://stackoverflow.com/questions/36936943/jackson-serialize-csv-property-order
+		mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+		//https://github.com/FasterXML/jackson-dataformat-csv/issues/112
+		mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 		return mapper;
 	}
 

@@ -242,10 +242,10 @@ public class ParameterController {
 
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
 			@RequestParam("returnReportId") Integer returnReportId,
 			@RequestParam("reportParameterId") Integer reportParameterId,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
 			HttpSession session, Locale locale) {
 

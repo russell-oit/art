@@ -27,19 +27,21 @@ bootstrap js, jquery js, datatables css, datatables js
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
-		<meta name="_csrf" content="${_csrf.token}"/>
-		<meta name="_csrf_header" content="${_csrf.headerName}"/>
-
 		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 
+	<jsp:attribute name="metaContent">
+		<meta name="_csrf" content="${_csrf.token}"/>
+		<meta name="_csrf_header" content="${_csrf.headerName}"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.12.4/css/bootstrap-select.min.css">
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.12.4/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
 		<script type="text/javascript">

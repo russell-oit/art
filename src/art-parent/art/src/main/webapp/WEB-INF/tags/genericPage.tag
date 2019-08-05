@@ -26,12 +26,9 @@ Includes bootstrap css, font awesome css, art css
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 		<title>${title}</title>
-
+		
 		<jsp:invoke fragment="metaContent"/>
-
-		<jsp:invoke fragment="headContent"/>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.7/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.7.0/css/font-awesome.min.css">
@@ -40,6 +37,8 @@ Includes bootstrap css, font awesome css, art css
 		<jsp:invoke fragment="css"/>
 		
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+		
+		<jsp:invoke fragment="headContent"/>
 
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>

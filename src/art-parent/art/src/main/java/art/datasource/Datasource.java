@@ -24,7 +24,6 @@ import art.enums.DatabaseType;
 import art.enums.DatasourceType;
 import art.settings.EncryptionPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
@@ -37,45 +36,29 @@ import org.apache.commons.lang3.StringUtils;
 public class Datasource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@Parsed
+	
 	private int datasourceId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String driver;
-	@Parsed
 	private String url;
-	@Parsed
 	private String username;
-	@Parsed
 	protected String password;
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
-	@Parsed
 	private String testSql;
-	@Parsed
 	private int connectionPoolTimeoutMins;
-	@Parsed
 	private boolean jndi;
-	@Parsed
 	private String passwordAlgorithm;
-	@Parsed
 	private DatasourceType datasourceType;
-	@Parsed
 	private String options;
-	@Parsed
 	private boolean active;
 	private Date creationDate;
 	private Date updateDate;
-	@Parsed
 	private String description;
 	private String createdBy;
 	private String updatedBy;
-	@Parsed
 	private boolean clearTextPassword;
-	@Parsed
 	private DatabaseProtocol databaseProtocol;
-	@Parsed
 	private DatabaseType databaseType;
 
 	/**

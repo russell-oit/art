@@ -199,8 +199,8 @@ public class DestinationController {
 
 	@RequestMapping(value = "/saveDestination", method = RequestMethod.POST)
 	public String saveDestination(@ModelAttribute("destination") @Valid Destination destination,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			@RequestParam(value = "jsonKeyFile", required = false) MultipartFile jsonKeyFile,
 			HttpSession session, Locale locale) {
 

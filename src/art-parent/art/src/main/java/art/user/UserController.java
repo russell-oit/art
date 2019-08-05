@@ -299,8 +299,8 @@ public class UserController {
 
 	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
 	public String saveUser(@ModelAttribute("user") @Valid User user,
-			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@RequestParam("action") String action,
 			HttpSession session, Locale locale) {
 
 		logger.debug("Entering saveUser: user={}, action='{}'", user, action);

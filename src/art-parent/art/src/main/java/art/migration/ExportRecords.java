@@ -21,6 +21,8 @@ import art.datasource.Datasource;
 import art.enums.MigrationFileFormat;
 import art.enums.MigrationLocation;
 import art.enums.MigrationRecordType;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.Serializable;
 
 /**
@@ -128,5 +130,19 @@ public class ExportRecords implements Serializable {
 	 */
 	public void setDatasource(Datasource datasource) {
 		this.datasource = datasource;
+	}
+
+	/**
+	 * Returns a csv schema to be used for importing/exporting records to csv
+	 *
+	 * @param csvMapper the csv mapper object
+	 * @param type the class for which the schema is to be built
+	 * @return the csv schema to be used for importing/exporting records
+	 */
+	public static CsvSchema getCsvSchema(CsvMapper csvMapper, Class<?> type) {
+		//https://stackoverflow.com/questions/15144641/what-is-the-difference-between-class-clazz-and-class-clazz-in-java/15144835
+		//https://github.com/FasterXML/jackson-dataformat-csv/issues/112
+		CsvSchema schema = csvMapper.schemaFor(type).withHeader().withNullValue("NULL");
+		return schema;
 	}
 }

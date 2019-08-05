@@ -114,8 +114,8 @@ public class PasswordUtils {
 	 *
 	 * @param clearText the clear text password
 	 * @param hashedPassword the password hash
-	 * @param algorithm the hashing algorithm. bcrypt or MD2, MD5, SHA-1, SHA-256,
-	 * SHA-384, SHA-512
+	 * @param algorithm the hashing algorithm. bcrypt or MD2, MD5, SHA-1,
+	 * SHA-256, SHA-384, SHA-512
 	 * @return <code>true</code> if password matches hash
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
@@ -123,8 +123,12 @@ public class PasswordUtils {
 	public static boolean VerifyPassword(String clearText, String hashedPassword, String algorithm)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		if (clearText == null || hashedPassword == null || algorithm == null) {
+		if (clearText == null || hashedPassword == null) {
 			return false;
+		}
+
+		if (algorithm == null) {
+			algorithm = "bcrypt";
 		}
 
 		boolean verified = false;

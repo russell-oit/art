@@ -18,7 +18,6 @@
 package art.role;
 
 import art.permission.Permission;
-import com.univocity.parsers.annotations.Parsed;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -32,13 +31,9 @@ public class Role implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Parsed
 	private int parentId; //used for import/export of linked records
-	@Parsed
 	private int roleId;
-	@Parsed
 	private String name;
-	@Parsed
 	private String description;
 	private Date creationDate;
 	private String createdBy;

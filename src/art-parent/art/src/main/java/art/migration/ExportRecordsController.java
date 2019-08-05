@@ -19,7 +19,9 @@ package art.migration;
 
 import art.accessright.AccessRightService;
 import art.accessright.UserGroupReportRight;
+import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
+import art.accessright.UserReportRightCsvExportMixIn;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -27,6 +29,7 @@ import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
 import art.destination.DestinationService;
 import art.drilldown.Drilldown;
+import art.drilldown.DrilldownCsvExportMixIn;
 import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
@@ -38,9 +41,11 @@ import art.enums.ReportType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.parameter.Parameter;
+import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
 import art.report.Report;
+import art.report.ReportCsvExportMixIn;
 import art.report.ReportService;
 import art.report.ReportServiceHelper;
 import art.reportgroup.ReportGroup;
@@ -54,8 +59,10 @@ import art.reportoptions.OrgChartOptions;
 import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterCsvExportMixIn;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleCsvExportMixIn;
 import art.reportrule.ReportRuleService;
 import art.role.Role;
 import art.role.RoleService;
@@ -63,7 +70,9 @@ import art.rule.Rule;
 import art.rule.RuleService;
 import art.ruleValue.RuleValueService;
 import art.ruleValue.UserGroupRuleValue;
+import art.ruleValue.UserGroupRuleValueCsvExportMixIn;
 import art.ruleValue.UserRuleValue;
+import art.ruleValue.UserRuleValueCsvExportMixIn;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
@@ -72,13 +81,15 @@ import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
+import art.user.UserCsvExportMixIn;
 import art.user.UserService;
 import art.usergroup.UserGroup;
+import art.usergroup.UserGroupCsvExportMixIn;
 import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.univocity.parsers.csv.CsvRoutines;
-import com.univocity.parsers.csv.CsvWriterSettings;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -199,22 +210,16 @@ public class ExportRecordsController {
 		try {
 			MigrationRecordType recordType = exportRecords.getRecordType();
 			String extension;
-			switch (recordType) {
-				case Settings:
+			MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+			switch (fileFormat) {
+				case json:
 					extension = ".json";
 					break;
+				case csv:
+					extension = ".csv";
+					break;
 				default:
-					MigrationFileFormat fileFormat = exportRecords.getFileFormat();
-					switch (fileFormat) {
-						case json:
-							extension = ".json";
-							break;
-						case csv:
-							extension = ".csv";
-							break;
-						default:
-							throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
-					}
+					throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 			}
 
 			String baseExportFilename = "art-export-" + recordType;
@@ -225,10 +230,6 @@ public class ExportRecordsController {
 			File file = new File(exportFilePath);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
-
-			CsvWriterSettings writerSettings = new CsvWriterSettings();
-			writerSettings.setHeaderWritingEnabled(true);
-			CsvRoutines csvRoutines = new CsvRoutines(writerSettings);
 
 			Connection conn = null;
 			if (exportRecords.getLocation() == MigrationLocation.Datasource) {
@@ -242,43 +243,43 @@ public class ExportRecordsController {
 						exportSettings(exportRecords, file, sessionUser, conn);
 						break;
 					case Datasources:
-						exportDatasources(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportDatasources(exportRecords, file, sessionUser, conn);
 						break;
 					case Destinations:
-						exportDestinations(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportDestinations(exportRecords, file, sessionUser, conn);
 						break;
 					case Encryptors:
-						exportFilePath = exportEncryptors(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportEncryptors(exportRecords, sessionUser, conn);
 						break;
 					case Holidays:
-						exportHolidays(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportHolidays(exportRecords, file, sessionUser, conn);
 						break;
 					case ReportGroups:
-						exportReportGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportReportGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case SmtpServers:
-						exportSmtpServers(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportSmtpServers(exportRecords, file, sessionUser, conn);
 						break;
 					case UserGroups:
-						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportFilePath = exportUserGroups(exportRecords, file, sessionUser, conn);
 						break;
 					case Schedules:
-						exportFilePath = exportSchedules(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportSchedules(exportRecords, file, sessionUser, conn);
 						break;
 					case Users:
-						exportFilePath = exportUsers(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportUsers(exportRecords, file, sessionUser, conn);
 						break;
 					case Rules:
-						exportRules(exportRecords, file, sessionUser, csvRoutines, conn);
+						exportRules(exportRecords, file, sessionUser, conn);
 						break;
 					case Parameters:
-						exportFilePath = exportParameters(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportParameters(exportRecords, sessionUser, conn);
 						break;
 					case Reports:
-						exportFilePath = exportReports(exportRecords, sessionUser, csvRoutines, conn);
+						exportFilePath = exportReports(exportRecords, sessionUser, conn);
 						break;
 					case Roles:
-						exportFilePath = exportRoles(exportRecords, sessionUser, csvRoutines, conn, file);
+						exportFilePath = exportRoles(exportRecords, file, sessionUser, conn);
 						break;
 					default:
 						break;
@@ -344,8 +345,17 @@ public class ExportRecordsController {
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
 			case File:
-				ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-				mapper.writerWithDefaultPrettyPrinter().writeValue(file, settings);
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						exportToJson(file, settings);
+						break;
+					case csv:
+						exportToCsv(file, settings, Settings.class);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
 				break;
 			case Datasource:
 				settingsService.importSettings(settings, sessionUser, conn);
@@ -361,13 +371,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportDatasources(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportDatasources");
 
@@ -383,11 +391,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, datasources);
+						exportToJson(file, datasources);
 						break;
 					case csv:
-						csvRoutines.writeAll(datasources, Datasource.class, file);
+						exportToCsv(file, datasources, Datasource.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -407,13 +414,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportDestinations(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportDestinations");
 
@@ -429,11 +434,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, destinations);
+						exportToJson(file, destinations);
 						break;
 					case csv:
-						csvRoutines.writeAll(destinations, Destination.class, file);
+						exportToCsv(file, destinations, Destination.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -452,14 +456,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportEncryptors(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportEncryptors");
 
@@ -486,8 +488,7 @@ public class ExportRecordsController {
 					case json:
 						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_ENCRYPTORS_FILENAME;
 						encryptorsFile = new File(encryptorsFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(encryptorsFile, encryptors);
+						exportToJson(encryptorsFile, encryptors);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(encryptorsFilePath);
 							exportFilePath = zipFilePath;
@@ -500,7 +501,7 @@ public class ExportRecordsController {
 					case csv:
 						encryptorsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_ENCRYPTORS_FILENAME;
 						encryptorsFile = new File(encryptorsFilePath);
-						csvRoutines.writeAll(encryptors, Encryptor.class, encryptorsFile);
+						exportToCsv(encryptorsFile, encryptors, Encryptor.class);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(encryptorsFilePath);
 							exportFilePath = zipFilePath;
@@ -530,14 +531,12 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportHolidays(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportHolidays");
 
@@ -550,11 +549,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, holidays);
+						exportToJson(file, holidays);
 						break;
 					case csv:
-						csvRoutines.writeAll(holidays, Holiday.class, file);
+						exportToCsv(file, holidays, Holiday.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -574,14 +572,12 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportReportGroups(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportReportGroups");
 
@@ -594,11 +590,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, reportGroups);
+						exportToJson(file, reportGroups);
 						break;
 					case csv:
-						csvRoutines.writeAll(reportGroups, ReportGroup.class, file);
+						exportToCsv(file, reportGroups, ReportGroup.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -618,13 +613,11 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws Exception
 	 */
 	private void exportSmtpServers(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportSmtpServers");
 
@@ -640,11 +633,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, smtpServers);
+						exportToJson(file, smtpServers);
 						break;
 					case csv:
-						csvRoutines.writeAll(smtpServers, SmtpServer.class, file);
+						exportToCsv(file, smtpServers, SmtpServer.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -664,15 +656,13 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private String exportUserGroups(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportUserGroups");
 
@@ -688,14 +678,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, userGroups);
+						exportToJson(file, userGroups);
 						exportFilePath = recordsExportPath + "art-export-UserGroups.json";
 						break;
 					case csv:
 						String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 						File userGroupsFile = new File(userGroupsFilePath);
-						csvRoutines.writeAll(userGroups, UserGroup.class, userGroupsFile);
+						exportToCsv(userGroupsFile, userGroups, UserGroup.class, UserGroupCsvExportMixIn.class);
 
 						List<Role> allRoles = new ArrayList<>();
 						for (UserGroup userGroup : userGroups) {
@@ -723,14 +712,14 @@ public class ExportRecordsController {
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
-								csvRoutines.writeAll(allRoles, Role.class, rolesFile);
+								exportToCsv(rolesFile, allRoles, Role.class);
 								filesToZip.add(rolesFilePath);
 							}
 
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							if (CollectionUtils.isNotEmpty(allPermissions)) {
-								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								exportToCsv(permissionsFile, allPermissions, Permission.class);
 								filesToZip.add(permissionsFilePath);
 							}
 
@@ -762,16 +751,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportSchedules(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportSchedules(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportSchedules");
 
@@ -787,14 +774,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, schedules);
+						exportToJson(file, schedules);
 						exportFilePath = recordsExportPath + "art-export-Schedules.json";
 						break;
 					case csv:
 						String schedulesFilePath = recordsExportPath + ExportRecords.EMBEDDED_SCHEDULES_FILENAME;
 						File schedulesFile = new File(schedulesFilePath);
-						csvRoutines.writeAll(schedules, Schedule.class, schedulesFile);
+						exportToCsv(schedulesFile, schedules, Schedule.class);
 						List<Holiday> holidays = new ArrayList<>();
 						for (Schedule schedule : schedules) {
 							List<Holiday> sharedHolidays = schedule.getSharedHolidays();
@@ -806,7 +792,7 @@ public class ExportRecordsController {
 						if (CollectionUtils.isNotEmpty(holidays)) {
 							String holidaysFilePath = recordsExportPath + ExportRecords.EMBEDDED_HOLIDAYS_FILENAME;
 							File holidaysFile = new File(holidaysFilePath);
-							csvRoutines.writeAll(holidays, Holiday.class, holidaysFile);
+							exportToCsv(holidaysFile, holidays, Holiday.class);
 							exportFilePath = recordsExportPath + "art-export-Schedules.zip";
 							ArtUtils.zipFiles(exportFilePath, schedulesFilePath, holidaysFilePath);
 							schedulesFile.delete();
@@ -834,16 +820,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportUsers(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportUsers(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportUsers");
 
@@ -859,14 +843,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, users);
+						exportToJson(file, users);
 						exportFilePath = recordsExportPath + "art-export-Users.json";
 						break;
 					case csv:
 						String usersFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERS_FILENAME;
 						File usersFile = new File(usersFilePath);
-						csvRoutines.writeAll(users, User.class, usersFile);
+						exportToCsv(usersFile, users, User.class, UserCsvExportMixIn.class);
 
 						List<UserGroup> allUserGroups = new ArrayList<>();
 						for (User user : users) {
@@ -904,21 +887,21 @@ public class ExportRecordsController {
 							String userGroupsFilePath = recordsExportPath + ExportRecords.EMBEDDED_USERGROUPS_FILENAME;
 							File userGroupsFile = new File(userGroupsFilePath);
 							if (CollectionUtils.isNotEmpty(allUserGroups)) {
-								csvRoutines.writeAll(allUserGroups, UserGroup.class, userGroupsFile);
+								exportToCsv(userGroupsFile, allUserGroups, UserGroup.class, UserGroupCsvExportMixIn.class);
 								filesToZip.add(userGroupsFilePath);
 							}
 
 							String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 							File rolesFile = new File(rolesFilePath);
 							if (CollectionUtils.isNotEmpty(allRoles)) {
-								csvRoutines.writeAll(allRoles, Role.class, rolesFile);
+								exportToCsv(rolesFile, allRoles, Role.class);
 								filesToZip.add(rolesFilePath);
 							}
 
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
 							if (CollectionUtils.isNotEmpty(allPermissions)) {
-								csvRoutines.writeAll(allPermissions, Permission.class, permissionsFile);
+								exportToCsv(permissionsFile, allPermissions, Permission.class);
 								filesToZip.add(permissionsFilePath);
 							}
 
@@ -952,14 +935,12 @@ public class ExportRecordsController {
 	 * @param exportRecords the export records object
 	 * @param file the export file to use
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
 	private void exportRules(ExportRecords exportRecords, File file,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws SQLException, IOException {
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportRules");
 
@@ -972,11 +953,10 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, rules);
+						exportToJson(file, rules);
 						break;
 					case csv:
-						csvRoutines.writeAll(rules, Rule.class, file);
+						exportToCsv(file, rules, Rule.class);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
@@ -995,14 +975,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportParameters(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportParameters");
 
@@ -1030,8 +1008,7 @@ public class ExportRecordsController {
 					case json:
 						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_PARAMETERS_FILENAME;
 						parametersFile = new File(parametersFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(parametersFile, parameters);
+						exportToJson(parametersFile, parameters);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(parametersFilePath);
 							exportFilePath = zipFilePath;
@@ -1044,7 +1021,7 @@ public class ExportRecordsController {
 					case csv:
 						parametersFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_PARAMETERS_FILENAME;
 						parametersFile = new File(parametersFilePath);
-						csvRoutines.writeAll(parameters, Parameter.class, parametersFile);
+						exportToCsv(parametersFile, parameters, Parameter.class, ParameterCsvExportMixIn.class);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(parametersFilePath);
 							exportFilePath = zipFilePath;
@@ -1074,14 +1051,12 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @return the export file path for file export
 	 * @throws Exception
 	 */
 	private String exportReports(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn)
-			throws Exception {
+			User sessionUser, Connection conn) throws Exception {
 
 		logger.debug("Entering exportReports");
 
@@ -1191,8 +1166,7 @@ public class ExportRecordsController {
 					case json:
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_JSON_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(reportsFile, reports);
+						exportToJson(reportsFile, reports);
 						if (CollectionUtils.isNotEmpty(filesToZip)) {
 							filesToZip.add(reportsFilePath);
 							exportFilePath = zipFilePath;
@@ -1205,7 +1179,7 @@ public class ExportRecordsController {
 					case csv:
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
-						csvRoutines.writeAll(reports, Report.class, reportsFile);
+						exportToCsv(reportsFile, reports, Report.class, ReportCsvExportMixIn.class);
 
 						if (CollectionUtils.isNotEmpty(allReportGroups)
 								|| CollectionUtils.isNotEmpty(allReportParams)
@@ -1246,46 +1220,46 @@ public class ExportRecordsController {
 							File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 							if (CollectionUtils.isNotEmpty(allReportGroups)) {
-								csvRoutines.writeAll(allReportGroups, ReportGroup.class, reportGroupsFile);
+								exportToCsv(reportGroupsFile, allReportGroups, ReportGroup.class);
 								filesToZip.add(reportGroupsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allReportParams)) {
-								csvRoutines.writeAll(allReportParams, ReportParameter.class, reportParamsFile);
+								exportToCsv(reportParamsFile, allReportParams, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 								filesToZip.add(reportParamsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserRuleValues)) {
-								csvRoutines.writeAll(allUserRuleValues, UserRuleValue.class, userRuleValuesFile);
+								exportToCsv(userRuleValuesFile, allUserRuleValues, UserRuleValue.class, UserRuleValueCsvExportMixIn.class);
 								filesToZip.add(userRuleValuesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserGroupRuleValues)) {
-								csvRoutines.writeAll(allUserGroupRuleValues, UserGroupRuleValue.class, userGroupRuleValuesFile);
+								exportToCsv(userGroupRuleValuesFile, allUserGroupRuleValues, UserGroupRuleValue.class, UserGroupRuleValueCsvExportMixIn.class);
 								filesToZip.add(userGroupRuleValuesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allReportRules)) {
-								csvRoutines.writeAll(allReportRules, ReportRule.class, reportRulesFile);
+								exportToCsv(reportRulesFile, allReportRules, ReportRule.class, ReportRuleCsvExportMixIn.class);
 								filesToZip.add(reportRulesFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserReportRights)) {
-								csvRoutines.writeAll(allUserReportRights, UserReportRight.class, userReportRightsFile);
+								exportToCsv(userReportRightsFile, allUserReportRights, UserReportRight.class, UserReportRightCsvExportMixIn.class);
 								filesToZip.add(userReportRightsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allUserGroupReportRights)) {
-								csvRoutines.writeAll(allUserGroupReportRights, UserGroupReportRight.class, userGroupReportRightsFile);
+								exportToCsv(userGroupReportRightsFile, allUserGroupReportRights, UserGroupReportRight.class, UserGroupReportRightCsvExportMixIn.class);
 								filesToZip.add(userGroupReportRightsFilePath);
 							}
 
 							if (CollectionUtils.isNotEmpty(allDrilldowns)) {
-								csvRoutines.writeAll(allDrilldowns, Drilldown.class, drilldownsFile);
+								exportToCsv(drilldownsFile, allDrilldowns, Drilldown.class, DrilldownCsvExportMixIn.class);
 								filesToZip.add(drilldownsFilePath);
 
 								if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-									csvRoutines.writeAll(allDrilldownReportParams, ReportParameter.class, drilldownReportParamsFile);
+									exportToCsv(drilldownReportParamsFile, allDrilldownReportParams, ReportParameter.class, ReportParameterCsvExportMixIn.class);
 									filesToZip.add(drilldownReportParamsFilePath);
 								}
 							}
@@ -1532,16 +1506,14 @@ public class ExportRecordsController {
 	 *
 	 * @param exportRecords the export records object
 	 * @param sessionUser the session user
-	 * @param csvRoutines the CsvRoutines object to use for file export
 	 * @param conn the connection to use for datasource export
 	 * @param file the export file to use, for json output
 	 * @return the export file path for file export
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private String exportRoles(ExportRecords exportRecords,
-			User sessionUser, CsvRoutines csvRoutines, Connection conn, File file)
-			throws SQLException, IOException {
+	private String exportRoles(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
 
 		logger.debug("Entering exportRoles");
 
@@ -1557,14 +1529,13 @@ public class ExportRecordsController {
 				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
 				switch (fileFormat) {
 					case json:
-						ObjectMapper mapper = ArtUtils.getPropertyOnlyObjectMapper();
-						mapper.writerWithDefaultPrettyPrinter().writeValue(file, roles);
+						exportToJson(file, roles);
 						exportFilePath = recordsExportPath + "art-export-Roles.json";
 						break;
 					case csv:
 						String rolesFilePath = recordsExportPath + ExportRecords.EMBEDDED_ROLES_FILENAME;
 						File rolesFile = new File(rolesFilePath);
-						csvRoutines.writeAll(roles, Role.class, rolesFile);
+						exportToCsv(rolesFile, roles, Role.class);
 						List<Permission> permissions = new ArrayList<>();
 						for (Role role : roles) {
 							List<Permission> rolePermissions = role.getPermissions();
@@ -1576,7 +1547,7 @@ public class ExportRecordsController {
 						if (CollectionUtils.isNotEmpty(permissions)) {
 							String permissionsFilePath = recordsExportPath + ExportRecords.EMBEDDED_PERMISSIONS_FILENAME;
 							File permissionsFile = new File(permissionsFilePath);
-							csvRoutines.writeAll(permissions, Permission.class, permissionsFile);
+							exportToCsv(permissionsFile, permissions, Permission.class);
 							exportFilePath = recordsExportPath + "art-export-Roles.zip";
 							ArtUtils.zipFiles(exportFilePath, rolesFilePath, permissionsFilePath);
 							rolesFile.delete();
@@ -1597,6 +1568,52 @@ public class ExportRecordsController {
 		}
 
 		return exportFilePath;
+	}
+
+	/**
+	 * Exports values to a file in json format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @throws java.io.IOException
+	 */
+	public void exportToJson(File file, Object value) throws IOException {
+		ObjectMapper mapper = ArtUtils.getMigrationObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter().writeValue(file, value);
+	}
+
+	/**
+	 * Exports values to a file in csv format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @param type the type of object
+	 * @throws IOException
+	 */
+	private void exportToCsv(File file, Object value, Class<?> type) throws IOException {
+		Class<?> mixIn = null;
+		exportToCsv(file, value, type, mixIn);
+	}
+
+	/**
+	 * Exports values to a file in csv format
+	 *
+	 * @param file the file to export to
+	 * @param value the object to export
+	 * @param type the type of object
+	 * @param mixIn a mixin to apply
+	 * @throws IOException
+	 */
+	private void exportToCsv(File file, Object value, Class<?> type, Class<?> mixIn)
+			throws IOException {
+
+		//https://gist.github.com/shsdev/11392809
+		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
+		if (mixIn != null) {
+			csvMapper.addMixIn(type, mixIn);
+		}
+		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
+		csvMapper.writer(schema).writeValue(file, value);
 	}
 
 }

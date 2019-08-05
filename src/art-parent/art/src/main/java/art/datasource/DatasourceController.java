@@ -203,8 +203,8 @@ public class DatasourceController {
 
 	@RequestMapping(value = "/saveDatasource", method = RequestMethod.POST)
 	public String saveDatasource(@ModelAttribute("datasource")
-			@Valid Datasource datasource, @RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			@Valid Datasource datasource, BindingResult result, Model model,
+			@RequestParam("action") String action, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
 		logger.debug("Entering saveDatasource: datasource={}, action='{}'", datasource, action);
