@@ -729,7 +729,7 @@ INSERT INTO ART_DRILLDOWN_QUERIES VALUES(83,23,1,'Drill','details','htmlDataTabl
 INSERT INTO ART_DRILLDOWN_QUERIES VALUES(84,23,1,'Drill','details','htmlDataTable',1,1,1)
 INSERT INTO ART_DRILLDOWN_QUERIES VALUES(86,23,1,'Drill','details','htmlDataTable',1,1,1)
 INSERT INTO ART_USER_JOBS VALUES(2,'auser',NULL,NULL,NULL,NULL,2,NULL,NULL)
-INSERT INTO ART_DATABASE_VERSION VALUES('4.4-snapshot')
+INSERT INTO ART_DATABASE_VERSION VALUES('4.4')
 INSERT INTO ART_PARAMETERS VALUES(1,'regionId','Select Region','Single-Value','Region','Select one item from the list','Integer','',0,1,4,0,0,0,NULL,NULL,'2016-04-15 09:42:18.784000','admin',NULL,0,NULL,NULL,NULL,NULL,0,NULL)
 INSERT INTO ART_PARAMETERS VALUES(2,'startDate','From Date','Single-Value','From','Pick a date by clicking on the calendar icon','Date','2010-01-01',0,0,NULL,0,0,0,NULL,NULL,'2019-02-06 19:00:06.557000','admin',NULL,0,'','','',0,0,'')
 INSERT INTO ART_PARAMETERS VALUES(3,'endDate','To Date','Single-Value','To','Pick a date by clicking on the calendar icon','Date','',0,0,NULL,0,0,0,NULL,NULL,'2019-02-06 19:00:42.234000','admin',NULL,0,'','dd-MMM-yyyy','',0,0,'')
