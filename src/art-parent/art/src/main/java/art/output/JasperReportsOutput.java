@@ -310,8 +310,8 @@ public class JasperReportsOutput {
 		String propertiesFilePath = Config.getClassesPath() + "jasperreports.properties";
 		File propertiesFile = new File(propertiesFilePath);
 		if (propertiesFile.exists()) {
-			try (FileInputStream o = new FileInputStream(propertiesFilePath)) {
-				properties.load(o);
+			try (FileInputStream input = new FileInputStream(propertiesFilePath)) {
+				properties.load(input);
 			}
 		}
 

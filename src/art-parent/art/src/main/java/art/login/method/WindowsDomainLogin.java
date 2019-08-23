@@ -19,19 +19,15 @@ package art.login.method;
 
 import art.login.LoginResult;
 import art.servlets.Config;
-import com.hierynomus.mssmb2.SMBApiException;
-import com.hierynomus.smbj.SMBClient;
-import com.hierynomus.smbj.SmbConfig;
-import com.hierynomus.smbj.auth.AuthenticationContext;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
+import java.util.Properties;
 import jcifs.CIFSContext;
 import jcifs.CIFSException;
 import jcifs.config.PropertyConfiguration;
 import jcifs.context.BaseContext;
-import jcifs.context.SingletonContext;
-import jcifs.netbios.UniAddress;
 import jcifs.smb.NtlmPasswordAuthenticator;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
@@ -73,48 +69,65 @@ public class WindowsDomainLogin {
 			return result;
 		}
 
-		SmbConfig config = SmbConfig.builder()
-				.withTimeout(10, TimeUnit.SECONDS)
-				.withSoTimeout(60, TimeUnit.SECONDS)
-				.withMultiProtocolNegotiate(true)
-				.build();
-
-			try (SMBClient client = new SMBClient(config)) {
-				try (com.hierynomus.smbj.connection.Connection connection = client.connect(domainController)) {
-					if (username == null) {
-						username = "";
-					}
-
-					if (password == null) {
-						password = "";
-					}
-
-					AuthenticationContext ac;
-					ac = new AuthenticationContext(username, password.toCharArray(), domain);
-
-					com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
-					
-					//if we are here, authentication is successful
-			result.setAuthenticated(true);
-			
-					//session.logoff();
-
-				} catch (SMBApiException ex) {
-					logger.error("Error. username={}", username, ex);
-
-					result.setMessage("login.message.invalidCredentials");
-					result.setDetails(ex.getMessage());
-					result.setError(ex.toString());
-				} catch (IOException ex) {
-					logger.error("Error. username={}", username, ex);
-
-					result.setMessage("page.message.errorOccurred");
-					result.setDetails(ex.getMessage());
-					result.setError(ex.toString());
+		try {
+			//https://stackoverflow.com/questions/11251289/how-to-read-a-properties-file-in-java-from-outside-the-class-folder
+			Properties properties = new Properties();
+			String propertiesFilePath = Config.getClassesPath() + "jcifs.properties";
+			File propertiesFile = new File(propertiesFilePath);
+			if (propertiesFile.exists()) {
+				try (FileInputStream input = new FileInputStream(propertiesFilePath)) {
+					properties.load(input);
 				}
-
 			}
 
+			//https://github.com/AgNO3/jcifs-ng/issues/139
+			//https://github.com/AgNO3/jcifs-ng/issues/93
+			//https://github.com/AgNO3/jcifs-ng/issues/67
+			PropertyConfiguration config = new PropertyConfiguration(properties);
+			BaseContext baseContext = new BaseContext(config);
+
+			NtlmPasswordAuthenticator auth = new NtlmPasswordAuthenticator(domain, username, password);
+			CIFSContext contextWithCredentials = baseContext.withCredentials(auth);
+
+			contextWithCredentials.getTransportPool().logon(contextWithCredentials, contextWithCredentials.getNameServiceClient().getByName(domainController));
+
+			//if we are here, authentication is successful
+			result.setAuthenticated(true);
+		} catch (UnknownHostException ex) {
+			//domainController provided was a hostname and name could not be resolved
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		} catch (SmbAuthException ex) {
+			//AUTHENTICATION FAILURE
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("login.message.invalidCredentials");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		} catch (SmbException ex) {
+			//NETWORK PROBLEMS? failed to connect to dc
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		} catch (CIFSException ex) {
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		} catch (IOException ex) {
+			//problem loading properties file
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		}
 
 		return result;
 	}
