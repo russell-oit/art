@@ -1,5 +1,5 @@
 ART 4.5
-* Enable use of windows domain authentication with SMBv2
+* Enable use of windows domain authentication with SMB2
 
 ART 4.4
 * Allow chained parameters to use default values
