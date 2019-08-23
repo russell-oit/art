@@ -19,12 +19,22 @@ package art.login.method;
 
 import art.login.LoginResult;
 import art.servlets.Config;
+import com.hierynomus.mssmb2.SMBApiException;
+import com.hierynomus.smbj.SMBClient;
+import com.hierynomus.smbj.SmbConfig;
+import com.hierynomus.smbj.auth.AuthenticationContext;
+import java.io.IOException;
 import java.net.UnknownHostException;
-import jcifs.UniAddress;
-import jcifs.smb.NtlmPasswordAuthentication;
+import java.util.concurrent.TimeUnit;
+import jcifs.CIFSContext;
+import jcifs.CIFSException;
+import jcifs.config.PropertyConfiguration;
+import jcifs.context.BaseContext;
+import jcifs.context.SingletonContext;
+import jcifs.netbios.UniAddress;
+import jcifs.smb.NtlmPasswordAuthenticator;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
-import jcifs.smb.SmbSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,40 +73,48 @@ public class WindowsDomainLogin {
 			return result;
 		}
 
-		try {
-			//See http://jcifs.samba.org/FAQ.html
-			UniAddress dc = UniAddress.getByName(domainController);
+		SmbConfig config = SmbConfig.builder()
+				.withTimeout(10, TimeUnit.SECONDS)
+				.withSoTimeout(60, TimeUnit.SECONDS)
+				.withMultiProtocolNegotiate(true)
+				.build();
 
-			//if we are here, domainController is an ip address or a valid machine name
-			//domainController can also be any machine that is a member of the domain,
-			//doesn't have to be the domain controller
-			NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
-			SmbSession.logon(dc, auth);
+			try (SMBClient client = new SMBClient(config)) {
+				try (com.hierynomus.smbj.connection.Connection connection = client.connect(domainController)) {
+					if (username == null) {
+						username = "";
+					}
 
-			//if we are here, authentication is successful
+					if (password == null) {
+						password = "";
+					}
+
+					AuthenticationContext ac;
+					ac = new AuthenticationContext(username, password.toCharArray(), domain);
+
+					com.hierynomus.smbj.session.Session session = connection.authenticate(ac);
+					
+					//if we are here, authentication is successful
 			result.setAuthenticated(true);
-		} catch (UnknownHostException ex) {
-			//if domainController provided was a hostname, name could not be resolved
-			logger.error("Error. username={}", username, ex);
+			
+					//session.logoff();
 
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		} catch (SmbAuthException ex) {
-			// AUTHENTICATION FAILURE
-			logger.error("Error. username={}", username, ex);
+				} catch (SMBApiException ex) {
+					logger.error("Error. username={}", username, ex);
 
-			result.setMessage("login.message.invalidCredentials");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		} catch (SmbException ex) {
-			// NETWORK PROBLEMS? failed to connect to dc
-			logger.error("Error. username={}", username, ex);
+					result.setMessage("login.message.invalidCredentials");
+					result.setDetails(ex.getMessage());
+					result.setError(ex.toString());
+				} catch (IOException ex) {
+					logger.error("Error. username={}", username, ex);
 
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		}
+					result.setMessage("page.message.errorOccurred");
+					result.setDetails(ex.getMessage());
+					result.setError(ex.toString());
+				}
+
+			}
+
 
 		return result;
 	}
