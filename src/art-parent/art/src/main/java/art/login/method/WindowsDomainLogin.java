@@ -22,15 +22,12 @@ import art.servlets.Config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Properties;
 import jcifs.CIFSContext;
-import jcifs.CIFSException;
 import jcifs.config.PropertyConfiguration;
 import jcifs.context.BaseContext;
 import jcifs.smb.NtlmPasswordAuthenticator;
 import jcifs.smb.SmbAuthException;
-import jcifs.smb.SmbException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,35 +90,13 @@ public class WindowsDomainLogin {
 
 			//if we are here, authentication is successful
 			result.setAuthenticated(true);
-		} catch (UnknownHostException ex) {
-			//domainController provided was a hostname and name could not be resolved
-			logger.error("Error. username='{}'", username, ex);
-
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
 		} catch (SmbAuthException ex) {
-			//AUTHENTICATION FAILURE
 			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("login.message.invalidCredentials");
 			result.setDetails(ex.getMessage());
 			result.setError(ex.toString());
-		} catch (SmbException ex) {
-			//NETWORK PROBLEMS? failed to connect to dc
-			logger.error("Error. username='{}'", username, ex);
-
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		} catch (CIFSException ex) {
-			logger.error("Error. username='{}'", username, ex);
-
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
 		} catch (IOException ex) {
-			//problem loading properties file
 			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("page.message.errorOccurred");
