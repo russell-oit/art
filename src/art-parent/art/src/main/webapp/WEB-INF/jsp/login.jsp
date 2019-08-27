@@ -12,7 +12,6 @@ Login page
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
@@ -74,14 +73,14 @@ Login page
 									<div class="alert alert-danger alert-dismissable">
 										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 										<p><spring:message code="page.message.errorOccurred"/></p>
-										<p>${fn:escapeXml(error)}</p>
+										<p>${encode:forHtmlContent(error)}</p>
 									</div>
 								</c:if>
 								<c:if test="${result != null}">
 									<div class="alert alert-danger alert-dismissable">
 										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 										<p><spring:message code="${result.message}"/></p>
-										<p>${fn:escapeXml(result.error)}</p>
+										<p>${encode:forHtmlContent(result.error)}</p>
 									</div>
 								</c:if>
 								<c:if test="${not empty message}">
@@ -109,9 +108,9 @@ Login page
 								<div class="col-md-10">
 									<select name="windowsDomain" id="windowsDomain" class="form-control">
 										<c:forTokens var="domain" items='${domains}' delims=",">
-											<option value="${fn:escapeXml(domain)}"
+											<option value="${encode:forHtmlAttribute(domain)}"
 													${domain == selectedDomain ? "selected" : ""}>
-												${fn:escapeXml(domain)}
+												${encode:forHtmlContent(domain)}
 											</option>
 										</c:forTokens>
 									</select>
@@ -124,7 +123,8 @@ Login page
 							</label>
 							<div class="col-md-10">
 								<input type="text" name="username" id="username"
-									   maxlength="50" class="form-control" value="${fn:escapeXml(selectedUsername)}">
+									   maxlength="50" class="form-control"
+									   value="${encode:forHtmlAttribute(selectedUsername)}">
 							</div>
 						</div>
 						<div class="form-group">
