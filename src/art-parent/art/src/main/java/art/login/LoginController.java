@@ -297,17 +297,19 @@ public class LoginController {
 		//log result
 		loginHelper.log(loginMethod, result, username, ip);
 
+		LoginResult backupResult = new LoginResult();
+
 		if (!result.isAuthenticated() && user != null && loginMethod != ArtAuthenticationMethod.Internal) {
 			//external authentication failed. try internal authentication
-			result = InternalLogin.authenticate(username, password);
-			if (result.isAuthenticated()) {
+			backupResult = InternalLogin.authenticate(username, password);
+			if (backupResult.isAuthenticated()) {
 				//log access using internal authentication
 				loginMethod = ArtAuthenticationMethod.Internal;
 				loginHelper.logSuccess(loginMethod, username, ip);
 			}
 		}
 
-		if (!result.isAuthenticated()) {
+		if (!result.isAuthenticated() && !backupResult.isAuthenticated()) {
 			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user
 			if (Config.getCustomSettings().isAllowRepositoryLogin()) {
@@ -315,8 +317,8 @@ public class LoginController {
 					loginMethod = ArtAuthenticationMethod.Repository;
 					user = User.createRepositoryUser();
 
-					result = new LoginResult();
-					result.setAuthenticated(true);
+					backupResult = new LoginResult();
+					backupResult.setAuthenticated(true);
 
 					//log access using repository user
 					loginHelper.logSuccess(loginMethod, username, ip);
@@ -325,7 +327,7 @@ public class LoginController {
 		}
 
 		//finally, authentication process finished. display appropriate page
-		if (result.isAuthenticated() && user != null) {
+		if ((result.isAuthenticated() || backupResult.isAuthenticated()) && user != null) {
 			//access granted
 			String ipAddress = request.getRemoteAddr();
 			try {

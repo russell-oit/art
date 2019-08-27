@@ -95,13 +95,12 @@ public class WindowsDomainLogin {
 
 			result.setMessage("login.message.invalidCredentials");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
 		} catch (IOException ex) {
 			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setError(ex.getMessage());
 		}
 
 		return result;
