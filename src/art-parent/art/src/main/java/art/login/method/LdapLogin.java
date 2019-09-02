@@ -226,7 +226,7 @@ public class LdapLogin {
 
 							result.setMessage("login.message.invalidCredentials");
 							result.setDetails(ex.getMessage());
-							result.setError(ex.toString());
+							result.setError(ex.getMessage());
 
 							logger.debug("ex.getResultCode().isConnectionUsable()={}", ex.getResultCode().isConnectionUsable());
 							if (!ex.getResultCode().isConnectionUsable()) {
@@ -240,7 +240,7 @@ public class LdapLogin {
 
 					result.setMessage("page.message.errorOccurred");
 					result.setDetails(ex.getMessage());
-					result.setError(ex.toString());
+					result.setError(ex.getMessage());
 				}
 			}
 		} catch (LDAPException | GeneralSecurityException ex) {
@@ -248,7 +248,7 @@ public class LdapLogin {
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setError(ex.getMessage());
 		} 
 
 		logger.debug("ldapConnection != null ={}", ldapConnection != null);
@@ -373,7 +373,8 @@ public class LdapLogin {
 				logger.error("Error. username='{}'", ex);
 
 				result.setMessage("login.message.invalidCredentials");
-				result.setDetails(ex.toString());
+				result.setDetails(ex.getMessage());
+				result.setError(ex.getMessage());
 			} finally {
 				if (results != null) {
 					try {
@@ -387,7 +388,8 @@ public class LdapLogin {
 			logger.error("Error. username='{}'", ex);
 
 			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.toString());
+			result.setDetails(ex.getMessage());
+			result.setError(ex.getMessage());
 		} finally {
 			if (ctx != null) {
 				try {

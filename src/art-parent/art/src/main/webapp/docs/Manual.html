@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.4"> 
+  <meta name="version" content="4.5"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -1259,7 +1259,8 @@
 ping -a &lt;ip address of domain controller&gt; (This will get the hostname of the domain controller)
 </pre> 
        </div> </li> 
-      <li> <p>Set the <strong>Allowed Windows Domains</strong> field to the windows domain name. Use all uppercase letters for the domain name</p> </li> 
+      <li> <p>Set the <strong>Allowed Windows Domains</strong> field to the windows domain name</p> </li> 
+      <li>ART uses the <a class="" href="https://github.com/AgNO3/jcifs-ng" rel="nofollow">jcifs-ng</a> library to provide windows domain authentication. You can optionally specify configuration properties for this library by modifying the <strong>WEB-INF\classes\jcifs.properties</strong> file. An indication of available properties can be found <a class="" href="https://github.com/AgNO3/jcifs-ng/blob/master/src/main/java/jcifs/config/PropertyConfiguration.java" rel="nofollow">here</a>.</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their windows login username. Grant them appropriate access to reports. The users can now log in to ART using their windows username and password.</p> 
      <h2 id="ldap-authentication">LDAP Authentication</h2> 

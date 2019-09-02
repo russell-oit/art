@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>4.4</version>
+		<version>4.5</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -221,22 +221,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -251,7 +251,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -271,7 +271,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -282,13 +282,13 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>reportengine-art</artifactId>
-			<version>4.4</version>
+			<version>4.5</version>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
@@ -418,17 +418,6 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.10</version>
-		</dependency>
-		<dependency>
-			<groupId>jcifs</groupId>
-			<artifactId>jcifs</artifactId>
-			<version>1.3.17</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<!-- ucanaccess needed at compile time for class that supports password protected files -->
 		<dependency>
@@ -1013,6 +1002,11 @@
 			<groupId>com.itfsw</groupId>
 			<artifactId>QueryBuilder</artifactId>
 			<version>1.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.agno3.jcifs</groupId>
+			<artifactId>jcifs-ng</artifactId>
+			<version>2.1.3</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -96,7 +96,7 @@ public class InternalLogin {
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setError(ex.getMessage());
 		}
 
 		return result;

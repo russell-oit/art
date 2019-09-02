@@ -79,7 +79,7 @@ public class DbLogin {
 
 			result.setMessage("login.message.invalidCredentials");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setError(ex.getMessage());
 		}
 
 		return result;

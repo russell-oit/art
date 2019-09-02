@@ -19,12 +19,15 @@ package art.login.method;
 
 import art.login.LoginResult;
 import art.servlets.Config;
-import java.net.UnknownHostException;
-import jcifs.UniAddress;
-import jcifs.smb.NtlmPasswordAuthentication;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import jcifs.CIFSContext;
+import jcifs.config.PropertyConfiguration;
+import jcifs.context.BaseContext;
+import jcifs.smb.NtlmPasswordAuthenticator;
 import jcifs.smb.SmbAuthException;
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,38 +67,40 @@ public class WindowsDomainLogin {
 		}
 
 		try {
-			//See http://jcifs.samba.org/FAQ.html
-			UniAddress dc = UniAddress.getByName(domainController);
+			//https://stackoverflow.com/questions/11251289/how-to-read-a-properties-file-in-java-from-outside-the-class-folder
+			Properties properties = new Properties();
+			String propertiesFilePath = Config.getClassesPath() + "jcifs.properties";
+			File propertiesFile = new File(propertiesFilePath);
+			if (propertiesFile.exists()) {
+				try (FileInputStream input = new FileInputStream(propertiesFilePath)) {
+					properties.load(input);
+				}
+			}
 
-			//if we are here, domainController is an ip address or a valid machine name
-			//domainController can also be any machine that is a member of the domain,
-			//doesn't have to be the domain controller
-			NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
-			SmbSession.logon(dc, auth);
+			//https://github.com/AgNO3/jcifs-ng/issues/139
+			//https://github.com/AgNO3/jcifs-ng/issues/93
+			//https://github.com/AgNO3/jcifs-ng/issues/67
+			PropertyConfiguration config = new PropertyConfiguration(properties);
+			BaseContext baseContext = new BaseContext(config);
+
+			NtlmPasswordAuthenticator auth = new NtlmPasswordAuthenticator(domain, username, password);
+			CIFSContext contextWithCredentials = baseContext.withCredentials(auth);
+
+			contextWithCredentials.getTransportPool().logon(contextWithCredentials, contextWithCredentials.getNameServiceClient().getByName(domainController));
 
 			//if we are here, authentication is successful
 			result.setAuthenticated(true);
-		} catch (UnknownHostException ex) {
-			//if domainController provided was a hostname, name could not be resolved
-			logger.error("Error. username={}", username, ex);
-
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
 		} catch (SmbAuthException ex) {
-			// AUTHENTICATION FAILURE
-			logger.error("Error. username={}", username, ex);
+			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("login.message.invalidCredentials");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		} catch (SmbException ex) {
-			// NETWORK PROBLEMS? failed to connect to dc
-			logger.error("Error. username={}", username, ex);
+		} catch (IOException ex) {
+			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setError(ex.getMessage());
 		}
 
 		return result;
