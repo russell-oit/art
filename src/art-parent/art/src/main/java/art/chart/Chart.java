@@ -573,28 +573,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		rotateLabels(chart);
 		applySeriesColors(chart);
 		addSecondaryCharts(chart);
-		addUpperMargin(chart);
-	}
-
-	/**
-	 * Sets the upper margin for the range axis
-	 *
-	 * @param chart
-	 */
-	private void addUpperMargin(JFreeChart chart) {
-		Plot plot = chart.getPlot();
-
-		//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/axis/ValueAxis.html#setUpperMargin-double-
-		double upperMargin = extraOptions.getUpperMargin();
-		if (upperMargin > 0 && upperMargin < 100) {
-			if (plot instanceof XYPlot) {
-				XYPlot xyPlot = (XYPlot) plot;
-				xyPlot.getRangeAxis().setUpperMargin(upperMargin);
-			} else if (plot instanceof CategoryPlot) {
-				CategoryPlot categoryPlot = (CategoryPlot) plot;
-				categoryPlot.getRangeAxis().setUpperMargin(upperMargin);
-			}
-		}
 	}
 
 	/**
@@ -688,6 +666,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				//https://community.jaspersoft.com/questions/537007/labels-truncated-chart
 				renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
 				renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
+
+				if (reportType.isVerticalBar2DChart()) {
+					double upperMargin = extraOptions.getUpperMargin();
+					if (upperMargin > 0 && upperMargin < 100) {
+						categoryPlot.getRangeAxis().setUpperMargin(upperMargin);
+					}
+				}
 			}
 		}
 	}

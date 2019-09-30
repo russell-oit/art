@@ -34,7 +34,7 @@ public class JFreeChartOptions implements Serializable {
 	private Map<String, String> seriesColors;
 	private String dateFormat;
 	private boolean dynamicSeries;
-	private double upperMargin;
+	private double upperMargin = 0.1;
 
 	/**
 	 * @return the upperMargin
