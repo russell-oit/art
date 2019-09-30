@@ -573,6 +573,28 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		rotateLabels(chart);
 		applySeriesColors(chart);
 		addSecondaryCharts(chart);
+		addUpperMargin(chart);
+	}
+
+	/**
+	 * Sets the upper margin for the range axis
+	 *
+	 * @param chart
+	 */
+	private void addUpperMargin(JFreeChart chart) {
+		Plot plot = chart.getPlot();
+
+		//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/axis/ValueAxis.html#setUpperMargin-double-
+		double upperMargin = extraOptions.getUpperMargin();
+		if (upperMargin > 0 && upperMargin < 100) {
+			if (plot instanceof XYPlot) {
+				XYPlot xyPlot = (XYPlot) plot;
+				xyPlot.getRangeAxis().setUpperMargin(upperMargin);
+			} else if (plot instanceof CategoryPlot) {
+				CategoryPlot categoryPlot = (CategoryPlot) plot;
+				categoryPlot.getRangeAxis().setUpperMargin(upperMargin);
+			}
+		}
 	}
 
 	/**
@@ -589,12 +611,10 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (chartOptions.getyAxisMin() != 0 || chartOptions.getyAxisMax() != 0) {
 			if (plot instanceof XYPlot) {
 				XYPlot xyPlot = (XYPlot) plot;
-				NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
-				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
+				xyPlot.getRangeAxis().setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
 			} else if (plot instanceof CategoryPlot) {
 				CategoryPlot categoryPlot = (CategoryPlot) plot;
-				NumberAxis rangeAxis = (NumberAxis) categoryPlot.getRangeAxis();
-				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
+				categoryPlot.getRangeAxis().setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
 			}
 		}
 	}
