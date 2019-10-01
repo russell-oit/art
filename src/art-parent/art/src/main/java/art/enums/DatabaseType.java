@@ -41,7 +41,7 @@ public enum DatabaseType {
 	SqlLiteXerial("sqlite-xerial"), CsvCsvjdbc("csv-csjdbc"),
 	H2Server("h2-server"), H2Embedded("h2-embedded"),
 	Olap4jMondrian("olap4j-mondrian"), Olap4jXmla("olap4j-xmla"),
-	Couchbase("couchbase"), Drill("drill"), Firebird("firebird"),
+	Drill("drill"), Firebird("firebird"),
 	MonetDB("monetdb"), Vertica("vertica"), Informix("informix"),
 	CassandraAdejanovski("cassandra-adejanovski"), Neo4j("neo4j"),
 	Exasol("exasol"), Redshift("redshift"), Teradata("teradata"),
