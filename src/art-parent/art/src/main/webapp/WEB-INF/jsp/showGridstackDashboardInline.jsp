@@ -236,7 +236,7 @@
 				if ("${item.baseUrl}") {
 					//use post for art reports
 					//use single quote as json string will have double quotes for attribute names and values
-					var parametersJson = '${item.parametersJson}';
+					var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
 					var parametersObject = JSON.parse(parametersJson);
 					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject, function () {
 						if (${item.autoheight} || ${item.autowidth}) {

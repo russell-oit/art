@@ -142,7 +142,7 @@
 				//use post for art reports
 				//https://api.jquery.com/load/
 				//use single quote as json string will have double quotes for attribute names and values
-				var parametersJson = '${portlet.parametersJson}';
+				var parametersJson = '${encode:forJavaScript(portlet.parametersJson)}';
 				var parametersObject = JSON.parse(parametersJson);
 				$(contentDivId).load(baseUrl, parametersObject);
 			} else {
@@ -157,7 +157,7 @@
 				if ("${portlet.baseUrl}") {
 					//use post for art reports
 					//use single quote as json string will have double quotes for attribute names and values
-					var parametersJson = '${portlet.parametersJson}';
+					var parametersJson = '${encode:forJavaScript(portlet.parametersJson)}';
 					var parametersObject = JSON.parse(parametersJson);
 					$("#portletContent_${portlet.index}").load("${portlet.baseUrl}", parametersObject);
 				} else {

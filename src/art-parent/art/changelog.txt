@@ -1,3 +1,6 @@
+ART 4.6
+* Corrected run of auto-refresh reports when dashboard parameters are changed
+
 ART 4.5
 * Enable use of windows domain authentication with SMB2
 
