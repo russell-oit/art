@@ -667,6 +667,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
 				renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
 
+				//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/axis/ValueAxis.html#setUpperMargin-double-
 				if (reportType.isVerticalBar2DChart()) {
 					double upperMargin = extraOptions.getUpperMargin();
 					if (upperMargin > 0 && upperMargin < 100) {
