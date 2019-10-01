@@ -273,6 +273,13 @@
 		}
 	</c:forEach>
 
+		$("#runInline").on("click", function (e) {
+			//https://api.jquery.com/jQuery.each/
+			$.each(intervalIds, function (key, value) {
+				clearInterval(intervalIds[key]);
+			});
+		});
+
 		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
