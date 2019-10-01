@@ -172,6 +172,14 @@
 		}
 	</c:forEach>
 
+		//https://stackoverflow.com/questions/1491718/jquery-more-than-one-handler-for-same-event
+		$("#runInline").on("click", function (e) {
+			//https://api.jquery.com/jQuery.each/
+			$.each(intervalIds, function (key, value) {
+				clearInterval(intervalIds[key]);
+			});
+		});
+
 		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
@@ -233,7 +241,7 @@
 				intervalIds[contentDivId] = setIntervalId;
 			}
 		});
-		
+
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 			$(window).trigger('resize');
 		});
