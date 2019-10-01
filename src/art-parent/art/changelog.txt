@@ -1,5 +1,6 @@
 ART 4.6
 * Corrected run of auto-refresh reports when dashboard parameters are changed
+* Better handling of labels being cut-off with vertical bar 2D charts
 
 ART 4.5
 * Enable use of windows domain authentication with SMB2
