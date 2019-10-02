@@ -281,12 +281,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
-			<artifactId>jdbc-n1ql-art</artifactId>
-			<version>4.6-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.art</groupId>
 			<artifactId>reportengine-art</artifactId>
 			<version>4.6-SNAPSHOT</version>
 		</dependency>
