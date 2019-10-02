@@ -179,7 +179,7 @@ public enum DatabaseProtocol {
 				return "rows {0}";
 			case kdb:
 				return "[{0}]";
-			case Oracle:
+			case Oracle: //12c+
 			case Db2:
 				//sql:2008 standard
 				return "fetch first {0} rows only";
