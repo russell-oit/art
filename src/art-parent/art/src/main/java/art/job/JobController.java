@@ -130,36 +130,55 @@ public class JobController {
 	public String showJobs(Model model, HttpSession session) {
 		logger.debug("Entering showJobs");
 
+		List<Job> jobs = null;
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			List<Job> jobs = jobService.getUserJobs(sessionUser.getUserId());
-			model.addAttribute("jobs", jobs);
-			model.addAttribute("nextPage", "jobs");
-			model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
+			jobs = jobService.getUserJobs(sessionUser.getUserId());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		model.addAttribute("action", "jobs");
-		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
-
-		return "jobs";
+		String action = "jobs";
+		String nextPage = "jobs";
+		
+		return showJobsPage(action, model, nextPage, jobs);
 	}
 
 	@RequestMapping(value = "/jobsConfig", method = RequestMethod.GET)
 	public String showJobsConfig(Model model) {
 		logger.debug("Entering showJobsConfig");
 
+		List<Job> jobs = null;
 		try {
-			model.addAttribute("jobs", jobService.getAllJobs());
-			model.addAttribute("nextPage", "jobsConfig");
+			jobs = jobService.getAllJobs();
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		model.addAttribute("action", "config");
+		String action = "config";
+		String nextPage = "jobsConfig";
+		
+		return showJobsPage(action, model, nextPage, jobs);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param action the kind of action being done
+	 * @param model the spring model
+	 * @param nextPage the page to display after editing a job
+	 * @param jobs the jobs to display
+	 * @return the jsp file to display
+	 */
+	private String showJobsPage(String action, Model model, String nextPage, List<Job> jobs) {
+		logger.debug("Entering showJobsPage: action='{}', nextPage='{}'", action, nextPage);
+
+		model.addAttribute("action", action);
+		model.addAttribute("nextPage", nextPage);
+		model.addAttribute("jobs", jobs);
+		model.addAttribute("serverDateString", ArtUtils.isoDateTimeMillisecondsFormatter.format(new Date()));
 		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 
 		return "jobs";
