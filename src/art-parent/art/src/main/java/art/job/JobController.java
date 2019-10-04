@@ -166,7 +166,7 @@ public class JobController {
 	/**
 	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action the kind of action being done
+	 * @param action "jobs" or "config"
 	 * @param model the spring model
 	 * @param nextPage the page to display after editing a job
 	 * @param jobs the jobs to display
