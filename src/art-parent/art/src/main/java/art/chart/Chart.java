@@ -589,12 +589,10 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (chartOptions.getyAxisMin() != 0 || chartOptions.getyAxisMax() != 0) {
 			if (plot instanceof XYPlot) {
 				XYPlot xyPlot = (XYPlot) plot;
-				NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
-				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
+				xyPlot.getRangeAxis().setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
 			} else if (plot instanceof CategoryPlot) {
 				CategoryPlot categoryPlot = (CategoryPlot) plot;
-				NumberAxis rangeAxis = (NumberAxis) categoryPlot.getRangeAxis();
-				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
+				categoryPlot.getRangeAxis().setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
 			}
 		}
 	}
@@ -653,8 +651,29 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				renderer.setBaseItemLabelGenerator(generator);
 				renderer.setBaseItemLabelsVisible(true);
 
+				//https://stackoverflow.com/questions/23665260/bar-chart-with-exact-value-printed-on-top-of-each-bar
+				//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/labels/ItemLabelAnchor.html
+				//https://stackoverflow.com/questions/18456048/jfreechart-margin
+				//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/axis/ValueAxis.html#setUpperMargin-double-
+				//https://stackoverflow.com/questions/23864802/add-margin-and-chart-header-alignment-in-jfree-charts
+				//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/JFreeChart.html#setPadding-org.jfree.chart.ui.RectangleInsets-
+				//https://stackoverflow.com/questions/16386295/margin-plot-and-chart-in-jfreechart
+				//https://stackoverflow.com/questions/22299659/how-can-i-make-a-jfreechart-bar-charts-plot-expand-to-show-vertical-labels-abov
+				//https://sourceforge.net/p/jfreechart/bugs/695/
+				//https://stackoverflow.com/questions/16091206/jfreechart-last-x-axis-label-cut-off
+				//http://jfree.org/forum/viewtopic.php?t=22177
+				//http://www.jfree.org/forum/viewtopic.php?t=23485
+				//https://community.jaspersoft.com/questions/537007/labels-truncated-chart
 				renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
 				renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BASELINE_CENTER));
+
+				//http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/axis/ValueAxis.html#setUpperMargin-double-
+				if (reportType.isVerticalBar2DChart()) {
+					double upperMargin = extraOptions.getUpperMargin();
+					if (upperMargin > 0 && upperMargin < 100) {
+						categoryPlot.getRangeAxis().setUpperMargin(upperMargin);
+					}
+				}
 			}
 		}
 	}

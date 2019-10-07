@@ -142,7 +142,7 @@
 				//use post for art reports
 				//https://api.jquery.com/load/
 				//use single quote as json string will have double quotes for attribute names and values
-				var parametersJson = '${portlet.parametersJson}';
+				var parametersJson = '${encode:forJavaScript(portlet.parametersJson)}';
 				var parametersObject = JSON.parse(parametersJson);
 				$(contentDivId).load(baseUrl, parametersObject);
 			} else {
@@ -157,7 +157,7 @@
 				if ("${portlet.baseUrl}") {
 					//use post for art reports
 					//use single quote as json string will have double quotes for attribute names and values
-					var parametersJson = '${portlet.parametersJson}';
+					var parametersJson = '${encode:forJavaScript(portlet.parametersJson)}';
 					var parametersObject = JSON.parse(parametersJson);
 					$("#portletContent_${portlet.index}").load("${portlet.baseUrl}", parametersObject);
 				} else {
@@ -171,6 +171,14 @@
 			intervalIds[contentDivId] = intervalId;
 		}
 	</c:forEach>
+
+		//https://stackoverflow.com/questions/1491718/jquery-more-than-one-handler-for-same-event
+		$("#runInline").on("click", function (e) {
+			//https://api.jquery.com/jQuery.each/
+			$.each(intervalIds, function (key, value) {
+				clearInterval(intervalIds[key]);
+			});
+		});
 
 		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');
@@ -233,7 +241,7 @@
 				intervalIds[contentDivId] = setIntervalId;
 			}
 		});
-		
+
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 			$(window).trigger('resize');
 		});

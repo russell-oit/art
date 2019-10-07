@@ -236,7 +236,7 @@
 				if ("${item.baseUrl}") {
 					//use post for art reports
 					//use single quote as json string will have double quotes for attribute names and values
-					var parametersJson = '${item.parametersJson}';
+					var parametersJson = '${encode:forJavaScript(item.parametersJson)}';
 					var parametersObject = JSON.parse(parametersJson);
 					$("#itemContent_${item.index}").load("${item.baseUrl}", parametersObject, function () {
 						if (${item.autoheight} || ${item.autowidth}) {
@@ -272,6 +272,13 @@
 			intervalIds[contentDivId] = intervalId;
 		}
 	</c:forEach>
+
+		$("#runInline").on("click", function (e) {
+			//https://api.jquery.com/jQuery.each/
+			$.each(intervalIds, function (key, value) {
+				clearInterval(intervalIds[key]);
+			});
+		});
 
 		$('.toggle').on('click', function () {
 			var parentDiv = $(this).parent('div');

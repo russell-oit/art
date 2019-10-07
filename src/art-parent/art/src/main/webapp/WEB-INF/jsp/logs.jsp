@@ -192,7 +192,7 @@ Display application logs
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['user'])}</td>
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['requestURI'])}</td>
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['remoteAddr'])}</td>
-							<td>${encode:forHtmlContent(log.formattedException)}</td>
+							<td>${log.formattedException}</td>
 						</tr>
 					</c:forEach>
 				</tbody>

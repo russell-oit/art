@@ -61,6 +61,23 @@ public enum ReportType {
 	}
 
 	/**
+	 * Returns <code>true</code> if this is a vertical bar or stacked vertical
+	 * bar 2D chart report
+	 *
+	 * @return <code>true</code> if this is a vertical bar or stacked vertical
+	 * bar 2D chart report
+	 */
+	public boolean isVerticalBar2DChart() {
+		switch (this) {
+			case VerticalBar2DChart:
+			case StackedVerticalBar2DChart:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if this report type requires a scrollable
 	 * resultset in order to run properly
 	 *

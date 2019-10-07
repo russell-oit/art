@@ -297,11 +297,6 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "org.olap4j.driver.xmla.XmlaOlap4jDriver";
 		urlElement.value = "jdbc:xmla:Server=<xmla_url>";
 		testSqlElement.value = "";
-	} else if (databaseType === "Couchbase") {
-		$(databaseProtocolSelector).val('');
-		driverElement.value = "com.couchbase.jdbc.CBDriver";
-		urlElement.value = "jdbc:couchbase://<server>:8093";
-		testSqlElement.value = "";
 	} else if (databaseType === "Drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
 		$(databaseProtocolSelector).val('Drill');
