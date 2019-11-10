@@ -343,7 +343,7 @@ public class UpgradeHelper {
 
 		logger.debug("reports.isEmpty()={}", reports.isEmpty());
 		if (!reports.isEmpty()) {
-			logger.info("Adding report-report group records");
+			logger.info("Adding report - report group records");
 
 			for (Map<String, Object> report : reports) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
@@ -857,6 +857,8 @@ public class UpgradeHelper {
 	 */
 	private void populateUserRolesTable() throws SQLException {
 		logger.debug("Entering populateUserRolesTable");
+		
+		logger.info("Adding user - role records");
 
 		String sql;
 
