@@ -526,8 +526,7 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
-		} catch (SQLException | RuntimeException ex) {
-			//include runtime exception in case of PoolInitializationException when using hikaricp
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
 

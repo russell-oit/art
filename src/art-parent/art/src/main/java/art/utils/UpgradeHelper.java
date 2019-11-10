@@ -61,16 +61,19 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
-	public void upgrade(String templatesPath) {
+	public void upgrade(String templatesPath) throws Exception {
 		migrateJobsToQuartz();
 		upgradeDatabase(templatesPath);
 	}
 
 	/**
 	 * Migrates art jobs to quartz jobs
+	 *
+	 * @throws java.sql.SQLException
 	 */
-	private void migrateJobsToQuartz() {
+	private void migrateJobsToQuartz() throws SQLException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -78,42 +81,38 @@ public class UpgradeHelper {
 			return;
 		}
 
-		try {
-			String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL"
-					+ " WHERE JOB_ID=?";
+		String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL"
+				+ " WHERE JOB_ID=?";
 
-			User actionUser = new User();
-			actionUser.setUsername("art migration");
+		User actionUser = new User();
+		actionUser.setUsername("art migration");
 
-			int nonQuartzJobCount = 0;
-			int successfulMigrationCount = 0;
+		int nonQuartzJobCount = 0;
+		int successfulMigrationCount = 0;
 
-			JobService jobService = new JobService();
+		JobService jobService = new JobService();
 
-			List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
-			for (Job job : nonQuartzJobs) {
-				nonQuartzJobCount++;
+		List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
+		for (Job job : nonQuartzJobs) {
+			nonQuartzJobCount++;
 
-				if (nonQuartzJobCount == 1) {
-					logger.info("Migrating jobs to quartz...");
-				}
-
-				int jobId = job.getJobId();
-
-				try {
-					jobService.processSchedules(job, actionUser);
-					dbService.update(sql, jobId);
-					successfulMigrationCount++;
-				} catch (ParseException | SchedulerException | SQLException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
-				}
+			if (nonQuartzJobCount == 1) {
+				logger.info("Migrating jobs to quartz...");
 			}
 
-			if (nonQuartzJobCount > 0) {
-				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
+			int jobId = job.getJobId();
+
+			try {
+				jobService.processSchedules(job, actionUser);
+				dbService.update(sql, jobId);
+				successfulMigrationCount++;
+			} catch (ParseException | SchedulerException | SQLException ex) {
+				logger.error("Error. Job Id {}", jobId, ex);
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+		}
+
+		if (nonQuartzJobCount > 0) {
+			logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
 		}
 	}
 
@@ -121,22 +120,20 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
-	private void upgradeDatabase(String templatesPath) {
-		try {
-			upgradeDatabaseTo30(templatesPath);
-			upgradeDatabaseTo31();
-			upgradeDatabaseTo38();
-			upgradeDatabaseTo41();
-		} catch (Exception ex) {
-			logger.error("Error", ex);
-		}
+	private void upgradeDatabase(String templatesPath) throws Exception {
+		upgradeDatabaseTo30(templatesPath);
+		upgradeDatabaseTo31();
+		upgradeDatabaseTo38();
+		upgradeDatabaseTo41();
 	}
 
 	/**
 	 * Upgrades the database to 3.0
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
 	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
 		logger.debug("Entering upgradeDatabaseTo30: templatesPath='{}'", templatesPath);
@@ -173,6 +170,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 3.1
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo31() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo31");
@@ -198,7 +196,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates the destinations table. Table added in 3.1
+	 * Populates the destinations table.Table added in 3.1
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void populateDestinationsTable() throws SQLException {
 		logger.debug("Entering populateDestinationsTable");
@@ -279,7 +279,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates report source column. Column added in 3.1
+	 * Populates report source column.Column added in 3.1
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void populateReportSourceColumn() throws SQLException {
 		logger.debug("Entering populateReportSourceColumn");
@@ -363,7 +365,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user_id columns. Columns added in 3.0
+	 * Populates user_id columns.Columns added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserIds() throws SQLException {
 		logger.debug("Entering addUserIds");
@@ -420,7 +424,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates schedule_id column. Column added in 3.0
+	 * Populates schedule_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addScheduleIds() throws SQLException {
 		logger.debug("Entering addScheduleIds");
@@ -448,7 +454,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates drilldown_id column. Column added in 3.0
+	 * Populates drilldown_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addDrilldownIds() throws SQLException {
 		logger.debug("Entering addDrilldownIds");
@@ -482,7 +490,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates rule_id column. Column added in 3.0
+	 * Populates rule_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addRuleIds() throws SQLException {
 		logger.debug("Entering addRuleIds");
@@ -520,7 +530,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates query rule id column. Column added in 3.0
+	 * Populates query rule id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addQueryRuleIds() throws SQLException {
 		logger.debug("Entering addQueryRuleIds");
@@ -554,7 +566,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates art_parameters table. Added in 3.0
+	 * Populates art_parameters table.Added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addParameters() throws SQLException {
 		logger.debug("Entering addParameters");
@@ -653,7 +667,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user rule value key column. Column added in 3.0
+	 * Populates user rule value key column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserRuleValueKeys");
@@ -684,7 +700,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user group rule value key column. Column added in 3.0
+	 * Populates user group rule value key column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserGroupRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserGroupRuleValueKeys");
@@ -715,7 +733,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates cached_datasource_id column. Column added in 3.0
+	 * Populates cached_datasource_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addCachedDatasourceIds() throws SQLException {
 		logger.debug("Entering addCachedDatasourceIds");
@@ -807,6 +827,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 3.8
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo38() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo38");
@@ -868,6 +889,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 4.1
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo41() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo41");
