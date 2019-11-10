@@ -886,9 +886,9 @@ public class UserService {
 
 		List<String> jobs = new ArrayList<>();
 		for (Map<String, Object> jobDetail : jobDetails) {
-			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			Number jobId = (Number) jobDetail.get("JOB_ID");
 			String jobName = (String) jobDetail.get("JOB_NAME");
-			jobs.add(jobName + " (" + jobId + ")");
+			jobs.add(jobName + " (" + String.valueOf(jobId) + ")");
 		}
 
 		return jobs;
@@ -1006,9 +1006,9 @@ public class UserService {
 
 		Map<Integer, String> details = new LinkedHashMap<>();
 		for (Map<String, Object> row : rows) {
-			Integer userId = (Integer) row.get("USER_ID");
+			Number userId = (Number) row.get("USER_ID");
 			String username = (String) row.get("USERNAME");
-			details.put(userId, username);
+			details.put(userId.intValue(), username);
 		}
 
 		return details;

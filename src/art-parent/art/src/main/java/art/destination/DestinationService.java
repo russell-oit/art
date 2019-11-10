@@ -518,9 +518,9 @@ public class DestinationService {
 
 		List<String> jobs = new ArrayList<>();
 		for (Map<String, Object> jobDetail : jobDetails) {
-			Integer jobId = (Integer) jobDetail.get("JOB_ID");
+			Number jobId = (Number) jobDetail.get("JOB_ID");
 			String jobName = (String) jobDetail.get("JOB_NAME");
-			jobs.add(jobName + " (" + jobId + ")");
+			jobs.add(jobName + " (" + String.valueOf(jobId) + ")");
 		}
 
 		return jobs;

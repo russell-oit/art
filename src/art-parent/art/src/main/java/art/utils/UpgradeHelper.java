@@ -229,7 +229,7 @@ public class UpgradeHelper {
 						+ " UPDATE_DATE, UPDATED_BY)"
 						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
-				Integer ftpServerId = (Integer) ftpServer.get("FTP_SERVER_ID");
+				Number ftpServerId = (Number) ftpServer.get("FTP_SERVER_ID");
 
 				Object[] values = {
 					maxId,
@@ -345,8 +345,8 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> report : reports) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer reportId = (Integer) report.get("QUERY_ID");
-				Integer reportGroupId = (Integer) report.get("QUERY_GROUP_ID");
+				Number reportId = (Number) report.get("QUERY_ID");
+				Number reportGroupId = (Number) report.get("QUERY_GROUP_ID");
 
 				sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 				dbService.update(sql, reportId);
@@ -472,8 +472,8 @@ public class UpgradeHelper {
 			for (Map<String, Object> drilldown : drilldowns) {
 				maxId++;
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer parentReportId = (Integer) drilldown.get("QUERY_ID");
-				Integer position = (Integer) drilldown.get("DRILLDOWN_QUERY_POSITION");
+				Number parentReportId = (Number) drilldown.get("QUERY_ID");
+				Number position = (Number) drilldown.get("DRILLDOWN_QUERY_POSITION");
 				sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_ID=?"
 						+ " WHERE QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
 				dbService.update(sql, maxId, parentReportId, position);
@@ -544,7 +544,7 @@ public class UpgradeHelper {
 			for (Map<String, Object> reportRule : reportRules) {
 				maxId++;
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer reportId = (Integer) reportRule.get("QUERY_ID");
+				Number reportId = (Number) reportRule.get("QUERY_ID");
 				String ruleName = (String) reportRule.get("RULE_NAME");
 				sql = "UPDATE ART_QUERY_RULES SET QUERY_RULE_ID=?"
 						+ " WHERE QUERY_ID=? AND RULE_NAME=?";
@@ -614,19 +614,19 @@ public class UpgradeHelper {
 				boolean shared = false;
 				Object[] values = {
 					maxParameterId,
-					(String) parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
-					(String) parameter.get("SHORT_DESCRIPTION"), //description
+					parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
+					parameter.get("SHORT_DESCRIPTION"), //description
 					parameterType.getValue(),
-					(String) parameter.get("NAME"), //label
-					(String) parameter.get("DESCRIPTION"), //help text
+					parameter.get("NAME"), //label
+					parameter.get("DESCRIPTION"), //help text
 					dataType.getValue(),
-					(String) parameter.get("DEFAULT_VALUE"),
+					parameter.get("DEFAULT_VALUE"),
 					BooleanUtils.toInteger(hidden),
 					BooleanUtils.toInteger(shared),
 					BooleanUtils.toInteger(useLov),
-					(Integer) parameter.get("LOV_QUERY_ID"),
+					parameter.get("LOV_QUERY_ID"),
 					BooleanUtils.toInteger(useRulesInLov),
-					(Integer) parameter.get("DRILLDOWN_COLUMN"),
+					parameter.get("DRILLDOWN_COLUMN"),
 					BooleanUtils.toInteger(useDirectSubstitution)
 				};
 
@@ -639,8 +639,8 @@ public class UpgradeHelper {
 						+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID, PARAMETER_POSITION)"
 						+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
 
-				Integer reportId = (Integer) parameter.get("QUERY_ID");
-				Integer position = (Integer) parameter.get("FIELD_POSITION");
+				Number reportId = (Number) parameter.get("QUERY_ID");
+				Number position = (Number) parameter.get("FIELD_POSITION");
 
 				dbService.update(sql, maxReportParameterId, reportId, maxParameterId, position);
 
@@ -703,7 +703,7 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> userGroupRule : userGroupRules) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer userGroupId = (Integer) userGroupRule.get("USER_GROUP_ID");
+				Number userGroupId = (Number) userGroupRule.get("USER_GROUP_ID");
 				String ruleName = (String) userGroupRule.get("RULE_NAME");
 				String ruleValue = (String) userGroupRule.get("RULE_VALUE");
 				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_VALUE_KEY=?"
@@ -734,7 +734,7 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> record : records) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer jobId = (Integer) record.get("JOB_ID");
+				Number jobId = (Number) record.get("JOB_ID");
 				String cachedDatasourceIdString = (String) record.get("OUTPUT_FORMAT");
 				Integer cachedDatasourceId = Integer.valueOf(cachedDatasourceIdString);
 				sql = "UPDATE ART_JOBS SET CACHED_DATASOURCE_ID=?"
@@ -766,7 +766,8 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> record : records) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer datasourceId = (Integer) record.get("DATABASE_ID");
+				//oracle stores INTEGER data type as NUMBER(38,0) and jdbc driver returns a BigDecimal rather than an Integer
+				Number datasourceId = (Number) record.get("DATABASE_ID");
 				String oldPassword = (String) record.get("PASSWORD");
 
 				if (oldPassword == null) {
@@ -932,8 +933,8 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> membership : memberships) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer userGroupId = (Integer) membership.get("USER_GROUP_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number userGroupId = (Number) membership.get("USER_GROUP_ID");
 				dbService.update(sql, userId, userGroupId);
 			}
 		}
@@ -965,8 +966,8 @@ public class UpgradeHelper {
 					+ " VALUES(?,?)";
 
 			for (Map<String, Object> membership : memberships) {
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer reportId = (Integer) membership.get("QUERY_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number reportId = (Number) membership.get("QUERY_ID");
 				dbService.update(sql, userId, reportId);
 			}
 		}
@@ -998,8 +999,8 @@ public class UpgradeHelper {
 					+ " VALUES(?,?)";
 
 			for (Map<String, Object> membership : memberships) {
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer reportGroupId = (Integer) membership.get("QUERY_GROUP_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number reportGroupId = (Number) membership.get("QUERY_GROUP_ID");
 				dbService.update(sql, userId, reportGroupId);
 			}
 		}
