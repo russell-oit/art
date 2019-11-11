@@ -235,7 +235,11 @@ public class Config extends HttpServlet {
 		setTimeZoneDetails();
 
 		//initialize datasources
-		initializeArtDatabase();
+		try {
+			initializeArtDatabase();
+		} catch (Exception ex) {
+			logger.error("Error", ex);
+		}
 
 		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
@@ -504,8 +508,10 @@ public class Config extends HttpServlet {
 	/**
 	 * Initializes the art database and report datasource connection pools, runs
 	 * upgrade steps on the art database and starts the quartz scheduler
+	 *
+	 * @throws java.lang.Exception
 	 */
-	public static void initializeArtDatabase() {
+	public static void initializeArtDatabase() throws Exception {
 		loadArtDatabaseConfiguration();
 
 		if (artDbConfig == null) {
@@ -526,15 +532,12 @@ public class Config extends HttpServlet {
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
-		} catch (SQLException | RuntimeException ex) {
-			//include runtime exception in case of PoolInitializationException when using hikaricp
-			logger.error("Error", ex);
+		} finally {
+			//load settings
+			//put in finally block so that a settings object is always available
+			//even if there's an error in connection pool creation
+			loadSettings();
 		}
-
-		//load settings
-		//put outside try block so that a settings object is always available
-		//even if there's an error in connection pool creation
-		loadSettings();
 	}
 
 	/**

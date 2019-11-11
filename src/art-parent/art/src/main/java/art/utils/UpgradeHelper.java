@@ -61,16 +61,19 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
-	public void upgrade(String templatesPath) {
+	public void upgrade(String templatesPath) throws Exception {
 		migrateJobsToQuartz();
 		upgradeDatabase(templatesPath);
 	}
 
 	/**
 	 * Migrates art jobs to quartz jobs
+	 *
+	 * @throws java.sql.SQLException
 	 */
-	private void migrateJobsToQuartz() {
+	private void migrateJobsToQuartz() throws SQLException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -78,42 +81,38 @@ public class UpgradeHelper {
 			return;
 		}
 
-		try {
-			String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL"
-					+ " WHERE JOB_ID=?";
+		String sql = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ=NULL"
+				+ " WHERE JOB_ID=?";
 
-			User actionUser = new User();
-			actionUser.setUsername("art migration");
+		User actionUser = new User();
+		actionUser.setUsername("art migration");
 
-			int nonQuartzJobCount = 0;
-			int successfulMigrationCount = 0;
+		int nonQuartzJobCount = 0;
+		int successfulMigrationCount = 0;
 
-			JobService jobService = new JobService();
+		JobService jobService = new JobService();
 
-			List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
-			for (Job job : nonQuartzJobs) {
-				nonQuartzJobCount++;
+		List<Job> nonQuartzJobs = jobService.getNonQuartzJobs();
+		for (Job job : nonQuartzJobs) {
+			nonQuartzJobCount++;
 
-				if (nonQuartzJobCount == 1) {
-					logger.info("Migrating jobs to quartz...");
-				}
-
-				int jobId = job.getJobId();
-
-				try {
-					jobService.processSchedules(job, actionUser);
-					dbService.update(sql, jobId);
-					successfulMigrationCount++;
-				} catch (ParseException | SchedulerException | SQLException ex) {
-					logger.error("Error. Job Id {}", jobId, ex);
-				}
+			if (nonQuartzJobCount == 1) {
+				logger.info("Migrating jobs to quartz...");
 			}
 
-			if (nonQuartzJobCount > 0) {
-				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
+			int jobId = job.getJobId();
+
+			try {
+				jobService.processSchedules(job, actionUser);
+				dbService.update(sql, jobId);
+				successfulMigrationCount++;
+			} catch (ParseException | SchedulerException | SQLException ex) {
+				logger.error("Error. Job Id {}", jobId, ex);
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+		}
+
+		if (nonQuartzJobCount > 0) {
+			logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
 		}
 	}
 
@@ -121,22 +120,20 @@ public class UpgradeHelper {
 	 * Runs upgrade steps
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
-	private void upgradeDatabase(String templatesPath) {
-		try {
-			upgradeDatabaseTo30(templatesPath);
-			upgradeDatabaseTo31();
-			upgradeDatabaseTo38();
-			upgradeDatabaseTo41();
-		} catch (Exception ex) {
-			logger.error("Error", ex);
-		}
+	private void upgradeDatabase(String templatesPath) throws Exception {
+		upgradeDatabaseTo30(templatesPath);
+		upgradeDatabaseTo31();
+		upgradeDatabaseTo38();
+		upgradeDatabaseTo41();
 	}
 
 	/**
 	 * Upgrades the database to 3.0
 	 *
 	 * @param templatesPath the path to the templates directory
+	 * @throws java.lang.Exception
 	 */
 	private void upgradeDatabaseTo30(String templatesPath) throws Exception {
 		logger.debug("Entering upgradeDatabaseTo30: templatesPath='{}'", templatesPath);
@@ -173,6 +170,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 3.1
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo31() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo31");
@@ -198,7 +196,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates the destinations table. Table added in 3.1
+	 * Populates the destinations table.Table added in 3.1
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void populateDestinationsTable() throws SQLException {
 		logger.debug("Entering populateDestinationsTable");
@@ -229,7 +229,7 @@ public class UpgradeHelper {
 						+ " UPDATE_DATE, UPDATED_BY)"
 						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
-				Integer ftpServerId = (Integer) ftpServer.get("FTP_SERVER_ID");
+				Number ftpServerId = (Number) ftpServer.get("FTP_SERVER_ID");
 
 				Object[] values = {
 					maxId,
@@ -279,7 +279,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates report source column. Column added in 3.1
+	 * Populates report source column.Column added in 3.1
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void populateReportSourceColumn() throws SQLException {
 		logger.debug("Entering populateReportSourceColumn");
@@ -341,12 +343,12 @@ public class UpgradeHelper {
 
 		logger.debug("reports.isEmpty()={}", reports.isEmpty());
 		if (!reports.isEmpty()) {
-			logger.info("Adding report-report group records");
+			logger.info("Adding report - report group records");
 
 			for (Map<String, Object> report : reports) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer reportId = (Integer) report.get("QUERY_ID");
-				Integer reportGroupId = (Integer) report.get("QUERY_GROUP_ID");
+				Number reportId = (Number) report.get("QUERY_ID");
+				Number reportGroupId = (Number) report.get("QUERY_GROUP_ID");
 
 				sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
 				dbService.update(sql, reportId);
@@ -363,7 +365,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user_id columns. Columns added in 3.0
+	 * Populates user_id columns.Columns added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserIds() throws SQLException {
 		logger.debug("Entering addUserIds");
@@ -420,7 +424,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates schedule_id column. Column added in 3.0
+	 * Populates schedule_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addScheduleIds() throws SQLException {
 		logger.debug("Entering addScheduleIds");
@@ -448,7 +454,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates drilldown_id column. Column added in 3.0
+	 * Populates drilldown_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addDrilldownIds() throws SQLException {
 		logger.debug("Entering addDrilldownIds");
@@ -472,8 +480,8 @@ public class UpgradeHelper {
 			for (Map<String, Object> drilldown : drilldowns) {
 				maxId++;
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer parentReportId = (Integer) drilldown.get("QUERY_ID");
-				Integer position = (Integer) drilldown.get("DRILLDOWN_QUERY_POSITION");
+				Number parentReportId = (Number) drilldown.get("QUERY_ID");
+				Number position = (Number) drilldown.get("DRILLDOWN_QUERY_POSITION");
 				sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_ID=?"
 						+ " WHERE QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
 				dbService.update(sql, maxId, parentReportId, position);
@@ -482,7 +490,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates rule_id column. Column added in 3.0
+	 * Populates rule_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addRuleIds() throws SQLException {
 		logger.debug("Entering addRuleIds");
@@ -520,7 +530,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates query rule id column. Column added in 3.0
+	 * Populates query rule id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addQueryRuleIds() throws SQLException {
 		logger.debug("Entering addQueryRuleIds");
@@ -544,7 +556,7 @@ public class UpgradeHelper {
 			for (Map<String, Object> reportRule : reportRules) {
 				maxId++;
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer reportId = (Integer) reportRule.get("QUERY_ID");
+				Number reportId = (Number) reportRule.get("QUERY_ID");
 				String ruleName = (String) reportRule.get("RULE_NAME");
 				sql = "UPDATE ART_QUERY_RULES SET QUERY_RULE_ID=?"
 						+ " WHERE QUERY_ID=? AND RULE_NAME=?";
@@ -554,7 +566,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates art_parameters table. Added in 3.0
+	 * Populates art_parameters table.Added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addParameters() throws SQLException {
 		logger.debug("Entering addParameters");
@@ -614,19 +628,19 @@ public class UpgradeHelper {
 				boolean shared = false;
 				Object[] values = {
 					maxParameterId,
-					(String) parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
-					(String) parameter.get("SHORT_DESCRIPTION"), //description
+					parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
+					parameter.get("SHORT_DESCRIPTION"), //description
 					parameterType.getValue(),
-					(String) parameter.get("NAME"), //label
-					(String) parameter.get("DESCRIPTION"), //help text
+					parameter.get("NAME"), //label
+					parameter.get("DESCRIPTION"), //help text
 					dataType.getValue(),
-					(String) parameter.get("DEFAULT_VALUE"),
+					parameter.get("DEFAULT_VALUE"),
 					BooleanUtils.toInteger(hidden),
 					BooleanUtils.toInteger(shared),
 					BooleanUtils.toInteger(useLov),
-					(Integer) parameter.get("LOV_QUERY_ID"),
+					parameter.get("LOV_QUERY_ID"),
 					BooleanUtils.toInteger(useRulesInLov),
-					(Integer) parameter.get("DRILLDOWN_COLUMN"),
+					parameter.get("DRILLDOWN_COLUMN"),
 					BooleanUtils.toInteger(useDirectSubstitution)
 				};
 
@@ -639,8 +653,8 @@ public class UpgradeHelper {
 						+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID, PARAMETER_POSITION)"
 						+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
 
-				Integer reportId = (Integer) parameter.get("QUERY_ID");
-				Integer position = (Integer) parameter.get("FIELD_POSITION");
+				Number reportId = (Number) parameter.get("QUERY_ID");
+				Number position = (Number) parameter.get("FIELD_POSITION");
 
 				dbService.update(sql, maxReportParameterId, reportId, maxParameterId, position);
 
@@ -653,7 +667,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user rule value key column. Column added in 3.0
+	 * Populates user rule value key column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserRuleValueKeys");
@@ -684,7 +700,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates user group rule value key column. Column added in 3.0
+	 * Populates user group rule value key column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addUserGroupRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserGroupRuleValueKeys");
@@ -703,7 +721,7 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> userGroupRule : userGroupRules) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer userGroupId = (Integer) userGroupRule.get("USER_GROUP_ID");
+				Number userGroupId = (Number) userGroupRule.get("USER_GROUP_ID");
 				String ruleName = (String) userGroupRule.get("RULE_NAME");
 				String ruleValue = (String) userGroupRule.get("RULE_VALUE");
 				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_VALUE_KEY=?"
@@ -715,7 +733,9 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populates cached_datasource_id column. Column added in 3.0
+	 * Populates cached_datasource_id column.Column added in 3.0
+	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void addCachedDatasourceIds() throws SQLException {
 		logger.debug("Entering addCachedDatasourceIds");
@@ -734,7 +754,7 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> record : records) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer jobId = (Integer) record.get("JOB_ID");
+				Number jobId = (Number) record.get("JOB_ID");
 				String cachedDatasourceIdString = (String) record.get("OUTPUT_FORMAT");
 				Integer cachedDatasourceId = Integer.valueOf(cachedDatasourceIdString);
 				sql = "UPDATE ART_JOBS SET CACHED_DATASOURCE_ID=?"
@@ -766,7 +786,8 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> record : records) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer datasourceId = (Integer) record.get("DATABASE_ID");
+				//oracle stores INTEGER data type as NUMBER(38,0) and jdbc driver returns a BigDecimal rather than an Integer
+				Number datasourceId = (Number) record.get("DATABASE_ID");
 				String oldPassword = (String) record.get("PASSWORD");
 
 				if (oldPassword == null) {
@@ -806,6 +827,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 3.8
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo38() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo38");
@@ -835,6 +857,8 @@ public class UpgradeHelper {
 	 */
 	private void populateUserRolesTable() throws SQLException {
 		logger.debug("Entering populateUserRolesTable");
+		
+		logger.info("Adding user - role records");
 
 		String sql;
 
@@ -867,6 +891,7 @@ public class UpgradeHelper {
 	/**
 	 * Upgrades the database to 4.1
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	private void upgradeDatabaseTo41() throws SQLException {
 		logger.debug("Entering upgradeDatabaseTo41");
@@ -932,8 +957,8 @@ public class UpgradeHelper {
 
 			for (Map<String, Object> membership : memberships) {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer userGroupId = (Integer) membership.get("USER_GROUP_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number userGroupId = (Number) membership.get("USER_GROUP_ID");
 				dbService.update(sql, userId, userGroupId);
 			}
 		}
@@ -965,8 +990,8 @@ public class UpgradeHelper {
 					+ " VALUES(?,?)";
 
 			for (Map<String, Object> membership : memberships) {
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer reportId = (Integer) membership.get("QUERY_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number reportId = (Number) membership.get("QUERY_ID");
 				dbService.update(sql, userId, reportId);
 			}
 		}
@@ -998,8 +1023,8 @@ public class UpgradeHelper {
 					+ " VALUES(?,?)";
 
 			for (Map<String, Object> membership : memberships) {
-				Integer userId = (Integer) membership.get("USER_ID");
-				Integer reportGroupId = (Integer) membership.get("QUERY_GROUP_ID");
+				Number userId = (Number) membership.get("USER_ID");
+				Number reportGroupId = (Number) membership.get("QUERY_GROUP_ID");
 				dbService.update(sql, userId, reportGroupId);
 			}
 		}

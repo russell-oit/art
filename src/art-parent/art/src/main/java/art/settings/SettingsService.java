@@ -234,7 +234,7 @@ public class SettingsService {
 	private void saveSettings(Settings settings, User actionUser, Connection conn)
 			throws SQLException {
 
-		logger.debug("Entering updateSettings: actionUser={}", actionUser);
+		logger.debug("Entering saveSettings: actionUser={}", actionUser);
 
 		String sql;
 

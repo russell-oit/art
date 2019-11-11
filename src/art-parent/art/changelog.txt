@@ -1,7 +1,10 @@
+ART 4.7
+* Fix for error with oracle upgrade
+
 ART 4.6
 * Corrected run of auto-refresh reports when dashboard parameters are changed
 * Better handling of labels being cut-off with vertical bar 2D charts
-* Removed Couchbase jdbc driver
+* Removed couchbase jdbc driver
 * Updated jsoup
 
 ART 4.5

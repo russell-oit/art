@@ -468,9 +468,9 @@ public class HolidayService {
 
 		List<String> records = new ArrayList<>();
 		for (Map<String, Object> recordDetail : recordDetails) {
-			Integer recordId = (Integer) recordDetail.get("RECORD_ID");
+			Number recordId = (Number) recordDetail.get("RECORD_ID");
 			String recordName = (String) recordDetail.get("RECORD_NAME");
-			records.add(recordName + " (" + recordId + ")");
+			records.add(recordName + " (" + String.valueOf(recordId) + ")");
 		}
 
 		return records;

@@ -2116,11 +2116,11 @@ public class ReportJob implements org.quartz.Job {
 						userCount += 1;
 						//map list handler uses a case insensitive map, so case of column names doesn't matter
 						String username = (String) record.get("USERNAME");
-						Integer userId = (Integer) record.get("USER_ID");
+						Number userId = (Number) record.get("USER_ID");
 						String email = (String) record.get("EMAIL");
 
 						User user = new User();
-						user.setUserId(userId);
+						user.setUserId(userId.intValue());
 						user.setUsername(username);
 
 						runJob(splitJob, user, email);
@@ -2184,8 +2184,8 @@ public class ReportJob implements org.quartz.Job {
 
 		for (Map<String, Object> record : records) {
 			//map list handler uses a case insensitive map, so case of column names doesn't matter
-			Integer userId = (Integer) record.get("USER_ID");
-			Integer userGroupId = (Integer) record.get("USER_GROUP_ID");
+			Number userId = (Number) record.get("USER_ID");
+			Number userGroupId = (Number) record.get("USER_GROUP_ID");
 
 			//insert records into the art_user_job_map table so that the users can have access to the job
 			Object[] values = {
