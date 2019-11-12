@@ -42,10 +42,10 @@ import org.apache.commons.lang3.StringUtils;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final int INITIAL_SETUP_USER_ID = -1;
 	private static final int REPOSITORY_USER_ID = -2;
-	
+
 	private int userId;
 	private String username;
 	private AccessLevel accessLevel;
@@ -742,7 +742,7 @@ public class User implements Serializable {
 		flatPermissions.clear();
 
 		flatPermissions.addAll(Arrays.asList("configure_users",
-				"configure_art_database", "configure_roles"));
+				"configure_art_database", "configure_roles", "view_logs"));
 	}
 
 	/**

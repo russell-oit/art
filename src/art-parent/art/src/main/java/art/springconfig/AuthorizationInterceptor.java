@@ -230,9 +230,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				|| canAccessPage(page, user, session, pathMinusContext)) {
 			if (!Config.isArtDatabaseConfigured()) {
 				//if art database not configured, only allow access to artDatabase and language
-				if (StringUtils.equals(page, "artDatabase")
-						|| StringUtils.equals(page, "language")
-						|| StringUtils.equals(page, "success")) {
+				if (StringUtils.equalsAny(page, "artDatabase", "language",
+						"success", "logs")) {
 					return true;
 				} else {
 					message = "page.message.artDatabaseNotConfigured";
