@@ -33,8 +33,6 @@ Display application logs
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/JSZip-2.5.0/jszip.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/pdfmake-0.1.36/pdfmake.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/pdfmake-0.1.36/vfs_fonts.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.html5.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js"></script>
@@ -72,12 +70,6 @@ Display application logs
 						},
 						{
 							extend: 'excel',
-							exportOptions: {
-								columns: ':visible'
-							}
-						},
-						{
-							extend: 'pdf',
 							exportOptions: {
 								columns: ':visible'
 							}
