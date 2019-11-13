@@ -106,7 +106,7 @@ public class UpgradeHelper {
 				jobService.processSchedules(job, actionUser);
 				dbService.update(sql, jobId);
 				successfulMigrationCount++;
-			} catch (ParseException | SchedulerException | SQLException ex) {
+			} catch (ParseException | SchedulerException | SQLException | RuntimeException ex) {
 				logger.error("Error. Job Id {}", jobId, ex);
 			}
 		}
