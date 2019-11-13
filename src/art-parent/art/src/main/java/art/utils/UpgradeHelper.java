@@ -101,12 +101,16 @@ public class UpgradeHelper {
 				logger.info("Migrating jobs to quartz...");
 			}
 
+			if (!job.isActive()) {
+				continue;
+			}
+
 			Date now = new Date();
 			Date endDate = job.getEndDate();
 			if (endDate != null && endDate.before(now)) {
 				continue;
 			}
-			
+
 			int jobId = job.getJobId();
 
 			try {
