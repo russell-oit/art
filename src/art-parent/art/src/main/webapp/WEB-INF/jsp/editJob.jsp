@@ -27,38 +27,32 @@
 	</c:when>
 </c:choose>
 
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
-<spring:message code="reports.format.htmlPlain" var="htmlPlainText"/>
-<spring:message code="reports.format.xlsZip" var="xlsZipText"/>
-<spring:message code="reports.format.pdf" var="pdfText"/>
-<spring:message code="reports.format.xls" var="xlsText"/>
-<spring:message code="reports.format.xlsx" var="xlsxText"/>
-<spring:message code="reports.format.tsvZip" var="tsvZipText"/>
-<spring:message code="reports.format.png" var="pngText"/>
-<spring:message code="reports.format.html" var="htmlText"/>
-<spring:message code="reports.format.docx" var="docxText"/>
-<spring:message code="reports.format.odt" var="odtText"/>
-<spring:message code="reports.format.pptx" var="pptxText"/>
-<spring:message code="reports.format.ods" var="odsText"/>
-<spring:message code="reports.format.csv" var="csvText"/>
-<spring:message code="reports.format.slk" var="slkText"/>
-<spring:message code="reports.format.tsv" var="tsvText"/>
-<spring:message code="reports.format.txt" var="txtText"/>
-<spring:message code="reports.format.txtZip" var="txtZipText"/>
-<spring:message code="reports.format.csv" var="csvText"/>
-<spring:message code="reports.format.csvZip" var="csvZipText"/>
-<spring:message code="reports.format.file" var="fileText"/>
-<spring:message code="reports.format.fileZip" var="fileZipText"/>
-<spring:message code="reports.text.selectFile" var="selectFileText"/>
-<spring:message code="reports.text.change" var="changeText"/>
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="select.text.selectAll" var="selectAllText"/>
-<spring:message code="select.text.deselectAll" var="deselectAllText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
+<spring:message code="reports.format.htmlPlain" var="htmlPlainText" javaScriptEscape="true"/>
+<spring:message code="reports.format.pdf" var="pdfText" javaScriptEscape="true"/>
+<spring:message code="reports.format.xls" var="xlsText" javaScriptEscape="true"/>
+<spring:message code="reports.format.xlsx" var="xlsxText" javaScriptEscape="true"/>
+<spring:message code="reports.format.png" var="pngText" javaScriptEscape="true"/>
+<spring:message code="reports.format.html" var="htmlText" javaScriptEscape="true"/>
+<spring:message code="reports.format.docx" var="docxText" javaScriptEscape="true"/>
+<spring:message code="reports.format.odt" var="odtText" javaScriptEscape="true"/>
+<spring:message code="reports.format.pptx" var="pptxText" javaScriptEscape="true"/>
+<spring:message code="reports.format.ods" var="odsText" javaScriptEscape="true"/>
+<spring:message code="reports.format.slk" var="slkText" javaScriptEscape="true"/>
+<spring:message code="reports.format.tsv" var="tsvText" javaScriptEscape="true"/>
+<spring:message code="reports.format.txt" var="txtText" javaScriptEscape="true"/>
+<spring:message code="reports.format.txtZip" var="txtZipText" javaScriptEscape="true"/>
+<spring:message code="reports.format.csv" var="csvText" javaScriptEscape="true"/>
+<spring:message code="reports.format.csvZip" var="csvZipText" javaScriptEscape="true"/>
+<spring:message code="reports.format.file" var="fileText" javaScriptEscape="true"/>
+<spring:message code="reports.format.fileZip" var="fileZipText" javaScriptEscape="true"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectAll" var="selectAllText" javaScriptEscape="true"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">
@@ -859,8 +853,12 @@
 							</div>
 							<div class="fileinput fileinput-new" data-provides="fileinput">
 								<span class="btn btn-default btn-file">
-									<span class="fileinput-new">${selectFileText}</span>
-									<span class="fileinput-exists">${changeText}</span>
+									<span class="fileinput-new">
+										<spring:message code="reports.text.selectFile"/>
+									</span>
+									<span class="fileinput-exists">
+										<spring:message code="reports.text.change"/>
+									</span>
 									<input type="file" name="emailTemplateFile">
 								</span>
 								<span class="fileinput-filename"></span>

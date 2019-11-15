@@ -24,19 +24,18 @@ Display user jobs and jobs configuration
 	</c:otherwise>
 </c:choose>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="jobs.message.running" var="runningText"/>
-<spring:message code="jobs.message.jobRefreshed" var="refreshedText"/>
-<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
-<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
-<spring:message code="jobs.message.scheduled" var="scheduledText"/>
-<spring:message code="reports.text.selectValue" var="selectValueText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.running" var="runningText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.jobRefreshed" var="refreshedText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.scheduled" var="scheduledText" javaScriptEscape="true"/>
+<spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 

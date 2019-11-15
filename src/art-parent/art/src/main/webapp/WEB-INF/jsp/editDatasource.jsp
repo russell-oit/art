@@ -32,11 +32,11 @@ Edit datasource page
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-8 col-md-offset-2" hasNotify="true">

@@ -16,14 +16,14 @@ Configure rule value
 
 <spring:message code="page.title.ruleValuesConfiguration" var="pageTitle"/>
 
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.valuesRemoved" var="valuesRemovedText"/>
-<spring:message code="page.message.valueAdded" var="valueAddedText"/>
-<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
-<spring:message code="page.text.available" var="availableText"/>
-<spring:message code="page.text.selected" var="selectedText"/>
-<spring:message code="page.text.search" var="searchText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.valuesRemoved" var="valuesRemovedText" javaScriptEscape="true"/>
+<spring:message code="page.message.valueAdded" var="valueAddedText" javaScriptEscape="true"/>
+<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText" javaScriptEscape="true"/>
+<spring:message code="page.text.available" var="availableText" javaScriptEscape="true"/>
+<spring:message code="page.text.selected" var="selectedText" javaScriptEscape="true"/>
+<spring:message code="page.text.search" var="searchText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">

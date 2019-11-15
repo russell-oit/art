@@ -17,7 +17,7 @@
 	${panelTitle} - ${parameter.name} (${parameter.parameterId})
 </c:set>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-8 col-md-offset-2"

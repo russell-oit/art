@@ -21,9 +21,6 @@
 	${panelTitle}
 </c:set>
 
-<spring:message code="reports.text.selectFile" var="selectFileText"/>
-<spring:message code="reports.text.change" var="changeText"/>
-
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -64,8 +61,12 @@
 					<div class="col-md-8">
 						<div class="fileinput fileinput-new" data-provides="fileinput">
 							<span class="btn btn-default btn-file">
-								<span class="fileinput-new">${selectFileText}</span>
-								<span class="fileinput-exists">${changeText}</span>
+								<span class="fileinput-new">
+									<spring:message code="reports.text.selectFile"/>
+								</span>
+								<span class="fileinput-exists">
+									<spring:message code="reports.text.change"/>
+								</span>
 								<input type="file" name="importFile" accept=".json, .csv, .zip">
 							</span>
 							<span class="fileinput-filename"></span>

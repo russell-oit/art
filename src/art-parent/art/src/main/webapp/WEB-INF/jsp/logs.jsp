@@ -18,7 +18,7 @@ Display application logs
 
 <spring:message code="page.title.logs" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" hasTable="true">
 

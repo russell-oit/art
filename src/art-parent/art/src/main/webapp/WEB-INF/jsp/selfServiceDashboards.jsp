@@ -14,18 +14,18 @@
 
 <spring:message code="page.title.selfServiceDashboards" var="pageTitle"/>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
-<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
-<spring:message code="dialog.title.saveReport" var="saveReportText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
-<spring:message code="dialog.text.title" var="titleText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText" javaScriptEscape="true"/>
+<spring:message code="dialog.text.title" var="titleText" javaScriptEscape="true"/>
 
 <t:mainPage title="${pageTitle}">
 

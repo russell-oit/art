@@ -16,10 +16,10 @@ Page to allow manual clearing of caches
 
 <spring:message code="page.title.caches" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
-<spring:message code="caches.message.cachesCleared" var="cachesClearedText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="caches.message.cacheCleared" var="cacheClearedText" javaScriptEscape="true"/>
+<spring:message code="caches.message.cachesCleared" var="cachesClearedText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
 					 hasTable="true" hasNotify="true">

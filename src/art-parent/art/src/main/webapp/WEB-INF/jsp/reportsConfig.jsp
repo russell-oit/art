@@ -17,25 +17,16 @@ Reports configuration page
 
 <spring:message code="page.title.reportsConfiguration" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="reports.message.linkedJobsExist" var="linkedJobsExistText"/>
-<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
-<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
-<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
-<spring:message code="reports.text.selectValue" var="selectValueText"/>
-<spring:message code="page.message.recordUpdated" var="recordUpdatedText"/>
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
-<spring:message code="reports.label.reportSource" var="reportSourceText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
+<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText" javaScriptEscape="true"/>
+<spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 

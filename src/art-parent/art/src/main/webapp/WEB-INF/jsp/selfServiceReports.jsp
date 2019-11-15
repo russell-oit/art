@@ -14,20 +14,18 @@
 
 <spring:message code="page.title.selfServiceReports" var="pageTitle"/>
 
-<spring:message code="page.text.search" var="searchText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="multiselect.button.undo" var="undoText"/>
-<spring:message code="multiselect.button.redo" var="redoText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
-<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
-<spring:message code="dialog.title.saveReport" var="saveReportText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+<spring:message code="page.text.search" var="searchText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText" javaScriptEscape="true"/>
 
 <t:mainPage title="${pageTitle}">
 
@@ -536,12 +534,12 @@
 			</div>
 
 			<div class="col-md-2">
-				<button type="button" id="multiselect_undo" class="btn btn-primary btn-block">${undoText}</button>
+				<button type="button" id="multiselect_undo" class="btn btn-primary btn-block"><spring:message code="multiselect.button.undo"/></button>
 				<button type="button" id="multiselect_rightAll" class="btn btn-block btn-default"><i class="glyphicon glyphicon-forward"></i></button>
 				<button type="button" id="multiselect_rightSelected" class="btn btn-block btn-default"><i class="glyphicon glyphicon-chevron-right"></i></button>
 				<button type="button" id="multiselect_leftSelected" class="btn btn-block btn-default"><i class="glyphicon glyphicon-chevron-left"></i></button>
 				<button type="button" id="multiselect_leftAll" class="btn btn-block btn-default"><i class="glyphicon glyphicon-backward"></i></button>
-				<button type="button" id="multiselect_redo" class="btn btn-warning btn-block">${redoText}</button>
+				<button type="button" id="multiselect_redo" class="btn btn-warning btn-block"><spring:message code="multiselect.button.redo"/></button>
 			</div>
 
 			<div class="col-md-5">

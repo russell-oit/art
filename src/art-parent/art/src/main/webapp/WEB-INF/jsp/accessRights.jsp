@@ -16,12 +16,12 @@ Display access rights
 
 <spring:message code="page.title.accessRights" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
-<spring:message code="page.action.revoke" var="revokeText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.rightsRevoked" var="rightsRevokedText" javaScriptEscape="true"/>
+<spring:message code="page.action.revoke" var="revokeText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" hasTable="true" hasNotify="true">
 

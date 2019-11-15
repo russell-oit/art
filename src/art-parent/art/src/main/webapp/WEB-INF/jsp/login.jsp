@@ -16,8 +16,6 @@ Login page
 
 <spring:message code="page.title.login" var="pageTitle"/>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-
 <t:genericPage title="${pageTitle} - ART">
 	<jsp:attribute name="metaContent">
 		<meta http-equiv="pragma" content="no-cache">

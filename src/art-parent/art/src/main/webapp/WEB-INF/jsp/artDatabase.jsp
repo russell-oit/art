@@ -17,9 +17,9 @@ Display art database configuration page
 
 <spring:message code="page.title.artDatabase" var="pageTitle"/>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
 
 <c:set var="mainColumnClass">
 	${empty initialSetup ? "col-md-8 col-md-offset-2" : "col-md-8"}
