@@ -1,5 +1,5 @@
 ART 4.8
-* Fix for error upgrading jobs with past end date
+* Fix for error while upgrading jobs
 
 ART 4.7
 * Fix for error with oracle upgrade
