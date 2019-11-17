@@ -65,8 +65,8 @@ public class UpgradeHelper {
 	 * @throws java.lang.Exception
 	 */
 	public void upgrade(String templatesPath) throws Exception {
-		migrateJobsToQuartz();
 		upgradeDatabase(templatesPath);
+		migrateJobsToQuartz();
 	}
 
 	/**
