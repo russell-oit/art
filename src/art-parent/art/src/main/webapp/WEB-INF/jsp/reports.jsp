@@ -125,7 +125,8 @@ Reports page. Also main/home page
 								text_data_delimiter: ", ",
 								select_value_delimiter: ";",
 								filter_match_mode: "regex",
-								case_insensitive: false
+								case_insensitive: false,
+								sort_as: "alphaNum"
 							},
 							{
 								column_number: 3,

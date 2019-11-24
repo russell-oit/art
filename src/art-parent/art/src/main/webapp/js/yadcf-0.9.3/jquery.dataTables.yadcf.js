@@ -2487,18 +2487,22 @@ if (!Object.entries) {
 							} else {
 								value_delimiter = columnObj.select_value_delimiter;
 							}
-							col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_display);
-							col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
-							var col_value_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
-							col_value_elements = (col_value_elements + '').split(value_delimiter);
+							col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
+							col_inner_elements = (col_inner_elements + '').split(value_delimiter);
+							var col_display_elements = dot2obj(data[j]._aData, columnObj.column_number_display);
+							col_display_elements = (col_display_elements + '').split(columnObj.text_data_delimiter);
 							for (k = 0; k < col_inner_elements.length; k++) {
 								col_inner_data = col_inner_elements[k];
-								var col_value_data = col_value_elements[k];
+								var col_display_data = col_display_elements[k];
 								if ($.trim(col_inner_data) !== '' && !(col_filter_array.hasOwnProperty(col_inner_data))) {
 									col_filter_array[col_inner_data] = col_inner_data;
+									//Timothy Anyona 20191124. Special handling for "blank" filter
+									if(col_inner_data === '~'){
+										col_display_data = col_inner_data;
+									}
 									column_data.push({
-										value: col_value_data,
-										label: col_inner_data
+										value: col_inner_data,
+										label: col_display_data
 									});
 								}
 							}
