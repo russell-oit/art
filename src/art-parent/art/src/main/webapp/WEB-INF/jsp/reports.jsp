@@ -57,7 +57,8 @@ Reports page. Also main/home page
 					{"data": null, defaultContent: "", className: "details-control"},
 					{"data": {
 							_: "reportGroupNames2",
-							filter: "reportGroupNamesFilter"
+							filter: "reportGroupNamesFilter",
+							display: "reportGroupNames2"
 						}
 					},
 					{"data": "description2"},
@@ -121,7 +122,10 @@ Reports page. Also main/home page
 							{
 								column_number: 1,
 								filter_default_label: '${selectValueText}',
-								text_data_delimiter: ", "
+								text_data_delimiter: ", ",
+								select_value_delimiter: ";",
+								filter_match_mode: "regex",
+								case_insensitive: false
 							},
 							{
 								column_number: 3,

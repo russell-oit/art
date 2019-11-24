@@ -41,6 +41,7 @@ public class BasicReport implements Serializable {
 	private String dtActiveStatus;
 	private String dtAction;
 	private String reportGroupNames2;
+	private String reportGroupNamesFilter;
 
 	public BasicReport(Report report) {
 		if (report == null) {
@@ -177,27 +178,39 @@ public class BasicReport implements Serializable {
 	private void initializeReportGroupNames(List<ReportGroup> reportGroups) {
 		if (CollectionUtils.isEmpty(reportGroups)) {
 			reportGroupNames2 = "";
+			reportGroupNamesFilter = "~";
 		} else {
 			List<String> names = new ArrayList<>();
+			List<String> filterNames = new ArrayList<>();
+			final String DISPLAY_SEPARATOR = ", ";
 			for (ReportGroup reportGroup : reportGroups) {
-				names.add(reportGroup.getName());
+				String groupName = reportGroup.getName();
+				names.add(groupName);
+				//https://stackoverflow.com/questions/23536133/how-do-you-match-multiple-regex-patterns-for-a-single-line-of-text-in-java
+				List<String> regexList = new ArrayList<>();
+				regexList.add("^" + groupName + "$");
+				regexList.add("^" + groupName + ",");
+				regexList.add(DISPLAY_SEPARATOR + groupName + "$");
+				regexList.add(DISPLAY_SEPARATOR + groupName + ",");
+				String regex = StringUtils.join(regexList, "|");
+				filterNames.add(regex);
 			}
 
-			String reportGroupNames = StringUtils.join(names, ", ");
+			String reportGroupNames = StringUtils.join(names, DISPLAY_SEPARATOR);
 			reportGroupNames2 = Encode.forHtml(reportGroupNames);
+
+			final String SELECT_VALUE_SEPARATOR = ";";
+			String filterReportGroupNames = StringUtils.join(filterNames, SELECT_VALUE_SEPARATOR);
+			reportGroupNamesFilter = Encode.forHtml(filterReportGroupNames);
 		}
 	}
 
 	/**
 	 * Returns the string to be used for filtering report groups
-	 * 
+	 *
 	 * @return the string to be used for filtering report groups
 	 */
 	public String getReportGroupNamesFilter() {
-		if (StringUtils.isEmpty(reportGroupNames2)) {
-			return "~";
-		} else {
-			return reportGroupNames2;
-		}
+		return reportGroupNamesFilter;
 	}
 }

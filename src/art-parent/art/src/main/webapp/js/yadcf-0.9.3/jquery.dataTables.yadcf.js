@@ -2401,6 +2401,13 @@ if (!Object.entries) {
 			column_number_filter = calcColumnNumberFilter(settingsDt, columnObj.column_number, table_selector_jq_friendly);
 			if (isNaN(settingsDt.aoColumns[column_number_filter].mData) && typeof settingsDt.aoColumns[column_number_filter].mData !== 'object') {
 				columnObj.column_number_data = settingsDt.aoColumns[column_number_filter].mData;
+			//Timothy Anyona 20191124. Fix to allow use of different display and filter values in selects
+			} else if (settingsDt.aoColumns[column_number_filter].mData && settingsDt.aoColumns[column_number_filter].mData.filter
+					&& settingsDt.aoColumns[column_number_filter].mData.display) {
+				columnObj.column_number_data = settingsDt.aoColumns[column_number_filter].mData.filter;
+				columnObj.column_number_display = settingsDt.aoColumns[column_number_filter].mData.display;
+			} else if (settingsDt.aoColumns[column_number_filter].mData && settingsDt.aoColumns[column_number_filter].mData.filter) {
+				columnObj.column_number_data = settingsDt.aoColumns[column_number_filter].mData.filter;
 			}
 			if (isNaN(settingsDt.aoColumns[column_number_filter].mRender) && typeof settingsDt.aoColumns[column_number_filter].mRender !== 'object') {
 				columnObj.column_number_render = settingsDt.aoColumns[column_number_filter].mRender;
@@ -2472,23 +2479,48 @@ if (!Object.entries) {
 
 				} else if (columnObj.column_data_type === "text") {
 					if (columnObj.text_data_delimiter !== undefined) {
-						//Timothy Anyona 20190227. Fix for error when using ajax data object or function
-						if (data[j]._aFilterData !== undefined && data[j]._aFilterData !== null) {
-							col_inner_elements = data[j]._aFilterData[column_number_filter];
-							col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
-						} else {
-							if (columnObj.column_number_data === undefined) {
-								col_inner_elements = data[j]._aData[column_number_filter].split(columnObj.text_data_delimiter);
+						//Timothy Anyona 20191124. Fix to allow use of different display and filter values in selects
+						if (columnObj.column_number_data !== undefined && columnObj.column_number_display !== undefined) {
+							var value_delimiter;
+							if(columnObj.select_value_delimiter === undefined){
+								value_delimiter = columnObj.text_data_delimiter;
 							} else {
-								col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
-								col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+								value_delimiter = columnObj.select_value_delimiter;
 							}
-						}
-						for (k = 0; k < col_inner_elements.length; k++) {
-							col_inner_data = col_inner_elements[k];
-							if ($.trim(col_inner_data) !== '' && !(col_filter_array.hasOwnProperty(col_inner_data))) {
-								col_filter_array[col_inner_data] = col_inner_data;
-								column_data.push(col_inner_data);
+							col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_display);
+							col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+							var col_value_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
+							col_value_elements = (col_value_elements + '').split(value_delimiter);
+							for (k = 0; k < col_inner_elements.length; k++) {
+								col_inner_data = col_inner_elements[k];
+								var col_value_data = col_value_elements[k];
+								if ($.trim(col_inner_data) !== '' && !(col_filter_array.hasOwnProperty(col_inner_data))) {
+									col_filter_array[col_inner_data] = col_inner_data;
+									column_data.push({
+										value: col_value_data,
+										label: col_inner_data
+									});
+								}
+							}
+						} else {
+							//Timothy Anyona 20190227. Fix for error when using ajax data object or function
+							if (data[j]._aFilterData !== undefined && data[j]._aFilterData !== null) {
+								col_inner_elements = data[j]._aFilterData[column_number_filter];
+								col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+							} else {
+								if (columnObj.column_number_data === undefined) {
+									col_inner_elements = data[j]._aData[column_number_filter].split(columnObj.text_data_delimiter);
+								} else {
+									col_inner_elements = dot2obj(data[j]._aData, columnObj.column_number_data);
+									col_inner_elements = (col_inner_elements + '').split(columnObj.text_data_delimiter);
+								}
+							}
+							for (k = 0; k < col_inner_elements.length; k++) {
+								col_inner_data = col_inner_elements[k];
+								if ($.trim(col_inner_data) !== '' && !(col_filter_array.hasOwnProperty(col_inner_data))) {
+									col_filter_array[col_inner_data] = col_inner_data;
+									column_data.push(col_inner_data);
+								}
 							}
 						}
 					} else {
