@@ -40,6 +40,13 @@
 					pagingType: "full_numbers",
 					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
 					pageLength: 10,
+					columnDefs: [
+						{
+							targets: "actionCol",
+							orderable: false,
+							searchable: false
+						}
+					],
 					language: {
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
@@ -121,7 +128,7 @@
 				<tr>
 					<th><spring:message code="page.text.report"/></th>
 					<th><spring:message code="page.text.reportGroup"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

@@ -192,11 +192,11 @@ Display user groups
 		<table id="userGroups" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
+					<th class="noFilter selectCol"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 

@@ -562,13 +562,19 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
 
 	var defaultColumnDefs = [
 		{
-			targets: 0,
+			targets: "selectCol",
+			className: 'select-checkbox',
 			orderable: false,
-			className: 'select-checkbox'
+			searchable: false
 		},
 		{
 			targets: "dtHidden", //target name matches class name of th.
 			visible: false
+		},
+		{
+			targets: "actionCol",
+			orderable: false,
+			searchable: false
 		}
 	];
 	

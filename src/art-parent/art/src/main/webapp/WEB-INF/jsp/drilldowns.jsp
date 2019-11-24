@@ -64,9 +64,15 @@ Display report drilldowns
 						{orderable: true, targets: 1},
 						{orderable: false, targets: '_all'},
 						{
-							orderable: false,
+							targets: "selectCol",
 							className: 'select-checkbox',
-							targets: 0
+							orderable: false,
+							searchable: false
+						},
+						{
+							targets: "actionCol",
+							orderable: false,
+							searchable: false
 						}
 					],
 					order: [[1, 'asc']],
@@ -242,11 +248,11 @@ Display report drilldowns
 		<table id="drilldowns" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
+					<th class="noFilter selectCol"></th>
 					<th><spring:message code="page.text.position"/></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="drilldowns.text.drilldownReport"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

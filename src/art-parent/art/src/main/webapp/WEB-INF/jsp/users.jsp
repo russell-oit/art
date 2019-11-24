@@ -297,7 +297,7 @@ Display user configuration page
 		<table id="users" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
+					<th class="noFilter selectCol"></th>
 					<th><spring:message code="page.text.id"/><p></p></th>
 					<th><spring:message code="users.text.username"/><p></p></th>
 					<th><spring:message code="users.text.fullName"/><p></p></th>

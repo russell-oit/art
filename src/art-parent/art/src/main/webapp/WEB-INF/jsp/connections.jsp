@@ -37,6 +37,13 @@ Page to display connections status
 					pagingType: "full_numbers",
 					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
 					pageLength: 20,
+					columnDefs: [
+						{
+							targets: "actionCol",
+							orderable: false,
+							searchable: false
+						}
+					],
 					language: {
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
@@ -116,7 +123,7 @@ Page to display connections status
 						<th><spring:message code="connections.text.currentConnectionCount"/></th>
 						<th><spring:message code="connections.text.inUseCount"/></th>
 						<th><spring:message code="connections.text.totalConnectionRequests"/></th>
-						<th class="noFilter"><spring:message code="page.text.action"/></th>
+						<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 						</c:if>
 				</tr>
 			</thead>

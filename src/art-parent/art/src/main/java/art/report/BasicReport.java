@@ -187,6 +187,7 @@ public class BasicReport implements Serializable {
 				String groupName = reportGroup.getName();
 				names.add(groupName);
 				//https://stackoverflow.com/questions/23536133/how-do-you-match-multiple-regex-patterns-for-a-single-line-of-text-in-java
+				//https://legacy.datatables.net/ref#fnFilter
 				List<String> regexList = new ArrayList<>();
 				regexList.add("^" + groupName + "$");
 				regexList.add("^" + groupName + ",");

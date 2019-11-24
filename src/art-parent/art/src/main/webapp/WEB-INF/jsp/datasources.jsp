@@ -226,7 +226,7 @@ Display datasources
 		<table id="datasources" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
+					<th class="noFilter selectCol"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
