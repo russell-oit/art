@@ -107,7 +107,7 @@ Display user jobs and jobs configuration
 						width: "400px"
 					},
 					{
-						targets: 0,
+						targets: "selectCol",
 						orderable: false,
 						className: 'select-checkbox'
 					},
@@ -454,7 +454,7 @@ Display user jobs and jobs configuration
 		<table id="jobs" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter selectorCol"></th>
+					<th class="noFilter selectCol"></th>
 					<th class="idCol"><spring:message code="page.text.id"/><p></p></th>
 					<th class="nameCol"><spring:message code="page.text.name"/><p></p></th>
 					<th class="dtHidden"><spring:message code="page.text.active"/><p></p></th>

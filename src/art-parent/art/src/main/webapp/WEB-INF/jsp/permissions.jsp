@@ -26,24 +26,17 @@
 				$('a[id="permissionsMenu"]').parent().addClass('active');
 
 				var tbl = $('#permissions');
+				
+				var pageLength = 20; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 20,
-					columnDefs: [
-						{
-							targets: "actionCol",
-							orderable: false,
-							searchable: false
-						}
-					],
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				//initialize datatable
+				initBasicTable(tbl, pageLength, showAllRowsText, contextPath,
+						localeCode, addColumnFilters, columnDefs);
 
 			});
 		</script>

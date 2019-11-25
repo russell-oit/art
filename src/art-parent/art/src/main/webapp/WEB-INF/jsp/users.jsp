@@ -55,6 +55,7 @@ Display user configuration page
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var columnDefs = undefined;
+				var hasSelect = true;
 
 				var activeSpan = "<span class='label label-success'>${activeText}</span>";
 				var disabledSpan = "<span class='label label-danger'>${disabledText}</span>";
@@ -78,17 +79,9 @@ Display user configuration page
 				];
 
 				//initialize datatable
-				var oTable = initAjaxTable(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						dataUrl,
-						errorOccurredText,
-						showErrors,
-						columnDefs,
-						columns
-						);
+				var oTable = initAjaxTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, dataUrl, errorOccurredText,
+						showErrors, columnDefs, columns, hasSelect);
 
 				var table = oTable.api();
 

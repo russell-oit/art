@@ -30,29 +30,17 @@
 				$('a[href*="parameters"]').parent().addClass('active');
 
 				var tbl = $('#reports');
+				
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = undefined; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				var columnFilterRow = createColumnFilters(tbl);
-
-				//initialize datatable and process delete action
-				var oTable = tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
-
-				//move column filter row after heading row
-				columnFilterRow.insertAfter(columnFilterRow.next());
-
-				//get datatables api object
-				var table = oTable.api();
-
-				// Apply the column filter
-				applyColumnFilters(tbl, table);
+				//initialize datatable
+				initBasicTable(tbl, pageLength, showAllRowsText, contextPath,
+						localeCode, addColumnFilters, columnDefs);
 
 			});
 		</script>

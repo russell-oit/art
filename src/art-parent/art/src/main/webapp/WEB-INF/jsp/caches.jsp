@@ -33,23 +33,16 @@ Page to allow manual clearing of caches
 
 				var tbl = $('#caches');
 
-				tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					columnDefs: [
-						{
-							targets: "actionCol",
-							orderable: false,
-							searchable: false
-						}
-					],
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
+
+				//initialize datatable
+				initBasicTable(tbl, pageLength, showAllRowsText, contextPath,
+						localeCode, addColumnFilters, columnDefs);
 
 				tbl.find('tbody').on('click', '.clearCache', function () {
 					var row = $(this).closest("tr"); //jquery object

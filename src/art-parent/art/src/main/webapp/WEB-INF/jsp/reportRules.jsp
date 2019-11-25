@@ -48,40 +48,20 @@ Display report filters
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				var tbl = $('#reportRules');
+				
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				var oTable = tbl.dataTable({
-					columnDefs: [
-						{
-							targets: "selectCol",
-							className: 'select-checkbox',
-							orderable: false,
-							searchable: false
-						},
-						{
-							targets: "actionCol",
-							orderable: false,
-							searchable: false
-						}
-					],
-					order: [[1, 'asc']],
-					dom: 'lBfrtip',
-					buttons: [
-						'selectAll',
-						'selectNone'
-					],
-					select: {
-						style: 'multi',
-						selector: 'td:first-child'
-					},
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
+
+				var table = oTable.api();
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -119,8 +99,6 @@ Display report filters
 						} //end callback
 					}); //end bootbox confirm
 				});
-
-				var table = oTable.api();
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});

@@ -59,41 +59,28 @@ Display report drilldowns
 
 				var tbl = $('#drilldowns');
 
-				var oTable = tbl.dataTable({
-					columnDefs: [
-						{orderable: true, targets: 1},
-						{orderable: false, targets: '_all'},
-						{
-							targets: "selectCol",
-							className: 'select-checkbox',
-							orderable: false,
-							searchable: false
-						},
-						{
-							targets: "actionCol",
-							orderable: false,
-							searchable: false
-						}
-					],
-					order: [[1, 'asc']],
-					dom: 'lBfrtip',
-					buttons: [
-						'selectAll',
-						'selectNone'
-					],
-					select: {
-						style: 'multi',
-						selector: 'td:first-child'
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = [
+					{
+						targets: 1,
+						orderable: true
 					},
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+					{
+						targets: '_all',
+						orderable: false
+					}
+				];
+
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
+
+				var table = oTable.api();
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object

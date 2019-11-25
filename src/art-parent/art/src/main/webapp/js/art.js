@@ -128,11 +128,11 @@ var tinymceConfig = {
  */
 function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		testSqlElementId, databaseProtocolElementId) {
-			
+
 	var driverElement = document.getElementById(driverElementId);
 	var urlElement = document.getElementById(urlElementId);
 	var testSqlElement = document.getElementById(testSqlElementId);
-	
+
 	//https://stackoverflow.com/questions/13343566/set-select-option-selected-by-value
 	var databaseProtocolSelector = "#" + databaseProtocolElementId;
 
@@ -393,7 +393,7 @@ var MAP = {'&': '&amp;',
 	"'": '&#39;'};
 
 function escapeHtml(s, forAttribute) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function (c) {
@@ -402,7 +402,7 @@ function escapeHtml(s, forAttribute) {
 }
 
 function escapeHtmlContent(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/[&<>]/g, function (c) {
@@ -411,7 +411,7 @@ function escapeHtmlContent(s) {
 }
 
 function escapeHtmlAttribute(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/[&<>'"]/g, function (c) {
@@ -422,7 +422,7 @@ function escapeHtmlAttribute(s) {
 
 //https://gist.github.com/getify/3667624
 function escapeDoubleQuotes(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/\\([\s\S])|(")/g, "\\$1$2");
@@ -437,18 +437,18 @@ function escapeDoubleQuotes(s) {
 function initializeButtonHover(ancestor) {
 	//https://api.jquery.com/descendant-selector/
 	var selector;
-	if(ancestor === undefined) {
+	if (ancestor === undefined) {
 		selector = '';
 	} else {
 		selector = ancestor + ' ';
 	}
 	selector += 'button.dropdown-toggle';
-	
+
 	//bootstrap-dropdown-hover
 //	$(selector).bootstrapDropdownHover({
 //		hideTimeout: 100
 //	});
-	
+
 	//bootstrap-hover-dropdown
 	$(selector).dropdownHover({
 		delay: 100
@@ -464,7 +464,7 @@ function initializeSelectHover() {
 	//activate dropdown-hover. to make bootstrap-select open on hover
 	//must come after bootstrap-select initialization
 	initializeButtonHover();
-	
+
 	//refresh needed when using bootstrap-dropdown-hover to avoid console error
 	//not needed when using bootstrap-hover-dropdown with bootstrap-select 1.10.0
 	//always needed with bootstrap-select 1.13
@@ -532,30 +532,31 @@ function datatablesInitComplete() {
 	if (!isMobile()) {
 		$('div.dataTables_filter input').trigger("focus");
 	}
-	
+
 	//https://datatables.net/forums/discussion/49138/how-to-put-space-between-buttons-and-show-x-entries
 	//https://developer.snapappointments.com/bootstrap-select/examples/#width
 	$('.dataTables_length select').selectpicker({
 		width: '100px'
 	});
-	
+
 	var ancestor = '.dataTables_length';
 	initializeButtonHover(ancestor);
 }
 
 /**
- * Get basic options used for datatables used in configuration pages
+ * Get options used for datatables used in configuration pages
  * 
  * @param {number} pageLength
  * @param {string} showAllRowsText
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {array} columnDefs - column definitions
+ * @param {boolean} hasSelect - whether to include select column
  * @returns {jQuery} datatables jquery object
  */
-function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
-		localeCode, columnDefs) {
-			
+function getConfigTableOptions(pageLength, showAllRowsText, contextPath,
+		localeCode, columnDefs, hasSelect) {
+
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 20;
 	}
@@ -577,9 +578,9 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
 			searchable: false
 		}
 	];
-	
+
 	var finalColumnDefs;
-	if(columnDefs === undefined){
+	if (columnDefs === undefined) {
 		finalColumnDefs = defaultColumnDefs;
 	} else {
 		finalColumnDefs = defaultColumnDefs.concat(columnDefs);
@@ -587,31 +588,36 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
 
 	var options = {
 		orderClasses: false,
-		order: [[1, 'asc']],
 		pagingType: "full_numbers",
 		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, showAllRowsText]],
 		pageLength: pageLength,
 		columnDefs: finalColumnDefs,
-		dom: 'lBfrtip',
-		buttons: [
-			'selectAll',
-			'selectNone'
-		],
-		select: {
-			style: 'multi',
-			selector: 'td:first-child'
-		},
 		language: {
 			url: contextPath + "/js/dataTables/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
 	};
-	
+
+	if (hasSelect) {
+		$.extend(options, {
+			order: [[1, 'asc']],
+			dom: 'lBfrtip',
+			buttons: [
+				'selectAll',
+				'selectNone'
+			],
+			select: {
+				style: 'multi',
+				selector: 'td:first-child'
+			}
+		});
+	}
+
 	return options;
 }
 
 /**
- * Initialise datatable used in configuration pages
+ * Initialise datatable
  * 
  * @param {jQuery} tbl
  * @param {number} pageLength
@@ -620,10 +626,11 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
  * @param {array} columnDefs - column definitions
+ * @param {boolean} hasSelect - whether to include select column
  * @returns {jQuery} datatables jquery object
  */
-function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		addColumnFilters, columnDefs) {
+function initTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs, hasSelect) {
 
 	if (addColumnFilters === undefined) {
 		addColumnFilters = true;
@@ -634,9 +641,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	if (addColumnFilters) {
 		columnFilterRow = createColumnFilters(tbl);
 	}
-	
-	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
-			contextPath, localeCode, columnDefs);
+
+	var options = getConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs, hasSelect);
 
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
@@ -657,13 +664,53 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	return oTable;
 }
 
+/**
+ * Initialise datatable used in configuration pages
+ * 
+ * @param {jQuery} tbl
+ * @param {number} pageLength
+ * @param {string} showAllRowsText
+ * @param {string} contextPath
+ * @param {string} localeCode
+ * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
+ * @returns {jQuery} datatables jquery object
+ */
+function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs) {
+
+	var hasSelect = true;
+	return initTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, addColumnFilters, columnDefs, hasSelect);
+}
+
+/**
+ * Initialise basic datatable without a select column
+ * 
+ * @param {jQuery} tbl
+ * @param {number} pageLength
+ * @param {string} showAllRowsText
+ * @param {string} contextPath
+ * @param {string} localeCode
+ * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
+ * @returns {jQuery} datatables jquery object
+ */
+function initBasicTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs) {
+
+	var hasSelect = false;
+	return initTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, addColumnFilters, columnDefs, hasSelect);
+}
+
 function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
-			
-	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
-			contextPath, localeCode, columnDefs);
-			
-	$.extend(options,{
+		dataUrl, errorOccurredText, showErrors, columnDefs, columns, hasSelect) {
+
+	var options = getConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs, hasSelect);
+
+	$.extend(options, {
 		deferRender: true,
 		ajax: {
 			type: "GET",
@@ -694,7 +741,7 @@ function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
 	var oTable = tbl.dataTable(options);
-	
+
 	return oTable;
 }
 
@@ -733,14 +780,14 @@ function showUserAjaxError(xhr, errorOccurredText) {
  */
 function getAjaxErrorMessage(xhr) {
 	var message;
-	
+
 	var responseText = xhr.responseText; //can be undefined e.g. if request header name is empty string
 	if (responseText) {
 		message = responseText;
 	} else {
 		message = xhr.status + " " + xhr.statusText;
 	}
-	
+
 	return message;
 }
 
@@ -767,23 +814,23 @@ function notifyActionSuccessReusable(actionText, recordName) {
  */
 function notifyActionSuccess(actionText, recordName, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += actionText;
 	if (recordName !== undefined) {
 		msg = msg + ": " + recordName;
 	}
-	
+
 	$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(actionText, "success");
 }
 
@@ -812,7 +859,7 @@ function notifyActionErrorReusable(errorOccurredText, errorMessage, showErrors) 
  */
 function notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
@@ -823,12 +870,12 @@ function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable
 	if (showErrors && errorMessage) {
 		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
 	}
-	
+
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(errorOccurredText, "error");
 }
 
@@ -856,13 +903,13 @@ function notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText,
  */
 function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += linkedRecordsExistText + "<ul>";
 
 	$.each(linkedRecords, function (index, value) {
@@ -872,10 +919,10 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(cannotDeleteRecordText, "error");
 }
 
@@ -903,13 +950,13 @@ function notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDe
  */
 function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += someRecordsNotDeletedText + "<ul>";
 
 	$.each(nonDeletedRecords, function (index, value) {
@@ -919,10 +966,10 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(someRecordsNotDeletedText, "error");
 }
 
@@ -938,7 +985,7 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
  * @param {string} [cannotDeleteRecordText]
  * @param {string} [linkedRecordsExistText]
  */
-function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
+function deleteDoneHandler(response, table, row, recordDeletedText, recordName,
 		errorOccurredText, cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var linkedRecords = response.data;
@@ -1031,7 +1078,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 				if (result) {
 					//user confirmed delete. make delete request
 					sendDeleteRequest(contextPath, deleteUrl, recordId,
-							table, row, recordDeletedText, recordName, 
+							table, row, recordDeletedText, recordName,
 							errorOccurredText, cannotDeleteRecordText,
 							linkedRecordsExistText);
 
@@ -1062,7 +1109,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {array} columnDefs - column definitions
  * @returns {jQuery} datatables jquery object
  */
-function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, 
+function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
 		localeCode, addColumnFilters, deleteButtonSelector,
 		deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,

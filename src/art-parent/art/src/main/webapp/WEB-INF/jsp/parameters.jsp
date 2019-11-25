@@ -53,6 +53,7 @@ Display parameters
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var columnDefs = undefined;
+				var hasSelect = true;
 
 				var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
 				var columns = [
@@ -75,17 +76,9 @@ Display parameters
 				];
 
 				//initialize datatable
-				var oTable = initAjaxTable(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						dataUrl,
-						errorOccurredText,
-						showErrors,
-						columnDefs,
-						columns
-						);
+				var oTable = initAjaxTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, dataUrl, errorOccurredText,
+						showErrors, columnDefs, columns, hasSelect);
 
 				var table = oTable.api();
 

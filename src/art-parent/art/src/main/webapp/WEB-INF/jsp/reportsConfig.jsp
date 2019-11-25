@@ -53,6 +53,7 @@ Reports configuration page
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var columnDefs = undefined;
+				var hasSelect = true;
 
 				var columns = [
 					{"data": null, defaultContent: ""},
@@ -70,17 +71,9 @@ Reports configuration page
 				];
 
 				//initialize datatable
-				var oTable = initAjaxTable(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						dataUrl,
-						errorOccurredText,
-						showErrors,
-						columnDefs,
-						columns
-						);
+				var oTable = initAjaxTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, dataUrl, errorOccurredText,
+						showErrors, columnDefs, columns, hasSelect);
 
 				var table = oTable.api();
 

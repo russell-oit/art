@@ -31,26 +31,18 @@ Page to display connections status
 				$('a[href*="connections"]').parent().addClass('active');
 
 				var tbl = $("#connections");
+				
+				var pageLength = undefined; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				var oTable = tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 20,
-					columnDefs: [
-						{
-							targets: "actionCol",
-							orderable: false,
-							searchable: false
-						}
-					],
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				//initialize datatable
+				var oTable = initBasicTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, addColumnFilters, columnDefs);
 
-				//get datatables api instance
 				var table = oTable.api();
 
 				tbl.find('tbody').on('click', '.reset', function () {
