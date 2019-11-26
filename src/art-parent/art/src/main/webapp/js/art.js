@@ -1169,3 +1169,35 @@ function artRemoveWork() {
 //	console.log("artRemoveWork " + workCount);
 }
 
+
+function escapeRegExp(string) {
+	//return string.replace(/([.*+?^=!:$(){}|\[\]\/\\])/g, "\\$1");
+	//https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+	return string.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+function filterReportGroups(filterVal, columnVal) {
+	//https://yadcf-showcase.appspot.com/dom_source_externally_triggered.html
+	//https://stackoverflow.com/questions/58990022/yadcf-plugin-using-select-filter-type-with-custom-func
+	if (filterVal === "~" && columnVal === "") {
+		return true;
+	}
+	
+	var escapedFilterVal = escapeRegExp(filterVal);
+	var dataSeparator = ", ";
+	var regexList = [
+		"^" + escapedFilterVal + "$",
+		"^" + escapedFilterVal + ",",
+		dataSeparator + escapedFilterVal + "$",
+		dataSeparator + escapedFilterVal + ","
+	];
+	var regex = regexList.join("|");
+	
+	var found = columnVal.search(regex);
+	if (found === -1) {
+		return false;
+	} else {
+		return true;
+	}
+}

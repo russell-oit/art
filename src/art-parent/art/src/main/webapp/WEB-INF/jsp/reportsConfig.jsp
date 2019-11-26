@@ -61,8 +61,7 @@ Reports configuration page
 					{"data": "name2"},
 					{"data": {
 							_: "reportGroupNames2",
-							filter: "reportGroupNamesFilter",
-							display: "reportGroupNames2"
+							filter: "reportGroupNamesFilter"
 						}
 					},
 					{"data": "description2"},
@@ -95,10 +94,9 @@ Reports configuration page
 								column_number: 3,
 								filter_default_label: '${selectValueText}',
 								text_data_delimiter: ", ",
-								select_value_delimiter: ";",
-								filter_match_mode: "regex",
 								case_insensitive: false,
-								sort_as: "alphaNum"
+								sort_as: "alphaNum",
+								custom_func: filterReportGroups
 							},
 							{
 								column_number: 4,
