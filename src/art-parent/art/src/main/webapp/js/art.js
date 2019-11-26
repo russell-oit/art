@@ -704,9 +704,10 @@ function initBasicTable(tbl, pageLength, showAllRowsText, contextPath, localeCod
 			localeCode, addColumnFilters, columnDefs, hasSelect);
 }
 
-function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		dataUrl, errorOccurredText, showErrors, columnDefs, columns, hasSelect) {
+function initAjaxConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
 
+	var hasSelect = true;
 	var options = getConfigTableOptions(pageLength, showAllRowsText,
 			contextPath, localeCode, columnDefs, hasSelect);
 
