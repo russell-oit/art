@@ -52,35 +52,28 @@
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteReportParameter";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReportParameter";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = undefined;
 				var linkedRecordsExistText = undefined;
 				var columnDefs = undefined;
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
-						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
-						);
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
+
+				var table = oTable.api();
+
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
 
 				//enable changing of report parameter position using drag and drop
 				oTable.rowReordering({
@@ -98,8 +91,6 @@
 						bootbox.alert(message);
 					}
 				});
-
-				var table = oTable.api();
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});

@@ -42,13 +42,13 @@
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteEncryptor";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteEncryptor";
 				var recordDeletedText = "${recordDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var columnDefs = [
@@ -58,26 +58,17 @@
 					}
 				];
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
-						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
-						);
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
 
 				var table = oTable.api();
+
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});

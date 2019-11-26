@@ -102,7 +102,7 @@ var tinymceConfig = {
 //http://jslinterrors.com/unused-a
 /*jslint unparam: true, node: true */
 /*jshint unused: true, node: true */
-/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,initConfigPage,addSelectDeselectAllHandler,displayReportInfo,displayReportProgress */
+/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,addSelectDeselectAllHandler,displayReportInfo,displayReportProgress */
 
 
 //possibly enclose functions in immediately executed function and have global use strict? but jshint/jslint will warn about unused functions
@@ -973,160 +973,51 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	$.notify(someRecordsNotDeletedText, "error");
 }
 
-/**
- * Callback for delete record ajax done successfully. String arguments should be html escaped
- * 
- * @param {PlainObject} response
- * @param {DataTables.Api} table
- * @param {jQuery} row
- * @param {string} recordDeletedText 
- * @param {string} recordName
- * @param {string} errorOccurredText
- * @param {string} [cannotDeleteRecordText]
- * @param {string} [linkedRecordsExistText]
- */
-function deleteDoneHandler(response, table, row, recordDeletedText, recordName,
-		errorOccurredText, cannotDeleteRecordText, linkedRecordsExistText) {
-
-	var linkedRecords = response.data;
-	if (response.success) {
-		table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-		notifyActionSuccessReusable(recordDeletedText, recordName);
-	} else if (linkedRecords !== null && linkedRecords.length > 0) {
-		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
-	} else {
-		notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage));
-	}
-}
-
-/**
- * Send delete request and process results. String arguments should be html escaped
- * 
- * @param {string} contextPath
- * @param {string} deleteUrl - url portion after the "app" section
- * @param {string|number} recordId
- * @param {DataTables.Api} table
- * @param {jQuery} row
- * @param {string} recordDeletedText - message shown after successful deletion
- * @param {string} recordName
- * @param {string} errorOccurredText
- * @param {string} [cannotDeleteRecordText]
- * @param {string} [linkedRecordsExistText]
- */
-function sendDeleteRequest(contextPath, deleteUrl, recordId,
-		table, row, recordDeletedText, recordName, errorOccurredText,
+function addDeleteRecordHandler(tbl, table, deleteRecordText, okText, cancelText,
+		deleteUrl, recordDeletedText, errorOccurredText, showErrors,
 		cannotDeleteRecordText, linkedRecordsExistText) {
 
-	var request = $.ajax({
-		type: "POST",
-		dataType: "json",
-		url: contextPath + "/" + deleteUrl,
-		data: {id: recordId}
-	});
-
-	//register http success callback
-	request.done(function (response) {
-		deleteDoneHandler(response, table, row, recordDeletedText,
-				recordName, errorOccurredText, cannotDeleteRecordText,
-				linkedRecordsExistText);
-	});
-	//register http error callback
-	request.fail(ajaxErrorHandler);
-}
-
-/**
- * Register handler for delete button click and process delete record actions
- * 
- * @param {jQuery} tbl
- * @param {DataTables.Api} table
- * @param {string} deleteButtonSelector
- * @param {string} deleteRecordText
- * @param {string} okText - confirm dialog ok button text
- * @param {string} cancelText - confirm dialog cancel button text
- * @param {string} contextPath
- * @param {string} deleteUrl
- * @param {string} recordDeletedText
- * @param {string} errorOccurredText
- * @param {string} cannotDeleteRecordText
- * @param {string} linkedRecordsExistText
- */
-function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-		deleteRecordText, okText, cancelText,
-		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-		cannotDeleteRecordText, linkedRecordsExistText) {
-
-	//delete record
-	tbl.find('tbody').on('click', deleteButtonSelector, function () {
+	tbl.find('tbody').on('click', ".deleteRecord", function () {
 		var row = $(this).closest("tr"); //jquery object
-		//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
-		//https://stackoverflow.com/questions/10958047/issue-with-jquery-data-treating-string-as-number
-		var recordName = escapeHtmlContent(row.attr("data-name"));
+		var recordName = escapeHtmlContent(row.data("name"));
 		var recordId = row.data("id");
 
 		//display confirm dialog
 		bootbox.confirm({
 			message: deleteRecordText + ": <b>" + recordName + "</b>",
 			buttons: {
-				cancel: {
-					label: cancelText
-				},
 				confirm: {
 					label: okText
+				},
+				cancel: {
+					label: cancelText
 				}
 			},
 			callback: function (result) {
 				if (result) {
 					//user confirmed delete. make delete request
-					sendDeleteRequest(contextPath, deleteUrl, recordId,
-							table, row, recordDeletedText, recordName,
-							errorOccurredText, cannotDeleteRecordText,
-							linkedRecordsExistText);
-
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: deleteUrl,
+						data: {id: recordId},
+						success: function (response) {
+							var linkedRecords = response.data;
+							if (response.success) {
+								table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+								notifyActionSuccessReusable(recordDeletedText, recordName);
+							} else if (linkedRecords !== null && linkedRecords.length > 0) {
+								notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
+							} else {
+								notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage), showErrors);
+							}
+						},
+						error: ajaxErrorHandler
+					});
 				} //end if result
 			} //end callback
 		}); //end bootbox confirm
 	}); //end on click
-}
-
-/**
- * Initialize datatable and delete record handler for a configuration page
- * 
- * @param {jQuery} tbl
- * @param {number} pageLength
- * @param {string} showAllRowsText
- * @param {string} contextPath
- * @param {string} localeCode
- * @param {boolean} addColumnFilters
- * @param {string} deleteButtonSelector
- * @param {string} deleteRecordText
- * @param {string} okText
- * @param {string} cancelText
- * @param {string} deleteUrl
- * @param {string} recordDeletedText
- * @param {string} errorOccurredText
- * @param {string} cannotDeleteRecordText
- * @param {string} linkedRecordsExistText
- * @param {array} columnDefs - column definitions
- * @returns {jQuery} datatables jquery object
- */
-function initConfigPage(tbl, pageLength, showAllRowsText, contextPath,
-		localeCode, addColumnFilters, deleteButtonSelector,
-		deleteRecordText, okText, cancelText,
-		deleteUrl, recordDeletedText, errorOccurredText,
-		cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
-
-	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
-			localeCode, addColumnFilters, columnDefs);
-
-	//get datatables api object
-	var table = oTable.api();
-
-	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-			deleteRecordText, okText, cancelText,
-			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-			cannotDeleteRecordText, linkedRecordsExistText);
-
-	return oTable;
 }
 
 /**

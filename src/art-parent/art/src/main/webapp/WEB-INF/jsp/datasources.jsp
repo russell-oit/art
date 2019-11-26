@@ -38,21 +38,24 @@ Display datasources
 				$('a[href*="datasources"]').parent().addClass('active');
 
 				var tbl = $('#datasources');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteButtonSelector = ".deleteRecord";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
-				var deleteUrl = "deleteDatasource";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteDatasource";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteDatasources";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
 				var columnDefs = [
 					{
 						targets: "actionCol",
@@ -60,26 +63,17 @@ Display datasources
 					}
 				];
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						addColumnFilters,
-						deleteButtonSelector,
-						deleteRecordText,
-						okText,
-						cancelText,
-						deleteUrl,
-						recordDeletedText,
-						errorOccurredText,
-						cannotDeleteRecordText,
-						linkedRecordsExistText,
-						columnDefs
-						);
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
 
 				var table = oTable.api();
+
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
 
 				$('#deleteRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
