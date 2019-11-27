@@ -37,7 +37,7 @@ Display rules
 				$('a[href*="rules"]').parent().addClass('active');
 
 				var tbl = $('#rules');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -47,11 +47,15 @@ Display rules
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
 				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteRule";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteRules";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = undefined;
 
 				//initialize datatable
@@ -66,51 +70,10 @@ Display rules
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteRules",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
@@ -188,7 +151,8 @@ Display rules
 			</thead>
 			<tbody>
 				<c:forEach var="rule" items="${rules}">
-					<tr data-id="${rule.ruleId}" 
+					<tr id="row_${rule.ruleId}"
+						data-id="${rule.ruleId}"
 						data-name="${encode:forHtmlAttribute(rule.name)}">
 
 						<td></td>

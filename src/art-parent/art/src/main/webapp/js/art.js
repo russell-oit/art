@@ -736,6 +736,11 @@ function initAjaxConfigTable(tbl, pageLength, showAllRowsText, contextPath, loca
 		createdRow: function (row, data, dataIndex) {
 			$(row).attr('data-id', data.dtId);
 			$(row).attr('data-name', data.dtName);
+		},
+		rowId: function (data) {
+			//https://datatables.net/reference/option/rowId
+			//https://stackoverflow.com/questions/36663037/datatables-rowid-starting-with-a-number-issue/36663176#36663176
+			return 'row_' + data.dtId;
 		}
 	});
 
@@ -1021,6 +1026,87 @@ function addDeleteRecordHandler(tbl, table, deleteRecordText, okText, cancelText
 	}); //end on click
 }
 
+function addDeleteRecordsHandler(table, deleteRecordText, okText, cancelText,
+		deleteUrl, recordsDeletedText, errorOccurredText, showErrors,
+		selectRecordsText, someRecordsNotDeletedText) {
+
+	$('#deleteRecords').on("click", function () {
+		var selectedRows = table.rows({selected: true});
+		//https://stackoverflow.com/questions/45563129/datatables-selected-rows-data-attribute
+		//https://datatables.net/reference/api/rows().nodes()
+		var nodes = selectedRows.nodes();
+		if (nodes.length > 0) {
+			var ids = $.map(nodes, function (item) {
+				return $(item).data("id");
+			});
+			bootbox.confirm({
+				message: deleteRecordText + ": <b>" + ids + "</b>",
+				buttons: {
+					cancel: {
+						label: cancelText
+					},
+					confirm: {
+						label: okText
+					}
+				},
+				callback: function (result) {
+					if (result) {
+						//user confirmed delete. make delete request
+						$.ajax({
+							type: "POST",
+							dataType: "json",
+							url: deleteUrl,
+							data: {ids: ids},
+							success: function (response) {
+								var nonDeletedRecords = response.data;
+								if (response.success) {
+									selectedRows.remove().draw(false);
+									notifyActionSuccessReusable(recordsDeletedText, ids);
+								} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+									var nonDeletedIds = [];
+									$.each(nonDeletedRecords, function (index, recordDetails) {
+										//https://stackoverflow.com/questions/9133102/how-to-grab-substring-before-a-specified-character-jquery-or-javascript
+										var rowIdString = recordDetails.split(' - ', 1)[0];
+										var rowIdInt = parseInt(rowIdString);
+										nonDeletedIds.push(rowIdInt);
+									});
+
+									var deletedIds = ids.filter(function (item) {
+										if (nonDeletedIds.indexOf(item) === -1) {
+											//id not in non deleted. so must have been deleted.
+											return true;
+										} else {
+											return false;
+										}
+									});
+
+									$.each(deletedIds, function (index, deletedId) {
+										//https://stackoverflow.com/questions/43131847/datatable-jquery-how-to-remove-a-row-from-a-table-based-on-an-id
+										//https://stackoverflow.com/questions/4146502/jquery-selectors-on-custom-data-attributes-using-html5
+										//https://stackoverflow.com/questions/2487747/selecting-element-by-data-attribute
+										//https://datatables.net/reference/api/row()
+										//https://datatables.net/reference/type/row-selector
+										var selector = "#row_" + deletedId;
+										table.row(selector).remove();
+									});
+									table.draw(false);
+
+									notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDeletedText);
+								} else {
+									notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage), showErrors);
+								}
+							},
+							error: ajaxErrorHandler
+						});
+					} //end if result
+				} //end callback
+			}); //end bootbox confirm
+		} else {
+			bootbox.alert(selectRecordsText);
+		}
+	});
+}
+
 /**
  * Add handler for select all/deselect all links used with lou-multiselect plugin
  */
@@ -1075,7 +1161,7 @@ function filterReportGroups(filterVal, columnVal) {
 	if (filterVal === "~" && columnVal === "") {
 		return true;
 	}
-	
+
 	var escapedFilterVal = escapeRegExp(filterVal);
 	var dataSeparator = ", ";
 	var regexList = [
@@ -1085,7 +1171,7 @@ function filterReportGroups(filterVal, columnVal) {
 		dataSeparator + escapedFilterVal + ","
 	];
 	var regex = regexList.join("|");
-	
+
 	var found = columnVal.search(regex);
 	if (found === -1) {
 		return false;

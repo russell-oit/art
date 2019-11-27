@@ -54,6 +54,19 @@ Display report filters
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = false; //pass undefined to use the default
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReportRule";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteReportRules";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = undefined;
+				var linkedRecordsExistText = undefined;
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = undefined;
 				var columnDefs = undefined; //pass undefined to use the default
 
 				//initialize datatable
@@ -62,6 +75,11 @@ Display report filters
 						addColumnFilters, columnDefs);
 
 				var table = oTable.api();
+				
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -98,53 +116,6 @@ Display report filters
 							} //end if result
 						} //end callback
 					}); //end bootbox confirm
-				});
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-//						var ids = [];
-//						for (var i = 0; i < table.rows('.selected').data().length; i++) {
-//							ids.push(table.rows('.selected').nodes()[i].attributes["data-name"].value);
-//						}
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteReportRules",
-										data: {ids: ids},
-										success: function (response) {
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
 				});
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {

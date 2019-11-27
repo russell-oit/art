@@ -56,6 +56,7 @@ Display datasources
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = [
 					{
 						targets: "actionCol",
@@ -75,51 +76,10 @@ Display datasources
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteDatasources",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
@@ -230,7 +190,8 @@ Display datasources
 			</thead>
 			<tbody>
 				<c:forEach var="datasource" items="${datasources}">
-					<tr data-id="${datasource.datasourceId}"
+					<tr id="row_${datasource.datasourceId}"
+						data-id="${datasource.datasourceId}"
 						data-name="${encode:forHtmlAttribute(datasource.name)}">
 
 						<td></td>

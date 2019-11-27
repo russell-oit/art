@@ -26,6 +26,8 @@ Reports configuration page
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText" javaScriptEscape="true"/>
+<spring:message code="reports.message.linkedJobsExist" var="linkedJobsExistText" javaScriptEscape="true"/>
 <spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
@@ -50,8 +52,19 @@ Reports configuration page
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var dataUrl = "getConfigReports";
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReport";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteReports";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = undefined;
 
 				var columns = [
@@ -74,6 +87,11 @@ Reports configuration page
 						showErrors, columnDefs, columns);
 
 				var table = oTable.api();
+
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				yadcf.init(table,
 						[
@@ -147,52 +165,6 @@ Reports configuration page
 							} //end if result
 						} //end callback
 					}); //end bootbox confirm
-				});
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteReports",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
 				});
 
 				$('#editRecords').on("click", function () {

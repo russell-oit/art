@@ -46,7 +46,7 @@
 				$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
 
 				var tbl = $('#reportParameters');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -56,11 +56,15 @@
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
 				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReportParameter";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteReportParameters";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = undefined;
 				var linkedRecordsExistText = undefined;
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = undefined;
 				var columnDefs = undefined;
 
 				//initialize datatable
@@ -74,6 +78,11 @@
 						cancelText, deleteRecordUrl, recordDeletedText,
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
+
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				//enable changing of report parameter position using drag and drop
 				oTable.rowReordering({
@@ -89,49 +98,6 @@
 					},
 					fnAlert: function (message) {
 						bootbox.alert(message);
-					}
-				});
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[2];
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteReportParameters",
-										data: {ids: ids},
-										success: function (response) {
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
 					}
 				});
 
@@ -200,7 +166,7 @@
 			</thead>
 			<tbody>
 				<c:forEach var="reportParameter" items="${reportParameters}">
-					<tr data-id="${reportParameter.reportParameterId}" 
+					<tr data-id="${reportParameter.reportParameterId}"
 						data-name="${encode:forHtmlAttribute(reportParameter.parameter.name)} (${reportParameter.parameter.parameterId})"
 						id="${reportParameter.reportParameterId}">
 

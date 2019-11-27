@@ -26,6 +26,8 @@ Display user configuration page
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText" javaScriptEscape="true"/>
+<spring:message code="users.message.linkedJobsExist" var="linkedJobsExistText" javaScriptEscape="true"/>
 <spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
 <spring:message code="activeStatus.option.active" var="activeText" javaScriptEscape="true"/>
 <spring:message code="activeStatus.option.disabled" var="disabledText" javaScriptEscape="true"/>
@@ -52,8 +54,19 @@ Display user configuration page
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var dataUrl = "getUsers";
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteUser";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteUsers";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = undefined;
 
 				var activeSpan = "<span class='label label-success'>${activeText}</span>";
@@ -83,6 +96,11 @@ Display user configuration page
 						showErrors, columnDefs, columns);
 
 				var table = oTable.api();
+				
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				yadcf.init(table,
 						[
@@ -146,52 +164,6 @@ Display user configuration page
 							} //end if result
 						} //end callback
 					}); //end bootbox confirm
-				});
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.userId;
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteUsers",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
 				});
 
 				$('#editRecords').on("click", function () {

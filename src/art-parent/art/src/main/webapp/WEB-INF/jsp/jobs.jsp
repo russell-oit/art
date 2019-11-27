@@ -89,6 +89,19 @@ Display user jobs and jobs configuration
 
 				var tbl = $('#jobs');
 
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteJob";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteJobs";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = undefined;
+				var linkedRecordsExistText = undefined;
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = undefined;
 				var columnDefs = [
 					{
 						targets: "idCol",
@@ -146,6 +159,16 @@ Display user jobs and jobs configuration
 				});
 
 				var table = oTable.api();
+				
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
+				
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				yadcf.init(table,
 						[
@@ -330,50 +353,6 @@ Display user jobs and jobs configuration
 					});
 				});
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteJobs",
-										data: {ids: ids},
-										success: function (response) {
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
-
 				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -466,7 +445,8 @@ Display user jobs and jobs configuration
 			</thead>
 			<tbody>
 				<c:forEach var="job" items="${jobs}">
-					<tr data-id="${job.jobId}" 
+					<tr id="row_${job.jobId}"
+						data-id="${job.jobId}"
 						data-name="${encode:forHtmlAttribute(job.name)} (${job.jobId})">
 
 						<td></td>

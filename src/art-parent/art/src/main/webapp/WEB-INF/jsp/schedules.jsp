@@ -38,7 +38,7 @@ Display schedules
 				$('a[href*="schedules"]').parent().addClass('active');
 
 				var tbl = $('#schedules');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -48,11 +48,15 @@ Display schedules
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
 				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteSchedule";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteSchedules";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = undefined
 
 				//initialize datatable
@@ -67,52 +71,10 @@ Display schedules
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteSchedules",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
@@ -192,7 +154,8 @@ Display schedules
 			</thead>
 			<tbody>
 				<c:forEach var="schedule" items="${schedules}">
-					<tr data-id="${schedule.scheduleId}" 
+					<tr id="row_${schedule.scheduleId}"
+						data-id="${schedule.scheduleId}"
 						data-name="${encode:forHtmlAttribute(schedule.name)}">
 
 						<td></td>

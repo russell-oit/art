@@ -36,7 +36,7 @@
 				$('a[href*="encryptors"]').parent().addClass('active');
 
 				var tbl = $('#encryptors');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -46,11 +46,15 @@
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
 				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteEncryptor";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteEncryptors";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedReportsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = [
 					{
 						targets: "actionCol",
@@ -70,51 +74,10 @@
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//delete confirmed
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteEncryptors",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
@@ -212,7 +175,8 @@
 			</thead>
 			<tbody>
 				<c:forEach var="encryptor" items="${encryptors}">
-					<tr data-id="${encryptor.encryptorId}"
+					<tr id="row_${encryptor.encryptorId}"
+						data-id="${encryptor.encryptorId}"
 						data-name="${encode:forHtmlAttribute(encryptor.name)}">
 
 						<td></td>

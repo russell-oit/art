@@ -38,7 +38,7 @@ Display user groups
 				$('a[href*="userGroups"]').parent().addClass('active');
 
 				var tbl = $('#userGroups');
-				
+
 				var pageLength = undefined; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -48,11 +48,15 @@ Display user groups
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
 				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteUserGroup";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteUserGroups";
 				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
 				var linkedRecordsExistText = "${linkedUsersExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var columnDefs = undefined;
 
 				//initialize datatable
@@ -67,52 +71,10 @@ Display user groups
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
 
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteUserGroups",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
@@ -193,7 +155,8 @@ Display user groups
 
 			<tbody>
 				<c:forEach var="group" items="${groups}">
-					<tr data-id="${group.userGroupId}" 
+					<tr id="row_${group.userGroupId}"
+						data-id="${group.userGroupId}"
 						data-name="${encode:forHtmlAttribute(group.name)}">
 
 						<td></td>
