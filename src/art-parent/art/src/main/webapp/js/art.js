@@ -140,23 +140,27 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('Oracle');
 		driverElement.value = "oracle.jdbc.OracleDriver";
 		urlElement.value = "jdbc:oracle:thin:@<server>:1521:<sid>";
-		testSqlElement.value = "select 1 from dual";
+		//testSqlElement.value = "select 1 from dual";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "MySQL") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		$(databaseProtocolSelector).val('MySQL');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "MemSQLMysql") {
 		$(databaseProtocolSelector).val('MySQL');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "MariaDB") {
 		$(databaseProtocolSelector).val('MariaDB');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "AuroraMySQLMariadb") {
 		//https://mariadb.com/kb/en/library/failover-and-high-availability-with-mariadb-connector-j/#specifics-for-amazon-aurora
 		//https://stackoverflow.com/questions/44020489/db-connections-increase-after-setting-aurora-in-mariadb-connector
@@ -164,57 +168,66 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('MariaDB');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb:aurora://<cluster_end_point>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "PostgreSQL") {
 		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "CitusPostgresql") {
 		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "AuroraPostgreSQLPostgresql") {
 		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "GreenplumPostgresql") {
 		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "TimescaleDBPostgresql") {
 		$(databaseProtocolSelector).val('PostgreSQL');
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "HsqldbStandAlone") {
 		$(databaseProtocolSelector).val('HSQLDB');
 		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
-		testSqlElement.value = "values 1";
+		//testSqlElement.value = "values 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "HsqldbServer") {
 		$(databaseProtocolSelector).val('HSQLDB');
 		driverElement.value = "org.hsqldb.jdbc.JDBCDriver";
 		urlElement.value = "jdbc:hsqldb:hsql://<server>:9001/<database_alias>";
-		testSqlElement.value = "values 1";
+		//testSqlElement.value = "values 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "SqlServerMicrosoft") {
 		$(databaseProtocolSelector).val('SqlServer');
 		driverElement.value = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 		urlElement.value = "jdbc:sqlserver://<server>;databaseName=<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "SqlServerJtds") {
 		$(databaseProtocolSelector).val('SqlServer');
 		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
 		urlElement.value = "jdbc:jtds:sqlserver://<server>/<database>";
-		testSqlElement.value = "select 1";
+		testSqlElement.value = "select 1"; //JDBC 3.0 driver. Doesn't support connection.isVaid()
 	} else if (databaseType === "CUBRID") {
 		$(databaseProtocolSelector).val('CUBRID');
 		driverElement.value = "cubrid.jdbc.driver.CUBRIDDriver";
 		urlElement.value = "jdbc:cubrid:<server>:33000:<database>:::";
-		testSqlElement.value = "select 1";
+		testSqlElement.value = "select 1"; //Only supports JDBC 2.0
 	} else if (databaseType === "Other") {
 		$(databaseProtocolSelector).val('');
 		driverElement.value = "";
@@ -278,12 +291,14 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('H2');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "H2Embedded") {
 		$(databaseProtocolSelector).val('H2');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<file_path>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "Olap4jMondrian") {
 		//http://forums.pentaho.com/showthread.php?70625-Mondrian-begining-with-olap4j
 		//http://mondrian.pentaho.com/api/mondrian/olap4j/MondrianOlap4jDriver.html
@@ -312,7 +327,8 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('Firebird');
 		driverElement.value = "org.firebirdsql.jdbc.FBDriver";
 		urlElement.value = "jdbc:firebirdsql://<server>/<file_path or database_alias>?encoding=UTF8";
-		testSqlElement.value = "select 1 from RDB$DATABASE";
+		//testSqlElement.value = "select 1 from RDB$DATABASE";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "MonetDB") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
 		$(databaseProtocolSelector).val('MonetDB');
@@ -330,7 +346,8 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('Informix');
 		driverElement.value = "com.informix.jdbc.IfxDriver";
 		urlElement.value = "jdbc:informix-sqli://<server>:<port>/<database>";
-		testSqlElement.value = "select 1 from systables where tabid=1";
+		//testSqlElement.value = "select 1 from systables where tabid=1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "CassandraAdejanovski") {
 		//https://datastax-oss.atlassian.net/browse/JAVA-975
 		//http://docs.datastax.com/en/cql/3.1/cql/cql_using/use_query_system_c.html
@@ -353,7 +370,8 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('Redshift');
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
 		urlElement.value = "jdbc:redshift://<server>/<database>";
-		testSqlElement.value = "select 1";
+		//testSqlElement.value = "select 1";
+		testSqlElement.value = "isValid";
 	} else if (databaseType === "Teradata") {
 		$(databaseProtocolSelector).val('Teradata');
 		driverElement.value = "com.teradata.jdbc.TeraDriver";
@@ -363,7 +381,7 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val('Snowflake');
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
-		testSqlElement.value = "select 1";
+		testSqlElement.value = "select 1"; //JDBC 1.0 driver
 	} else if (databaseType === "SnowflakeOther") {
 		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
 		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
