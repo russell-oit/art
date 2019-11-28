@@ -37,6 +37,15 @@
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var addColumnFilters = undefined; //pass undefined to use the default
+				var deleteRecordText = "${removeText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReportGroupMembership";
+				var recordDeletedText = "${membershipRemovedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = undefined;
+				var linkedRecordsExistText = undefined;
 				var columnDefs = undefined; //pass undefined to use the default
 
 				//initialize datatable
@@ -44,43 +53,11 @@
 						contextPath, localeCode, addColumnFilters, columnDefs);
 
 				var table = oTable.api();
-
-				tbl.find('tbody').on('click', '.deleteRecord', function () {
-					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.attr("data-name"));
-					var recordId = row.data("id");
-					bootbox.confirm({
-						message: "${removeText}: <b>" + recordName + "</b>",
-						buttons: {
-							cancel: {
-								label: "${cancelText}"
-							},
-							confirm: {
-								label: "${okText}"
-							}
-						},
-						callback: function (result) {
-							if (result) {
-								//report confirmed delete. make delete request
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteReportGroupMembership",
-									data: {id: recordId},
-									success: function (response) {
-										if (response.success) {
-											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccessReusable("${membershipRemovedText}", recordName);
-										} else {
-											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-										}
-									},
-									error: ajaxErrorHandler
-								});
-							} //end if result
-						} //end callback
-					}); //end bootbox confirm
-				});
+				
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();

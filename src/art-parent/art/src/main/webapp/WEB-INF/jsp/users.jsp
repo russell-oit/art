@@ -97,6 +97,11 @@ Display user configuration page
 
 				var table = oTable.api();
 				
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
+				
 				addDeleteRecordsHandler(table, deleteRecordText, okText,
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
@@ -128,43 +133,6 @@ Display user configuration page
 							}
 						]
 						);
-
-				tbl.find('tbody').on('click', '.deleteRecord', function () {
-					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.attr("data-name"));
-					var recordId = row.data("id");
-					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + recordName + "</b>",
-						buttons: {
-							cancel: {
-								label: "${cancelText}"
-							},
-							confirm: {
-								label: "${okText}"
-							}
-						},
-						callback: function (result) {
-							if (result) {
-								//user confirmed delete. make delete request
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteUser",
-									data: {id: recordId},
-									success: function (response) {
-										if (response.success) {
-											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccessReusable("${recordDeletedText}", recordName);
-										} else {
-											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
-										}
-									},
-									error: ajaxErrorHandler
-								});
-							} //end if result
-						} //end callback
-					}); //end bootbox confirm
-				});
 
 				$('#editRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
