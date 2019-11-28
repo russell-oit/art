@@ -47,12 +47,10 @@
 				var cannotDeleteRecordText = undefined;
 				var linkedRecordsExistText = undefined;
 				var columnDefs = undefined; //pass undefined to use the default
-				var hasSelect = false;
 
 				//initialize datatable
-				var oTable = initConfigTable(tbl, pageLength,
-						showAllRowsText, contextPath, localeCode,
-						addColumnFilters, columnDefs, hasSelect);
+				var oTable = initBasicTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, addColumnFilters, columnDefs);
 
 				var table = oTable.api();
 				
