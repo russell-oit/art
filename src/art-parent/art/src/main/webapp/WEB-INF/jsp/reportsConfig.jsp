@@ -65,6 +65,7 @@ Reports configuration page
 				var linkedRecordsExistText = "${linkedJobsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var editRecordsUrl = "${pageContext.request.contextPath}/editReports";
 				var columnDefs = undefined;
 
 				var columns = [
@@ -87,7 +88,7 @@ Reports configuration page
 						showErrors, columnDefs, columns);
 
 				var table = oTable.api();
-				
+
 				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
 						cancelText, deleteRecordUrl, recordDeletedText,
 						errorOccurredText, showErrors, cannotDeleteRecordText,
@@ -97,6 +98,8 @@ Reports configuration page
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
+
+				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -134,19 +137,6 @@ Reports configuration page
 							}
 						]
 						);
-
-				$('#editRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/editReports?ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});

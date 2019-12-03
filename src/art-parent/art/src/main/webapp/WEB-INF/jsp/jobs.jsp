@@ -102,6 +102,7 @@ Display user jobs and jobs configuration
 				var linkedRecordsExistText = undefined;
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = undefined;
+				var editRecordsUrl = "${pageContext.request.contextPath}/editJobs";
 				var columnDefs = [
 					{
 						targets: "idCol",
@@ -159,16 +160,18 @@ Display user jobs and jobs configuration
 				});
 
 				var table = oTable.api();
-				
+
 				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
 						cancelText, deleteRecordUrl, recordDeletedText,
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
-				
+
 				addDeleteRecordsHandler(table, deleteRecordText, okText,
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
+
+				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -314,19 +317,6 @@ Display user jobs and jobs configuration
 						},
 						error: ajaxErrorHandler
 					});
-				});
-
-				$('#editRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						window.location.href = '${pageContext.request.contextPath}/editJobs?ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
 				});
 
 				$('.datetimepicker').datetimepicker({

@@ -67,6 +67,7 @@ Display user configuration page
 				var linkedRecordsExistText = "${linkedJobsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var editRecordsUrl = "${pageContext.request.contextPath}/editUsers";
 				var columnDefs = undefined;
 
 				var activeSpan = "<span class='label label-success'>${activeText}</span>";
@@ -96,16 +97,18 @@ Display user configuration page
 						showErrors, columnDefs, columns);
 
 				var table = oTable.api();
-				
+
 				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
 						cancelText, deleteRecordUrl, recordDeletedText,
 						errorOccurredText, showErrors, cannotDeleteRecordText,
 						linkedRecordsExistText);
-				
+
 				addDeleteRecordsHandler(table, deleteRecordText, okText,
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
+
+				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -133,19 +136,6 @@ Display user configuration page
 							}
 						]
 						);
-
-				$('#editRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.userId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/editUsers?ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});

@@ -55,6 +55,7 @@
 				var linkedRecordsExistText = "${linkedJobsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var editRecordsUrl = "${pageContext.request.contextPath}/editDestinations";
 				var columnDefs = [
 					{
 						targets: "actionCol",
@@ -79,18 +80,7 @@
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
 
-				$('#editRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						window.location.href = '${pageContext.request.contextPath}/editDestinations?ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
 
 				$('#exportRecords').on("click", function () {
 					var selectedRows = table.rows({selected: true});
