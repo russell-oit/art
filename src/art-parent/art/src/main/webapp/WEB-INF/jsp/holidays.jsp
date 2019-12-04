@@ -55,6 +55,7 @@
 				var linkedRecordsExistText = "${linkedRecordsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Holidays";
 				var columnDefs = undefined;
 
 				//initialize datatable
@@ -73,19 +74,8 @@
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
-
-				$('#exportRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[1];
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Holidays&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
+						
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();

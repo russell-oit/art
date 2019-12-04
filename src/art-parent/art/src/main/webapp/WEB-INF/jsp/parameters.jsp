@@ -65,6 +65,7 @@ Display parameters
 				var linkedRecordsExistText = "${linkedReportsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Parameters";
 				var columnDefs = undefined;
 
 				var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
@@ -103,6 +104,8 @@ Display parameters
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
+						
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -124,19 +127,6 @@ Display parameters
 							}
 						]
 						);
-
-				$('#exportRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.parameterId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Parameters&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();

@@ -66,6 +66,7 @@ Reports configuration page
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var editRecordsUrl = "${pageContext.request.contextPath}/editReports";
+				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Reports";
 				var columnDefs = undefined;
 
 				var columns = [
@@ -100,6 +101,8 @@ Reports configuration page
 						someRecordsNotDeletedText);
 
 				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
+				
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -137,19 +140,6 @@ Reports configuration page
 							}
 						]
 						);
-
-				$('#exportRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Reports&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();

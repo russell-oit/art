@@ -1122,6 +1122,21 @@ function addEditRecordsHandler(table, url, selectRecordsText) {
 	});
 }
 
+function addExportRecordsHandler(table, url, selectRecordsText) {
+	$('#exportRecords').on("click", function () {
+		var selectedRows = table.rows({selected: true});
+		var nodes = selectedRows.nodes();
+		if (nodes.length > 0) {
+			var ids = $.map(nodes, function (item) {
+				return $(item).data("id");
+			});
+			window.location.href = url + '&ids=' + ids;
+		} else {
+			bootbox.alert(selectRecordsText);
+		}
+	});
+}
+
 /**
  * Add handler for select all/deselect all links used with lou-multiselect plugin
  */

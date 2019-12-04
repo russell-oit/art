@@ -68,6 +68,7 @@ Display user configuration page
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var editRecordsUrl = "${pageContext.request.contextPath}/editUsers";
+				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Users";
 				var columnDefs = undefined;
 
 				var activeSpan = "<span class='label label-success'>${activeText}</span>";
@@ -110,6 +111,8 @@ Display user configuration page
 
 				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
 
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
+
 				yadcf.init(table,
 						[
 							{
@@ -136,19 +139,6 @@ Display user configuration page
 							}
 						]
 						);
-
-				$('#exportRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.userId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Users&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();
