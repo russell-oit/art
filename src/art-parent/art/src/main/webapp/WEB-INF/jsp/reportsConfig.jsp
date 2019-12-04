@@ -51,7 +51,7 @@ Reports configuration page
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var dataUrl = "getConfigReports";
+				var dataUrl = "${pageContext.request.contextPath}/getConfigReports";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";

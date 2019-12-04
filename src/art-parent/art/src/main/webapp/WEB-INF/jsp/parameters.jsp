@@ -51,7 +51,7 @@ Display parameters
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var dataUrl = "getParameters";
+				var dataUrl = "${pageContext.request.contextPath}/getParameters";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";

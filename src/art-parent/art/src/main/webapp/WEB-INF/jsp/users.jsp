@@ -53,7 +53,7 @@ Display user configuration page
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var dataUrl = "getUsers";
+				var dataUrl = "${pageContext.request.contextPath}/getUsers";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";

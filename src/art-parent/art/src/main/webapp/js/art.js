@@ -716,7 +716,7 @@ function initAjaxConfigTable(tbl, pageLength, showAllRowsText, contextPath, loca
 		ajax: {
 			type: "GET",
 			dataType: "json",
-			url: contextPath + "/" + dataUrl,
+			url: dataUrl,
 			dataSrc: function (response) {
 				//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
 				if (response.success) {
