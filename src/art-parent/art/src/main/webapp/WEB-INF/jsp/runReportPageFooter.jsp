@@ -11,8 +11,9 @@ Html page footer fragment when displaying report output in a new page
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<c:if test="${allowSelectParameters}">
-</div>
+<c:choose>
+	<c:when test="${allowSelectParameters}">
+	</div>
 </div>
 </div>
 
@@ -31,7 +32,24 @@ Html page footer fragment when displaying report output in a new page
 		}
 	});
 </script>
-</c:if>
+</c:when>
+<c:otherwise>
+	<script>
+		$(document).ready(function () {
+			var httpMethod = "${httpMethod}";
+			if (httpMethod === "GET") {
+				var mainRefreshPeriodSeconds = ${refreshPeriodSeconds};
+				if (mainRefreshPeriodSeconds >= 5) {
+					var mainRefreshPeriodMilliseconds = mainRefreshPeriodSeconds * 1000;
+					setInterval(function () {
+						location.reload(true);
+					}, mainRefreshPeriodMilliseconds);
+				}
+			}
+		});
+	</script>
+</c:otherwise>
+</c:choose>
 
 </div>
 </div>

@@ -43,8 +43,12 @@ Display section to allow selecting of report parameters and initiate running of 
 			$('#parametersForm').attr('action', url).submit();
 		});
 
+		var mainIntervalId;
+
 		$("#runInline").on("click", function (e) {
 			e.preventDefault();
+
+			clearInterval(mainIntervalId);
 
 			$("#showInline").val("true");
 
@@ -60,6 +64,13 @@ Display section to allow selecting of report parameters and initiate running of 
 				data: $('#parametersForm').serialize(),
 				success: function (data) {
 					$("#reportOutput").html(data);
+					var mainRefreshPeriodSeconds = ${report.generalOptions.refreshPeriodSeconds};
+					if (mainRefreshPeriodSeconds >= 5) {
+						var mainRefreshPeriodMilliseconds = mainRefreshPeriodSeconds * 1000;
+						mainIntervalId = setInterval(function () {
+							$("#runInline").trigger("click");
+						}, mainRefreshPeriodMilliseconds);
+					}
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
@@ -132,7 +143,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		if (${startSelectParametersHidden}) {
 			$("#collapse1").collapse("hide");
 		}
-		
+
 		$("#showHideParameters").on("click", function () {
 			$("#collapse1").collapse("toggle");
 		});

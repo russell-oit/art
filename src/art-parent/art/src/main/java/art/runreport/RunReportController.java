@@ -555,6 +555,8 @@ public class RunReportController {
 
 			if (!showInline) {
 				request.setAttribute("reportFormat", reportFormat.getValue());
+				request.setAttribute("refreshPeriodSeconds", report.getGeneralOptions().getRefreshPeriodSeconds());
+				request.setAttribute("httpMethod", request.getMethod());
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 

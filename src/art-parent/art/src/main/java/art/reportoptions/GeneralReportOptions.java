@@ -29,12 +29,28 @@ import java.io.Serializable;
 public class GeneralReportOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L; //need serializable for cewolf charts
+	
 	private boolean usesGroovy;
 	private Reporti18nOptions i18n;
 	private C3Options c3;
 	private PlotlyOptions plotly;
 	private PivotTableJsOptions pivotTableJs;
 	private ViewOptions view;
+	private int refreshPeriodSeconds;
+
+	/**
+	 * @return the refreshPeriodSeconds
+	 */
+	public int getRefreshPeriodSeconds() {
+		return refreshPeriodSeconds;
+	}
+
+	/**
+	 * @param refreshPeriodSeconds the refreshPeriodSeconds to set
+	 */
+	public void setRefreshPeriodSeconds(int refreshPeriodSeconds) {
+		this.refreshPeriodSeconds = refreshPeriodSeconds;
+	}
 
 	/**
 	 * @return the view
