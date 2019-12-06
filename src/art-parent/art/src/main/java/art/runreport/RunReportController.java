@@ -339,6 +339,8 @@ public class RunReportController {
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
+				} else {
+					runReportHelper.setRefreshPeriodAttribute(report, request);
 				}
 
 				request.setAttribute("reportType", reportType);
@@ -555,8 +557,6 @@ public class RunReportController {
 
 			if (!showInline) {
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				request.setAttribute("refreshPeriodSeconds", report.getGeneralOptions().getRefreshPeriodSeconds());
-				request.setAttribute("httpMethod", request.getMethod());
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 

@@ -165,9 +165,6 @@ public class DashboardController {
 			reportType = report.getReportType();
 			model.addAttribute("reportType", reportType);
 
-			request.setAttribute("refreshPeriodSeconds", report.getGeneralOptions().getRefreshPeriodSeconds());
-			request.setAttribute("httpMethod", request.getMethod());
-
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessor.setSuppliedReport(report);
 			paramProcessor.setIsFragment(true);
@@ -180,7 +177,7 @@ public class DashboardController {
 			if (reportOptions.isShowSelectedParameters()) {
 				request.setAttribute("reportParamEntries", reportParamsMap);
 			}
-			
+
 			RunReportHelper runReportHelper = new RunReportHelper();
 
 			if (reportFormat == ReportFormat.pdf) {
@@ -241,6 +238,8 @@ public class DashboardController {
 			if (allowSelectParameters) {
 				request.setAttribute("allowSelectParameters", allowSelectParameters);
 				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
+			} else {
+				runReportHelper.setRefreshPeriodAttribute(report, request);
 			}
 
 			String reportName = report.getLocalizedName(locale);

@@ -64,7 +64,7 @@ Display section to allow selecting of report parameters and initiate running of 
 				data: $('#parametersForm').serialize(),
 				success: function (data) {
 					$("#reportOutput").html(data);
-					var mainRefreshPeriodSeconds = ${report.generalOptions.refreshPeriodSeconds};
+					var mainRefreshPeriodSeconds = ${refreshPeriodSeconds};
 					if (mainRefreshPeriodSeconds >= 5) {
 						var mainRefreshPeriodMilliseconds = mainRefreshPeriodSeconds * 1000;
 						mainIntervalId = setInterval(function () {
