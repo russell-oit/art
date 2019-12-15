@@ -1192,20 +1192,9 @@ function filterReportGroups(filterVal, columnVal) {
 		return true;
 	}
 
-	var escapedFilterVal = escapeRegExp(filterVal);
 	var dataSeparator = ", ";
-	var regexList = [
-		"^" + escapedFilterVal + "$",
-		"^" + escapedFilterVal + ",",
-		dataSeparator + escapedFilterVal + "$",
-		dataSeparator + escapedFilterVal + ","
-	];
-	var regex = regexList.join("|");
-
-	var found = columnVal.search(regex);
-	if (found === -1) {
-		return false;
-	} else {
-		return true;
-	}
+	var items = columnVal.split(dataSeparator);
+    return items.some(function(arrVal) {
+        return filterVal === arrVal;
+    });
 }
