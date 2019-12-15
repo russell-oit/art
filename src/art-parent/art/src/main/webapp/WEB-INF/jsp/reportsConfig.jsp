@@ -124,6 +124,7 @@ Reports configuration page
 								text_data_delimiter: ", ",
 								case_insensitive: false,
 								sort_as: "alphaNum",
+								filter_type: 'custom_func',
 								custom_func: filterReportGroups
 							},
 							{
