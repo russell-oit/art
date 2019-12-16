@@ -11,7 +11,7 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 

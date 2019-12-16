@@ -178,6 +178,8 @@ public class DashboardController {
 				request.setAttribute("reportParamEntries", reportParamsMap);
 			}
 
+			RunReportHelper runReportHelper = new RunReportHelper();
+
 			if (reportFormat == ReportFormat.pdf) {
 				FilenameHelper filenameHelper = new FilenameHelper();
 				String fileName = filenameHelper.getFilename(report, locale, reportFormat);
@@ -190,8 +192,6 @@ public class DashboardController {
 
 				request.setAttribute("reportFormat", "pdf");
 				request.setAttribute("fileName", fileName);
-
-				RunReportHelper runReportHelper = new RunReportHelper();
 
 				String shortDescription = report.getLocalizedShortDescription(locale);
 				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
@@ -215,7 +215,6 @@ public class DashboardController {
 						request.setAttribute("ajax", true);
 					}
 
-					RunReportHelper runReportHelper = new RunReportHelper();
 					request.setAttribute("requestParameters", runReportHelper.getRequestParametersString(request));
 
 					String options = report.getOptions();
@@ -233,6 +232,14 @@ public class DashboardController {
 						}
 					}
 				}
+			}
+
+			boolean allowSelectParameters = BooleanUtils.toBoolean(request.getParameter("allowSelectParameters"));
+			if (allowSelectParameters) {
+				request.setAttribute("allowSelectParameters", allowSelectParameters);
+				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
+			} else {
+				runReportHelper.setRefreshPeriodAttribute(report, request);
 			}
 
 			String reportName = report.getLocalizedName(locale);
@@ -495,7 +502,7 @@ public class DashboardController {
 			if (refreshPeriodSeconds != PORTLET_NO_REFRESH_SETTING
 					&& refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
 				throw new IllegalArgumentException("Refresh setting less than minimum. Setting="
-						+ refreshPeriodSeconds + ", Minimum=5");
+						+ refreshPeriodSeconds + ", Minimum=" + MINIMUM_REFRESH_SECONDS);
 			}
 		}
 

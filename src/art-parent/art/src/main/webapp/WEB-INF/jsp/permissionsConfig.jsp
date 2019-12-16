@@ -14,14 +14,14 @@
 
 <spring:message code="page.title.permissionsConfiguration" var="pageTitle"/>
 
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.permissionsAdded" var="permissionsAddedText"/>
-<spring:message code="page.message.permissionsRemoved" var="permissionsRemovedText"/>
-<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
-<spring:message code="permissions.message.selectRoleOrPermission" var="selectRoleOrPermissionText"/>
-<spring:message code="page.text.available" var="availableText"/>
-<spring:message code="page.text.selected" var="selectedText"/>
-<spring:message code="page.text.search" var="searchText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.permissionsAdded" var="permissionsAddedText" javaScriptEscape="true"/>
+<spring:message code="page.message.permissionsRemoved" var="permissionsRemovedText" javaScriptEscape="true"/>
+<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText" javaScriptEscape="true"/>
+<spring:message code="permissions.message.selectRoleOrPermission" var="selectRoleOrPermissionText" javaScriptEscape="true"/>
+<spring:message code="page.text.available" var="availableText" javaScriptEscape="true"/>
+<spring:message code="page.text.selected" var="selectedText" javaScriptEscape="true"/>
+<spring:message code="page.text.search" var="searchText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">

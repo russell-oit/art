@@ -16,8 +16,6 @@ Display application language selection page
 
 <spring:message code="page.title.language" var="pageTitle"/>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">

@@ -41,6 +41,7 @@ public class BasicReport implements Serializable {
 	private String dtActiveStatus;
 	private String dtAction;
 	private String reportGroupNames2;
+	private String reportGroupNamesFilter;
 
 	public BasicReport(Report report) {
 		if (report == null) {
@@ -177,27 +178,27 @@ public class BasicReport implements Serializable {
 	private void initializeReportGroupNames(List<ReportGroup> reportGroups) {
 		if (CollectionUtils.isEmpty(reportGroups)) {
 			reportGroupNames2 = "";
+			reportGroupNamesFilter = "~";
 		} else {
 			List<String> names = new ArrayList<>();
 			for (ReportGroup reportGroup : reportGroups) {
-				names.add(reportGroup.getName());
+				String groupName = reportGroup.getName();
+				names.add(groupName);
 			}
 
-			String reportGroupNames = StringUtils.join(names, ", ");
+			final String DATA_SEPARATOR = ", ";
+			String reportGroupNames = StringUtils.join(names, DATA_SEPARATOR);
 			reportGroupNames2 = Encode.forHtml(reportGroupNames);
+			reportGroupNamesFilter = reportGroupNames2;
 		}
 	}
 
 	/**
 	 * Returns the string to be used for filtering report groups
-	 * 
+	 *
 	 * @return the string to be used for filtering report groups
 	 */
 	public String getReportGroupNamesFilter() {
-		if (StringUtils.isEmpty(reportGroupNames2)) {
-			return "~";
-		} else {
-			return reportGroupNames2;
-		}
+		return reportGroupNamesFilter;
 	}
 }

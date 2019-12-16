@@ -16,16 +16,17 @@ Display report drilldowns
 
 <spring:message code="page.title.drilldowns" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="page.message.recordMoved" var="recordMovedText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordMoved" var="recordMovedText" javaScriptEscape="true"/>
 <spring:message code="page.help.dragToReorder" var="dragToReorderText"/>
-<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
-<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasTable="true" hasNotify="true">
@@ -59,72 +60,51 @@ Display report drilldowns
 
 				var tbl = $('#drilldowns');
 
-				var oTable = tbl.dataTable({
-					columnDefs: [
-						{orderable: true, targets: 1},
-						{orderable: false, targets: '_all'},
-						{
-							orderable: false,
-							className: 'select-checkbox',
-							targets: 0
-						}
-					],
-					order: [[1, 'asc']],
-					dom: 'lBfrtip',
-					buttons: [
-						'selectAll',
-						'selectNone'
-					],
-					select: {
-						style: 'multi',
-						selector: 'td:first-child'
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteDrilldown";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteDrilldowns";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = undefined;
+				var linkedRecordsExistText = undefined;
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = undefined;
+				var columnDefs = [
+					{
+						targets: 1,
+						orderable: true
 					},
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+					{
+						targets: '_all',
+						orderable: false
+					}
+				];
 
-				tbl.find('tbody').on('click', '.deleteRecord', function () {
-					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.attr("data-name"));
-					var recordId = row.data("id");
-					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + recordName + "</b>",
-						buttons: {
-							cancel: {
-								label: "${cancelText}"
-							},
-							confirm: {
-								label: "${okText}"
-							}
-						},
-						callback: function (result) {
-							if (result) {
-								//user confirmed delete. make delete request
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteDrilldown",
-									data: {id: recordId},
-									success: function (response) {
-										if (response.success) {
-											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccessReusable("${recordDeletedText}", recordName);
-										} else {
-											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-										}
-									},
-									error: ajaxErrorHandler
-								});
-							} //end if result
-						} //end callback
-					}); //end bootbox confirm
-				});
+				//initialize datatable
+				var oTable = initConfigTable(tbl, pageLength,
+						showAllRowsText, contextPath, localeCode,
+						addColumnFilters, columnDefs);
+
+				var table = oTable.api();
+
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
+
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
 
 				//enable changing of drilldown position using drag and drop
 				oTable.rowReordering({
@@ -140,51 +120,6 @@ Display report drilldowns
 					},
 					fnAlert: function (message) {
 						bootbox.alert(message);
-					}
-				});
-
-				var table = oTable.api();
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item[2];
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteDrilldowns",
-										data: {ids: ids},
-										success: function (response) {
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
 					}
 				});
 
@@ -242,11 +177,11 @@ Display report drilldowns
 		<table id="drilldowns" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
+					<th class="noFilter selectCol"></th>
 					<th><spring:message code="page.text.position"/></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="drilldowns.text.drilldownReport"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

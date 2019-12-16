@@ -102,7 +102,7 @@ var tinymceConfig = {
 //http://jslinterrors.com/unused-a
 /*jslint unparam: true, node: true */
 /*jshint unused: true, node: true */
-/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,initConfigPage,addSelectDeselectAllHandler,displayReportInfo,displayReportProgress */
+/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,addSelectDeselectAllHandler,displayReportInfo,displayReportProgress */
 
 
 //possibly enclose functions in immediately executed function and have global use strict? but jshint/jslint will warn about unused functions
@@ -128,11 +128,11 @@ var tinymceConfig = {
  */
 function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		testSqlElementId, databaseProtocolElementId) {
-			
+
 	var driverElement = document.getElementById(driverElementId);
 	var urlElement = document.getElementById(urlElementId);
 	var testSqlElement = document.getElementById(testSqlElementId);
-	
+
 	//https://stackoverflow.com/questions/13343566/set-select-option-selected-by-value
 	var databaseProtocolSelector = "#" + databaseProtocolElementId;
 
@@ -393,7 +393,7 @@ var MAP = {'&': '&amp;',
 	"'": '&#39;'};
 
 function escapeHtml(s, forAttribute) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function (c) {
@@ -402,7 +402,7 @@ function escapeHtml(s, forAttribute) {
 }
 
 function escapeHtmlContent(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/[&<>]/g, function (c) {
@@ -411,7 +411,7 @@ function escapeHtmlContent(s) {
 }
 
 function escapeHtmlAttribute(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/[&<>'"]/g, function (c) {
@@ -422,7 +422,7 @@ function escapeHtmlAttribute(s) {
 
 //https://gist.github.com/getify/3667624
 function escapeDoubleQuotes(s) {
-	if(s === null || s === undefined){
+	if (s === null || s === undefined) {
 		return s;
 	}
 	return s.replace(/\\([\s\S])|(")/g, "\\$1$2");
@@ -437,18 +437,18 @@ function escapeDoubleQuotes(s) {
 function initializeButtonHover(ancestor) {
 	//https://api.jquery.com/descendant-selector/
 	var selector;
-	if(ancestor === undefined) {
+	if (ancestor === undefined) {
 		selector = '';
 	} else {
 		selector = ancestor + ' ';
 	}
 	selector += 'button.dropdown-toggle';
-	
+
 	//bootstrap-dropdown-hover
 //	$(selector).bootstrapDropdownHover({
 //		hideTimeout: 100
 //	});
-	
+
 	//bootstrap-hover-dropdown
 	$(selector).dropdownHover({
 		delay: 100
@@ -464,7 +464,7 @@ function initializeSelectHover() {
 	//activate dropdown-hover. to make bootstrap-select open on hover
 	//must come after bootstrap-select initialization
 	initializeButtonHover();
-	
+
 	//refresh needed when using bootstrap-dropdown-hover to avoid console error
 	//not needed when using bootstrap-hover-dropdown with bootstrap-select 1.10.0
 	//always needed with bootstrap-select 1.13
@@ -532,48 +532,55 @@ function datatablesInitComplete() {
 	if (!isMobile()) {
 		$('div.dataTables_filter input').trigger("focus");
 	}
-	
+
 	//https://datatables.net/forums/discussion/49138/how-to-put-space-between-buttons-and-show-x-entries
 	//https://developer.snapappointments.com/bootstrap-select/examples/#width
 	$('.dataTables_length select').selectpicker({
 		width: '100px'
 	});
-	
+
 	var ancestor = '.dataTables_length';
 	initializeButtonHover(ancestor);
 }
 
 /**
- * Get basic options used for datatables used in configuration pages
+ * Get options used for datatables used in configuration pages
  * 
  * @param {number} pageLength
  * @param {string} showAllRowsText
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {array} columnDefs - column definitions
+ * @param {boolean} hasSelect - whether to include select column
  * @returns {jQuery} datatables jquery object
  */
-function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
-		localeCode, columnDefs) {
-			
+function getConfigTableOptions(pageLength, showAllRowsText, contextPath,
+		localeCode, columnDefs, hasSelect) {
+
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 20;
 	}
 
 	var defaultColumnDefs = [
 		{
-			targets: 0,
+			targets: "selectCol",
+			className: 'select-checkbox',
 			orderable: false,
-			className: 'select-checkbox'
+			searchable: false
 		},
 		{
 			targets: "dtHidden", //target name matches class name of th.
 			visible: false
+		},
+		{
+			targets: "actionCol",
+			orderable: false,
+			searchable: false
 		}
 	];
-	
+
 	var finalColumnDefs;
-	if(columnDefs === undefined){
+	if (columnDefs === undefined) {
 		finalColumnDefs = defaultColumnDefs;
 	} else {
 		finalColumnDefs = defaultColumnDefs.concat(columnDefs);
@@ -581,31 +588,36 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
 
 	var options = {
 		orderClasses: false,
-		order: [[1, 'asc']],
 		pagingType: "full_numbers",
 		lengthMenu: [[10, 20, 50, -1], [10, 20, 50, showAllRowsText]],
 		pageLength: pageLength,
 		columnDefs: finalColumnDefs,
-		dom: 'lBfrtip',
-		buttons: [
-			'selectAll',
-			'selectNone'
-		],
-		select: {
-			style: 'multi',
-			selector: 'td:first-child'
-		},
 		language: {
 			url: contextPath + "/js/dataTables/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
 	};
-	
+
+	if (hasSelect) {
+		$.extend(options, {
+			order: [[1, 'asc']],
+			dom: 'lBfrtip',
+			buttons: [
+				'selectAll',
+				'selectNone'
+			],
+			select: {
+				style: 'multi',
+				selector: 'td:first-child'
+			}
+		});
+	}
+
 	return options;
 }
 
 /**
- * Initialise datatable used in configuration pages
+ * Initialise datatable
  * 
  * @param {jQuery} tbl
  * @param {number} pageLength
@@ -614,10 +626,11 @@ function getBasicConfigTableOptions(pageLength, showAllRowsText, contextPath,
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
  * @param {array} columnDefs - column definitions
+ * @param {boolean} hasSelect - whether to include select column
  * @returns {jQuery} datatables jquery object
  */
-function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-		addColumnFilters, columnDefs) {
+function initTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs, hasSelect) {
 
 	if (addColumnFilters === undefined) {
 		addColumnFilters = true;
@@ -628,9 +641,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	if (addColumnFilters) {
 		columnFilterRow = createColumnFilters(tbl);
 	}
-	
-	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
-			contextPath, localeCode, columnDefs);
+
+	var options = getConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs, hasSelect);
 
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
@@ -651,18 +664,59 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 	return oTable;
 }
 
-function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+/**
+ * Initialise datatable used in configuration pages
+ * 
+ * @param {jQuery} tbl
+ * @param {number} pageLength
+ * @param {string} showAllRowsText
+ * @param {string} contextPath
+ * @param {string} localeCode
+ * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
+ * @returns {jQuery} datatables jquery object
+ */
+function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs) {
+
+	var hasSelect = true;
+	return initTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, addColumnFilters, columnDefs, hasSelect);
+}
+
+/**
+ * Initialise basic datatable without a select column
+ * 
+ * @param {jQuery} tbl
+ * @param {number} pageLength
+ * @param {string} showAllRowsText
+ * @param {string} contextPath
+ * @param {string} localeCode
+ * @param {boolean} addColumnFilters
+ * @param {array} columnDefs - column definitions
+ * @returns {jQuery} datatables jquery object
+ */
+function initBasicTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		addColumnFilters, columnDefs) {
+
+	var hasSelect = false;
+	return initTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, addColumnFilters, columnDefs, hasSelect);
+}
+
+function initAjaxConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
 		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
-			
-	var options = getBasicConfigTableOptions(pageLength, showAllRowsText,
-			contextPath, localeCode, columnDefs);
-			
-	$.extend(options,{
+
+	var hasSelect = true;
+	var options = getConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs, hasSelect);
+
+	$.extend(options, {
 		deferRender: true,
 		ajax: {
 			type: "GET",
 			dataType: "json",
-			url: contextPath + "/" + dataUrl,
+			url: dataUrl,
 			dataSrc: function (response) {
 				//https://stackoverflow.com/questions/35475964/datatables-ajax-call-error-handle
 				if (response.success) {
@@ -682,13 +736,18 @@ function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode
 		createdRow: function (row, data, dataIndex) {
 			$(row).attr('data-id', data.dtId);
 			$(row).attr('data-name', data.dtName);
+		},
+		rowId: function (data) {
+			//https://datatables.net/reference/option/rowId
+			//https://stackoverflow.com/questions/36663037/datatables-rowid-starting-with-a-number-issue/36663176#36663176
+			return 'row_' + data.dtId;
 		}
 	});
 
 	//use initialization that returns a jquery object. to be able to use plugins
 	/** @type {jQuery} */
 	var oTable = tbl.dataTable(options);
-	
+
 	return oTable;
 }
 
@@ -727,14 +786,14 @@ function showUserAjaxError(xhr, errorOccurredText) {
  */
 function getAjaxErrorMessage(xhr) {
 	var message;
-	
+
 	var responseText = xhr.responseText; //can be undefined e.g. if request header name is empty string
 	if (responseText) {
 		message = responseText;
 	} else {
 		message = xhr.status + " " + xhr.statusText;
 	}
-	
+
 	return message;
 }
 
@@ -761,23 +820,23 @@ function notifyActionSuccessReusable(actionText, recordName) {
  */
 function notifyActionSuccess(actionText, recordName, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += actionText;
 	if (recordName !== undefined) {
 		msg = msg + ": " + recordName;
 	}
-	
+
 	$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(actionText, "success");
 }
 
@@ -806,7 +865,7 @@ function notifyActionErrorReusable(errorOccurredText, errorMessage, showErrors) 
  */
 function notifyActionError(errorOccurredText, errorMessage, showErrors, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
@@ -817,12 +876,12 @@ function notifyActionError(errorOccurredText, errorMessage, showErrors, reusable
 	if (showErrors && errorMessage) {
 		msg += "<p>" + escapeHtmlContent(errorMessage) + "</p>";
 	}
-	
+
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(errorOccurredText, "error");
 }
 
@@ -850,13 +909,13 @@ function notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText,
  */
 function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += linkedRecordsExistText + "<ul>";
 
 	$.each(linkedRecords, function (index, value) {
@@ -866,10 +925,10 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(cannotDeleteRecordText, "error");
 }
 
@@ -897,13 +956,13 @@ function notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDe
  */
 function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText, reusableAlert) {
 	var msg;
-	
+
 	if (reusableAlert) {
 		msg = reusableAlertCloseButton;
 	} else {
 		msg = alertCloseButton;
 	}
-	
+
 	msg += someRecordsNotDeletedText + "<ul>";
 
 	$.each(nonDeletedRecords, function (index, value) {
@@ -913,167 +972,169 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	msg += "</ul>";
 
 	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-	if(reusableAlert){
+	if (reusableAlert) {
 		$("#ajaxResponse").show();
 	}
-	
+
 	$.notify(someRecordsNotDeletedText, "error");
 }
 
-/**
- * Callback for delete record ajax done successfully. String arguments should be html escaped
- * 
- * @param {PlainObject} response
- * @param {DataTables.Api} table
- * @param {jQuery} row
- * @param {string} recordDeletedText 
- * @param {string} recordName
- * @param {string} errorOccurredText
- * @param {string} [cannotDeleteRecordText]
- * @param {string} [linkedRecordsExistText]
- */
-function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
-		errorOccurredText, cannotDeleteRecordText, linkedRecordsExistText) {
-
-	var linkedRecords = response.data;
-	if (response.success) {
-		table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-		notifyActionSuccessReusable(recordDeletedText, recordName);
-	} else if (linkedRecords !== null && linkedRecords.length > 0) {
-		notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
-	} else {
-		notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage));
-	}
-}
-
-/**
- * Send delete request and process results. String arguments should be html escaped
- * 
- * @param {string} contextPath
- * @param {string} deleteUrl - url portion after the "app" section
- * @param {string|number} recordId
- * @param {DataTables.Api} table
- * @param {jQuery} row
- * @param {string} recordDeletedText - message shown after successful deletion
- * @param {string} recordName
- * @param {string} errorOccurredText
- * @param {string} [cannotDeleteRecordText]
- * @param {string} [linkedRecordsExistText]
- */
-function sendDeleteRequest(contextPath, deleteUrl, recordId,
-		table, row, recordDeletedText, recordName, errorOccurredText,
+function addDeleteRecordHandler(tbl, table, deleteRecordText, okText, cancelText,
+		deleteUrl, recordDeletedText, errorOccurredText, showErrors,
 		cannotDeleteRecordText, linkedRecordsExistText) {
 
-	var request = $.ajax({
-		type: "POST",
-		dataType: "json",
-		url: contextPath + "/" + deleteUrl,
-		data: {id: recordId}
-	});
-
-	//register http success callback
-	request.done(function (response) {
-		deleteDoneHandler(response, table, row, recordDeletedText,
-				recordName, errorOccurredText, cannotDeleteRecordText,
-				linkedRecordsExistText);
-	});
-	//register http error callback
-	request.fail(ajaxErrorHandler);
-}
-
-/**
- * Register handler for delete button click and process delete record actions
- * 
- * @param {jQuery} tbl
- * @param {DataTables.Api} table
- * @param {string} deleteButtonSelector
- * @param {string} deleteRecordText
- * @param {string} okText - confirm dialog ok button text
- * @param {string} cancelText - confirm dialog cancel button text
- * @param {string} contextPath
- * @param {string} deleteUrl
- * @param {string} recordDeletedText
- * @param {string} errorOccurredText
- * @param {string} cannotDeleteRecordText
- * @param {string} linkedRecordsExistText
- */
-function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-		deleteRecordText, okText, cancelText,
-		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-		cannotDeleteRecordText, linkedRecordsExistText) {
-
-	//delete record
-	tbl.find('tbody').on('click', deleteButtonSelector, function () {
+	tbl.find('tbody').on('click', ".deleteRecord", function () {
 		var row = $(this).closest("tr"); //jquery object
-		//https://stackoverflow.com/questions/10296985/data-attribute-becomes-integer
-		//https://stackoverflow.com/questions/10958047/issue-with-jquery-data-treating-string-as-number
-		var recordName = escapeHtmlContent(row.attr("data-name"));
+		var recordName = escapeHtmlContent(row.data("name"));
 		var recordId = row.data("id");
 
 		//display confirm dialog
 		bootbox.confirm({
 			message: deleteRecordText + ": <b>" + recordName + "</b>",
 			buttons: {
-				cancel: {
-					label: cancelText
-				},
 				confirm: {
 					label: okText
+				},
+				cancel: {
+					label: cancelText
 				}
 			},
 			callback: function (result) {
 				if (result) {
 					//user confirmed delete. make delete request
-					sendDeleteRequest(contextPath, deleteUrl, recordId,
-							table, row, recordDeletedText, recordName, 
-							errorOccurredText, cannotDeleteRecordText,
-							linkedRecordsExistText);
-
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: deleteUrl,
+						data: {id: recordId},
+						success: function (response) {
+							var linkedRecords = response.data;
+							if (response.success) {
+								table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+								notifyActionSuccessReusable(recordDeletedText, recordName);
+							} else if (linkedRecords !== null && linkedRecords.length > 0) {
+								notifyLinkedRecordsExistReusable(linkedRecords, cannotDeleteRecordText, linkedRecordsExistText);
+							} else {
+								notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage), showErrors);
+							}
+						},
+						error: ajaxErrorHandler
+					});
 				} //end if result
 			} //end callback
 		}); //end bootbox confirm
 	}); //end on click
 }
 
-/**
- * Initialize datatable and delete record handler for a configuration page
- * 
- * @param {jQuery} tbl
- * @param {number} pageLength
- * @param {string} showAllRowsText
- * @param {string} contextPath
- * @param {string} localeCode
- * @param {boolean} addColumnFilters
- * @param {string} deleteButtonSelector
- * @param {string} deleteRecordText
- * @param {string} okText
- * @param {string} cancelText
- * @param {string} deleteUrl
- * @param {string} recordDeletedText
- * @param {string} errorOccurredText
- * @param {string} cannotDeleteRecordText
- * @param {string} linkedRecordsExistText
- * @param {array} columnDefs - column definitions
- * @returns {jQuery} datatables jquery object
- */
-function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, 
-		localeCode, addColumnFilters, deleteButtonSelector,
-		deleteRecordText, okText, cancelText,
-		deleteUrl, recordDeletedText, errorOccurredText,
-		cannotDeleteRecordText, linkedRecordsExistText, columnDefs) {
+function addDeleteRecordsHandler(table, deleteRecordText, okText, cancelText,
+		deleteUrl, recordsDeletedText, errorOccurredText, showErrors,
+		selectRecordsText, someRecordsNotDeletedText) {
 
-	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
-			localeCode, addColumnFilters, columnDefs);
+	$('#deleteRecords').on("click", function () {
+		var selectedRows = table.rows({selected: true});
+		//https://stackoverflow.com/questions/45563129/datatables-selected-rows-data-attribute
+		//https://datatables.net/reference/api/rows().nodes()
+		var nodes = selectedRows.nodes();
+		if (nodes.length > 0) {
+			var ids = $.map(nodes, function (item) {
+				return $(item).data("id");
+			});
+			bootbox.confirm({
+				message: deleteRecordText + ": <b>" + ids + "</b>",
+				buttons: {
+					cancel: {
+						label: cancelText
+					},
+					confirm: {
+						label: okText
+					}
+				},
+				callback: function (result) {
+					if (result) {
+						//user confirmed delete. make delete request
+						$.ajax({
+							type: "POST",
+							dataType: "json",
+							url: deleteUrl,
+							data: {ids: ids},
+							success: function (response) {
+								var nonDeletedRecords = response.data;
+								if (response.success) {
+									selectedRows.remove().draw(false);
+									notifyActionSuccessReusable(recordsDeletedText, ids);
+								} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+									var nonDeletedIds = [];
+									$.each(nonDeletedRecords, function (index, recordDetails) {
+										//https://stackoverflow.com/questions/9133102/how-to-grab-substring-before-a-specified-character-jquery-or-javascript
+										var rowIdString = recordDetails.split(' - ', 1)[0];
+										var rowIdInt = parseInt(rowIdString);
+										nonDeletedIds.push(rowIdInt);
+									});
 
-	//get datatables api object
-	var table = oTable.api();
+									var deletedIds = ids.filter(function (item) {
+										if (nonDeletedIds.indexOf(item) === -1) {
+											//id not in non deleted. so must have been deleted.
+											return true;
+										} else {
+											return false;
+										}
+									});
 
-	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
-			deleteRecordText, okText, cancelText,
-			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
-			cannotDeleteRecordText, linkedRecordsExistText);
+									$.each(deletedIds, function (index, deletedId) {
+										//https://stackoverflow.com/questions/43131847/datatable-jquery-how-to-remove-a-row-from-a-table-based-on-an-id
+										//https://stackoverflow.com/questions/4146502/jquery-selectors-on-custom-data-attributes-using-html5
+										//https://stackoverflow.com/questions/2487747/selecting-element-by-data-attribute
+										//https://datatables.net/reference/api/row()
+										//https://datatables.net/reference/type/row-selector
+										var selector = "#row_" + deletedId;
+										table.row(selector).remove();
+									});
+									table.draw(false);
 
-	return oTable;
+									notifySomeRecordsNotDeletedReusable(nonDeletedRecords, someRecordsNotDeletedText);
+								} else {
+									notifyActionErrorReusable(errorOccurredText, escapeHtmlContent(response.errorMessage), showErrors);
+								}
+							},
+							error: ajaxErrorHandler
+						});
+					} //end if result
+				} //end callback
+			}); //end bootbox confirm
+		} else {
+			bootbox.alert(selectRecordsText);
+		}
+	});
+}
+
+function addEditRecordsHandler(table, url, selectRecordsText) {
+	$('#editRecords').on("click", function () {
+		var selectedRows = table.rows({selected: true});
+		var nodes = selectedRows.nodes();
+		if (nodes.length > 0) {
+			var ids = $.map(nodes, function (item) {
+				return $(item).data("id");
+			});
+			window.location.href = url + '?ids=' + ids;
+		} else {
+			bootbox.alert(selectRecordsText);
+		}
+	});
+}
+
+function addExportRecordsHandler(table, url, selectRecordsText) {
+	$('#exportRecords').on("click", function () {
+		var selectedRows = table.rows({selected: true});
+		var nodes = selectedRows.nodes();
+		if (nodes.length > 0) {
+			var ids = $.map(nodes, function (item) {
+				return $(item).data("id");
+			});
+			window.location.href = url + '&ids=' + ids;
+		} else {
+			bootbox.alert(selectRecordsText);
+		}
+	});
 }
 
 /**
@@ -1116,3 +1177,24 @@ function artRemoveWork() {
 //	console.log("artRemoveWork " + workCount);
 }
 
+
+function escapeRegExp(string) {
+	//return string.replace(/([.*+?^=!:$(){}|\[\]\/\\])/g, "\\$1");
+	//https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+	return string.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+function filterReportGroups(filterVal, columnVal) {
+	//https://yadcf-showcase.appspot.com/dom_source_externally_triggered.html
+	//https://stackoverflow.com/questions/58990022/yadcf-plugin-using-select-filter-type-with-custom-func
+	if (filterVal === "~" && columnVal === "") {
+		return true;
+	}
+
+	var dataSeparator = ", ";
+	var items = columnVal.split(dataSeparator);
+    return items.some(function(arrVal) {
+        return filterVal === arrVal;
+    });
+}

@@ -13,14 +13,19 @@ Display report parameter that uses dropdown input
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
+<spring:message code="page.text.loading" var="loadingText" javaScriptEscape="true"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectAll" var="selectAllText" javaScriptEscape="true"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText" javaScriptEscape="true"/>
+
 <select class="form-control"
 		name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		${reportParam.parameter.parameterType == 'MultiValue' ? 'multiple data-actions-box="true"' : ""}>
 	<option value="">--</option>
 </select>
-
-<spring:message code="page.text.loading" var="loadingText"/>
 
 <script type="text/javascript">
 	//parents and depends parameter names should not contain spaces or special characters
@@ -40,12 +45,6 @@ Display report parameter that uses dropdown input
 			depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
 		});
 </script>
-
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="select.text.selectAll" var="selectAllText"/>
-<spring:message code="select.text.deselectAll" var="deselectAllText"/>
 
 <script type="text/javascript">
 	$('#${encode:forJavaScript(reportParam.htmlElementName)}').selectpicker({

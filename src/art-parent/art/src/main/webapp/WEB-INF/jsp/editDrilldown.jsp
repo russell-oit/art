@@ -24,9 +24,9 @@ Edit a drilldown
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	

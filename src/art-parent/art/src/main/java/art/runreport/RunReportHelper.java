@@ -201,6 +201,8 @@ public class RunReportHelper {
 
 		request.setAttribute("report", report);
 		request.setAttribute("locale", locale);
+		
+		setRefreshPeriodAttribute(report, request);
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -1652,6 +1654,25 @@ public class RunReportHelper {
 		}
 
 		return columnSpecification;
+	}
+
+	/**
+	 * Sets attributes required for report auto refresh
+	 * 
+	 * @param report the report
+	 * @param request the http request
+	 */
+	public void setRefreshPeriodAttribute(Report report, HttpServletRequest request) {
+		request.setAttribute("httpMethod", request.getMethod());
+
+		String refreshPeriodParameter = request.getParameter("refreshPeriodSeconds");
+		int refreshPeriod;
+		if (refreshPeriodParameter == null) {
+			refreshPeriod = report.getGeneralOptions().getRefreshPeriodSeconds();
+		} else {
+			refreshPeriod = NumberUtils.toInt(refreshPeriodParameter);
+		}
+		request.setAttribute("refreshPeriodSeconds", refreshPeriod);
 	}
 
 }

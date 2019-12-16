@@ -14,12 +14,12 @@
 
 <spring:message code="page.title.roleUsage" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.roleRemoved" var="roleRemovedText"/>
-<spring:message code="page.action.remove" var="removeText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.roleRemoved" var="roleRemovedText" javaScriptEscape="true"/>
+<spring:message code="page.action.remove" var="removeText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" hasTable="true" hasNotify="true">
 
@@ -30,29 +30,19 @@
 				$('a[href*="roles"]').parent().addClass('active');
 
 				var tbl = $('#roles');
+				
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = undefined; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				var columnFilterRow = createColumnFilters(tbl);
+				//initialize datatable
+				var oTable = initBasicTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, addColumnFilters, columnDefs);
 
-				//initialize datatable and process delete action
-				var oTable = tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
-
-				//move column filter row after heading row
-				columnFilterRow.insertAfter(columnFilterRow.next());
-
-				//get datatables api object
 				var table = oTable.api();
-
-				// Apply the column filter
-				applyColumnFilters(tbl, table);
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -127,7 +117,7 @@
 				<tr>
 					<th><spring:message code="page.text.user"/></th>
 					<th><spring:message code="page.text.userGroup"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

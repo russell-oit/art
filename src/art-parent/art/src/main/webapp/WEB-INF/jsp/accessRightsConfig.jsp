@@ -16,14 +16,14 @@ Access rights configuration
 
 <spring:message code="page.title.accessRightsConfiguration" var="pageTitle"/>
 
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
-<spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
-<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
-<spring:message code="accessRights.message.selectReportOrReportGroupOrJob" var="selectReportOrReportGroupOrJobText"/>
-<spring:message code="page.text.available" var="availableText"/>
-<spring:message code="page.text.selected" var="selectedText"/>
-<spring:message code="page.text.search" var="searchText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.rightsRevoked" var="rightsRevokedText" javaScriptEscape="true"/>
+<spring:message code="page.message.rightsGranted" var="rightsGrantedText" javaScriptEscape="true"/>
+<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText" javaScriptEscape="true"/>
+<spring:message code="accessRights.message.selectReportOrReportGroupOrJob" var="selectReportOrReportGroupOrJobText" javaScriptEscape="true"/>
+<spring:message code="page.text.available" var="availableText" javaScriptEscape="true"/>
+<spring:message code="page.text.selected" var="selectedText" javaScriptEscape="true"/>
+<spring:message code="page.text.search" var="searchText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">

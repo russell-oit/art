@@ -11,26 +11,26 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="page.button.apply" var="applyText"/>
-<spring:message code="daterangepicker.button.customRange" var="customRangeText"/>
-<spring:message code="daterangepicker.text.today" var="todayText"/>
-<spring:message code="daterangepicker.text.yesterday" var="yesterdayText"/>
-<spring:message code="daterangepicker.text.lastXDays" arguments="7" var="last7DaysText"/>
-<spring:message code="daterangepicker.text.lastXDays" arguments="30" var="last30DaysText"/>
-<spring:message code="daterangepicker.text.thisMonth" var="thisMonthText"/>
-<spring:message code="daterangepicker.text.lastMonth" var="lastMonthText"/>
-<spring:message code="daterangepicker.text.thisQuarter" var="thisQuarterText"/>
-<spring:message code="daterangepicker.text.lastQuarter" var="lastQuarterText"/>
-<spring:message code="daterangepicker.text.thisYear" var="thisYearText"/>
-<spring:message code="daterangepicker.text.lastYear" var="lastYearText"/>
-<spring:message code="daterangepicker.text.to" var="toText"/>
-<spring:message code="daterangepicker.text.thisWeek" var="thisWeekText"/>
-<spring:message code="daterangepicker.text.lastWeek" var="lastWeekText"/>
-<spring:message code="daterangepicker.text.yearToDate" var="yearToDateText"/>
-<spring:message code="daterangepicker.text.monthToDate" var="monthToDateText"/>
-<spring:message code="daterangepicker.text.quarterToDate" var="quarterToDateText"/>
-<spring:message code="daterangepicker.text.weekToDate" var="weekToDateText"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="page.button.apply" var="applyText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.button.customRange" var="customRangeText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.today" var="todayText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.yesterday" var="yesterdayText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastXDays" arguments="7" var="last7DaysText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastXDays" arguments="30" var="last30DaysText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.thisMonth" var="thisMonthText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastMonth" var="lastMonthText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.thisQuarter" var="thisQuarterText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastQuarter" var="lastQuarterText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.thisYear" var="thisYearText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastYear" var="lastYearText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.to" var="toText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.thisWeek" var="thisWeekText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.lastWeek" var="lastWeekText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.yearToDate" var="yearToDateText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.monthToDate" var="monthToDateText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.quarterToDate" var="quarterToDateText" javaScriptEscape="true"/>
+<spring:message code="daterangepicker.text.weekToDate" var="weekToDateText" javaScriptEscape="true"/>
 
 <input type="text" class="form-control"
 	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"

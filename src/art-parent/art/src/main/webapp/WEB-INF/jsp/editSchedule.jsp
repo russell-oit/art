@@ -33,13 +33,13 @@ Edit schedule page
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="select.text.selectAll" var="selectAllText"/>
-<spring:message code="select.text.deselectAll" var="deselectAllText"/>
-<spring:message code="jobs.text.nextRunDate" var="nextRunDateText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectAll" var="selectAllText" javaScriptEscape="true"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText" javaScriptEscape="true"/>
+<spring:message code="jobs.text.nextRunDate" var="nextRunDateText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">

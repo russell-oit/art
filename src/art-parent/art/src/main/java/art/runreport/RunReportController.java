@@ -339,6 +339,8 @@ public class RunReportController {
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
+				} else {
+					runReportHelper.setRefreshPeriodAttribute(report, request);
 				}
 
 				request.setAttribute("reportType", reportType);

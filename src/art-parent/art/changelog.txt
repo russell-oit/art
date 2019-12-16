@@ -1,3 +1,8 @@
+ART 4.8
+* Fix for error while upgrading jobs
+* Have exact matching for report groups filter in reports page
+* Added refreshPeriodSeconds option for reports to allow auto refresh of reports
+
 ART 4.7
 * Fix for error with oracle upgrade
 

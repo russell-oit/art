@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.7"> 
+  <meta name="version" content="4.8"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -65,7 +65,10 @@
       </ol></li> 
      <li><a href="#user-groups">User Groups</a></li> 
      <li><a href="#user-group-membership">User Group Membership</a></li> 
-     <li><a href="#report-groups">Report Groups</a></li> 
+     <li><a href="#report-groups">Report Groups</a> 
+      <ol> 
+       <li><a href="#creating-a-new-report-group">Creating a new report group</a></li> 
+      </ol></li> 
      <li><a href="#reports">Reports</a> 
       <ol> 
        <li><a href="#creating-a-new-report">Creating a new report</a> 
@@ -1028,7 +1031,7 @@
        </tr> 
        <tr> 
         <td><strong>Test SQL</strong></td> 
-        <td>A short SQL query that can be used to determine if a connection is OK e.g. "Select 1"</td> 
+        <td>A short SQL query that can be used to determine if a connection is OK e.g. <code>select 1</code></td> 
        </tr> 
        <tr> 
         <td><strong>Connection Pool Timeout (Mins)</strong></td> 
@@ -1357,8 +1360,31 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="report-groups">Report Groups</h1> 
-     <p>Use the <strong>Configure | Report Groups</strong> menu to manage report groups.</p> 
-     <p>Report groups are used to logically associate reports.</p> 
+     <p>Report groups assist in assigning access rights to reports. Use the <strong>Configure | Report Groups</strong> menu to manage report groups.</p> 
+     <h2 id="creating-a-new-report-group">Creating a new report group</h2> 
+     <p>When creating a report group, the following fields are available.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>An auto-generated ID used to identify the report group</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>A name for the report group. It should not contain any of the following characters. <code>,;</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the report group</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>In a standard organization, you may want to define several groups to match the different business areas of the company e.g. INVENTORY, PURCHASING, FINANCE etc.</li> 
@@ -1618,50 +1644,50 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h3 id="tabular-html-only">Tabular (html only)</h3> 
      <p>A tabular result that can only be displayed in HTML format. This may be used to embed HTML code in the SQL query in order to modify display colours of certain columns etc. To do this, concatenate the SQL with the required HTML tags. e.g. For MySQL, to display positive values in green and negative values in red, you can use something like</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT col1,
-    CASE WHEN int_col2&gt;0 THEN
-    concat("<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">'background-color: green'</span><span class="nt">&gt;</span>",cast(int_col2 as char),"<span class="nt">&lt;/div&gt;</span>") 
-    ELSE
-    concat("<span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">'background-color: red'</span><span class="nt">&gt;</span>",cast(int_col2 as char),"<span class="nt">&lt;/div&gt;</span>") 
-    END as "My Formatted Column",
-    col3
-    from my_table
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="nv">col1</span>,
+    <span class="nv">CASE</span> <span class="nv">WHEN</span> <span class="nv">int_col2</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">THEN</span>
+    <span class="nv">concat</span><span class="ss">(</span><span class="s2">"</span><span class="s">&lt;div style='background-color: green'&gt;</span><span class="s2">"</span>,<span class="nv">cast</span><span class="ss">(</span><span class="nv">int_col2</span> <span class="nv">as</span> <span class="nv">char</span><span class="ss">)</span>,<span class="s2">"</span><span class="s">&lt;/div&gt;</span><span class="s2">"</span><span class="ss">)</span> 
+    <span class="k">ELSE</span>
+    <span class="nv">concat</span><span class="ss">(</span><span class="s2">"</span><span class="s">&lt;div style='background-color: red'&gt;</span><span class="s2">"</span>,<span class="nv">cast</span><span class="ss">(</span><span class="nv">int_col2</span> <span class="nv">as</span> <span class="nv">char</span><span class="ss">)</span>,<span class="s2">"</span><span class="s">&lt;/div&gt;</span><span class="s2">"</span><span class="ss">)</span> 
+    <span class="k">END</span> <span class="nv">as</span> <span class="s2">"</span><span class="s">My Formatted Column</span><span class="s2">"</span>,
+    <span class="nv">col3</span>
+    <span class="nv">from</span> <span class="nv">my_table</span>
 </pre> 
      </div> 
      <h3 id="crosstab">Crosstab</h3> 
      <p>Rearranges the query output into crosstab format, exportable to spreadsheet, pdf etc. If you want values to be summed, include the summing in the SQL query e.g. select year,quarter,sum(amount) from orders group by year,quarter</p> 
      <p>The SQL result set is expected to have either 3 or 5 columns:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT xAxisCol "xAxisLabel", yAxisCol "yAxisLabel", Value FROM ...
-    (data type: string, string, any)
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">xAxisCol</span> <span class="ss">"xAxisLabel"</span><span class="p">,</span> <span class="n">yAxisCol</span> <span class="ss">"yAxisLabel"</span><span class="p">,</span> <span class="n">Value</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="k">any</span><span class="p">)</span>
 </pre> 
      </div> 
      <p>OR</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT xAxisCol, xAxisAltSort, yAxisCol, yAxisAltSort, Value FROM ...
-    (data type: string, string, string, string, any)
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">xAxisCol</span><span class="p">,</span> <span class="n">xAxisAltSort</span><span class="p">,</span> <span class="n">yAxisCol</span><span class="p">,</span> <span class="n">yAxisAltSort</span><span class="p">,</span> <span class="n">Value</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="k">any</span><span class="p">)</span>
 </pre> 
      </div> 
      <p>The AltSort columns are used to sort the x-axis (rows) and y-axis (columns). The following helps to illustrate this.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    /* input */                  /* input */
-    // A Jan 14                   A 1 Jan 1 14
-    // A Feb 24                   A 1 Feb 2 24
-    // A Mar 34                   A 1 Mar 3 34
-    // B Jan 14                   B 2 Jan 1 14
-    // B Feb 24                   B 2 Feb 2 24
-    // C Jan 04                   C 3 Jan 1 04
-    // C Mar 44                   C 3 Mar 3 44
-    //                          ^-----^------Used to sort the x/y axis
+      <pre><span></span>    <span class="cm">/* input */</span>                  <span class="cm">/* input */</span>
+    <span class="o">//</span> <span class="n">A</span> <span class="n">Jan</span> <span class="mi">14</span>                   <span class="n">A</span> <span class="mi">1</span> <span class="n">Jan</span> <span class="mi">1</span> <span class="mi">14</span>
+    <span class="o">//</span> <span class="n">A</span> <span class="n">Feb</span> <span class="mi">24</span>                   <span class="n">A</span> <span class="mi">1</span> <span class="n">Feb</span> <span class="mi">2</span> <span class="mi">24</span>
+    <span class="o">//</span> <span class="n">A</span> <span class="n">Mar</span> <span class="mi">34</span>                   <span class="n">A</span> <span class="mi">1</span> <span class="n">Mar</span> <span class="mi">3</span> <span class="mi">34</span>
+    <span class="o">//</span> <span class="n">B</span> <span class="n">Jan</span> <span class="mi">14</span>                   <span class="n">B</span> <span class="mi">2</span> <span class="n">Jan</span> <span class="mi">1</span> <span class="mi">14</span>
+    <span class="o">//</span> <span class="n">B</span> <span class="n">Feb</span> <span class="mi">24</span>                   <span class="n">B</span> <span class="mi">2</span> <span class="n">Feb</span> <span class="mi">2</span> <span class="mi">24</span>
+    <span class="o">//</span> <span class="k">C</span> <span class="n">Jan</span> <span class="mi">04</span>                   <span class="k">C</span> <span class="mi">3</span> <span class="n">Jan</span> <span class="mi">1</span> <span class="mi">04</span>
+    <span class="o">//</span> <span class="k">C</span> <span class="n">Mar</span> <span class="mi">44</span>                   <span class="k">C</span> <span class="mi">3</span> <span class="n">Mar</span> <span class="mi">3</span> <span class="mi">44</span>
+    <span class="o">//</span>                          <span class="o">^</span><span class="c1">-----^------Used to sort the x/y axis</span>
 
-    /* output */                 /* output */
-    //         y-axis                     y-axis          
-    //           |                      |                
-    //  x-axis - _   Feb Jan Mar           x-axis - _  Jan Feb Mar
-    //           A    24  14  34                A   14  24  34   
-    //           B    24  14  -                 B   14  24   -   
-    //           C    -   04  44                C   04   -  44   
-    //                   ^--- Jan comes after Feb!
+    <span class="cm">/* output */</span>                 <span class="cm">/* output */</span>
+    <span class="o">//</span>         <span class="n">y</span><span class="o">-</span><span class="n">axis</span>                     <span class="n">y</span><span class="o">-</span><span class="n">axis</span>          
+    <span class="o">//</span>           <span class="o">|</span>                      <span class="o">|</span>                
+    <span class="o">//</span>  <span class="n">x</span><span class="o">-</span><span class="n">axis</span> <span class="o">-</span> <span class="n">_</span>   <span class="n">Feb</span> <span class="n">Jan</span> <span class="n">Mar</span>           <span class="n">x</span><span class="o">-</span><span class="n">axis</span> <span class="o">-</span> <span class="n">_</span>  <span class="n">Jan</span> <span class="n">Feb</span> <span class="n">Mar</span>
+    <span class="o">//</span>           <span class="n">A</span>    <span class="mi">24</span>  <span class="mi">14</span>  <span class="mi">34</span>                <span class="n">A</span>   <span class="mi">14</span>  <span class="mi">24</span>  <span class="mi">34</span>   
+    <span class="o">//</span>           <span class="n">B</span>    <span class="mi">24</span>  <span class="mi">14</span>  <span class="o">-</span>                 <span class="n">B</span>   <span class="mi">14</span>  <span class="mi">24</span>   <span class="o">-</span>   
+    <span class="o">//</span>           <span class="k">C</span>    <span class="o">-</span>   <span class="mi">04</span>  <span class="mi">44</span>                <span class="k">C</span>   <span class="mi">04</span>   <span class="o">-</span>  <span class="mi">44</span>   
+    <span class="o">//</span>                   <span class="o">^</span><span class="c1">--- Jan comes after Feb!</span>
 </pre> 
      </div> 
      <p>Without the AltSort columns, as in the first output, Feb appears before Jan. This is because the string "Feb" is alphabetically before "Jan". However, Jan should appear before Feb because that is how they appear in the order of months. You can therefore use the month number in the sort column to ensure that Jan is displayed before Feb. Another example would be if you are displaying dates in a format like "Apr-2011" (MMM-YYYY). Apr-2011 is alphabetically before Jan-2011, so the alternative sort column could be set to YYYY-MM format (e.g. 2011-04) to order the period names in the right way.</p> 
@@ -1704,83 +1730,87 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>The layout of the SQL must follow a specific syntax for each different type of chart</p> 
      <h3 id="xy">XY</h3> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Value1, Value2 "SeriesName" FROM ...
-    (data type: number, number )
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Value1</span><span class="p">,</span> <span class="n">Value2</span> <span class="ss">"SeriesName"</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span> <span class="p">)</span>
 
-Dynamic Series
+<span class="k">Dynamic</span> <span class="n">Series</span>
 
-    SELECT Value1, Value2, SeriesName FROM ...
-    (data type: number, number, string)
+    <span class="k">SELECT</span> <span class="n">Value1</span><span class="p">,</span> <span class="n">Value2</span><span class="p">,</span> <span class="n">SeriesName</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
 </pre> 
      </div> 
      <h3 id="pie">Pie</h3> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Category, Value FROM ...
-    (data type: string, number )
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Value</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span> <span class="nb">number</span> <span class="p">)</span>
 </pre> 
      </div> 
      <h3 id="barsstacked-barsline">Bars/Stacked Bars/Line</h3> 
      <p>Static Series</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Item, Value1 "SeriesName1" [, Value2, ...] FROM ...
-    (data type: string, number [, number, ...] )
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Item</span><span class="p">,</span> <span class="n">Value1</span> <span class="ss">"SeriesName1"</span> <span class="p">[,</span> <span class="n">Value2</span><span class="p">,</span> <span class="p">...]</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span> <span class="nb">number</span> <span class="p">[,</span> <span class="nb">number</span><span class="p">,</span> <span class="p">...]</span> <span class="p">)</span>
 </pre> 
      </div> 
      <p>Dynamic Series</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Item, SeriesName, Value FROM ...
-    (data type: string, string, number)
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Item</span><span class="p">,</span> <span class="n">SeriesName</span><span class="p">,</span> <span class="n">Value</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="nb">number</span><span class="p">)</span>
 
-    Example:
-    SELECT Product, Region, SUM(VOLUME) FROM sales group by product,region
+
+    <span class="n">Example</span><span class="p">:</span>
+    <span class="k">SELECT</span> <span class="n">Product</span><span class="p">,</span> <span class="n">Region</span><span class="p">,</span> <span class="k">SUM</span><span class="p">(</span><span class="n">VOLUME</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">sales</span> <span class="k">group</span> <span class="k">by</span> <span class="n">product</span><span class="p">,</span><span class="n">region</span>
 </pre> 
      </div> 
      <h3 id="timedate-series">Time/Date Series</h3> 
      <p>Static Series</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Timestamp|Date, Value1 "SeriesName1" [, Value2, ...] FROM ...
-    (data type: timestamp|date, number, [, number, ...] ). Timestamp/Dates must be unique.
+      <pre><span></span>    <span class="k">SELECT</span> <span class="k">Timestamp</span><span class="o">|</span><span class="nb">Date</span><span class="p">,</span> <span class="n">Value1</span> <span class="ss">"SeriesName1"</span> <span class="p">[,</span> <span class="n">Value2</span><span class="p">,</span> <span class="p">...]</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="k">timestamp</span><span class="o">|</span><span class="nb">date</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="p">[,</span> <span class="nb">number</span><span class="p">,</span> <span class="p">...]</span> <span class="p">).</span> <span class="k">Timestamp</span><span class="o">/</span><span class="n">Dates</span> <span class="n">must</span> <span class="n">be</span> <span class="k">unique</span><span class="p">.</span>
 </pre> 
      </div> 
      <p>Dynamic Series</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Timestamp|Date, SeriesName, Value FROM ...
-    (data type: timestamp|date, string, number). Timestamp/Dates must be unique.
+      <pre><span></span>    <span class="k">SELECT</span> <span class="k">Timestamp</span><span class="o">|</span><span class="nb">Date</span><span class="p">,</span> <span class="n">SeriesName</span><span class="p">,</span> <span class="n">Value</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="k">timestamp</span><span class="o">|</span><span class="nb">date</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="nb">number</span><span class="p">).</span> <span class="k">Timestamp</span><span class="o">/</span><span class="n">Dates</span> <span class="n">must</span> <span class="n">be</span> <span class="k">unique</span><span class="p">.</span>
 
-    Example:
-    SELECT ORDER_DATE, PRODUCT, SUM(VOLUME) FROM orders group by order_date,product
+
+    <span class="n">Example</span><span class="p">:</span>
+    <span class="k">SELECT</span> <span class="n">ORDER_DATE</span><span class="p">,</span> <span class="n">PRODUCT</span><span class="p">,</span> <span class="k">SUM</span><span class="p">(</span><span class="n">VOLUME</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">group</span> <span class="k">by</span> <span class="n">order_date</span><span class="p">,</span><span class="n">product</span>
 </pre> 
      </div> 
      <h3 id="speedometer">Speedometer</h3> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...
-    (data type: number, number, number, string)
-    Ranges represent optional columns and each range has 3 values separated by :  i.e.
-    RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string).
-    RangeUpperValue can be a percentage.
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">DataValue</span><span class="p">,</span> <span class="k">MinValue</span><span class="p">,</span> <span class="k">MaxValue</span><span class="p">,</span> <span class="n">UnitsDescription</span> <span class="p">[,</span> <span class="n">Range1</span><span class="p">,</span> <span class="n">Range2</span><span class="p">,</span> <span class="p">...]</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">Ranges</span> <span class="n">represent</span> <span class="n">optional</span> <span class="n">columns</span> <span class="k">and</span> <span class="k">each</span> <span class="n">range</span> <span class="n">has</span> <span class="mi">3</span> <span class="k">values</span> <span class="n">separated</span> <span class="k">by</span> <span class="p">:</span>  <span class="n">i</span><span class="p">.</span><span class="n">e</span><span class="p">.</span>
+    <span class="n">RangeUpperValue</span><span class="p">:</span><span class="n">RangeColour</span><span class="p">:</span><span class="n">RangeDescription</span> <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">).</span>
+    <span class="n">RangeUpperValue</span> <span class="n">can</span> <span class="n">be</span> <span class="n">a</span> <span class="n">percentage</span><span class="p">.</span>
 
-    Example:
-    SELECT reading, 0, 100, "degrees",
-    "50:#00FF00:Normal",
-    "80%:#FFFF00:Warning",
-    "100:#FF0000:Critical"
-    FROM temperature_reading
+
+    <span class="n">Example</span><span class="p">:</span>
+    <span class="k">SELECT</span> <span class="n">reading</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">"degrees"</span><span class="p">,</span>
+    <span class="ss">"50:#00FF00:Normal"</span><span class="p">,</span>
+    <span class="ss">"80%:#FFFF00:Warning"</span><span class="p">,</span>
+    <span class="ss">"100:#FF0000:Critical"</span>
+    <span class="k">FROM</span> <span class="n">temperature_reading</span>
 </pre> 
      </div> 
      <h3 id="bubble">Bubble</h3> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Value1, Value2 "SeriesName", Value3 [, normalisedValue3] FROM ...
-    (data type: number, number, number [, number] )
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Value1</span><span class="p">,</span> <span class="n">Value2</span> <span class="ss">"SeriesName"</span><span class="p">,</span> <span class="n">Value3</span> <span class="p">[,</span> <span class="n">normalisedValue3</span><span class="p">]</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span> <span class="p">[,</span> <span class="nb">number</span><span class="p">]</span> <span class="p">)</span>
 </pre> 
      </div> 
      <h3 id="heat-map">Heat Map</h3> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...
-    (data type: number, number, number [, string, string, ...] )
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">Value1</span><span class="p">,</span> <span class="n">Value2</span><span class="p">,</span> <span class="n">Value3</span> <span class="p">[,</span> <span class="n">Option1</span><span class="p">,</span> <span class="n">Option2</span><span class="p">,</span> <span class="p">...]</span> <span class="k">FROM</span> <span class="p">...</span>
+    <span class="p">(</span><span class="k">data</span> <span class="k">type</span><span class="p">:</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span><span class="p">,</span> <span class="nb">number</span> <span class="p">[,</span> <span class="n">string</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="p">...]</span> <span class="p">)</span>
 
-    Example:
-    SELECT x, y, z, "upperBound=100"        
-    FROM myvalues
+
+    <span class="n">Example</span><span class="p">:</span>
+    <span class="k">SELECT</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="ss">"upperBound=100"</span>        
+    <span class="k">FROM</span> <span class="n">myvalues</span>
 </pre> 
      </div> 
      <h3 id="chart-options">Chart Options</h3> 
@@ -1813,6 +1843,12 @@ Dynamic Series
         <td>false</td> 
         <td>Whether the data represents a dynamic series chart</td> 
        </tr> 
+       <tr> 
+        <td><strong>itemLabelAnchor</strong></td> 
+        <td>String</td> 
+        <td>OUTSIDE12</td> 
+        <td>Determines the positioning of data label values. Possible values is as per the JFreeChart <a class="" href="http://www.jfree.org/jfreechart/api/javadoc/org/jfree/chart/labels/ItemLabelAnchor.html" rel="nofollow">ItemLabelAnchor</a> class.</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p><strong>Note:</strong></p> 
@@ -1820,15 +1856,15 @@ Dynamic Series
       <li>ART uses the cewolf and jfreechart libraries to generate charts. These libraries in turn use standard java AWT to plot charts. In order to work correctly, AWT needs a graphic display. If you are using a "headless" workstation (i.e. a Unix box without X) you need to start the JVM with the option <strong>-Djava.awt.headless=true</strong></li> 
       <li> <p>You can specify specific colours to be used for the series displayed in a chart by adding columns to the query resultset in the format <code>seriesColor:&lt;series index&gt;:&lt;hex color code&gt;</code> e.g. for a pie chart,</p> 
        <div class="codehilite"> 
-        <pre><span></span>SELECT description, volume, "seriesColor:0:#ff8000"
-FROM orders
+        <pre><span></span><span class="k">SELECT</span> <span class="n">description</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="ss">"seriesColor:0:#ff8000"</span>
+<span class="k">FROM</span> <span class="n">orders</span>
 </pre> 
        </div> </li> 
       <li> <p>For <strong>bubble charts</strong>, the size of the bubbles is determined by <code>Value3</code>. The actual size of the bubbles as they appear in the chart is also relative to the values on the y axis (<code>Value2</code>). If your values for <code>Value3</code> are much larger than those for <code>Value2</code> for example, you may find the whole chart filled in one colour, with no bubbles. In this case, you can increase the range of the y axis by setting the <strong>y-axis Min</strong> and <strong>y-axis Max</strong> fields for the query. Alternatively, you can include an extra column in the result set that contains a normalised value that will be used to scale the size of the bubbles e.g.</p> 
        <div class="codehilite"> 
-        <pre><span></span>SELECT Value1, Value2 "MySeries", Value3,
-Value3 * (SELECT max(Value2) FROM mytable)/(SELECT max(Value3) FROM mytable)
-FROM mytable
+        <pre><span></span><span class="k">SELECT</span> <span class="n">Value1</span><span class="p">,</span> <span class="n">Value2</span> <span class="ss">"MySeries"</span><span class="p">,</span> <span class="n">Value3</span><span class="p">,</span>
+<span class="n">Value3</span> <span class="o">*</span> <span class="p">(</span><span class="k">SELECT</span> <span class="k">max</span><span class="p">(</span><span class="n">Value2</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">mytable</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="k">SELECT</span> <span class="k">max</span><span class="p">(</span><span class="n">Value3</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">mytable</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">mytable</span>
 </pre> 
        </div> </li> 
       <li> <p>For <strong>heat map</strong> charts, the following options are available. Option names and values are case sensitive. Options are defined in the result set with a column value whose syntax is <code>&lt;option&gt;=&lt;value&gt;</code> i.e. the option name and value separated by <code>=</code></p> </li> 
@@ -1915,20 +1951,20 @@ FROM mytable
      <p>Groups the report data.</p> 
      <p>For example, if a query's tabular output looks like:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    AA | AA | B | C | D
-    AA | AA | E | F | G
-    AA | BB | H | J | K
-    AA | BB | X | Y | Z
+      <pre><span></span>    <span class="n">AA</span> <span class="o">|</span> <span class="n">AA</span> <span class="o">|</span> <span class="n">B</span> <span class="o">|</span> <span class="k">C</span> <span class="o">|</span> <span class="n">D</span>
+    <span class="n">AA</span> <span class="o">|</span> <span class="n">AA</span> <span class="o">|</span> <span class="n">E</span> <span class="o">|</span> <span class="n">F</span> <span class="o">|</span> <span class="k">G</span>
+    <span class="n">AA</span> <span class="o">|</span> <span class="n">BB</span> <span class="o">|</span> <span class="n">H</span> <span class="o">|</span> <span class="n">J</span> <span class="o">|</span> <span class="n">K</span>
+    <span class="n">AA</span> <span class="o">|</span> <span class="n">BB</span> <span class="o">|</span> <span class="n">X</span> <span class="o">|</span> <span class="n">Y</span> <span class="o">|</span> <span class="n">Z</span>
 </pre> 
      </div> 
      <p>using "Group on 2 columns", the data would be grouped by the first 2 columns, and the output would look like:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    AA | AA
-    B | C | D
-    E | F | G
-    AA | BB
-    H | J | K
-    X | Y | Z
+      <pre><span></span>    <span class="n">AA</span> <span class="o">|</span> <span class="n">AA</span>
+    <span class="n">B</span> <span class="o">|</span> <span class="k">C</span> <span class="o">|</span> <span class="n">D</span>
+    <span class="n">E</span> <span class="o">|</span> <span class="n">F</span> <span class="o">|</span> <span class="k">G</span>
+    <span class="n">AA</span> <span class="o">|</span> <span class="n">BB</span>
+    <span class="n">H</span> <span class="o">|</span> <span class="n">J</span> <span class="o">|</span> <span class="n">K</span>
+    <span class="n">X</span> <span class="o">|</span> <span class="n">Y</span> <span class="o">|</span> <span class="n">Z</span>
 </pre> 
      </div> 
      <p>For a "Group on n columns" report, the query must be ordered by the the first n-1 columns.</p> 
@@ -2091,22 +2127,22 @@ FROM mytable
      <h3 id="lov-dynamic">LOV: Dynamic</h3> 
      <p>Creates an LOV query whose values are based on an sql query. The query can have either one column, or two columns if the parameter value and the text displayed to the user needs to be different</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT city_id, city_name
-    FROM cities
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">city_id</span><span class="p">,</span> <span class="n">city_name</span>
+    <span class="k">FROM</span> <span class="n">cities</span>
 </pre> 
      </div> 
      <p>OR</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT city_id
-    FROM cities
+      <pre><span></span>    <span class="k">SELECT</span> <span class="n">city_id</span>
+    <span class="k">FROM</span> <span class="n">cities</span>
 </pre> 
      </div> 
      <h3 id="lov-static">LOV: Static</h3> 
      <p>Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
      <div class="codehilite"> 
-      <pre><span></span>    Toaster
-    pr-01|Laptops
-    pr-02|Desktops
+      <pre><span></span>    <span class="n">Toaster</span>
+    <span class="n">pr</span><span class="o">-</span><span class="mi">01</span><span class="o">|</span><span class="n">Laptops</span>
+    <span class="n">pr</span><span class="o">-</span><span class="mi">02</span><span class="o">|</span><span class="n">Desktops</span>
 </pre> 
      </div> 
      <h3 id="dynamic-job-recipients">Dynamic Job Recipients</h3> 
@@ -2991,6 +3027,7 @@ FROM mytable
 <span class="kn">import</span> <span class="nn">org.mongodb.morphia.query.Query</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span><span class="p">;</span>
 
+
 <span class="nd">@Entity</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"employeesCol"</span><span class="p">,</span> <span class="n">noClassnameStored</span> <span class="o">=</span> <span class="n">true</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Employee</span><span class="p">{</span>
     <span class="nd">@Id</span>
@@ -3076,27 +3113,27 @@ FROM mytable
      <p>Used as a basis for creating self service reports. The view report will define the columns that should be available for selection and the joins and basic conditions for the reports. The report source will contain placeholders to be replaced when the view or self service reports are run. Examples are given below.</p> 
      <p><strong>Example with a MySQL datasource</strong></p> 
      <div class="codehilite"> 
-      <pre><span></span>    select #columns#
-    from my_table
-    where #condition#
-    #limitClause#
+      <pre><span></span>    <span class="k">select</span> <span class="o">#</span><span class="n">columns</span><span class="o">#</span>
+    <span class="k">from</span> <span class="n">my_table</span>
+    <span class="k">where</span> <span class="o">#</span><span class="n">condition</span><span class="o">#</span>
+    <span class="o">#</span><span class="n">limitClause</span><span class="o">#</span>
 </pre> 
      </div> 
      <p><strong>Example with an SQL Server datasource</strong></p> 
      <div class="codehilite"> 
-      <pre><span></span>    select #limitClause# #columns#
-    from my_table
-    where #condition#
+      <pre><span></span>    <span class="k">select</span> <span class="o">#</span><span class="n">limitClause</span><span class="o">#</span> <span class="o">#</span><span class="n">columns</span><span class="o">#</span>
+    <span class="k">from</span> <span class="n">my_table</span>
+    <span class="k">where</span> <span class="o">#</span><span class="n">condition</span><span class="o">#</span>
 </pre> 
      </div> 
      <p><strong>Example with the use of a join</strong></p> 
      <div class="codehilite"> 
-      <pre><span></span>    select #columns#
-    from my_table a
-    inner join my_other_table b
-    on a.id=b.id
-    where #condition#
-    #limitClause#
+      <pre><span></span>    <span class="k">select</span> <span class="o">#</span><span class="n">columns</span><span class="o">#</span>
+    <span class="k">from</span> <span class="n">my_table</span> <span class="n">a</span>
+    <span class="k">inner</span> <span class="k">join</span> <span class="n">my_other_table</span> <span class="n">b</span>
+    <span class="k">on</span> <span class="n">a</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">id</span>
+    <span class="k">where</span> <span class="o">#</span><span class="n">condition</span><span class="o">#</span>
+    <span class="o">#</span><span class="n">limitClause</span><span class="o">#</span>
 </pre> 
      </div> 
      <p>The <strong>#columns#</strong> placeholder will be replaced with the selected columns. The <strong>#condition#</strong> placeholder will be replaced by the selected report conditions. The <strong>#limitClause#</strong> placeholder will be replaced by the number of records to display when previewing the view or self service report and needs to be placed in the appropriate place according to the database in use.</p> 
@@ -3230,6 +3267,11 @@ FROM mytable
         <td><strong>plotly</strong></td> 
         <td>Object</td> 
         <td>Allows for custom configuration of Plotly Chart output with tabular reports. The properties are same as those specified for the <strong>Plotly.js</strong> report type.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>refreshPeriodSeconds</strong></td> 
+        <td>Integer</td> 
+        <td>Enables a report to be re-run or refreshed automatically after the first run. Minimum is 5 seconds.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3430,6 +3472,11 @@ FROM mytable
         <td>Boolean</td> 
         <td>For <strong>json</strong> and <strong>jsonBrowser</strong> report formats, determines if the json output should be pretty printed.</td> 
        </tr> 
+       <tr> 
+        <td><strong>refreshPeriodSeconds</strong></td> 
+        <td>Integer</td> 
+        <td>Enables a report to be re-run or refreshed automatically after the first run. Minimum is 5 seconds.</td> 
+       </tr> 
       </tbody> 
      </table> 
      <h3 id="chart-options_1">Chart Options</h3> 
@@ -3508,76 +3555,80 @@ FROM mytable
      <h3 id="examples">Examples</h3> 
      <p><strong>Example 1:</strong> (single-value parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=120&amp;reportFormat=html&amp;p-startdate=2006-04-04&amp;p-description=Desktop
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">120</span><span class="o">&amp;</span><span class="n">reportFormat</span><span class="o">=</span><span class="n">html</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">startdate</span><span class="o">=</span><span class="mi">2006</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">04</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">description</span><span class="o">=</span><span class="n">Desktop</span>
 
-    runs report 120 in html format.
-    The #startdate# parameter (p-startdate) is set to 2006-04-04 
-    and the #description# parameter (p-description) is set to "Desktop"
+
+    <span class="n">runs</span> <span class="n">report</span> <span class="mi">120</span> <span class="k">in</span> <span class="n">html</span> <span class="n">format</span><span class="p">.</span>
+    <span class="n">The</span> <span class="o">#</span><span class="n">startdate</span><span class="o">#</span> <span class="k">parameter</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">startdate</span><span class="p">)</span> <span class="k">is</span> <span class="k">set</span> <span class="k">to</span> <span class="mi">2006</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">04</span> 
+    <span class="k">and</span> <span class="n">the</span> <span class="o">#</span><span class="n">description</span><span class="o">#</span> <span class="k">parameter</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">description</span><span class="p">)</span> <span class="k">is</span> <span class="k">set</span> <span class="k">to</span> <span class="ss">"Desktop"</span>
 </pre> 
      </div> 
      <p><strong>Example 2:</strong> (chart)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=121&amp;p-date=2006-04-04&amp;showLegend=true
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">121</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="nb">date</span><span class="o">=</span><span class="mi">2006</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">04</span><span class="o">&amp;</span><span class="n">showLegend</span><span class="o">=</span><span class="k">true</span>
 </pre> 
      </div> 
      <p><strong>Example 3:</strong> (group)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=122&amp;splitColumn=2&amp;p-param=abc
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">122</span><span class="o">&amp;</span><span class="n">splitColumn</span><span class="o">=</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">param</span><span class="o">=</span><span class="n">abc</span>
 
-    runs report 122 in group on 2 columns mode (splitColumn parameter). 
-    The parameter named param is set to "abc".
+
+    <span class="n">runs</span> <span class="n">report</span> <span class="mi">122</span> <span class="k">in</span> <span class="k">group</span> <span class="k">on</span> <span class="mi">2</span> <span class="n">columns</span> <span class="k">mode</span> <span class="p">(</span><span class="n">splitColumn</span> <span class="k">parameter</span><span class="p">).</span> 
+    <span class="n">The</span> <span class="k">parameter</span> <span class="n">named</span> <span class="n">param</span> <span class="k">is</span> <span class="k">set</span> <span class="k">to</span> <span class="ss">"abc"</span><span class="p">.</span>
 </pre> 
      </div> 
      <p><strong>Example 4:</strong> (pdf, public)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=123&amp;reportFormat=pdf&amp;public=true&amp;user=guest
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">123</span><span class="o">&amp;</span><span class="n">reportFormat</span><span class="o">=</span><span class="n">pdf</span><span class="o">&amp;</span><span class="k">public</span><span class="o">=</span><span class="k">true</span><span class="o">&amp;</span><span class="k">user</span><span class="o">=</span><span class="n">guest</span>
 
-    generates report as a pdf file without requiring the user to log in to ART
+
+    <span class="n">generates</span> <span class="n">report</span> <span class="k">as</span> <span class="n">a</span> <span class="n">pdf</span> <span class="n">file</span> <span class="k">without</span> <span class="n">requiring</span> <span class="n">the</span> <span class="k">user</span> <span class="k">to</span> <span class="n">log</span> <span class="k">in</span> <span class="k">to</span> <span class="n">ART</span>
 </pre> 
      </div> 
      <p><strong>Example 5:</strong> (dashboard)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=124&amp;p-param1=value1&amp;p-param2=value2
+      <pre><span></span>    <span class="nv">http</span>:<span class="o">//</span><span class="nv">server</span>:<span class="nv">port</span><span class="o">/</span><span class="nv">art</span><span class="o">/</span><span class="nv">runReport</span>?
+    <span class="nv">reportId</span><span class="o">=</span><span class="mi">124</span><span class="o">&amp;</span><span class="nv">p</span><span class="o">-</span><span class="nb">param1</span><span class="o">=</span><span class="nv">value1</span><span class="o">&amp;</span><span class="nv">p</span><span class="o">-</span><span class="nb">param2</span><span class="o">=</span><span class="nv">value2</span>
 
-    runs report 124, setting values for parameters param1 and param2
+
+    <span class="nv">runs</span> <span class="nv">report</span> <span class="mi">124</span>, <span class="nv">setting</span> <span class="nv">values</span> <span class="k">for</span> <span class="nv">parameters</span> <span class="nb">param1</span> <span class="nv">and</span> <span class="nb">param2</span>
 </pre> 
      </div> 
      <p><strong>Example 6:</strong> (show selected parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=125&amp;reportFormat=xls&amp;p-startdate=2006-04-04&amp;showSelectedParameters=true
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">125</span><span class="o">&amp;</span><span class="n">reportFormat</span><span class="o">=</span><span class="n">xls</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">startdate</span><span class="o">=</span><span class="mi">2006</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">04</span><span class="o">&amp;</span><span class="n">showSelectedParameters</span><span class="o">=</span><span class="k">true</span>
 
-    generates report and includes the parameter value used in the report output
+    <span class="n">generates</span> <span class="n">report</span> <span class="k">and</span> <span class="n">includes</span> <span class="n">the</span> <span class="k">parameter</span> <span class="n">value</span> <span class="n">used</span> <span class="k">in</span> <span class="n">the</span> <span class="n">report</span> <span class="k">output</span>
 </pre> 
      </div> 
      <p><strong>Example 7:</strong> (multi-value parameters)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=126&amp;reportFormat=xls&amp;p-category=Laptops&amp;p-category=Desktops&amp;p-category=Tablets
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">126</span><span class="o">&amp;</span><span class="n">reportFormat</span><span class="o">=</span><span class="n">xls</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">category</span><span class="o">=</span><span class="n">Laptops</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">category</span><span class="o">=</span><span class="n">Desktops</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-</span><span class="n">category</span><span class="o">=</span><span class="n">Tablets</span>
 
-    the #category# multi-value parameter (p-category) has 3 values defined: 
-    Laptops, Desktops, Tablets
+    <span class="n">the</span> <span class="o">#</span><span class="n">category</span><span class="o">#</span> <span class="n">multi</span><span class="o">-</span><span class="n">value</span> <span class="k">parameter</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">category</span><span class="p">)</span> <span class="n">has</span> <span class="mi">3</span> <span class="k">values</span> <span class="k">defined</span><span class="p">:</span> 
+    <span class="n">Laptops</span><span class="p">,</span> <span class="n">Desktops</span><span class="p">,</span> <span class="n">Tablets</span>
 </pre> 
      </div> 
      <p><strong>Example 8:</strong> (default parameter values)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    http://server:port/art/runReport?
-    reportId=127
+      <pre><span></span>    <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="n">port</span><span class="o">/</span><span class="n">art</span><span class="o">/</span><span class="n">runReport</span><span class="o">?</span>
+    <span class="n">reportId</span><span class="o">=</span><span class="mi">127</span>
 
-    generates report using default parameter values
+    <span class="n">generates</span> <span class="n">report</span> <span class="k">using</span> <span class="k">default</span> <span class="k">parameter</span> <span class="k">values</span>
 </pre> 
      </div> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li> <p>If the report url contains some non-ASCII characters in the parameter values and they don't seem to be interpreted correctly, you may need to configure your application server to explicitly handle urls using UTF-8 encoding e.g. for Tomcat, edit the TOMCAT_HOME\conf\<strong>server.xml</strong> file and add the <strong>URIEncoding</strong> attribute to the appropriate <strong>Connector</strong> element e.g.</p> 
+      <li>If the report url contains some non-ASCII characters in the parameter values and they don't seem to be interpreted correctly, you may need to configure your application server to explicitly handle urls using UTF-8 encoding e.g. for Tomcat, edit the TOMCAT_HOME\conf\<strong>server.xml</strong> file and add the <strong>URIEncoding</strong> attribute to the appropriate <strong>Connector</strong> element e.g. 
        <div class="codehilite"> 
-        <pre><span></span>&lt;Connector port="8080" protocol="HTTP/1.1" URIEncoding="UTF-8"
-    ...
+        <pre><span></span><span class="o">&lt;</span><span class="n">Connector</span> <span class="n">port</span><span class="o">=</span><span class="ss">"8080"</span> <span class="n">protocol</span><span class="o">=</span><span class="ss">"HTTP/1.1"</span> <span class="n">URIEncoding</span><span class="o">=</span><span class="ss">"UTF-8"</span>
+    <span class="p">...</span>
 </pre> 
        </div> </li> 
      </ul> 

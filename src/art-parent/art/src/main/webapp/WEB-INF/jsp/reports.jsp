@@ -16,11 +16,10 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
-<spring:message code="page.text.reports" var="panelTitle"/>
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.text.description" var="descriptionText"/>
-<spring:message code="reports.text.selectValue" var="selectValueText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.text.description" var="descriptionText" javaScriptEscape="true"/>
+<spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1"
 					 hasTable="true">
@@ -122,7 +121,11 @@ Reports page. Also main/home page
 							{
 								column_number: 1,
 								filter_default_label: '${selectValueText}',
-								text_data_delimiter: ", "
+								text_data_delimiter: ", ",
+								case_insensitive: false,
+								sort_as: "alphaNum",
+								filter_type: 'custom_func',
+								custom_func: filterReportGroups
 							},
 							{
 								column_number: 3,

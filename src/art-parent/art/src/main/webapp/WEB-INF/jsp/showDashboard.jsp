@@ -14,7 +14,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
+
 		<meta name="_csrf" content="${_csrf.token}"/>
 		<meta name="_csrf_header" content="${_csrf.headerName}"/>
 
@@ -41,6 +41,13 @@
 			<div id="pageContent">
 				<div class="container-fluid">
 
+					<div class="row" id="errorsDiv">
+						<div class="col-md-12">
+							<div id="ajaxResponse">
+							</div>
+						</div>
+					</div>
+
 					<div id="spinner">
 						<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
 					</div>
@@ -53,16 +60,47 @@
 						});
 					</script>
 
-					<c:choose>
-						<c:when test="${reportFormat == 'pdf'}">
-							<jsp:include page="/WEB-INF/jsp/showDashboardFileLink.jsp"/>
+					<c:if test="${allowSelectParameters}">
+						<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>
+						<div class="row">
+							<div class="col-md-12">
+								<div id="reportOutput">
+								</c:if>
+
+								<c:choose>
+									<c:when test="${reportFormat == 'pdf'}">
+										<jsp:include page="/WEB-INF/jsp/showDashboardFileLink.jsp"/>
+									</c:when>
+									<c:when test="${reportType == 'Dashboard'}">
+										<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
+									</c:when>
+									<c:when test="${reportType == 'GridstackDashboard'}">
+										<jsp:include page="/WEB-INF/jsp/showGridstackDashboardInline.jsp"/>
+									</c:when>
+								</c:choose>
+
+								<c:choose>
+									<c:when test="${allowSelectParameters}">
+									</div>
+								</div>
+							</div>
 						</c:when>
-						<c:when test="${reportType == 'Dashboard'}">
-							<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
-						</c:when>
-						<c:when test="${reportType == 'GridstackDashboard'}">
-							<jsp:include page="/WEB-INF/jsp/showGridstackDashboardInline.jsp"/>
-						</c:when>
+						<c:otherwise>
+							<script>
+								$(document).ready(function () {
+									var httpMethod = "${httpMethod}";
+									if (httpMethod === "GET") {
+										var mainRefreshPeriodSeconds = ${refreshPeriodSeconds};
+										if (mainRefreshPeriodSeconds >= 5) {
+											var mainRefreshPeriodMilliseconds = mainRefreshPeriodSeconds * 1000;
+											setInterval(function () {
+												location.reload(true);
+											}, mainRefreshPeriodMilliseconds);
+										}
+									}
+								});
+							</script>
+						</c:otherwise>
 					</c:choose>
 
 				</div>

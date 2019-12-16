@@ -14,12 +14,12 @@
 
 <spring:message code="page.title.jobAccessRights" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
-<spring:message code="page.action.revoke" var="revokeText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.rightsRevoked" var="rightsRevokedText" javaScriptEscape="true"/>
+<spring:message code="page.action.revoke" var="revokeText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasTable="true" hasNotify="true">
@@ -32,65 +32,32 @@
 
 				var tbl = $('#rights');
 
-				var columnFilterRow = createColumnFilters(tbl);
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = undefined; //pass undefined to use the default
+				var deleteRecordText = "${revokeText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteAccessRight";
+				var recordDeletedText = "${rightsRevokedText}";
+				var errorOccurredText = "${errorOccurredText}";
+				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = undefined;
+				var linkedRecordsExistText = undefined;
+				var columnDefs = undefined; //pass undefined to use the default
 
-				//initialize datatable and process delete action
-				var oTable = tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				//initialize datatable
+				var oTable = initBasicTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, addColumnFilters, columnDefs);
 
-				//move column filter row after heading row
-				columnFilterRow.insertAfter(columnFilterRow.next());
-
-				//get datatables api object
 				var table = oTable.api();
 
-				// Apply the column filter
-				applyColumnFilters(tbl, table);
-
-				tbl.find('tbody').on('click', '.deleteRecord', function () {
-					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.attr("data-name"));
-					var recordId = row.data("id");
-					bootbox.confirm({
-						message: "${revokeText}: <b>" + recordName + "</b>",
-						buttons: {
-							cancel: {
-								label: "${cancelText}"
-							},
-							confirm: {
-								label: "${okText}"
-							}
-						},
-						callback: function (result) {
-							if (result) {
-								//user confirmed delete. make delete request
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteAccessRight",
-									data: {id: recordId},
-									success: function (response) {
-										if (response.success) {
-											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccessReusable("${rightsRevokedText}", recordName);
-										} else {
-											notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-										}
-									},
-									error: ajaxErrorHandler
-								});
-							} //end if result
-						} //end callback
-					}); //end bootbox confirm
-				});
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
 
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
@@ -125,7 +92,7 @@
 				<tr>
 					<th><spring:message code="page.text.user"/></th>
 					<th><spring:message code="page.text.userGroup"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

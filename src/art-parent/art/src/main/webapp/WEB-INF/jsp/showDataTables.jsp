@@ -11,8 +11,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <div id="${outputDivId}">
 	<table id="${tableId}" class="table table-bordered table-striped table-condensed">

@@ -14,14 +14,14 @@
 
 <spring:message code="page.title.reportGroupMembershipConfiguration" var="pageTitle"/>
 
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.membershipAdded" var="membershipAddedText"/>
-<spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
-<spring:message code="reportGroupMembership.message.selectReport" var="selectReportText"/>
-<spring:message code="reportGroupMembership.message.selectReportGroup" var="selectReportGroupText"/>
-<spring:message code="page.text.available" var="availableText"/>
-<spring:message code="page.text.selected" var="selectedText"/>
-<spring:message code="page.text.search" var="searchText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="page.message.membershipAdded" var="membershipAddedText" javaScriptEscape="true"/>
+<spring:message code="page.message.membershipRemoved" var="membershipRemovedText" javaScriptEscape="true"/>
+<spring:message code="reportGroupMembership.message.selectReport" var="selectReportText" javaScriptEscape="true"/>
+<spring:message code="reportGroupMembership.message.selectReportGroup" var="selectReportGroupText" javaScriptEscape="true"/>
+<spring:message code="page.text.available" var="availableText" javaScriptEscape="true"/>
+<spring:message code="page.text.selected" var="selectedText" javaScriptEscape="true"/>
+<spring:message code="page.text.search" var="searchText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2"
 					 hasNotify="true">

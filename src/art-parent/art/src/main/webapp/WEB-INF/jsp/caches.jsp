@@ -16,10 +16,10 @@ Page to allow manual clearing of caches
 
 <spring:message code="page.title.caches" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
-<spring:message code="caches.message.cachesCleared" var="cachesClearedText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="caches.message.cacheCleared" var="cacheClearedText" javaScriptEscape="true"/>
+<spring:message code="caches.message.cachesCleared" var="cachesClearedText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
 					 hasTable="true" hasNotify="true">
@@ -33,16 +33,16 @@ Page to allow manual clearing of caches
 
 				var tbl = $('#caches');
 
-				tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
+
+				//initialize datatable
+				initBasicTable(tbl, pageLength, showAllRowsText, contextPath,
+						localeCode, addColumnFilters, columnDefs);
 
 				tbl.find('tbody').on('click', '.clearCache', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -115,7 +115,7 @@ Page to allow manual clearing of caches
 			<thead>
 				<tr>
 					<th><spring:message code="caches.text.cache"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

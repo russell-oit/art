@@ -30,10 +30,10 @@
 	</c:when>
 </c:choose>
 
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
-<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
+<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3" hasNotify="true">

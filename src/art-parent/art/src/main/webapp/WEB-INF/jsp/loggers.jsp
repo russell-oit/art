@@ -16,7 +16,7 @@ Display current loggers
 
 <spring:message code="page.title.loggers" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3"
 					 hasTable="true">
@@ -28,18 +28,17 @@ Display current loggers
 				$('a[href*="loggers"]').parent().addClass('active');
 
 				var tbl = $("#loggers");
+				
+				var pageLength = 10; //pass undefined to use the default
+				var showAllRowsText = "${showAllRowsText}";
+				var contextPath = "${pageContext.request.contextPath}";
+				var localeCode = "${pageContext.response.locale}";
+				var addColumnFilters = false; //pass undefined to use the default
+				var columnDefs = undefined; //pass undefined to use the default
 
-				tbl.dataTable({
-					orderClasses: false,
-					pagingType: "full_numbers",
-					lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "${showAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-					},
-					initComplete: datatablesInitComplete
-				});
-
+				//initialize datatable
+				initBasicTable(tbl, pageLength, showAllRowsText, contextPath,
+						localeCode, addColumnFilters, columnDefs);
 
 			}); //end document ready
 		</script>
@@ -77,7 +76,7 @@ Display current loggers
 				<tr>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.level"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

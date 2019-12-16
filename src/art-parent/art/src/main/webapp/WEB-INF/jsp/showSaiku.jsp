@@ -13,7 +13,6 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.text.loading" var="loadingText"/>
 <spring:message code="page.title.analytics" var="pageTitle"/>
 
 <!DOCTYPE html>
@@ -77,7 +76,7 @@
         <span class="saiku_logo">&nbsp;</span>
         <div class="processing_content">
             <span class="processing_image">&nbsp;</span>
-            <span class="processing_message">${loadingText}...</span>
+            <span class="processing_message"><spring:message code="page.text.loading"/>...</span>
         </div>
     </div>
 </div>

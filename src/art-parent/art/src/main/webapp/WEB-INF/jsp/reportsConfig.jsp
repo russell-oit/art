@@ -17,25 +17,18 @@ Reports configuration page
 
 <spring:message code="page.title.reportsConfiguration" var="pageTitle"/>
 
-<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
-<spring:message code="reports.message.linkedJobsExist" var="linkedJobsExistText"/>
-<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
-<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
-<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
-<spring:message code="reports.text.selectValue" var="selectValueText"/>
-<spring:message code="page.message.recordUpdated" var="recordUpdatedText"/>
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
-<spring:message code="reports.label.reportSource" var="reportSourceText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
+<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText" javaScriptEscape="true"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText" javaScriptEscape="true"/>
+<spring:message code="reports.message.linkedJobsExist" var="linkedJobsExistText" javaScriptEscape="true"/>
+<spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -58,9 +51,22 @@ Reports configuration page
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var dataUrl = "getConfigReports";
+				var dataUrl = "${pageContext.request.contextPath}/getConfigReports";
+				var deleteRecordText = "${deleteRecordText}";
+				var okText = "${okText}";
+				var cancelText = "${cancelText}";
+				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteReport";
+				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteReports";
+				var recordDeletedText = "${recordDeletedText}";
+				var recordsDeletedText = "${recordsDeletedText}";
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
+				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var selectRecordsText = "${selectRecordsText}";
+				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+				var editRecordsUrl = "${pageContext.request.contextPath}/editReports";
+				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Reports";
 				var columnDefs = undefined;
 
 				var columns = [
@@ -78,19 +84,25 @@ Reports configuration page
 				];
 
 				//initialize datatable
-				var oTable = initAjaxTable(tbl,
-						pageLength,
-						showAllRowsText,
-						contextPath,
-						localeCode,
-						dataUrl,
-						errorOccurredText,
-						showErrors,
-						columnDefs,
-						columns
-						);
+				var oTable = initAjaxConfigTable(tbl, pageLength, showAllRowsText,
+						contextPath, localeCode, dataUrl, errorOccurredText,
+						showErrors, columnDefs, columns);
 
 				var table = oTable.api();
+
+				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+						cancelText, deleteRecordUrl, recordDeletedText,
+						errorOccurredText, showErrors, cannotDeleteRecordText,
+						linkedRecordsExistText);
+
+				addDeleteRecordsHandler(table, deleteRecordText, okText,
+						cancelText, deleteRecordsUrl, recordsDeletedText,
+						errorOccurredText, showErrors, selectRecordsText,
+						someRecordsNotDeletedText);
+
+				addEditRecordsHandler(table, editRecordsUrl, selectRecordsText);
+				
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
 
 				yadcf.init(table,
 						[
@@ -109,7 +121,11 @@ Reports configuration page
 							{
 								column_number: 3,
 								filter_default_label: '${selectValueText}',
-								text_data_delimiter: ", "
+								text_data_delimiter: ", ",
+								case_insensitive: false,
+								sort_as: "alphaNum",
+								filter_type: 'custom_func',
+								custom_func: filterReportGroups
 							},
 							{
 								column_number: 4,
@@ -125,115 +141,6 @@ Reports configuration page
 							}
 						]
 						);
-
-				tbl.find('tbody').on('click', '.deleteRecord', function () {
-					var row = $(this).closest("tr"); //jquery object
-					var recordName = escapeHtmlContent(row.attr("data-name"));
-					var recordId = row.data("id");
-					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + recordName + "</b>",
-						buttons: {
-							cancel: {
-								label: "${cancelText}"
-							},
-							confirm: {
-								label: "${okText}"
-							}
-						},
-						callback: function (result) {
-							if (result) {
-								//user confirmed delete. make delete request
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/deleteReport",
-									data: {id: recordId},
-									success: function (response) {
-										if (response.success) {
-											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-											notifyActionSuccessReusable("${recordDeletedText}", recordName);
-										} else {
-											notifyActionErrorReusable("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
-										}
-									},
-									error: ajaxErrorHandler
-								});
-							} //end if result
-						} //end callback
-					}); //end bootbox confirm
-				});
-
-				$('#deleteRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						bootbox.confirm({
-							message: "${deleteRecordText}: <b>" + ids + "</b>",
-							buttons: {
-								cancel: {
-									label: "${cancelText}"
-								},
-								confirm: {
-									label: "${okText}"
-								}
-							},
-							callback: function (result) {
-								if (result) {
-									//user confirmed delete. make delete request
-									$.ajax({
-										type: "POST",
-										dataType: "json",
-										url: "${pageContext.request.contextPath}/deleteReports",
-										data: {ids: ids},
-										success: function (response) {
-											var nonDeletedRecords = response.data;
-											if (response.success) {
-												selectedRows.remove().draw(false);
-												notifyActionSuccessReusable("${recordsDeletedText}", ids);
-											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
-												notifySomeRecordsNotDeletedReusable(nonDeletedRecords, "${someRecordsNotDeletedText}");
-											} else {
-												notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
-											}
-										},
-										error: ajaxErrorHandler
-									});
-								} //end if result
-							} //end callback
-						}); //end bootbox confirm
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
-
-				$('#editRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/editReports?ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
-
-				$('#exportRecords').on("click", function () {
-					var selectedRows = table.rows({selected: true});
-					var data = selectedRows.data();
-					if (data.length > 0) {
-						var ids = $.map(data, function (item) {
-							return item.reportId;
-						});
-						window.location.href = '${pageContext.request.contextPath}/exportRecords?type=Reports&ids=' + ids;
-					} else {
-						bootbox.alert("${selectRecordsText}");
-					}
-				});
 
 				$("#refreshRecords").on("click", function () {
 					table.ajax.reload();
@@ -304,13 +211,13 @@ Reports configuration page
 			<table id="reports" class="table table-bordered table-striped table-condensed" style='width: 100%'>
 				<thead>
 					<tr>
-						<th class="noFilter"></th>
+						<th class="noFilter selectCol"></th>
 						<th><spring:message code="page.text.id"/><p></p></th>
 						<th><spring:message code="page.text.name"/><p></p></th>
 						<th><spring:message code="reports.text.groupName"/><p></p></th>
 						<th><spring:message code="page.text.description"/><p></p></th>
 						<th><spring:message code="page.text.active"/><p></p></th>
-						<th class="noFilter"><spring:message code="page.text.action"/><p></p></th>
+						<th class="noFilter actionCol"><spring:message code="page.text.action"/><p></p></th>
 					</tr>
 				</thead>
 			</table>

@@ -14,16 +14,16 @@ Display section to allow selecting of report parameters and initiate running of 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="reports.message.fileSent" var="fileSentText"/>
-<spring:message code="reports.message.parametersSaved" var="parametersSavedText"/>
-<spring:message code="reports.message.parametersCleared" var="parametersClearedText"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="reports.message.accessUpdated" var="accessUpdatedText"/>
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-<spring:message code="select.text.selectAll" var="selectAllText"/>
-<spring:message code="select.text.deselectAll" var="deselectAllText"/>
+<spring:message code="reports.message.fileSent" var="fileSentText" javaScriptEscape="true"/>
+<spring:message code="reports.message.parametersSaved" var="parametersSavedText" javaScriptEscape="true"/>
+<spring:message code="reports.message.parametersCleared" var="parametersClearedText" javaScriptEscape="true"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="reports.message.accessUpdated" var="accessUpdatedText" javaScriptEscape="true"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText" javaScriptEscape="true"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText" javaScriptEscape="true"/>
+<spring:message code="select.text.selectAll" var="selectAllText" javaScriptEscape="true"/>
+<spring:message code="select.text.deselectAll" var="deselectAllText" javaScriptEscape="true"/>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notifyjs-0.4.2/notify.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
@@ -43,8 +43,12 @@ Display section to allow selecting of report parameters and initiate running of 
 			$('#parametersForm').attr('action', url).submit();
 		});
 
+		var mainIntervalId;
+
 		$("#runInline").on("click", function (e) {
 			e.preventDefault();
+
+			clearInterval(mainIntervalId);
 
 			$("#showInline").val("true");
 
@@ -60,6 +64,13 @@ Display section to allow selecting of report parameters and initiate running of 
 				data: $('#parametersForm').serialize(),
 				success: function (data) {
 					$("#reportOutput").html(data);
+					var mainRefreshPeriodSeconds = ${refreshPeriodSeconds};
+					if (mainRefreshPeriodSeconds >= 5) {
+						var mainRefreshPeriodMilliseconds = mainRefreshPeriodSeconds * 1000;
+						mainIntervalId = setInterval(function () {
+							$("#runInline").trigger("click");
+						}, mainRefreshPeriodMilliseconds);
+					}
 				},
 				error: function (xhr) {
 					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
@@ -132,7 +143,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		if (${startSelectParametersHidden}) {
 			$("#collapse1").collapse("hide");
 		}
-		
+
 		$("#showHideParameters").on("click", function () {
 			$("#collapse1").collapse("toggle");
 		});

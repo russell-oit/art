@@ -12,14 +12,14 @@
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="pivotTableJs.text.processing" var="processingText" javaScriptEscape="true"/>
-<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="reports.message.reportSaved" var="reportSavedText"/>
-<spring:message code="reports.message.reportDeleted" var="reportDeletedText"/>
-<spring:message code="dialog.title.saveReport" var="saveReportText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.cancel" var="cancelText" javaScriptEscape="true"/>
+<spring:message code="dialog.button.ok" var="okText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportSaved" var="reportSavedText" javaScriptEscape="true"/>
+<spring:message code="reports.message.reportDeleted" var="reportDeletedText" javaScriptEscape="true"/>
+<spring:message code="dialog.title.saveReport" var="saveReportText" javaScriptEscape="true"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText" javaScriptEscape="true"/>
+<spring:message code="reports.message.cannotDeleteReport" var="cannotDeleteReportText" javaScriptEscape="true"/>
 
 
 <c:if test="${sessionUser.hasPermission('save_reports')}">

@@ -32,11 +32,9 @@ Edit parameter definition
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="switch.text.yes" var="yesText"/>
-<spring:message code="switch.text.no" var="noText"/>
-<spring:message code="reports.text.selectFile" var="selectFileText"/>
-<spring:message code="reports.text.change" var="changeText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText" javaScriptEscape="true"/>
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -327,8 +325,12 @@ Edit parameter definition
 						</div>
 						<div class="fileinput fileinput-new" data-provides="fileinput">
 							<span class="btn btn-default btn-file">
-								<span class="fileinput-new">${selectFileText}</span>
-								<span class="fileinput-exists">${changeText}</span>
+								<span class="fileinput-new">
+									<spring:message code="reports.text.selectFile"/>
+								</span>
+								<span class="fileinput-exists">
+									<spring:message code="reports.text.change"/>
+								</span>
 								<input type="file" name="templateFile">
 							</span>
 							<span class="fileinput-filename"></span>

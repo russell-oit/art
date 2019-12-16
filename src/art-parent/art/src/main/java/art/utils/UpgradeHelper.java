@@ -28,6 +28,7 @@ import art.user.User;
 import java.io.File;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -64,8 +65,8 @@ public class UpgradeHelper {
 	 * @throws java.lang.Exception
 	 */
 	public void upgrade(String templatesPath) throws Exception {
-		migrateJobsToQuartz();
 		upgradeDatabase(templatesPath);
+		migrateJobsToQuartz();
 	}
 
 	/**
@@ -88,7 +89,7 @@ public class UpgradeHelper {
 		actionUser.setUsername("art migration");
 
 		int nonQuartzJobCount = 0;
-		int successfulMigrationCount = 0;
+		int migratedCount = 0;
 
 		JobService jobService = new JobService();
 
@@ -100,19 +101,29 @@ public class UpgradeHelper {
 				logger.info("Migrating jobs to quartz...");
 			}
 
+			if (!job.isActive()) {
+				continue;
+			}
+
+			Date now = new Date();
+			Date endDate = job.getEndDate();
+			if (endDate != null && endDate.before(now)) {
+				continue;
+			}
+
 			int jobId = job.getJobId();
 
 			try {
 				jobService.processSchedules(job, actionUser);
 				dbService.update(sql, jobId);
-				successfulMigrationCount++;
-			} catch (ParseException | SchedulerException | SQLException ex) {
+				migratedCount++;
+			} catch (ParseException | SchedulerException | SQLException | RuntimeException ex) {
 				logger.error("Error. Job Id {}", jobId, ex);
 			}
 		}
 
 		if (nonQuartzJobCount > 0) {
-			logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", successfulMigrationCount, nonQuartzJobCount);
+			logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs.", migratedCount, nonQuartzJobCount);
 		}
 	}
 
@@ -857,7 +868,7 @@ public class UpgradeHelper {
 	 */
 	private void populateUserRolesTable() throws SQLException {
 		logger.debug("Entering populateUserRolesTable");
-		
+
 		logger.info("Adding user - role records");
 
 		String sql;
