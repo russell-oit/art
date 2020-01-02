@@ -102,7 +102,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-timezone-0.5.27/moment-timezone-with-data-10-year-range.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init(tinymceConfig);
@@ -278,13 +277,6 @@
 				optionsEditor.getSession().on('change', function () {
 					options.val(optionsEditor.getSession().getValue());
 				});
-
-				var clientTimeZoneName = moment.tz.guess();
-				var defaultTimeZoneOption = "<option value='" + clientTimeZoneName + "'>"
-						+ clientTimeZoneName + " (GMT"
-						+ moment().tz(clientTimeZoneName).format('Z') + ")</option>";
-				$("#scheduleTimeZone").prepend(defaultTimeZoneOption);
-				$("#scheduleTimeZone").selectpicker('refresh');
 
 			});
 		</script>
@@ -1019,7 +1011,8 @@
 						</label>
 						<div class="col-md-8">
 							<form:select path="scheduleTimeZone" class="form-control selectpicker">
-								<option data-divider="true"></option>
+								<form:option value="${serverTimeZone}">${serverTimeZoneDescription}</form:option>
+									<option data-divider="true"></option>
 								<form:options items="${timeZones}"/>
 							</form:select>
 							<form:errors path="scheduleTimeZone" cssClass="error"/>
