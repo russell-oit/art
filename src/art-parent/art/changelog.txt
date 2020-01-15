@@ -1,3 +1,6 @@
+ART 4.9
+* Updated mongo java driver
+
 ART 4.8
 * Fix for error while upgrading jobs
 * Have exact matching for report groups filter in reports page
