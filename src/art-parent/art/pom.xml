@@ -30,6 +30,7 @@
 		<jclouds.version>2.1.2</jclouds.version>
 		<spring.security.version>4.2.9.RELEASE</spring.security.version>
 		<morphia.version>1.5.8</morphia.version>
+		<calcite.version>1.21.0</calcite.version>
 	</properties>
 
 	<build>
@@ -573,6 +574,30 @@
 			<groupId>dev.morphia.morphia</groupId>
 			<artifactId>logging-slf4j</artifactId>
 			<version>${morphia.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-core</artifactId>
+			<version>${calcite.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-file</artifactId>
+			<version>${calcite.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-mongodb</artifactId>
+			<version>${calcite.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-cassandra</artifactId>
+			<version>${calcite.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
