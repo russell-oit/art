@@ -381,6 +381,26 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "jdbc";
 		urlElement.value = "jdbc:q:<server>:<port>";
 		testSqlElement.value = "";
+	} else if (databaseType === "CsvCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.file.FileSchemaFactory;schema.directory=<C:\\directory\\with\\csv\\files>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "JsonCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.file.FileSchemaFactory;schema.directory=<C:\\directory\\with\\json\\files>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "MongoDBCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:model=<C:\\path\\to\\model.json>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "CassandraCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:model=<C:\\path\\to\\model.json>;lex=MYSQL";
+		testSqlElement.value = "";
 	}
 }
 
