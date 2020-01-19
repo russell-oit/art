@@ -33,13 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 public enum DatabaseProtocol {
 	//https://stackoverflow.com/questions/24157817/jackson-databind-enum-case-insensitive
 
-	Other("Other"), MySQL("MySQL"), MariaDB("MariaDB"), Oracle("Oracle"),
+	Other("Other"), Oracle("Oracle"), Access("MS Access"), Teradata("Teradata"),
 	CUBRID("CUBRID"), Db2("Db2"), HSQLDB("HSQLDB"), PostgreSQL("PostgreSQL"),
 	SqlServer("SQL Server"), Informix("Informix"), Firebird("Firebird"),
-	Access("MS Access"), SQLite("SQLite"), H2("H2"), Vertica("Vertica"),
-	Redshift("Redshift"), Teradata("Teradata"), Snowflake("Snowflake"),
-	Presto("Presto"), Drill("Drill"), MonetDB("MonetDB"), Exasol("Exasol"),
-	kdb("kdb+"), Phoenix("Phoenix");
+	kdb("kdb+");
 
 	private final String value;
 
@@ -119,36 +116,12 @@ public enum DatabaseProtocol {
 			return Informix;
 		} else if (StringUtils.startsWith(url, "jdbc:firebirdsql")) {
 			return Firebird;
-		} else if (StringUtils.startsWith(url, "jdbc:mysql")) {
-			return MySQL;
-		} else if (StringUtils.startsWith(url, "jdbc:mariadb")) {
-			return MariaDB;
 		} else if (StringUtils.startsWith(url, "jdbc:ucanaccess")) {
 			return Access;
-		} else if (StringUtils.startsWith(url, "jdbc:sqlite")) {
-			return SQLite;
-		} else if (StringUtils.startsWith(url, "jdbc:h2")) {
-			return H2;
-		} else if (StringUtils.startsWith(url, "jdbc:vertica")) {
-			return Vertica;
-		} else if (StringUtils.startsWith(url, "jdbc:redshift")) {
-			return Redshift;
 		} else if (StringUtils.startsWith(url, "jdbc:teradata")) {
 			return Teradata;
-		} else if (StringUtils.startsWith(url, "jdbc:snowflake")) {
-			return Snowflake;
-		} else if (StringUtils.startsWith(url, "jdbc:presto")) {
-			return Presto;
-		} else if (StringUtils.startsWith(url, "jdbc:drill")) {
-			return Drill;
-		} else if (StringUtils.startsWith(url, "jdbc:monetdb")) {
-			return MonetDB;
-		} else if (StringUtils.startsWith(url, "jdbc:exa")) {
-			return Exasol;
 		} else if (StringUtils.startsWith(url, "jdbc:q")) {
 			return kdb;
-		} else if (StringUtils.startsWith(url, "jdbc:phoenix")) {
-			return Phoenix;
 		} else {
 			return Other;
 		}
