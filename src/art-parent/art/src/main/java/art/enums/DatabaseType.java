@@ -50,7 +50,9 @@ public enum DatabaseType {
 	AuroraMySQLMariadb("aurora-mysql-mariadb"),
 	AuroraPostgreSQLPostgresql("aurora-postgresql-postgresql"),
 	GreenplumPostgresql("greenplum-postgresql"),
-	TimescaleDBPostgresql("timescaledb-postgresql"), kdb("kdb+");
+	TimescaleDBPostgresql("timescaledb-postgresql"), kdb("kdb+"),
+	CsvCalcite("csv-calcite"), JsonCalcite("json-calcite"),
+	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite");
 
 	private final String value;
 
@@ -167,6 +169,10 @@ public enum DatabaseType {
 				return "SQLite (Xerial driver)";
 			case CsvCsvjdbc:
 				return "CSV (CsvJdbc driver)";
+			case CsvCalcite:
+				return "CSV (Calcite driver)";
+			case JsonCalcite:
+				return "JSON (Calcite driver)";
 			case H2Server:
 				return "H2 Server";
 			case H2Embedded:
@@ -181,6 +187,10 @@ public enum DatabaseType {
 				return "Vertica - driver not included"; //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 			case CassandraAdejanovski:
 				return "Cassandra (adejanovski driver)";
+			case CassandraCalcite:
+				return "Cassandra (Calcite driver)";
+			case MongoDBCalcite:
+				return "MongoDB (Calcite driver)";
 			case Neo4j:
 				return "Neo4j - driver not included"; //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 			case Exasol:

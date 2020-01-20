@@ -1,3 +1,8 @@
+ART 4.9
+* Added jdbc driver for JSON files
+* Updated morphia. Will require change of package names in report source and groovy-whitelist.txt from org.mongodb.morphia... to dev.morphia...
+* Updated mongo java driver
+
 ART 4.8
 * Fix for error while upgrading jobs
 * Have exact matching for report groups filter in reports page

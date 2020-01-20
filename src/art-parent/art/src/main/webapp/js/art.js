@@ -143,17 +143,17 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		testSqlElement.value = "select 1 from dual";
 	} else if (databaseType === "MySQL") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
-		$(databaseProtocolSelector).val('MySQL');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MemSQLMysql") {
-		$(databaseProtocolSelector).val('MySQL');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MariaDB") {
-		$(databaseProtocolSelector).val('MariaDB');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb://<server>/<database>";
 		testSqlElement.value = "select 1";
@@ -161,7 +161,7 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		//https://mariadb.com/kb/en/library/failover-and-high-availability-with-mariadb-connector-j/#specifics-for-amazon-aurora
 		//https://stackoverflow.com/questions/44020489/db-connections-increase-after-setting-aurora-in-mariadb-connector
 		//https://stackoverflow.com/questions/31250975/what-database-driver-should-be-used-to-access-aws-aurora
-		$(databaseProtocolSelector).val('MariaDB');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.mariadb.jdbc.Driver";
 		urlElement.value = "jdbc:mariadb:aurora://<cluster_end_point>/<database>";
 		testSqlElement.value = "select 1";
@@ -245,7 +245,7 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 			usernameElement.value = "";
 		}
 	} else if (databaseType === "HbasePhoenix") {
-		$(databaseProtocolSelector).val('Phoenix');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
 		urlElement.value = "jdbc:phoenix:<server>";
 		testSqlElement.value = "";
@@ -265,7 +265,7 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 			usernameElement.value = "";
 		}
 	} else if (databaseType === "SqlLiteXerial") {
-		$(databaseProtocolSelector).val('SQLite');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.sqlite.JDBC";
 		urlElement.value = "jdbc:sqlite:<file_path>";
 		testSqlElement.value = "select 1";
@@ -275,12 +275,12 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		urlElement.value = "jdbc:relique:csv:<directory_with_csvs>";
 		testSqlElement.value = "";
 	} else if (databaseType === "H2Server") {
-		$(databaseProtocolSelector).val('H2');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "H2Embedded") {
-		$(databaseProtocolSelector).val('H2');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.h2.Driver";
 		urlElement.value = "jdbc:h2://<file_path>";
 		testSqlElement.value = "select 1";
@@ -299,7 +299,7 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		testSqlElement.value = "";
 	} else if (databaseType === "Drill") {
 		//https://stackoverflow.com/questions/31654658/apache-drill-connection-to-drill-in-embedded-mode-java/33442630
-		$(databaseProtocolSelector).val('Drill');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "org.apache.drill.jdbc.Driver";
 		urlElement.value = "jdbc:drill:drillbit=<server>";
 		testSqlElement.value = "select 1 from sys.version";
@@ -315,13 +315,13 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		testSqlElement.value = "select 1 from RDB$DATABASE";
 	} else if (databaseType === "MonetDB") {
 		//https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Select_queries/Select_without_tables
-		$(databaseProtocolSelector).val('MonetDB');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "nl.cwi.monetdb.jdbc.MonetDriver";
 		urlElement.value = "jdbc:monetdb://<server>/<database>";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "Vertica") {
 		//https://my.vertica.com/docs/7.1.x/HTML/Content/Authoring/ConnectingToHPVertica/ClientJDBC/CreatingAndConfiguringAConnection.htm
-		$(databaseProtocolSelector).val('Vertica');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.vertica.jdbc.Driver";
 		urlElement.value = "jdbc:vertica://<server>/<database>";
 		testSqlElement.value = "select 1 from dual";
@@ -345,12 +345,12 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		urlElement.value = "jdbc:neo4j:bolt://<server>";
 		testSqlElement.value = "";
 	} else if (databaseType === "Exasol") {
-		$(databaseProtocolSelector).val('Exasol');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.exasol.jdbc.EXADriver";
 		urlElement.value = "jdbc:exa://<server>;schema=<database>";
 		testSqlElement.value = "";
 	} else if (databaseType === "Redshift") {
-		$(databaseProtocolSelector).val('Redshift');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "com.amazon.redshift.jdbc.Driver";
 		urlElement.value = "jdbc:redshift://<server>/<database>";
 		testSqlElement.value = "select 1";
@@ -360,19 +360,19 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		urlElement.value = "jdbc:teradata://<server>/DATABASE=<database>";
 		testSqlElement.value = "";
 	} else if (databaseType === "SnowflakeUsWest") {
-		$(databaseProtocolSelector).val('Snowflake');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "SnowflakeOther") {
 		//https://docs.snowflake.net/manuals/user-guide/jdbc-configure.html
 		//https://docs.snowflake.net/manuals/user-guide/intro-regions.html
-		$(databaseProtocolSelector).val('Snowflake');
+		$(databaseProtocolSelector).val('');
 		driverElement.value = "net.snowflake.client.jdbc.SnowflakeDriver";
 		urlElement.value = "jdbc:snowflake://<account_name>.<region_id>.snowflakecomputing.com/?warehouse=<warehouse>&db=<database>&schema=<schema>";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "Presto") {
-		$(databaseProtocolSelector).val("Presto");
+		$(databaseProtocolSelector).val("");
 		driverElement.value = "com.facebook.presto.jdbc.PrestoDriver";
 		urlElement.value = "jdbc:presto://<server>:<port>/<catalog>/<schema>";
 		testSqlElement.value = "select 1";
@@ -380,6 +380,26 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		$(databaseProtocolSelector).val("kdb");
 		driverElement.value = "jdbc";
 		urlElement.value = "jdbc:q:<server>:<port>";
+		testSqlElement.value = "";
+	} else if (databaseType === "CsvCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.file.FileSchemaFactory;schema.directory=<C:\\\\directory\\\\with\\\\csv\\\\files>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "JsonCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.file.FileSchemaFactory;schema.directory=<C:\\\\directory\\\\with\\\\json\\\\files>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "MongoDBCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:model=<C:\\\\path\\\\to\\\\model.json>;lex=MYSQL";
+		testSqlElement.value = "";
+	} else if (databaseType === "CassandraCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:model=<C:\\\\path\\\\to\\\\model.json>;lex=MYSQL";
 		testSqlElement.value = "";
 	}
 }
