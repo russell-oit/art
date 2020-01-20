@@ -1,5 +1,6 @@
 ART 4.9
 * Added jdbc driver for JSON files
+* Added jdbc driver for MongoDB
 * Updated morphia. Will require change of package names in report source and groovy-whitelist.txt from org.mongodb.morphia... to dev.morphia...
 * Updated mongo java driver
 
