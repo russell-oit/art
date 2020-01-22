@@ -16,6 +16,10 @@ com.mongodb.MongoBatchCursorAdapter
 com.mongodb.WriteResult
 org.bson.Document
 org.bson.types.ObjectId
+com.mongodb.client.internal.MongoDatabaseImpl
+com.mongodb.client.internal.MongoCollectionImpl
+com.mongodb.client.internal.Java8FindIterableImpl
+com.mongodb.client.internal.MongoBatchCursorAdapter
 
 #classes used with the jongo library
 org.jongo.Jongo
