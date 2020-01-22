@@ -17,11 +17,17 @@
  */
 package art.connectionpool;
 
-import art.datasource.Datasource;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
+
+import art.datasource.Datasource;
+import art.datasource.DatasourceOptions;
+import art.utils.ArtUtils;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,50 +39,85 @@ import org.slf4j.LoggerFactory;
  */
 public class HikariCPConnectionPool extends ConnectionPool {
 
-	private static final Logger logger = LoggerFactory.getLogger(HikariCPConnectionPool.class);
+    private static final Logger logger = LoggerFactory.getLogger(HikariCPConnectionPool.class);
 
-	private HikariDataSource hikariDataSource;
+    private HikariDataSource hikariDataSource;
 
-	@Override
-	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
-		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
+    private Map<String, Object> toHikariProperties(String options) {
+        Map<String, Object> result;
+        if (StringUtils.isNotBlank(options)) {
 
-		HikariConfig config = new HikariConfig();
+        }
+        return null;
+    }
 
-		config.setPoolName(datasource.getName());
-		config.setUsername(datasource.getUsername());
-		config.setPassword(datasource.getPassword());
-		//explicitly set minimum idle connection count to a low value to avoid
-		//"too many connection" errors where you have multiple report datasources using the same server
-		config.setMinimumIdle(1);
-		config.setMaximumPoolSize(maxPoolSize);
-		config.setJdbcUrl(datasource.getUrl());
-		
-		String driver = datasource.getDriver();
-		if (StringUtils.isNotBlank(driver)) {
-			config.setDriverClassName(driver); //registers/loads the driver
-		}
+    @Override
+    protected DataSource createPool(Datasource datasource, int maxPoolSize) {
+        logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 
-		if (StringUtils.isBlank(datasource.getTestSql())
-				|| StringUtils.equals(datasource.getTestSql(), "isValid")) {
-			//do nothing
-		} else {
-			config.setConnectionTestQuery(datasource.getTestSql());
-		}
+        HikariConfig config = initHikariConfig(datasource.getOptions());
 
-		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasource.getConnectionPoolTimeoutMins());
-		config.setIdleTimeout(timeoutMillis);
+        config.setPoolName(datasource.getName());
+        config.setUsername(datasource.getUsername());
+        config.setPassword(datasource.getPassword());
+        //explicitly set minimum idle connection count to a low value to avoid
+        //"too many connection" errors where you have multiple report datasources using the same server
+        config.setMinimumIdle(1);
+        config.setMaximumPoolSize(maxPoolSize);
+        config.setJdbcUrl(datasource.getUrl());
 
-		//set application name connection property
-		config.setDataSourceProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
+        String driver = datasource.getDriver();
+        if (StringUtils.isNotBlank(driver)) {
+            config.setDriverClassName(driver); //registers/loads the driver
+        }
 
-		hikariDataSource = new HikariDataSource(config);
+        if (StringUtils.isBlank(datasource.getTestSql())
+            || StringUtils.equals(datasource.getTestSql(), "isValid")) {
+            //do nothing
+        } else {
+            config.setConnectionTestQuery(datasource.getTestSql());
+        }
 
-		return hikariDataSource;
-	}
+        long timeoutMillis = TimeUnit.MINUTES.toMillis(datasource.getConnectionPoolTimeoutMins());
+        config.setIdleTimeout(timeoutMillis);
 
-	@Override
-	protected void closePool() {
-		hikariDataSource.close();
-	}
+        //set application name connection property
+        config.setDataSourceProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
+
+        hikariDataSource = new HikariDataSource(config);
+
+        return hikariDataSource;
+    }
+
+    /**
+     * Initializes data source properties.
+     * If properties are specified in the configuration
+     * then these properties will be transferred to the configuration
+     *
+     * @param options - data source settings in json format
+     * @return new HikariConfig instance
+     * @see DatasourceOptions
+     */
+    private HikariConfig initHikariConfig(String options) {
+        try {
+            DatasourceOptions datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
+            Map<String, Object> props;
+            HikariConfig result;
+            if (datasourceOptions != null && (props = datasourceOptions.getProperties()) != null) {
+                Properties properties = new Properties();
+                properties.putAll(props);
+                result = new HikariConfig(properties);
+            } else {
+                result = new HikariConfig();
+            }
+            return result;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Illegal Datasource options value: " + options, e);
+        }
+    }
+
+    @Override
+    protected void closePool() {
+        hikariDataSource.close();
+    }
 }
