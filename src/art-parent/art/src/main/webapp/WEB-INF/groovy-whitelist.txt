@@ -24,10 +24,10 @@ org.jongo.MongoCursor
 org.jongo.Find
 
 #classes used with the morphia library
-org.mongodb.morphia.Morphia
-org.mongodb.morphia.DatastoreImpl
-org.mongodb.morphia.Key
-org.mongodb.morphia.query.QueryImpl
+dev.morphia.Morphia
+dev.morphia.DatastoreImpl
+dev.morphia.Key
+dev.morphia.query.QueryImpl
 
 #other classes
 java.util.ArrayList
