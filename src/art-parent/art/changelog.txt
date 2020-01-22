@@ -1,3 +1,6 @@
+ART 4.10
+* Allow use of grouping in jxls templates
+
 ART 4.9
 * Added jdbc driver for JSON files
 * Added jdbc driver for MongoDB

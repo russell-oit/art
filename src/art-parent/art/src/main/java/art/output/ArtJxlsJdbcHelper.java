@@ -50,6 +50,10 @@ public class ArtJxlsJdbcHelper {
 		this.conn = conn;
 		this.templateResultOptions = templateResultOptions;
 	}
+	
+	public ArtJxlsJdbcHelper(TemplateResultOptions templateResultOptions) {
+		this.templateResultOptions = templateResultOptions;
+	}
 
 	public ArtJxlsJdbcHelper() {
 		templateResultOptions = new TemplateResultOptions();
