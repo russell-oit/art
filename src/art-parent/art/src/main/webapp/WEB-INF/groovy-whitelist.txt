@@ -9,10 +9,6 @@ com.mongodb.DBCursor
 com.mongodb.client.MongoCollection
 com.mongodb.client.MongoCursor
 com.mongodb.client.MongoDatabase
-com.mongodb.MongoDatabaseImpl
-com.mongodb.MongoCollectionImpl
-com.mongodb.FindIterableImpl
-com.mongodb.MongoBatchCursorAdapter
 com.mongodb.WriteResult
 org.bson.Document
 org.bson.types.ObjectId
