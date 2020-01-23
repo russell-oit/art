@@ -1,6 +1,7 @@
 ART 4.10
 * Allow use of grouping in jxls templates
 * Fix for incorrect file name on download
+* Fix for open password not working for xlsx files
 
 ART 4.9
 * Added jdbc driver for JSON files
