@@ -44,9 +44,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.beanutils.DynaProperty;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -226,18 +225,19 @@ public class XDocReportOutput {
 				templateResultOptions = ArtUtils.jsonToObject(reportOptions, TemplateResultOptions.class);
 			}
 
+			RunReportHelper runReportHelper = new RunReportHelper();
+
 			//pass report data
 			if (resultSet != null) {
-				boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-				boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-				context.put("results", rsdc.getRows());
+				ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(templateResultOptions);
+				List<Map<String, Object>> rows = jdbcHelper.handle(resultSet);
+				context.put("results", rows);
 
 				//add metadata to indicate results fields are list fields
+				List<String> columnNames = runReportHelper.getColumnNames(resultSet, templateResultOptions);
 				FieldsMetadata metadata = new FieldsMetadata();
-				DynaProperty[] columns = rsdc.getDynaProperties();
-				for (DynaProperty column : columns) {
-					String metadataFieldName = "results." + column.getName();
+				for (String columnName : columnNames) {
+					String metadataFieldName = "results." + columnName;
 					metadata.addFieldAsList(metadataFieldName);
 				}
 				xdocReport.setFieldsMetadata(metadata);
@@ -253,7 +253,6 @@ public class XDocReportOutput {
 				xdocReport.setFieldsMetadata(metadata);
 			}
 
-			RunReportHelper runReportHelper = new RunReportHelper();
 			conn = runReportHelper.getEffectiveReportConnection(report, reportParams);
 			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(conn, templateResultOptions);
 			context.put("jdbc", jdbcHelper);
