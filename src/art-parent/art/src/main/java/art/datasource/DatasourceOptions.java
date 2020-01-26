@@ -19,6 +19,7 @@ package art.datasource;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Represents datasource options
@@ -31,6 +32,7 @@ public class DatasourceOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String limitClause;
 	private Integer limit;
+	private Map<String, Object> properties;
 
 	/**
 	 * @return the limitClause
@@ -58,5 +60,13 @@ public class DatasourceOptions implements Serializable {
 	 */
 	public void setLimit(Integer limit) {
 		this.limit = limit;
+	}
+
+	public Map<String, Object> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, Object> properties) {
+		this.properties = properties;
 	}
 }
