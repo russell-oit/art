@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -815,6 +816,29 @@ public class ArtUtils {
 				+ request.getContextPath();
 
 		return baseUrl;
+	}
+
+	/**
+	 * Returns a properties object populated from contents of a properties file
+	 * 
+	 * @param propertiesFilePath the path of the properties file
+	 * @return the loaded properties object
+	 * @throws java.io.IOException
+	 */
+	public static Properties loadPropertiesFromFile(String propertiesFilePath) throws IOException {
+		Properties properties = new Properties();
+
+		//https://stackoverflow.com/questions/11251289/how-to-read-a-properties-file-in-java-from-outside-the-class-folder
+		if (propertiesFilePath != null) {
+			File propertiesFile = new File(propertiesFilePath);
+			if (propertiesFile.exists()) {
+				try (FileInputStream o = new FileInputStream(propertiesFilePath)) {
+					properties.load(o);
+				}
+			}
+		}
+
+		return properties;
 	}
 
 }

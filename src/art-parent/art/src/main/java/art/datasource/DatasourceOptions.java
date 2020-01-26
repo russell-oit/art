@@ -32,7 +32,7 @@ public class DatasourceOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String limitClause;
 	private Integer limit;
-	private Map<String, Object> properties;
+	private Map<String, Object> hikariCp;
 
 	/**
 	 * @return the limitClause
@@ -62,11 +62,19 @@ public class DatasourceOptions implements Serializable {
 		this.limit = limit;
 	}
 
-	public Map<String, Object> getProperties() {
-		return properties;
+	/**
+	 * 
+	 * @return the hikariCp
+	 */
+	public Map<String, Object> getHikariCp() {
+		return hikariCp;
 	}
 
-	public void setProperties(Map<String, Object> properties) {
-		this.properties = properties;
+	/**
+	 * 
+	 * @param hikariCp the hikariCp to set
+	 */
+	public void setHikariCp(Map<String, Object> hikariCp) {
+		this.hikariCp = hikariCp;
 	}
 }
