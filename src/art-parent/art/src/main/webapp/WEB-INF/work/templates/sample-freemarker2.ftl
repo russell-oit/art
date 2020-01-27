@@ -15,8 +15,8 @@ Region ID: ${regionId.displayValues}
 	<tbody>
 		<#list results as result>
 			<tr>
-				<td>${result.CITY_ID}</td>
-				<td>${result.NAME}</td>			
+				<td>${result.city_id}</td>
+				<td>${result.name}</td>			
 			</tr>
 		</#list>
 	</tbody>
