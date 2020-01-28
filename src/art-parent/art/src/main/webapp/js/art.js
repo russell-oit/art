@@ -401,6 +401,11 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "org.apache.calcite.jdbc.Driver";
 		urlElement.value = "jdbc:calcite:model=<C:\\\\path\\\\to\\\\model.json>;lex=MYSQL";
 		testSqlElement.value = "";
+	} else if (databaseType === "ElasticsearchCalcite") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:model=<C:\\\\path\\\\to\\\\model.json>;lex=MYSQL";
+		testSqlElement.value = "";
 	}
 }
 

@@ -52,7 +52,8 @@ public enum DatabaseType {
 	GreenplumPostgresql("greenplum-postgresql"),
 	TimescaleDBPostgresql("timescaledb-postgresql"), kdb("kdb+"),
 	CsvCalcite("csv-calcite"), JsonCalcite("json-calcite"),
-	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite");
+	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite"),
+	ElasticsearchCalcite("elasticsearch-calcite");
 
 	private final String value;
 
@@ -191,6 +192,8 @@ public enum DatabaseType {
 				return "Cassandra (Calcite driver)";
 			case MongoDBCalcite:
 				return "MongoDB (Calcite driver)";
+			case ElasticsearchCalcite:
+				return "Elasticsearch (Calcite driver)";
 			case Neo4j:
 				return "Neo4j - driver not included"; //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 			case Exasol:

@@ -3,6 +3,7 @@ ART 4.10
 * Fix for incorrect file name on download
 * Fix for open password not working for xlsx files
 * Allow for HikariCP configuration
+* Added jdbc driver for Elasticsearch
 
 ART 4.9
 * Added jdbc driver for JSON files
