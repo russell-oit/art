@@ -30,6 +30,12 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 	<script th:src="${contextPath} + ${'/js/art.js'}"></script>
 	<script th:src="${contextPath} + ${'/js/bootstrap-hover-dropdown-2.0.3.min.js'}"></script>
 
+	<th:block th:if='${showColumnFilters}'>
+		<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/css/yadcf.css'}"/>
+		<link rel="stylesheet" type="text/css" th:href="${contextPath} + ${'/js/yadcf-0.9.3/jquery.dataTables.yadcf.css'}"/>
+		<script th:src="${contextPath} + ${'/js/yadcf-0.9.3/jquery.dataTables.yadcf.js'}"></script>
+	</th:block>
+
 	<script th:inline="javascript">
 		$(document).ready(function () {
 
@@ -79,9 +85,7 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 				language: {
 					url: url
 				},
-				initComplete: function () {
-					datatablesInitComplete();
-				}
+				initComplete: afterTableInitialization
 			};
 
 			var reportOptionsString = /*[[${options}]]*/ "";
@@ -97,6 +101,42 @@ https://stackoverflow.com/questions/42217214/springboot-with-thymeleaf-showing-e
 
 			//http://www.datatables.net/reference
 			$('#' + tableId).dataTable(options);
+
+			function afterTableInitialization(settings) {
+				//https://datatables.net/reference/option/initComplete
+				//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
+				datatablesInitComplete();
+				
+				var showColumnFilters = /*[[${showColumnFilters}]]*/ false;
+
+				if (showColumnFilters) {
+					var table = settings.oInstance.api();
+					createColumnFilters(table);
+				}
+			}
+
+			function createColumnFilters(table) {
+				var tbl = $('#' + tableId);
+				var headingRow = tbl.find('thead tr:first');
+				//https://stackoverflow.com/questions/34609173/datatables-1-10-column-count
+				var colCount = table.columns().header().length;
+				var cols = '';
+				for (var i = 1; i <= colCount; i++) {
+					cols += '<th></th>';
+				}
+
+				var filterRow = '<tr>' + cols + '</tr>';
+				headingRow.after(filterRow);
+				var filterColumnDefs = [];
+				for (var i = 0; i < colCount; i++) {
+					filterColumnDefs.push({
+						column_number: i, filter_type: "text", filter_default_label: "",
+						style_class: "yadcf-report-name-filter"
+					});
+				}
+
+				yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
+			}
 		});
 	</script>
 </th:block>

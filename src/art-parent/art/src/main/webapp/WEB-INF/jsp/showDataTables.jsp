@@ -40,6 +40,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.print.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/Buttons-1.5.4/js/buttons.colVis.min.js"></script>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
 
@@ -228,7 +229,8 @@
 		var filterColumnDefs = [];
 		for (var i = 0; i < colCount; i++) {
 			filterColumnDefs.push({
-				column_number: i, filter_type: "text", filter_default_label: ""
+				column_number: i, filter_type: "text", filter_default_label: "",
+				style_class: "yadcf-report-name-filter"
 			});
 		}
 
