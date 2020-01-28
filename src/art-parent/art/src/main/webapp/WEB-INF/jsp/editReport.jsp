@@ -351,7 +351,7 @@ Edit report page
 				gridstackSavedOptionsEditor.getSession().on('change', function () {
 					gridstackSavedOptions.val(gridstackSavedOptionsEditor.getSession().getValue());
 				});
-				
+
 				var selfServiceOptionsEditor = ace.edit("selfServiceOptionsEditor");
 				selfServiceOptionsEditor.$blockScrolling = Infinity;
 				selfServiceOptionsEditor.getSession().setMode("ace/mode/json");
@@ -1069,16 +1069,16 @@ Edit report page
 					default:
 						$("#gridstackSavedOptionsDiv").hide();
 				}
-				
+
 				//show/hide self service options field
-				if(${report.selfService}){
+				if (${report.selfService}) {
 					$("#selfServiceOptionsDiv").show();
 					$("#viewReportIdDiv").show();
 				} else {
 					$("#selfServiceOptionsDiv").hide();
 					$("#viewReportIdDiv").hide();
 				}
-				
+
 				//show/hide apply button
 				switch (reportTypeId) {
 					case 129: //gridstack dashboard
@@ -1962,6 +1962,10 @@ Edit report page
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
+						<label class="checkbox-inline">
+							<input type="checkbox" name="showSelectedParameters" checked>
+							<spring:message code="reports.label.showParameters"/>
+						</label>
 						<span class="pull-right">
 							<button type="button" class="btn btn-default" id="applyOptions">
 								<spring:message code="page.button.apply"/>
