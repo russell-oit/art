@@ -1962,11 +1962,12 @@ Edit report page
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<label class="checkbox-inline">
-							<input type="checkbox" name="showSelectedParameters" checked>
-							<spring:message code="reports.label.showParameters"/>
-						</label>
 						<span class="pull-right">
+							<label class="checkbox-inline">
+								<input type="checkbox" name="showSelectedParameters" checked>
+								<spring:message code="reports.label.showParameters"/>
+							</label>
+							&nbsp;
 							<button type="button" class="btn btn-default" id="applyOptions">
 								<spring:message code="page.button.apply"/>
 							</button>
