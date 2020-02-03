@@ -33,6 +33,21 @@ public class ReportOptions implements Serializable {
 	private boolean prettyPrint;
 	private boolean swapAxes;
 	private String plotlyType;
+	private boolean showColumnFilters;
+
+	/**
+	 * @return the showColumnFilters
+	 */
+	public boolean isShowColumnFilters() {
+		return showColumnFilters;
+	}
+
+	/**
+	 * @param showColumnFilters the showColumnFilters to set
+	 */
+	public void setShowColumnFilters(boolean showColumnFilters) {
+		this.showColumnFilters = showColumnFilters;
+	}
 
 	/**
 	 * @return the plotlyType

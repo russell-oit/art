@@ -2598,6 +2598,7 @@ public class ReportOutputGenerator {
 		standardOutput.setDynamicOpenPassword(dynamicOpenPassword);
 		standardOutput.setDynamicModifyPassword(dynamicModifyPassword);
 		standardOutput.setReportRequestParameters(reportRequestParameters);
+		standardOutput.setReportOptions(reportOptions);
 
 		if (request != null) {
 			standardOutput.setContextPath(contextPath);

@@ -30,6 +30,7 @@ import art.utils.ArtUtils;
 import art.drilldown.DrilldownLinkHelper;
 import art.reportoptions.StandardOutputOptions;
 import art.runreport.GroovyDataDetails;
+import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
@@ -109,6 +110,21 @@ public abstract class StandardOutput {
 	protected String dynamicModifyPassword;
 	protected boolean pageHeaderLoaded;
 	private Map<String, String[]> reportRequestParameters;
+	protected ReportOptions reportOptions;
+
+	/**
+	 * @return the reportOptions
+	 */
+	public ReportOptions getReportOptions() {
+		return reportOptions;
+	}
+
+	/**
+	 * @param reportOptions the reportOptions to set
+	 */
+	public void setReportOptions(ReportOptions reportOptions) {
+		this.reportOptions = reportOptions;
+	}
 
 	/**
 	 * @return the reportRequestParameters

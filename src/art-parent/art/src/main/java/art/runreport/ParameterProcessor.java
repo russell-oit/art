@@ -608,8 +608,9 @@ public class ParameterProcessor {
 					reportOptions.setSwapAxes(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "plotlyType")) {
 					reportOptions.setPlotlyType(paramValue);
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showColumnFilters")) {
+					reportOptions.setShowColumnFilters(true);
 				}
-
 			}
 		}
 
