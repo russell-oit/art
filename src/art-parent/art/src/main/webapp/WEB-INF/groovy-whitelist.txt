@@ -9,13 +9,13 @@ com.mongodb.DBCursor
 com.mongodb.client.MongoCollection
 com.mongodb.client.MongoCursor
 com.mongodb.client.MongoDatabase
-com.mongodb.MongoDatabaseImpl
-com.mongodb.MongoCollectionImpl
-com.mongodb.FindIterableImpl
-com.mongodb.MongoBatchCursorAdapter
 com.mongodb.WriteResult
 org.bson.Document
 org.bson.types.ObjectId
+com.mongodb.client.internal.MongoDatabaseImpl
+com.mongodb.client.internal.MongoCollectionImpl
+com.mongodb.client.internal.Java8FindIterableImpl
+com.mongodb.client.internal.MongoBatchCursorAdapter
 
 #classes used with the jongo library
 org.jongo.Jongo
@@ -24,10 +24,10 @@ org.jongo.MongoCursor
 org.jongo.Find
 
 #classes used with the morphia library
-org.mongodb.morphia.Morphia
-org.mongodb.morphia.DatastoreImpl
-org.mongodb.morphia.Key
-org.mongodb.morphia.query.QueryImpl
+dev.morphia.Morphia
+dev.morphia.DatastoreImpl
+dev.morphia.Key
+dev.morphia.query.QueryImpl
 
 #other classes
 java.util.ArrayList

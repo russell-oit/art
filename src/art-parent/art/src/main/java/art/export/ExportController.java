@@ -168,7 +168,8 @@ public class ExportController {
 
 			response.setContentType(mimeType);
 			if (!StringUtils.containsIgnoreCase(mimeType, "html")) {
-				response.addHeader("Content-Disposition", "attachment; filename=" + filename);
+				//https://stackoverflow.com/questions/18634337/how-to-set-filename-containing-spaces-in-content-disposition-header
+				response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 			}
 
 			FileInputStream fs = null;

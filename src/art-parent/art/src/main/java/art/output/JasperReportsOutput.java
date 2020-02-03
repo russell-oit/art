@@ -26,9 +26,9 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import com.jaspersoft.mongodb.connection.MongoDbConnection;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -306,14 +306,8 @@ public class JasperReportsOutput {
 		JRAbstractLRUVirtualizer jrVirtualizer;
 
 		//set virtualizer properties, if virtualizer is to be used
-		Properties properties = new Properties();
 		String propertiesFilePath = Config.getClassesPath() + "jasperreports.properties";
-		File propertiesFile = new File(propertiesFilePath);
-		if (propertiesFile.exists()) {
-			try (FileInputStream input = new FileInputStream(propertiesFilePath)) {
-				properties.load(input);
-			}
-		}
+		Properties properties = ArtUtils.loadPropertiesFromFile(propertiesFilePath);
 
 		//finalize properties object
 		//use values from the properties file if they exist, otherwise use defaults

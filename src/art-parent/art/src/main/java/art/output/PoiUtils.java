@@ -33,11 +33,11 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 /**
  * Provides utility methods related to output using the poi library
- * 
+ *
  * @author Timothy Anyona
  */
 public class PoiUtils {
-	
+
 	/**
 	 * Adds a password to prevent opening of a file
 	 *
@@ -49,7 +49,7 @@ public class PoiUtils {
 	 */
 	public static void addOpenPassword(String openPassword, String fullOutputFileName)
 			throws IOException, GeneralSecurityException, InvalidFormatException {
-		
+
 		//http://www.quicklyjava.com/create-password-protected-excel-using-apache-poi/
 		//http://www.quicklyjava.com/create-password-protected-excel-sheets-using-apache-poi/
 		//https://poi.apache.org/encryption.html
@@ -57,27 +57,27 @@ public class PoiUtils {
 		//https://stackoverflow.com/questions/14701322/apache-poi-how-to-protect-sheet-with-options
 		//https://stackoverflow.com/questions/17675685/apache-poi-excel-sheet-protection-and-data-validation
 		//https://stackoverflow.com/questions/45097889/apache-poi-sheet-password-not-working
-		
 		if (StringUtils.isEmpty(openPassword)) {
 			return;
 		}
 
-		POIFSFileSystem fs = new POIFSFileSystem();
-		EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile);
-		// EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile, CipherAlgorithm.aes192, HashAlgorithm.sha384, -1, -1, null);
+		try (POIFSFileSystem fs = new POIFSFileSystem()) {
+			EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile);
+			// EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile, CipherAlgorithm.aes192, HashAlgorithm.sha384, -1, -1, null);
 
-		Encryptor enc = info.getEncryptor();
-		enc.confirmPassword(openPassword);
+			Encryptor enc = info.getEncryptor();
+			enc.confirmPassword(openPassword);
 
-		// Read in an existing OOXML file
-		try (OPCPackage opc = OPCPackage.open(new File(fullOutputFileName), PackageAccess.READ_WRITE)) {
-			OutputStream os = enc.getDataStream(fs);
-			opc.save(os);
-		}
+			// Read in an existing OOXML file
+			try (OPCPackage opc = OPCPackage.open(new File(fullOutputFileName), PackageAccess.READ_WRITE);
+					OutputStream os = enc.getDataStream(fs)) {
+				opc.save(os);
+			}
 
-		// Write out the encrypted version
-		try (FileOutputStream fos = new FileOutputStream(fullOutputFileName)) {
-			fs.writeFilesystem(fos);
+			// Write out the encrypted version
+			try (FileOutputStream fos = new FileOutputStream(fullOutputFileName)) {
+				fs.writeFilesystem(fos);
+			}
 		}
 	}
 }

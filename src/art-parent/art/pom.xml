@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>4.9</version>
+		<version>4.10</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -222,22 +222,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -252,7 +252,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -272,7 +272,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -283,7 +283,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>reportengine-art</artifactId>
-			<version>4.9</version>
+			<version>4.10</version>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
@@ -596,6 +596,12 @@
 		<dependency>
 			<groupId>org.apache.calcite</groupId>
 			<artifactId>calcite-cassandra</artifactId>
+			<version>${calcite.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-elasticsearch</artifactId>
 			<version>${calcite.version}</version>
 			<scope>runtime</scope>
 		</dependency>

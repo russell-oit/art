@@ -38,8 +38,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -223,10 +223,9 @@ public class JxlsOutput {
 				context.putVar("jdbc", jdbcHelper);
 			} else {
 				if (data == null) {
-					boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-					boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-					RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-					context.putVar("results", rsdc.getRows());
+					ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(templateResultOptions);
+					List<Map<String, Object>> rows = jdbcHelper.handle(resultSet);
+					context.putVar("results", rows);
 				} else {
 					context.putVar("results", data);
 				}

@@ -18,8 +18,16 @@
 package art.connectionpool;
 
 import art.datasource.Datasource;
+import art.datasource.DatasourceOptions;
+import art.servlets.Config;
+import art.utils.ArtUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +49,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
 		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 
-		HikariConfig config = new HikariConfig();
+		HikariConfig config = createHikariConfig(datasource);
 
 		config.setPoolName(datasource.getName());
 		config.setUsername(datasource.getUsername());
@@ -51,7 +59,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
 		config.setJdbcUrl(datasource.getUrl());
-		
+
 		String driver = datasource.getDriver();
 		if (StringUtils.isNotBlank(driver)) {
 			config.setDriverClassName(driver); //registers/loads the driver
@@ -73,6 +81,50 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		hikariDataSource = new HikariDataSource(config);
 
 		return hikariDataSource;
+	}
+
+	/**
+	 * Creates a HikariConfig object for a datasource, considering properties
+	 * configured in the hikaricp.properties file and/or on the datasource
+	 *
+	 * @param datasource the datasource for which to create a config object
+	 * @return new HikariConfig instance
+	 */
+	private HikariConfig createHikariConfig(Datasource datasource) {
+		logger.debug("Entering createHikariConfig");
+
+		try {
+			//https://www.baeldung.com/java-merging-properties
+			//https://stackoverflow.com/questions/2004833/how-to-merge-two-java-util-properties-objects
+			Properties mergedProperties = new Properties();
+
+			String propertiesFilePath = Config.getClassesPath() + "hikaricp.properties";
+			Properties fileProperties = ArtUtils.loadPropertiesFromFile(propertiesFilePath);
+			mergedProperties.putAll(fileProperties);
+
+			String options = datasource.getOptions();
+			if (StringUtils.isNotBlank(options)) {
+				DatasourceOptions datasourceOptions = ArtUtils.jsonToObject(options, DatasourceOptions.class);
+				Map<String, Object> datasourcePropertiesMap = datasourceOptions.getHikariCp();
+				if (datasourcePropertiesMap != null) {
+					Map<String, String> stringMap = new HashMap<>();
+					for (Entry<String, Object> entry : datasourcePropertiesMap.entrySet()) {
+						//https://stackoverflow.com/questions/2004833/how-to-merge-two-java-util-properties-objects
+						String key = entry.getKey();
+						Object value = entry.getValue();
+						if (key != null && value != null) {
+							stringMap.put(key, String.valueOf(value));
+						}
+					}
+					mergedProperties.putAll(stringMap);
+				}
+			}
+
+			HikariConfig config = new HikariConfig(mergedProperties);
+			return config;
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	@Override

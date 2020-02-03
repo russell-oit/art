@@ -17,10 +17,12 @@
  */
 package art.output;
 
+import art.reportoptions.DataTablesOptions;
 import art.reportoptions.HtmlDataTableOutputOptions;
 import art.reportoptions.StandardOutputOptions;
 import art.servlets.Config;
 import art.utils.ArtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -84,6 +86,16 @@ public class HtmlDataTableOutput extends StandardOutput {
 			options = "";
 		}
 
+		DataTablesOptions dataTablesOptions = new DataTablesOptions();
+		try {
+			if (StringUtils.isNotBlank(options)) {
+				ObjectMapper mapper = new ObjectMapper();
+				dataTablesOptions = mapper.readValue(options, DataTablesOptions.class);
+			}
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+
 		Context ctx = new Context(locale);
 		ctx.setVariable("ajax", ajax);
 		ctx.setVariable("pageHeaderLoaded", pageHeaderLoaded);
@@ -93,6 +105,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		ctx.setVariable("options", options);
 		ctx.setVariable("dtExtraOptions", getDtExtraOptions());
 		ctx.setVariable("selfServicePreview", report.isSelfServicePreview());
+		ctx.setVariable("showColumnFilters", dataTablesOptions.isShowColumnFilters());
 
 		SpringTemplateEngine templateEngine = Config.getDefaultThymeleafTemplateEngine();
 		templateEngine.setMessageSource(messageSource);

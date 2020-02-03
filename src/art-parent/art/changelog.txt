@@ -1,5 +1,13 @@
+ART 4.10
+* Allow use of grouping in jxls templates
+* Fix for incorrect file name on download
+* Fix for open password not working for xlsx files
+* Allow for HikariCP configuration
+* Added jdbc driver for Elasticsearch
+
 ART 4.9
 * Added jdbc driver for JSON files
+* Added jdbc driver for MongoDB
 * Updated morphia. Will require change of package names in report source and groovy-whitelist.txt from org.mongodb.morphia... to dev.morphia...
 * Updated mongo java driver
 

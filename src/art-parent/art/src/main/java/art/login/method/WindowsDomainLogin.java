@@ -19,8 +19,7 @@ package art.login.method;
 
 import art.login.LoginResult;
 import art.servlets.Config;
-import java.io.File;
-import java.io.FileInputStream;
+import art.utils.ArtUtils;
 import java.io.IOException;
 import java.util.Properties;
 import jcifs.CIFSContext;
@@ -67,15 +66,8 @@ public class WindowsDomainLogin {
 		}
 
 		try {
-			//https://stackoverflow.com/questions/11251289/how-to-read-a-properties-file-in-java-from-outside-the-class-folder
-			Properties properties = new Properties();
 			String propertiesFilePath = Config.getClassesPath() + "jcifs.properties";
-			File propertiesFile = new File(propertiesFilePath);
-			if (propertiesFile.exists()) {
-				try (FileInputStream input = new FileInputStream(propertiesFilePath)) {
-					properties.load(input);
-				}
-			}
+			Properties properties = ArtUtils.loadPropertiesFromFile(propertiesFilePath);
 
 			//https://github.com/AgNO3/jcifs-ng/issues/139
 			//https://github.com/AgNO3/jcifs-ng/issues/93

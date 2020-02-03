@@ -34,6 +34,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.GroovyOptions;
+import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
 import art.selfservice.SelfServiceColumn;
@@ -201,7 +202,7 @@ public class RunReportHelper {
 
 		request.setAttribute("report", report);
 		request.setAttribute("locale", locale);
-		
+
 		setRefreshPeriodAttribute(report, request);
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -1658,7 +1659,7 @@ public class RunReportHelper {
 
 	/**
 	 * Sets attributes required for report auto refresh
-	 * 
+	 *
 	 * @param report the report
 	 * @param request the http request
 	 */
@@ -1673,6 +1674,61 @@ public class RunReportHelper {
 			refreshPeriod = NumberUtils.toInt(refreshPeriodParameter);
 		}
 		request.setAttribute("refreshPeriodSeconds", refreshPeriod);
+	}
+
+	/**
+	 * Returns the column names in a given resultset
+	 *
+	 * @param rs the resultset
+	 * @return column names in a given resultset
+	 * @throws SQLException
+	 */
+	public List<String> getColumnNames(ResultSet rs) throws SQLException {
+		TemplateResultOptions templateResultOptions = null;
+		return getColumnNames(rs, templateResultOptions);
+
+	}
+
+	/**
+	 * Returns the column names in a given resultset
+	 *
+	 * @param rs the resultset
+	 * @param templateResultOptions template result options
+	 * @return column names in a given resultset
+	 * @throws SQLException
+	 */
+	public List<String> getColumnNames(ResultSet rs,
+			TemplateResultOptions templateResultOptions) throws SQLException {
+
+		Objects.requireNonNull(rs, "rs must not be null");
+
+		if (templateResultOptions == null) {
+			templateResultOptions = new TemplateResultOptions();
+		}
+
+		List<String> columnNames = new ArrayList<>();
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) {
+			String columnLabel = rsmd.getColumnLabel(i);
+			String columnName = rsmd.getColumnName(i);
+			String finalColumnName;
+			if (templateResultOptions.isUseColumnLabels()
+					&& StringUtils.isNotBlank(columnLabel)) {
+				finalColumnName = columnLabel;
+			} else {
+				finalColumnName = columnName;
+			}
+
+			if (templateResultOptions.isUseLowerCaseProperties()) {
+				finalColumnName = StringUtils.lowerCase(finalColumnName, Locale.ENGLISH);
+			}
+
+			columnNames.add(finalColumnName);
+		}
+
+		return columnNames;
 	}
 
 }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.9"> 
+  <meta name="version" content="4.10"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -1064,6 +1064,11 @@
         <td>Integer</td> 
         <td>The default limit to use when the datasource is used in a view report</td> 
        </tr> 
+       <tr> 
+        <td><strong>hikariCp</strong></td> 
+        <td>Object</td> 
+        <td>Allows for specifying some <a class="" href="https://github.com/brettwooldridge/HikariCP" rel="nofollow">HikariCP configuration options</a> e.g. <code>{ "hikariCp" : { "readOnly" : true} }</code>. If you would like to specify options to be used for all datasources, you can specify these options in the <strong>WEB-INF\classes\hikaricp.properties</strong> file.</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p><strong>Note:</strong></p> 
@@ -2023,7 +2028,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h3 id="jxls-art-query">Jxls: ART Query</h3> 
      <p>Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted Jxls template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</p> 
      <h3 id="freemarker">FreeMarker</h3> 
-     <p>Displays a report in the browser based on a <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the default-value operator "!" after the column name e.g. <strong>${result.description!}</strong>. (See <a href="http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing" rel="nofollow">http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing</a>). The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
+     <p>Displays a report in the browser based on a <a class="" href="http://freemarker.org/" rel="nofollow">FreeMarker</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the default-value operator "!" after the column name e.g. <strong>${result.description!}</strong>. (See <a href="http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing" rel="nofollow">http://freemarker.org/docs/dgui_template_exp.html#dgui_template_exp_missing</a>). Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
      <p>A number of options can be specified in the <strong>Options</strong> field.</p> 
      <table border="1"> 
       <thead> 
@@ -2044,7 +2049,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       </tbody> 
      </table> 
      <h3 id="velocity">Velocity</h3> 
-     <p>Displays a report in the browser based on a <a class="" href="https://velocity.apache.org/engine/index.html" rel="nofollow">Velocity</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use quiet reference notation e.g. <strong>$!{result.description}</strong>. (See <a href="https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation" rel="nofollow">https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation</a>). The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. Also a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/NumberTool.html" rel="nofollow">NumberTool</a> object named <strong>numberTool</strong> is available for formatting numbers e.g. <strong>$numberTool.format('#,##0.00',$result.amount)</strong>. Similarly, a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html" rel="nofollow">DateTool</a> object named <strong>dateTool</strong> is available for formatting dates. An example report is included in the demo database.</p> 
+     <p>Displays a report in the browser based on a <a class="" href="https://velocity.apache.org/engine/index.html" rel="nofollow">Velocity</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use quiet reference notation e.g. <strong>$!{result.description}</strong>. (See <a href="https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation" rel="nofollow">https://velocity.apache.org/engine/2.0/user-guide.html#quiet-reference-notation</a>). Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. Also a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/NumberTool.html" rel="nofollow">NumberTool</a> object named <strong>numberTool</strong> is available for formatting numbers e.g. <strong>$numberTool.format('#,##0.00',$result.amount)</strong>. Similarly, a <a class="" href="https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html" rel="nofollow">DateTool</a> object named <strong>dateTool</strong> is available for formatting dates. An example report is included in the demo database.</p> 
      <p>A number of options can be specified in the <strong>Options</strong> field.</p> 
      <table border="1"> 
       <thead> 
@@ -2065,7 +2070,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       </tbody> 
      </table> 
      <h3 id="thymeleaf">Thymeleaf</h3> 
-     <p>Displays a report in the browser based on a <a class="" href="http://www.thymeleaf.org/" rel="nofollow">Thymeleaf</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. If you are sure a particular column will never have null values, you can use the simple dot notation to access it e.g. <strong>${result.description}</strong> to access a column in the result set named "description". If the column can have null values, use the <strong>get()</strong> method e.g. <strong>${result.get('description')}</strong>. The field name may be case sensitive depending on the RDBMS being used. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
+     <p>Displays a report in the browser based on a <a class="" href="http://www.thymeleaf.org/" rel="nofollow">Thymeleaf</a> template. The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable e.g. <strong>${result.description}</strong> to access a column in the result set named "description". Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. Variables named <strong>contextPath</strong> and <strong>artBaseUrl</strong> are available e.g. to include css or javascript files. <strong>artBaseUrl</strong> is only available if it is set in the <strong>Settings</strong> page and <strong>contextPath</strong> is only available for interactive reports and is not available with jobs. An example report is included in the demo database.</p> 
      <p>A number of options can be specified in the <strong>Options</strong> field.</p> 
      <table border="1"> 
       <thead> 
@@ -3020,11 +3025,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <div class="codehilite"> 
       <pre><span></span><span class="n">package</span> <span class="n">art</span><span class="o">.</span><span class="n">groovy</span>
 
-<span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Entity</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">org.mongodb.morphia.annotations.Id</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">org.mongodb.morphia.Datastore</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">org.mongodb.morphia.Morphia</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">org.mongodb.morphia.query.Query</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">dev.morphia.annotations.Entity</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">dev.morphia.annotations.Id</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">dev.morphia.Datastore</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">dev.morphia.Morphia</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">dev.morphia.query.Query</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.bson.types.ObjectId</span><span class="p">;</span>
 
 
@@ -3399,12 +3404,6 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
       </thead> 
       <tbody> 
-       <tr> 
-        <td><strong>useLowerCaseProperties</strong></td> 
-        <td>Boolean</td> 
-        <td>false</td> 
-        <td>Whether to use lower case property names (column names) regardless of if they are saved as upper case by the database. This setting doesn't need to be specified if using the <strong>jdbc</strong> object. In this case, the property names are not case sensitive.</td> 
-       </tr> 
        <tr> 
         <td><strong>useColumnLabels</strong></td> 
         <td>Boolean</td> 
@@ -5310,8 +5309,7 @@ WHERE REGION = #region#
 <span class="n">$</span><span class="o">{</span><span class="n">row</span><span class="o">.</span><span class="na">description</span><span class="o">}</span>
 </pre> 
        </div> </li> 
-      <li> <p>If a column may have null values, use syntax like <strong>${row.get('description')}</strong> instead of <code>${row.description}</code> to avoid messages in the log files about inaccessible or unknown properties</p> </li> 
-      <li>If the report is of type <strong>Jxls: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The datasource used for the query will be the one selected in the datasource field of the report. Use the <strong>jdbc.query</strong> method to call the sql e.g. <code>jdbc.query('select * from cities')</code>. You can alternatively pass the datasource id of the datasource to use. In this case use the <strong>jdbc.query2</strong> method to call the sql e.g. <code>jdbc.query2(1, 'select * from cities')</code>. You can also use the datasource name e.g. <code>jdbc.query2('mydb', 'select * from cities')</code>.</li> 
+      <li> <p>If the report is of type <strong>Jxls: Template Query</strong>, the sql used to retrieve the data will be the one defined in the template. The datasource used for the query will be the one selected in the datasource field of the report. Use the <strong>jdbc.query</strong> method to call the sql e.g. <code>jdbc.query('select * from cities')</code>. You can alternatively pass the datasource id of the datasource to use. In this case use the <strong>jdbc.query2</strong> method to call the sql e.g. <code>jdbc.query2(1, 'select * from cities')</code>. You can also use the datasource name e.g. <code>jdbc.query2('mydb', 'select * from cities')</code>.</p> </li> 
       <li>If the report uses parameters, avoid using the following names for the parameters as these are used for special purpose variables i.e. <code>results, jdbc, params, locale</code>.</li> 
      </ul> 
      <h2 id="options">Options</h2> 

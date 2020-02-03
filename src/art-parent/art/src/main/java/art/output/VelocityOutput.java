@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
@@ -221,10 +220,9 @@ public class VelocityOutput {
 
 		//pass report data
 		if (resultSet != null) {
-			boolean useLowerCaseProperties = templateResultOptions.isUseLowerCaseProperties();
-			boolean useColumnLabels = templateResultOptions.isUseColumnLabels();
-			RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
-			variables.put("results", rsdc.getRows());
+			ArtJxlsJdbcHelper jdbcHelper = new ArtJxlsJdbcHelper(templateResultOptions);
+			List<Map<String, Object>> rows = jdbcHelper.handle(resultSet);
+			variables.put("results", rows);
 		} else if (data != null) {
 			variables.put("results", data);
 		}

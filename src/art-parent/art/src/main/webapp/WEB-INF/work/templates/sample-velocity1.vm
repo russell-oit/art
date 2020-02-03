@@ -1,6 +1,6 @@
 <b>Region ID:</b> ${regionId.displayValues}
 <br>
 #foreach($result in $results)
-	${result.CITY_ID} ${result.NAME}
+	${result.city_id} ${result.name}
 	<br>
 #end
