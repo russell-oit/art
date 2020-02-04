@@ -1,5 +1,6 @@
 ART 4.11
 * Added showColumnFilters option for htmlDataTable report format
+* Restrict art classes in groovy source
 
 ART 4.10
 * Allow use of grouping in jxls templates
