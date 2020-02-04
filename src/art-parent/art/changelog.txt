@@ -1,3 +1,6 @@
+ART 4.11
+* Added showColumnFilters option for htmlDataTable report format
+
 ART 4.10
 * Allow use of grouping in jxls templates
 * Fix for incorrect file name on download
