@@ -388,7 +388,7 @@ Display section to allow selecting of report parameters and initiate running of 
 											<div id="showColumnFiltersDiv">
 												<label class="checkbox-inline">
 													<input type="checkbox" name="showColumnFilters">
-													<spring:message code="reports.label.showColumnFilters"/>
+													<spring:message code="reports.label.columnFilters"/>
 												</label>
 											</div>
 										</div>
