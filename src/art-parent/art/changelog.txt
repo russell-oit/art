@@ -2,6 +2,7 @@ ART 4.11
 * Added showColumnFilters option for htmlDataTable report format
 * Restrict art classes in groovy source
 * Consider default report format when running a report
+* Allow null value for parameters
 * Updated jackson
 
 ART 4.10

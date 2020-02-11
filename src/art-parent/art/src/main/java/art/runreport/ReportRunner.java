@@ -62,6 +62,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,6 +74,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -698,9 +700,9 @@ public class ReportRunner {
 		String querySql = querySb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
+		Map<Integer, JdbcParamDetails> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
 		ReportType reportType = report.getReportType();
 		if (!reportType.isJPivot()) {
-			Map<Integer, ReportParameter> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 				String paramName = entry.getKey();
 				ReportParameter reportParam = entry.getValue();
@@ -708,7 +710,9 @@ public class ReportRunner {
 				String paramIdentifier = "#" + paramName + "#";
 				int index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier);
 				while (index >= 0) {
-					jdbcParamOrder.put(index, reportParam);
+					JdbcParamDetails jdbcParamDetails = new JdbcParamDetails(reportParam);
+					jdbcParamDetails.setFinalValues(reportParam.getActualParameterValues());
+					jdbcParamOrder.put(index, jdbcParamDetails);
 					index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier, index + paramIdentifier.length());
 				}
 			}
@@ -717,14 +721,6 @@ public class ReportRunner {
 			setXParameterOrder("notin", querySql, jdbcParamOrder);
 			setXParameterOrder("equal", querySql, jdbcParamOrder);
 			setXParameterOrder("notequal", querySql, jdbcParamOrder);
-
-			jdbcParams.clear();
-			for (ReportParameter reportParam : jdbcParamOrder.values()) {
-				for (Object paramValue : reportParam.getActualParameterValues()) {
-					logger.debug("{} - {}", reportParam, paramValue);
-					addJdbcParam(paramValue, reportParam.getParameter().getDataType());
-				}
-			}
 		}
 
 		//replace literal ? in query with a placeholder, before substituting query parameters with ?
@@ -738,14 +734,11 @@ public class ReportRunner {
 			ReportParameter reportParam = entry.getValue();
 
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
-
-			if (actualParameterValues.isEmpty()) {
-				continue;
+			if (!actualParameterValues.isEmpty()) {
+				String searchString = "#" + paramName + "#";
+				String replaceString = StringUtils.repeat("?", ",", actualParameterValues.size());
+				querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 			}
-
-			String searchString = "#" + paramName + "#";
-			String replaceString = StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size());
-			querySql = StringUtils.replaceIgnoreCase(querySql, searchString, replaceString);
 		}
 
 		//replace x parameter identifiers with ?
@@ -762,14 +755,16 @@ public class ReportRunner {
 			String xNotEqualParamPrefix = "$x{notequal";
 			String xParamPrefix;
 			String sqlCommand;
-			String sqlNullCommand = null;
+			String sqlNullCommand;
 
 			if (StringUtils.startsWithIgnoreCase(xParamDefinition, xInParamPrefix)) {
 				xParamPrefix = xInParamPrefix;
 				sqlCommand = "IN";
+				sqlNullCommand = "IS NULL";
 			} else if (StringUtils.startsWithIgnoreCase(xParamDefinition, xNotInParamPrefix)) {
 				xParamPrefix = xNotInParamPrefix;
 				sqlCommand = "NOT IN";
+				sqlNullCommand = "IS NOT NULL";
 			} else if (StringUtils.startsWithIgnoreCase(xParamDefinition, xEqualParamPrefix)) {
 				xParamPrefix = xEqualParamPrefix;
 				sqlCommand = "=?";
@@ -796,6 +791,7 @@ public class ReportRunner {
 
 			String finalString = "";
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+			List<Object> finalValues = new ArrayList<>();
 
 			if (StringUtils.equalsAny(xParamPrefix, xInParamPrefix, xNotInParamPrefix)) {
 				StringBuilder finalSb = new StringBuilder();
@@ -806,10 +802,28 @@ public class ReportRunner {
 				} else {
 					//oracle has a maximum list literal count of 1000 items e.g. in IN clauses
 					//https://sourceforge.net/p/art/discussion/352129/thread/518e3b41/
-					final int MAX_LITERAL_COUNT = 1000;
 					//https://stackoverflow.com/questions/2895342/java-how-can-i-split-an-arraylist-in-multiple-small-arraylists?noredirect=1&lq=1
-					List<List<Object>> listParts = ListUtils.partition(actualParameterValues, MAX_LITERAL_COUNT);
+					//https://stackoverflow.com/questions/4697187/need-for-a-jasperreports-null-parameter-value-to-show-all
+					//https://community.jaspersoft.com/blog/tip-how-handle-null-values-when-passing-nothing-single-select-query-parameter-jasper-design
+					//https://community.jaspersoft.com/documentation/tibco-jaspersoft-studio-user-guide/v60/using-parameters-queries
+					//https://stackoverflow.com/questions/6362112/in-clause-with-null-or-is-null
+					//https://stackoverflow.com/questions/8737837/query-sql-server-with-in-null-not-working
+					//https://stackoverflow.com/questions/129077/null-values-inside-not-in-clause
+					//https://stackoverflow.com/questions/46958023/java-stream-divide-into-two-lists-by-boolean-predicate
+					//https://stackoverflow.com/questions/27993604/whats-the-purpose-of-partitioningby
 					List<String> conditions = new ArrayList<>();
+					Map<Boolean, List<Object>> partitionedValues = actualParameterValues.stream().collect(Collectors.partitioningBy(Objects::isNull));
+					List<Object> nullValues = partitionedValues.get(true);
+					List<Object> nonNullValues = partitionedValues.get(false);
+					if (!nullValues.isEmpty()) {
+						String condition = column + " " + sqlNullCommand;
+						conditions.add(condition);
+					}
+
+					finalValues = nonNullValues;
+					
+					final int MAX_LITERAL_COUNT = 1000;
+					List<List<Object>> listParts = ListUtils.partition(nonNullValues, MAX_LITERAL_COUNT);
 					for (List<Object> listPart : listParts) {
 						String condition = column + " " + sqlCommand
 								+ "(" + StringUtils.repeat("?", ",", listPart.size()) + ")";
@@ -825,10 +839,27 @@ public class ReportRunner {
 					finalString = column + " " + sqlNullCommand;
 				} else {
 					finalString = column + sqlCommand;
+					finalValues.add(value);
+				}
+			}
+
+			for (JdbcParamDetails jdbcParamDetails : jdbcParamOrder.values()) {
+				if (jdbcParamDetails.isxParameter()
+						&& reportParam.equals(jdbcParamDetails.getReportParam())) {
+					jdbcParamDetails.setFinalValues(finalValues);
 				}
 			}
 
 			querySql = StringUtils.replaceIgnoreCase(querySql, xParamDefinition, finalString);
+		}
+
+		jdbcParams.clear();
+		for (JdbcParamDetails jdbcParamDetails : jdbcParamOrder.values()) {
+			ReportParameter reportParam = jdbcParamDetails.getReportParam();
+			for (Object paramValue : jdbcParamDetails.getFinalValues()) {
+				logger.debug("{} - {}", reportParam, paramValue);
+				addJdbcParam(paramValue, reportParam.getParameter().getDataType());
+			}
 		}
 
 		//update querySb with new sql
@@ -864,7 +895,7 @@ public class ReportRunner {
 	 * @throws IllegalArgumentException
 	 */
 	private void setXParameterOrder(String command, String querySql,
-			Map<Integer, ReportParameter> jdbcParamOrder) throws IllegalArgumentException {
+			Map<Integer, JdbcParamDetails> jdbcParamOrder) throws IllegalArgumentException {
 
 		//search for x-parameter definitions
 		//http://community.jaspersoft.com/questions/516502/x-and-p
@@ -882,11 +913,16 @@ public class ReportRunner {
 			String contents = StringUtils.substringBetween(xParamDefinition, "{", "}");
 			String[] components = StringUtils.split(contents, separator);
 			String paramName = components[2].trim();
+
 			ReportParameter reportParam = reportParamsMap.get(paramName);
 			if (reportParam == null) {
 				throw new IllegalArgumentException("X parameter not found: " + paramName);
 			}
-			jdbcParamOrder.put(index, reportParam);
+
+			JdbcParamDetails jdbcParamDetails = new JdbcParamDetails(reportParam);
+			jdbcParamDetails.setxParameter(true);
+			jdbcParamOrder.put(index, jdbcParamDetails);
+
 			index = StringUtils.indexOfIgnoreCase(querySql, xParamPrefix, end);
 		}
 	}
@@ -900,10 +936,6 @@ public class ReportRunner {
 	 * @param paramDataType the parameter data type
 	 */
 	private void addJdbcParam(Object paramValue, ParameterDataType paramDataType) {
-		if (paramValue == null) {
-			return;
-		}
-
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
 			if (paramDataType == ParameterDataType.Date) {

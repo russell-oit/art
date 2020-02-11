@@ -369,6 +369,7 @@ public class ParameterProcessor {
 					ReportParameter testReportParam = reportParamsMap.get(testParamName);
 					if (testReportParam != null) {
 						reportParam = testReportParam;
+						paramValues = reportParam.getPassedParameterValues();
 						nullParamExists = true;
 					}
 				}
