@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,6 +362,17 @@ public class ParameterProcessor {
 				ReportParameter reportParam = reportParamsMap.get(paramName);
 				logger.debug("reportParam={}", reportParam);
 
+				boolean nullParamExists = false;
+				final String NULL_PARAMETER_SUFFIX = "-null";
+				if (StringUtils.endsWith(paramName, NULL_PARAMETER_SUFFIX)) {
+					String testParamName = StringUtils.substringBeforeLast(paramName, NULL_PARAMETER_SUFFIX);
+					ReportParameter testReportParam = reportParamsMap.get(testParamName);
+					if (testReportParam != null) {
+						reportParam = testReportParam;
+						nullParamExists = true;
+					}
+				}
+
 				if (reportParam == null) {
 					//report parameter indicated in url but not configured for the report
 					//e.g. with dashboard reports where report parameters are passed to all reports
@@ -370,6 +382,12 @@ public class ParameterProcessor {
 					//multi param that doesn't use an lov contains values separated by newlines
 					Parameter param = reportParam.getParameter();
 					logger.debug("param={}", param);
+
+					if (nullParamExists) {
+						//https://www.baeldung.com/java-add-element-to-array-vs-list
+						paramValues = ArrayUtils.nullToEmpty(paramValues);
+						paramValues = ArrayUtils.add(paramValues, 0, null);
+					}
 
 					if (param.getParameterType() == ParameterType.MultiValue
 							&& !param.isUseLov() && paramValues != null) {
@@ -468,6 +486,10 @@ public class ParameterProcessor {
 			return value;
 		}
 
+		if (value == null) {
+			return null;
+		}
+
 		ParameterDataType paramDataType = param.getDataType();
 
 		String username = null;
@@ -498,6 +520,10 @@ public class ParameterProcessor {
 	 */
 	private Object convertParameterStringValueToNumber(String value, Parameter param) {
 		logger.debug("Entering convertParameterStringValueToNumber: value='{}'", value);
+
+		if (value == null) {
+			return null;
+		}
 
 		String finalValue;
 		if (StringUtils.isBlank(value)) {
@@ -545,18 +571,6 @@ public class ParameterProcessor {
 	 */
 	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		return convertParameterStringValueToDate(value, param.getDateFormat());
-	}
-
-	/**
-	 * Converts a string parameter value to a date object
-	 *
-	 * @param value the string parameter value
-	 * @return a date object
-	 * @throws ParseException
-	 */
-	public Date convertParameterStringValueToDate(String value) throws ParseException {
-		String dateFormat = null;
-		return convertParameterStringValueToDate(value, dateFormat);
 	}
 
 	/**

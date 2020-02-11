@@ -739,7 +739,7 @@ public class ReportRunner {
 
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
 
-			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+			if (actualParameterValues.isEmpty()) {
 				continue;
 			}
 
@@ -900,6 +900,10 @@ public class ReportRunner {
 	 * @param paramDataType the parameter data type
 	 */
 	private void addJdbcParam(Object paramValue, ParameterDataType paramDataType) {
+		if (paramValue == null) {
+			return;
+		}
+
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
 			if (paramDataType == ParameterDataType.Date) {
