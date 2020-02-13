@@ -393,6 +393,9 @@ public class ParameterProcessor {
 						logger.debug("firstValue='{}'", firstValue);
 
 						//https://stackoverflow.com/questions/15130309/how-to-use-regex-in-string-contains-method-in-java
+						//https://stackoverflow.com/questions/3871729/transmitting-newline-character-n
+						//https://stackoverflow.com/questions/5065912/how-to-use-carriage-return-or-line-feed-in-the-query-string
+						//https://meyerweb.com/eric/tools/dencoder/
 						final String VALUE_SEPARATOR_REGEX = "\\r?\\n";
 						if (Pattern.compile(VALUE_SEPARATOR_REGEX).matcher(firstValue).find()) {
 							String values[] = firstValue.split(VALUE_SEPARATOR_REGEX);
