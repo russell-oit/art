@@ -362,15 +362,13 @@ public class ParameterProcessor {
 				ReportParameter reportParam = reportParamsMap.get(paramName);
 				logger.debug("reportParam={}", reportParam);
 
-				boolean nullParamExists = false;
 				final String NULL_PARAMETER_SUFFIX = "-null";
 				if (StringUtils.endsWith(paramName, NULL_PARAMETER_SUFFIX)) {
 					String testParamName = StringUtils.substringBeforeLast(paramName, NULL_PARAMETER_SUFFIX);
 					ReportParameter testReportParam = reportParamsMap.get(testParamName);
 					if (testReportParam != null) {
 						reportParam = testReportParam;
-						paramValues = reportParam.getPassedParameterValues();
-						nullParamExists = true;
+						paramValues = new String[]{null};
 					}
 				}
 
@@ -384,11 +382,8 @@ public class ParameterProcessor {
 					Parameter param = reportParam.getParameter();
 					logger.debug("param={}", param);
 
-					if (nullParamExists) {
-						//https://www.baeldung.com/java-add-element-to-array-vs-list
-						paramValues = ArrayUtils.nullToEmpty(paramValues);
-						paramValues = ArrayUtils.add(paramValues, 0, null);
-					}
+					String[] existingParamValues = reportParam.getPassedParameterValues();
+					paramValues = ArrayUtils.addAll(existingParamValues, paramValues);
 
 					if (param.getParameterType() == ParameterType.MultiValue
 							&& !param.isUseLov() && paramValues != null) {
@@ -432,7 +427,11 @@ public class ParameterProcessor {
 					//parameter value not specified or using default value in a isJob. use default value
 					actualValueString = param.getLocalizedDefaultValue(locale);
 				} else {
-					actualValueString = passedValues[0];
+					if (ArrayUtils.contains(passedValues, null)) {
+						actualValueString = null;
+					} else {
+						actualValueString = passedValues[0];
+					}
 				}
 
 				logger.debug("actualValueString = '{}'", actualValueString);

@@ -77,6 +77,21 @@ public class Parameter implements Serializable {
 	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
+	private boolean allowNull;
+
+	/**
+	 * @return the allowNull
+	 */
+	public boolean isAllowNull() {
+		return allowNull;
+	}
+
+	/**
+	 * @param allowNull the allowNull to set
+	 */
+	public void setAllowNull(boolean allowNull) {
+		this.allowNull = allowNull;
+	}
 
 	/**
 	 * @return the name2

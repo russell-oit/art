@@ -159,6 +159,7 @@ public class ParameterService {
 		parameter.setPlaceholderText(rs.getString("PLACEHOLDER_TEXT"));
 		parameter.setUseDefaultValueInJobs(rs.getBoolean("USE_DEFAULT_VALUE_IN_JOBS"));
 		parameter.setTemplate(rs.getString("TEMPLATE"));
+		parameter.setAllowNull(rs.getBoolean("ALLOW_NULL"));
 		parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -560,9 +561,9 @@ public class ParameterService {
 					+ " HIDDEN, FIXED_VALUE, SHARED, USE_LOV, LOV_REPORT_ID, USE_RULES_IN_LOV,"
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
 					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
-					+ " TEMPLATE,"
+					+ " TEMPLATE, ALLOW_NULL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 25) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -587,6 +588,7 @@ public class ParameterService {
 				parameter.getPlaceholderText(),
 				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				parameter.getTemplate(),
+				BooleanUtils.toInteger(parameter.isAllowNull()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -603,7 +605,7 @@ public class ParameterService {
 					+ " SHARED=?, USE_LOV=?, LOV_REPORT_ID=?,"
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
-					+ " USE_DEFAULT_VALUE_IN_JOBS=?, TEMPLATE=?,"
+					+ " USE_DEFAULT_VALUE_IN_JOBS=?, TEMPLATE=?, ALLOW_NULL=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -629,6 +631,7 @@ public class ParameterService {
 				parameter.getPlaceholderText(),
 				BooleanUtils.toInteger(parameter.isUseDefaultValueInJobs()),
 				parameter.getTemplate(),
+				BooleanUtils.toInteger(parameter.isAllowNull()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()

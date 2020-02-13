@@ -700,7 +700,7 @@ public class ReportRunner {
 		String querySql = querySb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
-		Map<Integer, JdbcParamDetails> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
+		Map<Integer, JdbcParameterDetails> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
 		ReportType reportType = report.getReportType();
 		if (!reportType.isJPivot()) {
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -710,8 +710,9 @@ public class ReportRunner {
 				String paramIdentifier = "#" + paramName + "#";
 				int index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier);
 				while (index >= 0) {
-					JdbcParamDetails jdbcParamDetails = new JdbcParamDetails(reportParam);
-					jdbcParamDetails.setFinalValues(reportParam.getActualParameterValues());
+					List<Object> finalValues = reportParam.getActualParameterValues();
+					JdbcParameterDetails jdbcParamDetails = new JdbcParameterDetails(reportParam);
+					jdbcParamDetails.setFinalValues(finalValues);
 					jdbcParamOrder.put(index, jdbcParamDetails);
 					index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier, index + paramIdentifier.length());
 				}
@@ -811,6 +812,7 @@ public class ReportRunner {
 					//https://stackoverflow.com/questions/129077/null-values-inside-not-in-clause
 					//https://stackoverflow.com/questions/46958023/java-stream-divide-into-two-lists-by-boolean-predicate
 					//https://stackoverflow.com/questions/27993604/whats-the-purpose-of-partitioningby
+					//https://stackoverflow.com/questions/7230315/how-to-remove-null-from-an-array-in-java
 					List<String> conditions = new ArrayList<>();
 					Map<Boolean, List<Object>> partitionedValues = actualParameterValues.stream().collect(Collectors.partitioningBy(Objects::isNull));
 					List<Object> nullValues = partitionedValues.get(true);
@@ -821,7 +823,7 @@ public class ReportRunner {
 					}
 
 					finalValues = nonNullValues;
-					
+
 					final int MAX_LITERAL_COUNT = 1000;
 					List<List<Object>> listParts = ListUtils.partition(nonNullValues, MAX_LITERAL_COUNT);
 					for (List<Object> listPart : listParts) {
@@ -843,7 +845,7 @@ public class ReportRunner {
 				}
 			}
 
-			for (JdbcParamDetails jdbcParamDetails : jdbcParamOrder.values()) {
+			for (JdbcParameterDetails jdbcParamDetails : jdbcParamOrder.values()) {
 				if (jdbcParamDetails.isxParameter()
 						&& reportParam.equals(jdbcParamDetails.getReportParam())) {
 					jdbcParamDetails.setFinalValues(finalValues);
@@ -854,7 +856,7 @@ public class ReportRunner {
 		}
 
 		jdbcParams.clear();
-		for (JdbcParamDetails jdbcParamDetails : jdbcParamOrder.values()) {
+		for (JdbcParameterDetails jdbcParamDetails : jdbcParamOrder.values()) {
 			ReportParameter reportParam = jdbcParamDetails.getReportParam();
 			for (Object paramValue : jdbcParamDetails.getFinalValues()) {
 				logger.debug("{} - {}", reportParam, paramValue);
@@ -895,7 +897,7 @@ public class ReportRunner {
 	 * @throws IllegalArgumentException
 	 */
 	private void setXParameterOrder(String command, String querySql,
-			Map<Integer, JdbcParamDetails> jdbcParamOrder) throws IllegalArgumentException {
+			Map<Integer, JdbcParameterDetails> jdbcParamOrder) throws IllegalArgumentException {
 
 		//search for x-parameter definitions
 		//http://community.jaspersoft.com/questions/516502/x-and-p
@@ -919,7 +921,7 @@ public class ReportRunner {
 				throw new IllegalArgumentException("X parameter not found: " + paramName);
 			}
 
-			JdbcParamDetails jdbcParamDetails = new JdbcParamDetails(reportParam);
+			JdbcParameterDetails jdbcParamDetails = new JdbcParameterDetails(reportParam);
 			jdbcParamDetails.setxParameter(true);
 			jdbcParamOrder.put(index, jdbcParamDetails);
 

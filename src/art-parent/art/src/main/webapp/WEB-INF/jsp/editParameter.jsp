@@ -365,16 +365,6 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="fixedValue">
-						<spring:message code="parameters.label.fixedValue"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="fixedValue" id="fixedValue" class="switch-yes-no"/>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
 					<label class="control-label col-md-4" for="useLov">
 						<spring:message code="parameters.label.useLov"/>
 					</label>
@@ -404,6 +394,26 @@ Edit parameter definition
 					<div class="col-md-8">
 						<form:input type="number" path="drilldownColumnIndex" maxlength="2" class="form-control"/>
 						<form:errors path="drilldownColumnIndex" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="fixedValue">
+						<spring:message code="parameters.label.fixedValue"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="fixedValue" id="fixedValue" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="allowNull">
+						<spring:message code="parameters.label.allowNull"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="allowNull" id="allowNull" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">

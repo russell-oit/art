@@ -25,17 +25,17 @@ import java.util.List;
  * 
  * @author Timothy Anyona
  */
-public class JdbcParamDetails {
+public class JdbcParameterDetails {
 
 	private ReportParameter reportParam;
 	private List<Object> finalValues;
 	private boolean xParameter;
 	
-	public JdbcParamDetails(){
+	public JdbcParameterDetails(){
 		
 	}
 
-	public JdbcParamDetails(ReportParameter reportParam) {
+	public JdbcParameterDetails(ReportParameter reportParam) {
 		this.reportParam = reportParam;
 	}
 

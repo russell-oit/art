@@ -317,16 +317,20 @@ public class ReportParameter implements Serializable {
 
 		for (Object paramValue : actualParameterValues) {
 			String paramValueString;
-			ParameterDataType parameterDataType = parameter.getDataType();
-			switch (parameterDataType) {
-				case Date:
-					paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
-					break;
-				case DateTime:
-					paramValueString = ArtUtils.isoDateTimeSecondsFormatter.format((Date) paramValue);
-					break;
-				default:
-					paramValueString = String.valueOf(paramValue);
+			if (paramValue == null) {
+				paramValueString = "null";
+			} else {
+				ParameterDataType parameterDataType = parameter.getDataType();
+				switch (parameterDataType) {
+					case Date:
+						paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
+						break;
+					case DateTime:
+						paramValueString = ArtUtils.isoDateTimeSecondsFormatter.format((Date) paramValue);
+						break;
+					default:
+						paramValueString = String.valueOf(paramValue);
+				}
 			}
 
 			String displayValue = null;
@@ -394,7 +398,11 @@ public class ReportParameter implements Serializable {
 	 */
 	public Object getEffectiveActualParameterValue() {
 		if (parameter.getParameterType() == ParameterType.SingleValue) {
-			return actualParameterValues.get(0);
+			if (actualParameterValues.contains(null)) {
+				return null;
+			} else {
+				return actualParameterValues.get(0);
+			}
 		} else {
 			return actualParameterValues;
 		}
@@ -712,9 +720,9 @@ public class ReportParameter implements Serializable {
 
 	/**
 	 * Returns all the possible default values
-	 * 
+	 *
 	 * @return all the possible default values
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public List<String> getDefaultValues() throws IOException {
 		List<String> defaultValues = new ArrayList<>();
@@ -780,5 +788,5 @@ public class ReportParameter implements Serializable {
 
 		return defaultValues;
 	}
-	
+
 }
