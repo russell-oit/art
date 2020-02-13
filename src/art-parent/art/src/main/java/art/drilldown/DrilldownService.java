@@ -89,7 +89,7 @@ public class DrilldownService {
 			drilldown.setReportFormat(rs.getString("OUTPUT_FORMAT"));
 			drilldown.setOpenInNewWindow(rs.getBoolean("OPEN_IN_NEW_WINDOW"));
 			drilldown.setAllowSelectParameters(rs.getBoolean("ALLOW_SELECT_PARAMETERS"));
-
+			drilldown.setRunImmediately(rs.getBoolean("RUN_IMMEDIATELY"));
 			drilldown.setParentReportId(rs.getInt("QUERY_ID"));
 
 			Report drilldownReport = reportService.getReport(rs.getInt("DRILLDOWN_QUERY_ID"));
@@ -273,8 +273,9 @@ public class DrilldownService {
 					+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID,"
 					+ " DRILLDOWN_QUERY_POSITION, DRILLDOWN_TITLE,"
 					+ " DRILLDOWN_TEXT, OUTPUT_FORMAT,"
-					+ " OPEN_IN_NEW_WINDOW, ALLOW_SELECT_PARAMETERS)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 9) + ")";
+					+ " OPEN_IN_NEW_WINDOW, ALLOW_SELECT_PARAMETERS,"
+					+ " RUN_IMMEDIATELY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -286,6 +287,7 @@ public class DrilldownService {
 				drilldown.getReportFormat(),
 				BooleanUtils.toInteger(drilldown.isOpenInNewWindow()),
 				BooleanUtils.toInteger(drilldown.isAllowSelectParameters()),
+				BooleanUtils.toInteger(drilldown.isRunImmediately())
 			};
 
 			if (conn == null) {
@@ -297,7 +299,7 @@ public class DrilldownService {
 			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_QUERY_ID=?,"
 					+ " DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
 					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?,"
-					+ " ALLOW_SELECT_PARAMETERS=?"
+					+ " ALLOW_SELECT_PARAMETERS=?, RUN_IMMEDIATELY=?"
 					+ " WHERE DRILLDOWN_ID=?";
 
 			Object[] values = {
@@ -307,6 +309,7 @@ public class DrilldownService {
 				drilldown.getReportFormat(),
 				BooleanUtils.toInteger(drilldown.isOpenInNewWindow()),
 				BooleanUtils.toInteger(drilldown.isAllowSelectParameters()),
+				BooleanUtils.toInteger(drilldown.isRunImmediately()),
 				drilldown.getDrilldownId()
 			};
 

@@ -3,6 +3,7 @@ ART 4.11
 * Restrict art classes in groovy source
 * Consider default report format when running a report
 * Allow null value for parameters
+* Allow drilldowns not to run immediately
 * Updated jackson
 
 ART 4.10

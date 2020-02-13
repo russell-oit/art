@@ -38,7 +38,22 @@ public class Drilldown implements Serializable {
 	private String reportFormat;
 	private boolean openInNewWindow;
 	private boolean allowSelectParameters;
+	private boolean runImmediately = true;
 	private Report drilldownReport;
+
+	/**
+	 * @return the runImmediately
+	 */
+	public boolean isRunImmediately() {
+		return runImmediately;
+	}
+
+	/**
+	 * @param runImmediately the runImmediately to set
+	 */
+	public void setRunImmediately(boolean runImmediately) {
+		this.runImmediately = runImmediately;
+	}
 
 	/**
 	 * @return the allowSelectParameters
