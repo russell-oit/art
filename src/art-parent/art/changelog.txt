@@ -4,7 +4,7 @@ ART 4.11
 * Consider default report format when running a report
 * Allow null value for parameters
 * Allow drilldowns not to run immediately
-* Updated jackson
+* Updated jackson, velocity-tools
 
 ART 4.10
 * Allow use of grouping in jxls templates
