@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
@@ -391,8 +392,14 @@ public class ParameterProcessor {
 						String firstValue = paramValues[0];
 						logger.debug("firstValue='{}'", firstValue);
 
-						String values[] = firstValue.split("\\r?\\n");
-						reportParam.setPassedParameterValues(values);
+						//https://stackoverflow.com/questions/15130309/how-to-use-regex-in-string-contains-method-in-java
+						final String VALUE_SEPARATOR_REGEX = "\\r?\\n";
+						if (Pattern.compile(VALUE_SEPARATOR_REGEX).matcher(firstValue).find()) {
+							String values[] = firstValue.split(VALUE_SEPARATOR_REGEX);
+							reportParam.setPassedParameterValues(values);
+						} else {
+							reportParam.setPassedParameterValues(paramValues);
+						}
 					} else {
 						reportParam.setPassedParameterValues(paramValues);
 					}
