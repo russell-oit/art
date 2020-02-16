@@ -44,10 +44,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,6 +363,16 @@ public class ParameterProcessor {
 				ReportParameter reportParam = reportParamsMap.get(paramName);
 				logger.debug("reportParam={}", reportParam);
 
+				final String NULL_PARAMETER_SUFFIX = "-null";
+				if (StringUtils.endsWith(paramName, NULL_PARAMETER_SUFFIX)) {
+					String testParamName = StringUtils.substringBeforeLast(paramName, NULL_PARAMETER_SUFFIX);
+					ReportParameter testReportParam = reportParamsMap.get(testParamName);
+					if (testReportParam != null) {
+						reportParam = testReportParam;
+						paramValues = new String[]{null};
+					}
+				}
+
 				if (reportParam == null) {
 					//report parameter indicated in url but not configured for the report
 					//e.g. with dashboard reports where report parameters are passed to all reports
@@ -371,14 +383,26 @@ public class ParameterProcessor {
 					Parameter param = reportParam.getParameter();
 					logger.debug("param={}", param);
 
+					String[] existingParamValues = reportParam.getPassedParameterValues();
+					paramValues = ArrayUtils.addAll(existingParamValues, paramValues);
+
 					if (param.getParameterType() == ParameterType.MultiValue
 							&& !param.isUseLov() && paramValues != null) {
 
 						String firstValue = paramValues[0];
 						logger.debug("firstValue='{}'", firstValue);
 
-						String values[] = firstValue.split("\\r?\\n");
-						reportParam.setPassedParameterValues(values);
+						//https://stackoverflow.com/questions/15130309/how-to-use-regex-in-string-contains-method-in-java
+						//https://stackoverflow.com/questions/3871729/transmitting-newline-character-n
+						//https://stackoverflow.com/questions/5065912/how-to-use-carriage-return-or-line-feed-in-the-query-string
+						//https://meyerweb.com/eric/tools/dencoder/
+						final String VALUE_SEPARATOR_REGEX = "\\r?\\n";
+						if (Pattern.compile(VALUE_SEPARATOR_REGEX).matcher(firstValue).find()) {
+							String values[] = firstValue.split(VALUE_SEPARATOR_REGEX);
+							reportParam.setPassedParameterValues(values);
+						} else {
+							reportParam.setPassedParameterValues(paramValues);
+						}
 					} else {
 						reportParam.setPassedParameterValues(paramValues);
 					}
@@ -413,7 +437,11 @@ public class ParameterProcessor {
 					//parameter value not specified or using default value in a isJob. use default value
 					actualValueString = param.getLocalizedDefaultValue(locale);
 				} else {
-					actualValueString = passedValues[0];
+					if (ArrayUtils.contains(passedValues, null)) {
+						actualValueString = null;
+					} else {
+						actualValueString = passedValues[0];
+					}
 				}
 
 				logger.debug("actualValueString = '{}'", actualValueString);
@@ -468,6 +496,10 @@ public class ParameterProcessor {
 			return value;
 		}
 
+		if (value == null) {
+			return null;
+		}
+
 		ParameterDataType paramDataType = param.getDataType();
 
 		String username = null;
@@ -498,6 +530,10 @@ public class ParameterProcessor {
 	 */
 	private Object convertParameterStringValueToNumber(String value, Parameter param) {
 		logger.debug("Entering convertParameterStringValueToNumber: value='{}'", value);
+
+		if (value == null) {
+			return null;
+		}
 
 		String finalValue;
 		if (StringUtils.isBlank(value)) {
@@ -551,18 +587,6 @@ public class ParameterProcessor {
 	 * Converts a string parameter value to a date object
 	 *
 	 * @param value the string parameter value
-	 * @return a date object
-	 * @throws ParseException
-	 */
-	public Date convertParameterStringValueToDate(String value) throws ParseException {
-		String dateFormat = null;
-		return convertParameterStringValueToDate(value, dateFormat);
-	}
-
-	/**
-	 * Converts a string parameter value to a date object
-	 *
-	 * @param value the string parameter value
 	 * @param dateFormat the date format that the value is in
 	 * @return a date object
 	 * @throws ParseException
@@ -608,8 +632,9 @@ public class ParameterProcessor {
 					reportOptions.setSwapAxes(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "plotlyType")) {
 					reportOptions.setPlotlyType(paramValue);
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showColumnFilters")) {
+					reportOptions.setShowColumnFilters(true);
 				}
-
 			}
 		}
 

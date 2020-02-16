@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>4.10</version>
+		<version>4.11</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -205,15 +205,9 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>2.9.9</version>
+				<version>2.9.10</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<!-- velocity-tools includes commons-validator 1.3.1 but simple odf needs higher -->
-			<dependency>
-				<groupId>commons-validator</groupId>
-				<artifactId>commons-validator</artifactId>
-				<version>1.6</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -222,22 +216,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -252,7 +246,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -272,7 +266,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -283,7 +277,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>reportengine-art</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
@@ -963,19 +957,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity-tools</artifactId>
-			<version>2.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>velocity-engine-core</artifactId>
+			<version>2.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity-engine-core</artifactId>
-			<version>2.0</version>
+			<groupId>org.apache.velocity.tools</groupId>
+			<artifactId>velocity-tools-generic</artifactId>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.eclecticlogic</groupId>

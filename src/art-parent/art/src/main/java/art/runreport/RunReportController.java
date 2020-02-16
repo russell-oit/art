@@ -215,8 +215,13 @@ public class RunReportController {
 
 			ReportFormat reportFormat;
 			String reportFormatString = request.getParameter("reportFormat");
-			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
+			if (StringUtils.isBlank(reportFormatString) || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
+				String reportDefaultFormat = report.getDefaultReportFormat();
+				if (StringUtils.isBlank(reportDefaultFormat) || StringUtils.equalsIgnoreCase(reportDefaultFormat, "default")) {
+					reportFormat = runReportHelper.getDefaultReportFormat(reportType);
+				} else {
+					reportFormat = ReportFormat.toEnum(reportDefaultFormat);
+				}
 			} else {
 				reportFormat = ReportFormat.toEnum(reportFormatString);
 			}

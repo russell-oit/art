@@ -29,6 +29,16 @@ Display report parameter that uses dropdown input
 	</c:forEach>
 </select>
 		
+<c:if test="${reportParam.parameter.allowNull}">
+	<div>
+		<label class="checkbox-inline">
+			<input type="checkbox" name="${encode:forHtmlAttribute(reportParam.htmlElementName)}-null"
+				   ${reportParam.actualParameterValues.contains(null) ? "checked" : ""}>
+			<spring:message code="reports.checkbox.null"/>
+		</label>
+	</div>
+</c:if>
+		
 <script type="text/javascript">
 	$('#${encode:forJavaScript(reportParam.htmlElementName)}').selectpicker({
 		liveSearch: true,

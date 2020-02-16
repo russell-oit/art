@@ -379,13 +379,17 @@ public class ExpressionHelper {
 
 		logger.debug("Entering convertStringToDate: string='{}',"
 				+ " dateFormat='{}', locale={}", string, dateFormat, locale);
+		
+		if(string == null){
+			return null;
+		}
 
 		Date dateValue;
 		Date now = new Date();
 
 		String trimString = StringUtils.trimToEmpty(string);
 
-		if (string == null || StringUtils.equalsIgnoreCase(trimString, "now")
+		if (StringUtils.equalsIgnoreCase(trimString, "now")
 				|| StringUtils.isBlank(string)) {
 			dateValue = now;
 		} else if (StringUtils.equalsIgnoreCase(trimString, "today")) {

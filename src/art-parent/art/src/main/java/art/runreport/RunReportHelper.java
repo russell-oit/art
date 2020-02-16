@@ -354,7 +354,10 @@ public class RunReportHelper {
 		request.setAttribute("enableReportFormats", enableReportFormats);
 		String reportFormat = (String) request.getAttribute("reportFormat");
 		if (reportFormat == null) {
-			reportFormat = report.getDefaultReportFormat();
+			reportFormat = request.getParameter("reportFormat");
+			if (reportFormat == null) {
+				reportFormat = report.getDefaultReportFormat();
+			}
 		}
 		request.setAttribute("reportFormat", reportFormat);
 

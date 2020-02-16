@@ -201,6 +201,16 @@ Edit a drilldown
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4" for="runImmediately">
+						<spring:message code="drilldowns.label.runImmediately"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="runImmediately" id="runImmediately" class="switch-yes-no"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>

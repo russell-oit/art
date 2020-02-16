@@ -1,3 +1,11 @@
+ART 4.11
+* Added showColumnFilters option for htmlDataTable report format
+* Restrict art classes in groovy source
+* Consider default report format when running a report
+* Allow null value for parameters
+* Allow drilldowns not to run immediately
+* Updated jackson, velocity-tools, velocity
+
 ART 4.10
 * Allow use of grouping in jxls templates
 * Fix for incorrect file name on download

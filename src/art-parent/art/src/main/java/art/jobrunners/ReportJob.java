@@ -358,15 +358,21 @@ public class ReportJob implements org.quartz.Job {
 	 * Run pre run reports
 	 *
 	 * @throws SQLException
+	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
-	private void runPreRunReports() throws SQLException {
+	private void runPreRunReports() throws SQLException, ParseException, IOException {
 		runReports(job.getPreRunReport());
 	}
 
 	/**
 	 * Run post run reports
+	 * 
+	 * @throws java.sql.SQLException
+	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
-	private void runPostRunReports() throws SQLException {
+	private void runPostRunReports() throws SQLException, ParseException, IOException {
 		runReports(job.getPostRunReport());
 	}
 
@@ -375,8 +381,10 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param reportIds comma separated list of report ids to run
 	 * @throws SQLException
+	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
-	private void runReports(String reportIds) throws SQLException {
+	private void runReports(String reportIds) throws SQLException, ParseException, IOException {
 		logger.debug("Entering runReports: reportIds='{}'", reportIds);
 
 		if (StringUtils.isBlank(reportIds)) {
@@ -3015,24 +3023,20 @@ public class ReportJob implements org.quartz.Job {
 	 * @param user the user under whose permission the job is being run
 	 * @return parameter processor result
 	 * @throws SQLException
+	 * @throws java.text.ParseException
+	 * @throws java.io.IOException
 	 */
 	private ParameterProcessorResult buildParameters(int reportId, int jId,
-			User user) throws SQLException {
+			User user) throws SQLException, ParseException, IOException {
 
 		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
-
-		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
 		Map<String, String[]> finalValues = jobParameterService.getJobParameterValues(jId);
 
-		try {
-			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessor.setIsJob(true);
-			paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
-		} catch (ParseException | IOException ex) {
-			logError(ex);
-		}
+		ParameterProcessor paramProcessor = new ParameterProcessor();
+		paramProcessor.setIsJob(true);
+		ParameterProcessorResult paramProcessorResult = paramProcessor.process(finalValues, reportId, user, locale);
 
 		return paramProcessorResult;
 	}

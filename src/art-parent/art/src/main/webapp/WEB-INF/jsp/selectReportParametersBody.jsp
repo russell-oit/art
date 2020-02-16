@@ -213,6 +213,13 @@ Display section to allow selecting of report parameters and initiate running of 
 					$('#emailButton').show();
 			}
 		}
+
+		//show/hide show column filters check box
+		if (reportFormat === 'htmlDataTable') {
+			$('#showColumnFiltersDiv').show();
+		} else {
+			$('#showColumnFiltersDiv').hide();
+		}
 	}
 </script>
 
@@ -378,6 +385,12 @@ Display section to allow selecting of report parameters and initiate running of 
 													</option>
 												</c:forEach>
 											</select>
+											<div id="showColumnFiltersDiv">
+												<label class="checkbox-inline">
+													<input type="checkbox" name="showColumnFilters">
+													<spring:message code="reports.checkbox.columnFilters"/>
+												</label>
+											</div>
 										</div>
 									</div>
 								</c:if>

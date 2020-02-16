@@ -2530,7 +2530,7 @@ if (!Object.entries) {
 					} else {
 						if (columnObj.column_number_data === undefined) {
 							col_inner_data = data[j]._aData[column_number_filter];
-							if (typeof col_inner_data === 'object') {
+							if (col_inner_data !== null && typeof col_inner_data === 'object') {
 								if (columnObj.html5_data !== undefined) {
 									col_inner_data = col_inner_data['@' + columnObj.html5_data];
 								} else if (col_inner_data && col_inner_data.display) {
