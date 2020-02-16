@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.10"> 
+  <meta name="version" content="4.11"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -168,6 +168,11 @@
        <li><a href="#creating-a-new-parameter">Creating a new parameter</a></li> 
        <li><a href="#single-value-parameters">Single-Value Parameters</a></li> 
        <li><a href="#multi-value-parameters">Multi-Value Parameters</a></li> 
+       <li><a href="#x-parameter-definitions">X-Parameter Definitions</a> 
+        <ol> 
+         <li><a href="#in-not-in">IN, NOT IN</a></li> 
+         <li><a href="#equal-not-equal">EQUAL, NOT EQUAL</a></li> 
+        </ol></li> 
        <li><a href="#parameter-options">Parameter Options</a> 
         <ol> 
          <li><a href="#i18n-options">i18n Options</a></li> 
@@ -3476,6 +3481,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>Integer</td> 
         <td>Enables a report to be re-run or refreshed automatically after the first run. Minimum is 5 seconds.</td> 
        </tr> 
+       <tr> 
+        <td><strong>showColumnFilters</strong></td> 
+        <td>Boolean</td> 
+        <td>For the <strong>htmlDataTable</strong> report format, if present indicates that column filters should be included in the output</td> 
+       </tr> 
       </tbody> 
      </table> 
      <h3 id="chart-options_1">Chart Options</h3> 
@@ -3888,10 +3898,6 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>Whether the parameter is displayed in the select parameters page</td> 
        </tr> 
        <tr> 
-        <td><strong>Fixed Value</strong></td> 
-        <td>Whether the parameter uses fixed values</td> 
-       </tr> 
-       <tr> 
         <td><strong>Use LOV</strong></td> 
         <td>Whether the parameter uses a dropdown to provide a list of values to choose from in the select parameters page</td> 
        </tr> 
@@ -3904,6 +3910,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>The index of the column that will be set with the parameter's value when used with drilldown reports. The first column has an index of 1.</td> 
        </tr> 
        <tr> 
+        <td><strong>Fixed Value</strong></td> 
+        <td>Whether the parameter uses fixed values</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Allow Null</strong></td> 
+        <td>Whether a checkbox will be displayed for the user to specify passing NULL as a parameter value. If null values are passed for a parameter, ensure that you use the x-parameter syntax otherwise you will likely get incorrect results. To specify NULL value via url, add <code>-null</code> to the parameter name and include that in the url e.g. <code>&amp;p-param1-null=true&amp;p-param2=test</code> would pass a NULL value for the parameter named <code>param1</code>.</td> 
+       </tr> 
+       <tr> 
         <td><strong>Options</strong></td> 
         <td>Options used to further configure the parameter. The options are specified in JSON format.</td> 
        </tr> 
@@ -3912,10 +3926,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h2 id="single-value-parameters">Single-Value Parameters</h2> 
      <p>Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter in the SQL source. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders
-    WHERE order_date &gt; #date#
-    AND vendor_name like #vendor# -- you do not need to put the ' character around the name
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="nv">orders</span>
+    <span class="nv">WHERE</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span>#
+    <span class="nv">AND</span> <span class="nv">vendor_name</span> <span class="nv">like</span> #<span class="nv">vendor</span># <span class="o">--</span> <span class="nv">you</span> <span class="k">do</span> <span class="nv">not</span> <span class="nv">need</span> <span class="nv">to</span> <span class="nv">put</span> <span class="nv">the</span> <span class="s1">'</span><span class="s"> character around the name</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a single-value parameter</p> 
@@ -3964,52 +3978,55 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#
+      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">mytable</span> <span class="k">WHERE</span> <span class="n">my_boolean_column</span><span class="o">=#</span><span class="n">boolean_param</span><span class="o">#</span>
 </pre> 
      </div> 
      <p>Example static LOV query for boolean values</p> 
      <div class="codehilite"> 
-      <pre><span></span>    true|True
-    false|False
+      <pre><span></span>    <span class="k">true</span><span class="o">|</span><span class="k">True</span>
+    <span class="k">false</span><span class="o">|</span><span class="k">False</span>
 </pre> 
      </div> 
      <p>Lastly, create a <strong>Single-Value</strong> parameter named <code>boolean_param</code>, with data type as <strong>Varchar</strong>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the <strong>LOV Report</strong> to the report created for this purpose above.</p> 
      <p>If the boolean states are "1" and "0" instead of "true" and "false", you can create a static LOV query like the one below and set the parameter data type to <strong>Integer</strong> instead of Varchar.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    1|True
-    0|False
+      <pre><span></span>    <span class="mi">1</span><span class="o">|</span><span class="k">True</span>
+    <span class="mi">0</span><span class="o">|</span><span class="k">False</span>
 </pre> 
      </div> 
      <p><br></p> 
      <h2 id="multi-value-parameters">Multi-Value Parameters</h2> 
      <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders
-    WHERE product_name IN(#product_list#)
+      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
+    <span class="k">FROM</span> <span class="n">orders</span>
+    <span class="k">WHERE</span> <span class="n">product_name</span> <span class="k">IN</span><span class="p">(</span><span class="o">#</span><span class="n">product_list</span><span class="o">#</span><span class="p">)</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a multi-value parameter </p> 
      <ul> 
       <li>Create the report, putting the WHERE...IN clause and parameter placeholder in the appropriate place within the SQL</li> 
       <li>Create the parameter definition using the same process as with single-value parameters</li> 
-      <li>Now when a user runs the query, they will be presented with a parameters section where they can select one or more values for the parameter. An "All" option will be displayed to specify all values.</li> 
+      <li>Now when a user runs the query, they will be presented with a parameters section where they can select one or more values for the parameter</li> 
      </ul> 
-     <p><strong>X-Parameter Definitions</strong></p> 
-     <p>There exists an alternative syntax for specifying multi-value parameters. This provides for defining <code>IN</code> and <code>NOT IN</code> clauses where IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
-     <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders
-    WHERE $x{in,product_name,product_list}
-</pre> 
-     </div> 
-     <p>It should be noted that with x-parameter definitions, the parameter name is case sensitive and must be specified exactly the way it is defined in the parameter configuration. Also, a different separator other than a comma can be used to separate the different components of the x-parameter definition e.g. ; or | etc.</p> 
-     <p>X-parameter definitions would particularly be used when running reports against Oracle databases and the multi-value parameter is expected to have more than 1000 items. Using the normal syntax would result in an error like the following <strong>ORA-01795: maximum number of expressions in a list is 1000</strong>.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>If the values for a multi-value parameter are not derived from an LOV, the end user will enter the multiple values required in the text box provided, with each value put on a new line.</li> 
       <li>When setting the <strong>Default Value</strong> for a multi-value parameter, several values can be set as defaults by entering each value on a separate line in the field provided. Default values can also come from an LOV report that can be specified in the <strong>Default Value Report</strong> field.</li> 
      </ul> 
+     <h2 id="x-parameter-definitions">X-Parameter Definitions</h2> 
+     <p>There exists an alternative syntax for specifying <code>IN</code>, <code>NOT IN</code>, <code>=</code> and <code>&lt;&gt;</code> comparisons. This syntax takes the form <code>$x{&lt;comparator&gt;,&lt;column_name&gt;,&lt;parameter_name&gt;}</code>. It should be noted that with x-parameter definitions, the parameter name is case sensitive and must be specified exactly the way it is defined in the parameter configuration.</p> 
+     <h3 id="in-not-in">IN, NOT IN</h3> 
+     <p>This is used with multi-value parameters. IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
+    <span class="k">FROM</span> <span class="n">orders</span>
+    <span class="k">WHERE</span> <span class="err">$</span><span class="n">x</span><span class="err">{</span><span class="k">in</span><span class="p">,</span><span class="n">product_name</span><span class="p">,</span><span class="n">product_list</span><span class="err">}</span>
+</pre> 
+     </div> 
+     <p>This syntax would particularly be used when running reports against Oracle databases and the multi-value parameter is expected to have more than 1000 items. Using the normal syntax would result in an error like the following <strong>ORA-01795: maximum number of expressions in a list is 1000</strong>.</p> 
+     <h3 id="equal-not-equal">EQUAL, NOT EQUAL</h3> 
+     <p>This is used for single-value parameters. Equal comparators take the format <code>$x{equal,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and would typically be equivalent to <code>column_name=#parameter_name#</code>. In case NULL is passed, the syntax would be converted to <code>column_name IS NULL</code>. Not equal comparators take the format <code>$x{notequal,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and would typically be equivalent to <code>column_name&lt;&gt;#parameter_name#</code>. In case NULL is passed, the syntax would be converted to <code>column_name IS NOT NULL</code>.</p> 
      <h2 id="parameter-options">Parameter Options</h2> 
      <p>When defining a parameter, a number of options can be specified in the <strong>Options</strong> field. These are defined in JSON format with the following possibilities.</p> 
      <h3 id="i18n-options">i18n Options</h3> 
@@ -4678,16 +4695,16 @@ where #rules#
      <ul> 
       <li> <p><strong>Sales Summary</strong> (Main report)</p> 
        <div class="codehilite"> 
-        <pre><span></span>select REGION "Region", SUM(VOLUME) "Volume"
-from ORDERS
-where ...
+        <pre><span></span><span class="k">select</span> <span class="n">REGION</span> <span class="ss">"Region"</span><span class="p">,</span> <span class="k">SUM</span><span class="p">(</span><span class="n">VOLUME</span><span class="p">)</span> <span class="ss">"Volume"</span>
+<span class="k">from</span> <span class="n">ORDERS</span>
+<span class="k">where</span> <span class="p">...</span>
 </pre> 
        </div> </li> 
       <li> <p><strong>Sales Details</strong> (Drill Down report)</p> 
        <div class="codehilite"> 
-        <pre><span></span>select REGION, CITY, ITEM, VOLUME
-from ORDER_DETAILS
-WHERE REGION = #region#
+        <pre><span></span><span class="k">select</span> <span class="n">REGION</span><span class="p">,</span> <span class="n">CITY</span><span class="p">,</span> <span class="n">ITEM</span><span class="p">,</span> <span class="n">VOLUME</span>
+<span class="k">from</span> <span class="n">ORDER_DETAILS</span>
+<span class="k">WHERE</span> <span class="n">REGION</span> <span class="o">=</span> <span class="o">#</span><span class="n">region</span><span class="o">#</span>
 </pre> 
        </div> </li> 
      </ul> 
@@ -4710,7 +4727,7 @@ WHERE REGION = #region#
        </tr> 
        <tr> 
         <td><strong>Drilldown Report</strong></td> 
-        <td>The Drill Down report</td> 
+        <td>The drill down report</td> 
        </tr> 
        <tr> 
         <td><strong>Header Text</strong></td> 
@@ -4722,7 +4739,7 @@ WHERE REGION = #region#
        </tr> 
        <tr> 
         <td><strong>Report Format</strong></td> 
-        <td>The report format that will be used to display the Drill Down Report results</td> 
+        <td>The report format that will be used to display the drill down report results</td> 
        </tr> 
        <tr> 
         <td><strong>Open In New Window</strong></td> 
@@ -4730,16 +4747,20 @@ WHERE REGION = #region#
        </tr> 
        <tr> 
         <td><strong>Allow Select Parameters</strong></td> 
-        <td>Whether the user will be provided with the parameters box to select/change parameters after the drill down report has run and possibly re-run the drill down report with the newly selected parameters.</td> 
+        <td>Whether the user will be provided with the parameters box to select/change parameters after the drill down report has run if they wish to re-run the report</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Run Immediately</strong></td> 
+        <td>Whether the drill down report will run immediately</td> 
        </tr> 
       </tbody> 
      </table> 
      <h2 id="using-the-main-reports-parameters">Using the main report's parameters</h2> 
      <p>In addition to using the main report's column values, a drill down report can also use the main report's parameter values. If in our example above the Main Report allowed the user to select a city, e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    select REGION "Region", SUM(VOLUME) "Volume"
-    from ORDERS
-    WHERE CITY=#city# AND ...
+      <pre><span></span>    <span class="k">select</span> <span class="n">REGION</span> <span class="ss">"Region"</span><span class="p">,</span> <span class="k">SUM</span><span class="p">(</span><span class="n">VOLUME</span><span class="p">)</span> <span class="ss">"Volume"</span>
+    <span class="k">from</span> <span class="n">ORDERS</span>
+    <span class="k">WHERE</span> <span class="n">CITY</span><span class="o">=#</span><span class="n">city</span><span class="o">#</span> <span class="k">AND</span> <span class="p">...</span>
 </pre> 
      </div> 
      <p>The Drill Down Report can make use of this <code>#city#</code> parameter even if it is not among the columns displayed by the Main Report's select statement. To use the value of the <code>#city#</code> parameter in the Drill Down Report,</p> 
@@ -4749,9 +4770,9 @@ WHERE REGION = #region#
      </ul> 
      <p>So the Drill Down Report would look something like</p> 
      <div class="codehilite"> 
-      <pre><span></span>    select REGION, CITY, ITEM, VOLUME
-    from ORDER_DETAILS
-    WHERE REGION = #region# and CITY=#city#
+      <pre><span></span>    <span class="k">select</span> <span class="n">REGION</span><span class="p">,</span> <span class="n">CITY</span><span class="p">,</span> <span class="n">ITEM</span><span class="p">,</span> <span class="n">VOLUME</span>
+    <span class="k">from</span> <span class="n">ORDER_DETAILS</span>
+    <span class="k">WHERE</span> <span class="n">REGION</span> <span class="o">=</span> <span class="o">#</span><span class="n">region</span><span class="o">#</span> <span class="k">and</span> <span class="n">CITY</span><span class="o">=#</span><span class="n">city</span><span class="o">#</span>
 </pre> 
      </div> 
      <p>Here the <code>#region#</code> parameter will still be set as Drilldown Column 1, since it's getting its value from the Main Report's column 1, while the <code>#city#</code> parameter will be set as Drilldown Column 0, since it's not getting its value from any of the Main Report's columns (the Main Report's select doesn't include the city column).</p> 
