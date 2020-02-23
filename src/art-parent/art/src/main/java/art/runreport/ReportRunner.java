@@ -1265,6 +1265,17 @@ public class ReportRunner {
 
 		DatabaseUtils.setValues(psQuery, paramValues);
 
+		//https://www.programcreek.com/java-api-examples/?class=java.sql.Statement&method=setQueryTimeout
+		//https://docs.oracle.com/javase/7/docs/api/java/sql/Statement.html#setQueryTimeout(int)
+		Integer queryTimeoutSeconds = report.getGeneralOptions().getQueryTimeoutSeconds();
+		if (queryTimeoutSeconds != null) {
+			if (queryTimeoutSeconds < 0) {
+				throw new RuntimeException("Invalid query timeout value: " + queryTimeoutSeconds);
+			} else {
+				psQuery.setQueryTimeout(queryTimeoutSeconds);
+			}
+		}
+
 		psQuery.execute();
 	}
 
