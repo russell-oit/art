@@ -4,7 +4,7 @@ ${licenseFirst}
 ${licensePrefix}ART. A Reporting Tool.
 ${licensePrefix}Copyright (C) ${date?date?string("yyyy")} Enrico Liboni <eliboni@users.sf.net>
 ${licensePrefix?replace(" +$", "", "r")}
-${licensePrefix}This program is free software; you can redistribute it and/or modify
+${licensePrefix}This program is free software: you can redistribute it and/or modify
 ${licensePrefix}it under the terms of the GNU General Public License as published by
 ${licensePrefix}the Free Software Foundation, either version 3 of the License, or
 ${licensePrefix}(at your option) any later version.
