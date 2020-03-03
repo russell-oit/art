@@ -75,9 +75,9 @@ import org.slf4j.LoggerFactory;
 public class Report implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Report.class);
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private int reportId;
 	private String name;
 	private String shortDescription;
@@ -169,6 +169,22 @@ public class Report implements Serializable {
 	private Integer limit;
 	@JsonIgnore
 	private boolean selfServicePreview;
+	@JsonIgnore
+	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
+
+	/**
+	 * @return the passwordsEncrypted
+	 */
+	public boolean isPasswordsEncrypted() {
+		return passwordsEncrypted;
+	}
+
+	/**
+	 * @param passwordsEncrypted the passwordsEncrypted to set
+	 */
+	public void setPasswordsEncrypted(boolean passwordsEncrypted) {
+		this.passwordsEncrypted = passwordsEncrypted;
+	}
 
 	/**
 	 * @return the selfServicePreview
@@ -1640,8 +1656,11 @@ public class Report implements Serializable {
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
-		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+		if (!passwordsEncrypted) {
+			openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+			modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+			passwordsEncrypted = true;
+		}
 	}
 
 	/**

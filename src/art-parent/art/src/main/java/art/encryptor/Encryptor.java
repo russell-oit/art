@@ -32,7 +32,7 @@ import java.util.Date;
 public class Encryptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private int encryptorId;
 	private String name;
 	private String description;
@@ -56,6 +56,22 @@ public class Encryptor implements Serializable {
 	private boolean clearTextPasswords;
 	@JsonIgnore
 	private boolean overwriteFiles;
+	@JsonIgnore
+	private boolean passwordsEncrypted; // for use with the export process
+
+	/**
+	 * @return the passwordsEncrypted
+	 */
+	public boolean isPasswordsEncrypted() {
+		return passwordsEncrypted;
+	}
+
+	/**
+	 * @param passwordsEncrypted the passwordsEncrypted to set
+	 */
+	public void setPasswordsEncrypted(boolean passwordsEncrypted) {
+		this.passwordsEncrypted = passwordsEncrypted;
+	}
 
 	/**
 	 * @return the overwriteFiles
@@ -399,10 +415,13 @@ public class Encryptor implements Serializable {
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPasswords(String key, EncryptionPassword encryptionPassword) throws Exception {
-		aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key, encryptionPassword);
-		openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key, encryptionPassword);
-		openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
-		modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+		if (!passwordsEncrypted) {
+			aesCryptPassword = AesEncryptor.encrypt(aesCryptPassword, key, encryptionPassword);
+			openPgpSigningKeyPassphrase = AesEncryptor.encrypt(openPgpSigningKeyPassphrase, key, encryptionPassword);
+			openPassword = AesEncryptor.encrypt(openPassword, key, encryptionPassword);
+			modifyPassword = AesEncryptor.encrypt(modifyPassword, key, encryptionPassword);
+			passwordsEncrypted = true;
+		}
 	}
 
 	/**
