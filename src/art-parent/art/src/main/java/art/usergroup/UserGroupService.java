@@ -382,6 +382,9 @@ public class UserGroupService {
 
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, Role> addedRoles = new HashMap<>();
+			
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<Role> currentRoles = roleService.getAllRoles();
 
 			for (UserGroup userGroup : userGroups) {
 				userGroupId++;
@@ -391,7 +394,10 @@ public class UserGroupService {
 					if (StringUtils.isBlank(reportGroupName)) {
 						userGroup.setDefaultReportGroup(null);
 					} else {
-						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						ReportGroup existingReportGroup = currentReportGroups.stream()
+							.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+							.findFirst()
+							.orElse(null);
 						if (existingReportGroup == null) {
 							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
 							if (addedReportGroup == null) {
@@ -412,7 +418,10 @@ public class UserGroupService {
 					List<Role> newRoles = new ArrayList<>();
 					for (Role role : roles) {
 						String roleName = role.getName();
-						Role existingRole = roleService.getRole(roleName);
+						Role existingRole = currentRoles.stream()
+							.filter(r -> StringUtils.equals(roleName, r.getName()))
+							.findFirst()
+							.orElse(null);
 						if (existingRole == null) {
 							Role addedRole = addedRoles.get(roleName);
 							if (addedRole == null) {

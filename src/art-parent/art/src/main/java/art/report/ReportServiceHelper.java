@@ -166,10 +166,18 @@ public class ReportServiceHelper {
 			}
 			reports.addAll(drilldownReports);
 
+			List<Report> currentReports = reportService.getAllReportsBasic();
+			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
+			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+
 			for (Report report : reports) {
 				String reportName = report.getName();
 				if (StringUtils.isNotBlank(reportName)) {
-					Report existingReport = reportService.getReport(reportName);
+					Report existingReport = currentReports.stream()
+							.filter(r -> StringUtils.equals(reportName, r.getName()))
+							.findFirst()
+							.orElse(null);
 					if (existingReport == null) {
 						Report addedReport = addedReports.get(reportName);
 						if (addedReport == null) {
@@ -181,7 +189,10 @@ public class ReportServiceHelper {
 								if (StringUtils.isBlank(datasourceName)) {
 									report.setDatasource(null);
 								} else {
-									Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
+									Datasource existingDatasource = currentDatasources.stream()
+											.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingDatasource == null) {
 										Datasource addedDatasource = addedDatasources.get(datasourceName);
 										if (addedDatasource == null) {
@@ -203,7 +214,10 @@ public class ReportServiceHelper {
 								if (StringUtils.isBlank(encryptorName)) {
 									report.setEncryptor(null);
 								} else {
-									Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
+									Encryptor existingEncryptor = currentEncryptors.stream()
+											.filter(e -> StringUtils.equals(encryptorName, e.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingEncryptor == null) {
 										Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
 										if (addedEncryptor == null) {
@@ -224,7 +238,10 @@ public class ReportServiceHelper {
 								List<ReportGroup> newReportGroups = new ArrayList<>();
 								for (ReportGroup reportGroup : reportGroups) {
 									String reportGroupName = reportGroup.getName();
-									ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+									ReportGroup existingReportGroup = currentReportGroups.stream()
+											.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingReportGroup == null) {
 										ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
 										if (addedReportGroup == null) {

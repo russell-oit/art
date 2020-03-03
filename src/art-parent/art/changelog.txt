@@ -1,5 +1,6 @@
 ART 4.12
 * Fix for incorrect export of reports that share datasources
+* Fix for report import on sql server
 
 ART 4.11
 * Added showColumnFilters option for htmlDataTable report format
