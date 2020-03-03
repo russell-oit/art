@@ -138,22 +138,6 @@ public class ReportServiceHelper {
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, Report> addedReports = new HashMap<>();
 
-			List<Report> parameterReports = new ArrayList<>();
-			for (Report report : reports) {
-				List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
-				for (Parameter parameter : parameters) {
-					Report defaultValueReport = parameter.getDefaultValueReport();
-					if (defaultValueReport != null) {
-						parameterReports.add(defaultValueReport);
-					}
-					Report lovReport = parameter.getLovReport();
-					if (lovReport != null) {
-						parameterReports.add(lovReport);
-					}
-				}
-			}
-			reports.addAll(parameterReports);
-
 			List<Report> currentReports = reportService.getAllReportsBasic();
 			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
 			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();

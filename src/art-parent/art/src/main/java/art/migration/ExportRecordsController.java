@@ -1336,6 +1336,18 @@ public class ExportRecordsController {
 			Report drilldownReport = drilldown.getDrilldownReport();
 			getAllReports(allReports, drilldownReport, recursionCount);
 		}
+
+		List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
+		for (Parameter parameter : parameters) {
+			Report defaultValueReport = parameter.getDefaultValueReport();
+			if (defaultValueReport != null) {
+				getAllReports(allReports, defaultValueReport, recursionCount);
+			}
+			Report lovReport = parameter.getLovReport();
+			if (lovReport != null) {
+				getAllReports(allReports, lovReport, recursionCount);
+			}
+		}
 	}
 
 	/**
