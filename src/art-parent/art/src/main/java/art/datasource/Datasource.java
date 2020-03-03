@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Datasource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private int datasourceId;
 	private String name;
 	private String driver;
@@ -60,6 +60,22 @@ public class Datasource implements Serializable {
 	private boolean clearTextPassword;
 	private DatabaseProtocol databaseProtocol;
 	private DatabaseType databaseType;
+	@JsonIgnore
+	private boolean passwordEncrypted;
+
+	/**
+	 * @return the passwordEncrypted
+	 */
+	public boolean isPasswordEncrypted() {
+		return passwordEncrypted;
+	}
+
+	/**
+	 * @param passwordEncrypted the passwordEncrypted to set
+	 */
+	public void setPasswordEncrypted(boolean passwordEncrypted) {
+		this.passwordEncrypted = passwordEncrypted;
+	}
 
 	/**
 	 * @return the databaseType
@@ -468,8 +484,11 @@ public class Datasource implements Serializable {
 	 * @throws java.lang.Exception
 	 */
 	public void encryptPassword(String key, EncryptionPassword encryptionPassword) throws Exception {
-		password = AesEncryptor.encrypt(password, key, encryptionPassword);
-		passwordAlgorithm = "AES";
+		if (!passwordEncrypted) {
+			password = AesEncryptor.encrypt(password, key, encryptionPassword);
+			passwordAlgorithm = "AES";
+			passwordEncrypted = true;
+		}
 	}
 
 	/**

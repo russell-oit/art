@@ -22,6 +22,7 @@ import art.accessright.UserGroupReportRight;
 import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
 import art.accessright.UserReportRightCsvExportMixIn;
+import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -178,6 +179,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private RoleService roleService;
+	
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -1292,6 +1296,12 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+		
+		//clear objects that could have had their passwords encrypted, so as to have fresh start
+		cacheHelper.clearReports();
+		cacheHelper.clearDatasources();
+		cacheHelper.clearEncryptors();
+		cacheHelper.clearParameters();
 
 		return exportFilePath;
 	}
