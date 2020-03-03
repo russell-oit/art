@@ -154,18 +154,6 @@ public class ReportServiceHelper {
 			}
 			reports.addAll(parameterReports);
 
-			List<Report> drilldownReports = new ArrayList<>();
-			for (Report report : reports) {
-				List<Drilldown> drilldowns = report.getDrilldowns();
-				if (CollectionUtils.isNotEmpty(drilldowns)) {
-					for (Drilldown drilldown : drilldowns) {
-						Report drilldownReport = drilldown.getDrilldownReport();
-						drilldownReports.add(drilldownReport);
-					}
-				}
-			}
-			reports.addAll(drilldownReports);
-
 			List<Report> currentReports = reportService.getAllReportsBasic();
 			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
 			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();

@@ -179,7 +179,7 @@ public class ExportRecordsController {
 
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private CacheHelper cacheHelper;
 
@@ -1067,7 +1067,14 @@ public class ExportRecordsController {
 		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
-		List<Report> reports = reportService.getReports(ids);
+		List<Report> exportReports = reportService.getReports(ids);
+
+		List<Report> reports = new ArrayList<>();
+
+		for (Report report : exportReports) {
+			int recursionCount = 0;
+			getAllReports(reports, report, recursionCount);
+		}
 
 		List<ReportGroup> allReportGroups = new ArrayList<>();
 		List<ReportParameter> allReportParams = new ArrayList<>();
@@ -1296,7 +1303,7 @@ public class ExportRecordsController {
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
-		
+
 		//clear objects that could have had their passwords encrypted, so as to have fresh start
 		cacheHelper.clearReports();
 		cacheHelper.clearDatasources();
@@ -1304,6 +1311,31 @@ public class ExportRecordsController {
 		cacheHelper.clearParameters();
 
 		return exportFilePath;
+	}
+
+	/**
+	 * Gets all nested report objects in a report's hierarchy
+	 *
+	 * @param allReports the list to fill with the reports obtained, including
+	 * the one passed
+	 * @param report the report to interogate
+	 * @throws SQLException
+	 */
+	private void getAllReports(List<Report> allReports, Report report, int recursionCount) throws SQLException {
+		recursionCount++;
+		final int MAX_RECURSION_COUNT = 50;
+		if (recursionCount > MAX_RECURSION_COUNT) {
+			throw new RuntimeException("Max recursion count exceeded: " + MAX_RECURSION_COUNT);
+		}
+
+		int reportId = report.getReportId();
+		List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+		report.setDrilldowns(drilldowns);
+		allReports.add(report);
+		for (Drilldown drilldown : drilldowns) {
+			Report drilldownReport = drilldown.getDrilldownReport();
+			getAllReports(allReports, drilldownReport, recursionCount);
+		}
 	}
 
 	/**
