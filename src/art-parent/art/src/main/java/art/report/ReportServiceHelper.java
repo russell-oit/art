@@ -142,6 +142,10 @@ public class ReportServiceHelper {
 			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
 			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();
 			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<Rule> currentRules = ruleService.getAllRules();
+			List<User> currentUsers = userService.getAllUsersBasic();
+			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
+			List<ReportRule> currentReportRules = reportRuleService.getAllReportRules();
 
 			for (Report report : reports) {
 				String reportName = report.getName();
@@ -340,7 +344,10 @@ public class ReportServiceHelper {
 			Map<String, Rule> addedRules = new HashMap<>();
 			for (Rule rule : allRules) {
 				String ruleName = rule.getName();
-				Rule existingRule = ruleService.getRule(ruleName);
+				Rule existingRule = currentRules.stream()
+						.filter(r -> StringUtils.equals(ruleName, r.getName()))
+						.findFirst()
+						.orElse(null);
 				if (existingRule == null) {
 					Rule addedRule = addedRules.get(ruleName);
 					if (addedRule == null) {
@@ -369,7 +376,10 @@ public class ReportServiceHelper {
 			Map<String, User> addedUsers = new HashMap<>();
 			for (User user : allUsers) {
 				String username = user.getUsername();
-				User existingUser = userService.getUser(username);
+				User existingUser = currentUsers.stream()
+						.filter(u -> StringUtils.equals(username, u.getUsername()))
+						.findFirst()
+						.orElse(null);
 				if (existingUser == null) {
 					User addedUser = addedUsers.get(username);
 					if (addedUser == null) {
@@ -398,7 +408,10 @@ public class ReportServiceHelper {
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			for (UserGroup userGroup : allUserGroups) {
 				String userGroupName = userGroup.getName();
-				UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+				UserGroup existingUserGroup = currentUserGroups.stream()
+						.filter(g -> StringUtils.equals(userGroupName, g.getName()))
+						.findFirst()
+						.orElse(null);
 				if (existingUserGroup == null) {
 					UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
 					if (addedUserGroup == null) {
@@ -418,7 +431,10 @@ public class ReportServiceHelper {
 				int tempReportId = reportRule.getReportId();
 				int tempRuleId = reportRule.getRule().getRuleId();
 				String reportRuleKey = tempReportId + "-" + tempRuleId;
-				ReportRule existingReportRule = reportRuleService.getReportRule(tempReportId, tempRuleId);
+				ReportRule existingReportRule = currentReportRules.stream()
+						.filter(r -> r.getReportId() == tempReportId && r.getRule().getRuleId() == tempRuleId)
+						.findFirst()
+						.orElse(null);
 				if (existingReportRule == null) {
 					ReportRule addedReportRule = addedReportRules.get(reportRuleKey);
 					if (addedReportRule == null) {
