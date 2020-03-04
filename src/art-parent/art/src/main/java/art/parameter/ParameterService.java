@@ -92,7 +92,7 @@ public class ParameterService {
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			Parameter parameter = loadBasicParameter(rs);
-			
+
 			Report defaultValueReport = reportService.getReport(rs.getInt("DEFAULT_VALUE_REPORT_ID"));
 			parameter.setDefaultValueReport(defaultValueReport);
 
@@ -116,12 +116,12 @@ public class ParameterService {
 			return type.cast(parameter);
 		}
 	}
-	
+
 	/**
 	 * Maps a resultset to an object
 	 */
 	private class BasicParameterMapper extends ParameterMapper {
-		
+
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			Parameter parameter = loadBasicParameter(rs);
@@ -131,10 +131,10 @@ public class ParameterService {
 
 	/**
 	 * Returns an object with basic properties loaded from a resultset
-	 * 
+	 *
 	 * @param rs the resultset
 	 * @return the loaded object
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private Parameter loadBasicParameter(ResultSet rs) throws SQLException {
 		Parameter parameter = new Parameter();
@@ -181,7 +181,7 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns all parameters with only basic properties filled
 	 *
@@ -455,19 +455,21 @@ public class ParameterService {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			List<Report> reports = new ArrayList<>();
+			List<Report> parameterReports = new ArrayList<>();
 			for (Parameter parameter : parameters) {
 				Report defaultValueReport = parameter.getDefaultValueReport();
 				if (defaultValueReport != null) {
-					reports.add(defaultValueReport);
+					parameterReports.add(defaultValueReport);
 				}
 				Report lovReport = parameter.getLovReport();
 				if (lovReport != null) {
-					reports.add(lovReport);
+					parameterReports.add(lovReport);
 				}
 			}
 
 			ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+			List<Report> reports = reportServiceHelper.prepareReportsForExport(parameterReports);
+
 			boolean commitReports = false;
 			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
 
