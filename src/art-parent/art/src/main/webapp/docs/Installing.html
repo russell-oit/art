@@ -55,7 +55,7 @@
    </div> 
    <h1 id="requirements">Requirements</h1> 
    <ul> 
-    <li>Java application server or servlet container e.g. Apache Tomcat</li> 
+    <li>Java application server or servlet container e.g. Apache Tomcat 9</li> 
     <li>Java 8 and above</li> 
    </ul> 
    <h1 id="download-art">Download ART</h1> 
@@ -70,10 +70,10 @@
    <h3 id="linux-installation">Linux Installation</h3> 
    <ul> 
     <li>Download the latest binary distribution</li> 
-    <li> <p>Unpack the archive somewhere e.g.</p> 
+    <li>Unpack the archive somewhere e.g. 
      <div class="codehilite"> 
-      <pre><span></span>tar xvzf apache-tomcat-7.0.23.tar.gz
-sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
+      <pre><span></span><span class="n">tar</span> <span class="n">xvzf</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mi">7</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">23</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mi">7</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">23</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">local</span><span class="o">/</span><span class="n">tomcat</span>
 </pre> 
      </div> </li> 
    </ul> 
@@ -143,17 +143,17 @@ sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
-      <pre><span></span>c:\&gt; mysql -h localhost -u root -p
+      <pre><span></span><span class="k">c</span><span class="p">:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">h</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
 </pre> 
      </div> </li> 
     <li> <p>Enter the password and the following subsequent commands</p> 
      <div class="codehilite"> 
-      <pre><span></span>mysql&gt; create database art;
-mysql&gt; grant all on art.* to artuser@localhost identified by "artpassword";
-mysql&gt; use art;
-mysql&gt; \. "PACKAGE_PATH\database\art_tables.sql"
-mysql&gt; \. "PACKAGE_PATH\database\quartz\tables_mysql.sql"
-mysql&gt; quit;
+      <pre><span></span><span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="n">art</span><span class="p">;</span><span class="w"></span>
+<span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="k">grant</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">art</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">artuser</span><span class="nv">@localhost</span><span class="w"> </span><span class="n">identified</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="ss">"artpassword"</span><span class="p">;</span><span class="w"></span>
+<span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">art</span><span class="p">;</span><span class="w"></span>
+<span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="w"> </span><span class="ss">"PACKAGE_PATH\database\art_tables.sql"</span><span class="w"></span>
+<span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="err">\</span><span class="p">.</span><span class="w"> </span><span class="ss">"PACKAGE_PATH\database\quartz\tables_mysql.sql"</span><span class="w"></span>
+<span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quit</span><span class="p">;</span><span class="w"></span>
 </pre> 
      </div> </li> 
    </ul> 
@@ -163,19 +163,19 @@ mysql&gt; quit;
     <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
-      <pre><span></span>c:\&gt; psql -U postgres
+      <pre><span></span><span class="k">c</span><span class="p">:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">psql</span> <span class="o">-</span><span class="n">U</span> <span class="n">postgres</span>
 </pre> 
      </div> </li> 
     <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> </li> 
-    <li> <p>Enter the following subsequent commands</p> 
+    <li>Enter the following subsequent commands 
      <div class="codehilite"> 
-      <pre><span></span>postgres=# create user artuser password 'artpassword';
-postgres=# create database art owner artuser;
-postgres=# \c art
+      <pre><span></span><span class="n">postgres</span><span class="o">=#</span> <span class="k">create</span> <span class="k">user</span> <span class="n">artuser</span> <span class="n">password</span> <span class="s1">'artpassword'</span><span class="p">;</span>
+<span class="n">postgres</span><span class="o">=#</span> <span class="k">create</span> <span class="k">database</span> <span class="n">art</span> <span class="k">owner</span> <span class="n">artuser</span><span class="p">;</span>
+<span class="n">postgres</span><span class="o">=#</span> <span class="err">\</span><span class="k">c</span> <span class="n">art</span>
 
-art=# \i 'c:/somepath/database/art_tables.sql'
-art=# \i 'c:/somepath/database/quartz/tables_postgres.sql'
-art=# \q
+<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">i</span> <span class="s1">'c:/somepath/database/art_tables.sql'</span>
+<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">i</span> <span class="s1">'c:/somepath/database/quartz/tables_postgres.sql'</span>
+<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">q</span>
 </pre> 
      </div> </li> 
    </ul> 

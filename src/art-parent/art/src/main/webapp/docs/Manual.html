@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.11"> 
+  <meta name="version" content="4.12"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -145,6 +145,7 @@
          <li><a href="#mongodb">MongoDB</a></li> 
          <li><a href="#view">View</a></li> 
          <li><a href="#file">File</a></li> 
+         <li><a href="#link">Link</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
         <ol> 
@@ -1593,6 +1594,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>Source Report</strong></td> 
         <td>A report ID of a report which should be used to provide the report source for this report</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Link</strong></td> 
+        <td>For the link report type, the link to open. If it is an external url, it needs to start with the protocol section e.g. <code>http://</code> or <code>https://</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Open In New Window</strong></td> 
+        <td>For link reports, whether the link will open in a new window when clicked from the ART home page</td> 
        </tr> 
        <tr> 
         <td><strong>Use Groovy</strong></td> 
@@ -3114,7 +3123,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
       </tbody> 
      </table> 
-     <p>Another alternative for querying MongoDB is to install and use <a class="" href="https://drill.apache.org/" rel="nofollow">Apache Drill</a>. Drill allows you to use normal SQL to query a MongoDB database. When using drill, you wouldn't use the MongoDB datasource type or the MongoDB report type. You would use the JDBC datasource type with the drill driver, and then use any of the other report types e.g. Tabular etc. The drill jdbc driver can be obtained from the drill installation and copied to the ART_HOME\WEB-INF\lib directory.</p> 
+     <p>Another alternative for querying MongoDB is to use the Calcite MongoDB JDBC driver under the JDBC datasource type. This would allow use of normal SQL to query MongoDB. Yet another alternative for querying MongoDB is to install and use <a class="" href="https://drill.apache.org/" rel="nofollow">Apache Drill</a>. Drill allows you to use normal SQL to query a MongoDB database. When using drill, you wouldn't use the MongoDB datasource type or the MongoDB report type. You would use the JDBC datasource type with the drill driver, and then use any of the other report types e.g. Tabular etc. The drill jdbc driver can be obtained from the drill installation and copied to the ART_HOME\WEB-INF\lib directory.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>Instead of using the MongoDB report type, one can specify any of the other report types e.g. Tabular, enable the <strong>Use Groovy</strong> option and use the kind of code as given above to generate the report.</li> 
@@ -3246,6 +3255,8 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
       </tbody> 
      </table> 
+     <h3 id="link">Link</h3> 
+     <p>Opens a link as provided in the <strong>Link</strong> field.</p> 
      <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -3282,6 +3293,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td><strong>refreshPeriodSeconds</strong></td> 
         <td>Integer</td> 
         <td>Enables a report to be re-run or refreshed automatically after the first run. Minimum is 5 seconds.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>queryTimeoutSeconds</strong></td> 
+        <td>Integer</td> 
+        <td>Enables setting of a query timeout for a report that uses a JDBC query. If the timeout expires before the query completes, the query execution will stop and an exception will be thrown. The value if defined should be &gt;= 0, with 0 meaning no timeout.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3485,6 +3501,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td><strong>showColumnFilters</strong></td> 
         <td>Boolean</td> 
         <td>For the <strong>htmlDataTable</strong> report format, if present indicates that column filters should be included in the output</td> 
+       </tr> 
+       <tr> 
+        <td><strong>isFragment</strong></td> 
+        <td>Boolean</td> 
+        <td>If set to true e.g. <code>isFragment=true</code>, the report information header and footer showing the start time of execution and the number of rows retrieved will not be shown.</td> 
        </tr> 
       </tbody> 
      </table> 
