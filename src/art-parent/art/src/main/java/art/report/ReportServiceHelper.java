@@ -34,6 +34,7 @@ import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
 import art.reportgroupmembership.ReportGroupMembershipService2;
+import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleService;
@@ -48,6 +49,7 @@ import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,9 +65,25 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class ReportServiceHelper {
-	//use separate class to avoid circular with ParameterService and ReportParameterService
+	//use separate class to avoid circular reference with ParameterService and ReportParameterService
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportServiceHelper.class);
+
+	private final DbService dbService = new DbService();
+	private final ReportService reportService = new ReportService();
+	private final ReportParameterService reportParameterService = new ReportParameterService();
+	private final DatasourceService datasourceService = new DatasourceService();
+	private final EncryptorService encryptorService = new EncryptorService();
+	private final ReportGroupService reportGroupService = new ReportGroupService();
+	private final ReportGroupMembershipService2 reportGroupMembershipService2 = new ReportGroupMembershipService2();
+	private final RuleValueService ruleValueService = new RuleValueService();
+	private final RuleService ruleService = new RuleService();
+	private final UserService userService = new UserService();
+	private final UserGroupService userGroupService = new UserGroupService();
+	private final ReportRuleService reportRuleService = new ReportRuleService();
+	private final AccessRightService accessRightService = new AccessRightService();
+	private final DrilldownService drilldownService = new DrilldownService();
+	private final ParameterService parameterService = new ParameterService();
 
 	/**
 	 * Imports report records
@@ -105,21 +123,14 @@ public class ReportServiceHelper {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			DbService dbService = new DbService();
-			ReportService reportService = new ReportService();
-			ReportParameterService reportParameterService = new ReportParameterService();
-			DatasourceService datasourceService = new DatasourceService();
-			EncryptorService encryptorService = new EncryptorService();
-			ReportGroupService reportGroupService = new ReportGroupService();
-			ReportGroupMembershipService2 reportGroupMembershipService2 = new ReportGroupMembershipService2();
-			ParameterService parameterService = new ParameterService();
-			RuleValueService ruleValueService = new RuleValueService();
-			RuleService ruleService = new RuleService();
-			UserService userService = new UserService();
-			UserGroupService userGroupService = new UserGroupService();
-			ReportRuleService reportRuleService = new ReportRuleService();
-			AccessRightService accessRightService = new AccessRightService();
-			DrilldownService drilldownService = new DrilldownService();
+			List<Report> currentReports = reportService.getAllReportsBasic();
+			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
+			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<Rule> currentRules = ruleService.getAllRules();
+			List<User> currentUsers = userService.getAllUsersBasic();
+			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
+			List<ReportRule> currentReportRules = reportRuleService.getAllReportRules();
 
 			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
 			int reportId = dbService.getMaxRecordId(conn, sql);
@@ -138,38 +149,13 @@ public class ReportServiceHelper {
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, Report> addedReports = new HashMap<>();
 
-			List<Report> parameterReports = new ArrayList<>();
-			for (Report report : reports) {
-				List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
-				for (Parameter parameter : parameters) {
-					Report defaultValueReport = parameter.getDefaultValueReport();
-					if (defaultValueReport != null) {
-						parameterReports.add(defaultValueReport);
-					}
-					Report lovReport = parameter.getLovReport();
-					if (lovReport != null) {
-						parameterReports.add(lovReport);
-					}
-				}
-			}
-			reports.addAll(parameterReports);
-
-			List<Report> drilldownReports = new ArrayList<>();
-			for (Report report : reports) {
-				List<Drilldown> drilldowns = report.getDrilldowns();
-				if (CollectionUtils.isNotEmpty(drilldowns)) {
-					for (Drilldown drilldown : drilldowns) {
-						Report drilldownReport = drilldown.getDrilldownReport();
-						drilldownReports.add(drilldownReport);
-					}
-				}
-			}
-			reports.addAll(drilldownReports);
-
 			for (Report report : reports) {
 				String reportName = report.getName();
 				if (StringUtils.isNotBlank(reportName)) {
-					Report existingReport = reportService.getReport(reportName);
+					Report existingReport = currentReports.stream()
+							.filter(r -> StringUtils.equals(reportName, r.getName()))
+							.findFirst()
+							.orElse(null);
 					if (existingReport == null) {
 						Report addedReport = addedReports.get(reportName);
 						if (addedReport == null) {
@@ -181,7 +167,10 @@ public class ReportServiceHelper {
 								if (StringUtils.isBlank(datasourceName)) {
 									report.setDatasource(null);
 								} else {
-									Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
+									Datasource existingDatasource = currentDatasources.stream()
+											.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingDatasource == null) {
 										Datasource addedDatasource = addedDatasources.get(datasourceName);
 										if (addedDatasource == null) {
@@ -203,7 +192,10 @@ public class ReportServiceHelper {
 								if (StringUtils.isBlank(encryptorName)) {
 									report.setEncryptor(null);
 								} else {
-									Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
+									Encryptor existingEncryptor = currentEncryptors.stream()
+											.filter(e -> StringUtils.equals(encryptorName, e.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingEncryptor == null) {
 										Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
 										if (addedEncryptor == null) {
@@ -224,7 +216,10 @@ public class ReportServiceHelper {
 								List<ReportGroup> newReportGroups = new ArrayList<>();
 								for (ReportGroup reportGroup : reportGroups) {
 									String reportGroupName = reportGroup.getName();
-									ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+									ReportGroup existingReportGroup = currentReportGroups.stream()
+											.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+											.findFirst()
+											.orElse(null);
 									if (existingReportGroup == null) {
 										ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
 										if (addedReportGroup == null) {
@@ -351,7 +346,10 @@ public class ReportServiceHelper {
 			Map<String, Rule> addedRules = new HashMap<>();
 			for (Rule rule : allRules) {
 				String ruleName = rule.getName();
-				Rule existingRule = ruleService.getRule(ruleName);
+				Rule existingRule = currentRules.stream()
+						.filter(r -> StringUtils.equals(ruleName, r.getName()))
+						.findFirst()
+						.orElse(null);
 				if (existingRule == null) {
 					Rule addedRule = addedRules.get(ruleName);
 					if (addedRule == null) {
@@ -380,7 +378,10 @@ public class ReportServiceHelper {
 			Map<String, User> addedUsers = new HashMap<>();
 			for (User user : allUsers) {
 				String username = user.getUsername();
-				User existingUser = userService.getUser(username);
+				User existingUser = currentUsers.stream()
+						.filter(u -> StringUtils.equals(username, u.getUsername()))
+						.findFirst()
+						.orElse(null);
 				if (existingUser == null) {
 					User addedUser = addedUsers.get(username);
 					if (addedUser == null) {
@@ -409,7 +410,10 @@ public class ReportServiceHelper {
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			for (UserGroup userGroup : allUserGroups) {
 				String userGroupName = userGroup.getName();
-				UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+				UserGroup existingUserGroup = currentUserGroups.stream()
+						.filter(g -> StringUtils.equals(userGroupName, g.getName()))
+						.findFirst()
+						.orElse(null);
 				if (existingUserGroup == null) {
 					UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
 					if (addedUserGroup == null) {
@@ -429,7 +433,10 @@ public class ReportServiceHelper {
 				int tempReportId = reportRule.getReportId();
 				int tempRuleId = reportRule.getRule().getRuleId();
 				String reportRuleKey = tempReportId + "-" + tempRuleId;
-				ReportRule existingReportRule = reportRuleService.getReportRule(tempReportId, tempRuleId);
+				ReportRule existingReportRule = currentReportRules.stream()
+						.filter(r -> r.getReportId() == tempReportId && r.getRule().getRuleId() == tempRuleId)
+						.findFirst()
+						.orElse(null);
 				if (existingReportRule == null) {
 					ReportRule addedReportRule = addedReportRules.get(reportRuleKey);
 					if (addedReportRule == null) {
@@ -501,6 +508,120 @@ public class ReportServiceHelper {
 			throw ex;
 		} finally {
 			conn.setAutoCommit(originalAutoCommit);
+		}
+	}
+
+	/**
+	 * Returns a list of reports to be exported with appropriate details filled in
+	 * 
+	 * @param exportReports the initial list of report objects to export
+	 * @return the final list of reports to export
+	 * @throws Exception 
+	 */
+	public List<Report> prepareReportsForExport(List<Report> exportReports) throws Exception {
+		logger.debug("Entering prepareReportsForExport");
+		
+		List<Report> reports = new ArrayList<>();
+
+		for (Report report : exportReports) {
+			int recursionCount = 0;
+			getAllReports(reports, report, recursionCount);
+		}
+
+		for (Report report : reports) {
+			int reportId = report.getReportId();
+
+			List<ReportGroup> reportGroups = report.getReportGroups();
+			for (ReportGroup reportGroup : reportGroups) {
+				reportGroup.setParentId(reportId);
+			}
+
+			List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
+			report.setReportParams(reportParams);
+			for (ReportParameter reportParam : reportParams) {
+				reportParam.setParentId(reportId);
+			}
+
+			List<UserRuleValue> userRuleValues = ruleValueService.getReportUserRuleValues(reportId);
+			report.setUserRuleValues(userRuleValues);
+			for (UserRuleValue userRuleValue : userRuleValues) {
+				userRuleValue.setParentId(reportId);
+			}
+
+			List<UserGroupRuleValue> userGroupRuleValues = ruleValueService.getReportUserGroupRuleValues(reportId);
+			report.setUserGroupRuleValues(userGroupRuleValues);
+			for (UserGroupRuleValue userGroupRuleValue : userGroupRuleValues) {
+				userGroupRuleValue.setParentId(reportId);
+			}
+
+			List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+			report.setReportRules(reportRules);
+			for (ReportRule reportRule : reportRules) {
+				reportRule.setParentId(reportId);
+			}
+
+			List<UserReportRight> userReportRights = accessRightService.getUserReportRightsForReport(reportId);
+			report.setUserReportRights(userReportRights);
+			for (UserReportRight userReportRight : userReportRights) {
+				userReportRight.setParentId(reportId);
+			}
+
+			List<UserGroupReportRight> userGroupReportRights = accessRightService.getUserGroupReportRightsForReport(reportId);
+			report.setUserGroupReportRights(userGroupReportRights);
+			for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
+				userGroupReportRight.setParentId(reportId);
+			}
+
+			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+			report.setDrilldowns(drilldowns);
+			for (Drilldown drilldown : drilldowns) {
+				drilldown.setParentId(reportId);
+			}
+		}
+
+		for (Report report : reports) {
+			report.encryptAllPasswords();
+		}
+
+		return reports;
+	}
+
+	/**
+	 * Gets all nested report objects in a report's hierarchy
+	 *
+	 * @param allReports the list to fill with the reports obtained, including
+	 * the one passed
+	 * @param report the report to interogate
+	 * @throws SQLException
+	 */
+	private void getAllReports(List<Report> allReports, Report report, int recursionCount)
+			throws SQLException {
+
+		recursionCount++;
+		final int MAX_RECURSION_COUNT = 50;
+		if (recursionCount > MAX_RECURSION_COUNT) {
+			throw new RuntimeException("Max recursion count exceeded: " + MAX_RECURSION_COUNT);
+		}
+
+		int reportId = report.getReportId();
+		List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+		report.setDrilldowns(drilldowns);
+		allReports.add(report);
+		for (Drilldown drilldown : drilldowns) {
+			Report drilldownReport = drilldown.getDrilldownReport();
+			getAllReports(allReports, drilldownReport, recursionCount);
+		}
+
+		List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
+		for (Parameter parameter : parameters) {
+			Report defaultValueReport = parameter.getDefaultValueReport();
+			if (defaultValueReport != null) {
+				getAllReports(allReports, defaultValueReport, recursionCount);
+			}
+			Report lovReport = parameter.getLovReport();
+			if (lovReport != null) {
+				getAllReports(allReports, lovReport, recursionCount);
+			}
 		}
 	}
 }

@@ -31,7 +31,6 @@ import art.general.ActionResult;
 import art.parameter.ParameterService;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
-import art.reportgroupmembership.ReportGroupMembershipService2;
 import art.reportoptions.CloneOptions;
 import art.saiku.SaikuReport;
 import art.user.User;
@@ -46,7 +45,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,18 +79,15 @@ public class ReportService {
 	private final DatasourceService datasourceService;
 	private final ReportGroupService reportGroupService;
 	private final EncryptorService encryptorService;
-	private final ReportGroupMembershipService2 reportGroupMembershipService2;
 
 	@Autowired
 	public ReportService(DbService dbService, DatasourceService datasourceService,
-			ReportGroupService reportGroupService, EncryptorService encryptorService,
-			ReportGroupMembershipService2 reportGroupMembershipService2) {
+			ReportGroupService reportGroupService, EncryptorService encryptorService) {
 
 		this.dbService = dbService;
 		this.datasourceService = datasourceService;
 		this.reportGroupService = reportGroupService;
 		this.encryptorService = encryptorService;
-		this.reportGroupMembershipService2 = reportGroupMembershipService2;
 	}
 
 	public ReportService() {
@@ -100,7 +95,6 @@ public class ReportService {
 		datasourceService = new DatasourceService();
 		reportGroupService = new ReportGroupService();
 		encryptorService = new EncryptorService();
-		reportGroupMembershipService2 = new ReportGroupMembershipService2();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
@@ -290,6 +284,8 @@ public class ReportService {
 		report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
 		report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
 		report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
+		report.setLink(rs.getString("LINK"));
+		report.setOpenInNewWindow(rs.getBoolean("OPEN_IN_NEW_WINDOW"));
 		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -880,111 +876,6 @@ public class ReportService {
 	}
 
 	/**
-	 * Imports report records
-	 *
-	 * @param reports the list of reports to import
-	 * @param actionUser the user who is performing the import
-	 * @param conn the connection to use. if autocommit is false, no commit is
-	 * performed
-	 * @throws SQLException
-	 */
-	@CacheEvict(value = "reports", allEntries = true)
-	public void importReports(List<Report> reports, User actionUser,
-			Connection conn) throws SQLException {
-
-		logger.debug("Entering importReports: actionUser={}", actionUser);
-
-		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-		int reportId = dbService.getMaxRecordId(conn, sql);
-
-		sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
-		int datasourceId = dbService.getMaxRecordId(conn, sql);
-
-		sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
-		int encryptorId = dbService.getMaxRecordId(conn, sql);
-
-		sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
-		int reportGroupId = dbService.getMaxRecordId(conn, sql);
-
-		Map<String, Datasource> addedDatasources = new HashMap<>();
-		Map<String, Encryptor> addedEncryptors = new HashMap<>();
-		Map<String, ReportGroup> addedReportGroups = new HashMap<>();
-		for (Report report : reports) {
-			reportId++;
-
-			Datasource datasource = report.getDatasource();
-			if (datasource != null) {
-				String datasourceName = datasource.getName();
-				if (StringUtils.isBlank(datasourceName)) {
-					report.setDatasource(null);
-				} else {
-					Datasource existingDatasource = datasourceService.getDatasource(datasourceName);
-					if (existingDatasource == null) {
-						Datasource addedDatasource = addedDatasources.get(datasourceName);
-						if (addedDatasource == null) {
-							datasourceId++;
-							datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
-							addedDatasources.put(datasourceName, datasource);
-						} else {
-							report.setDatasource(addedDatasource);
-						}
-					} else {
-						report.setDatasource(existingDatasource);
-					}
-				}
-			}
-
-			Encryptor encryptor = report.getEncryptor();
-			if (encryptor != null) {
-				String encryptorName = encryptor.getName();
-				if (StringUtils.isBlank(encryptorName)) {
-					report.setEncryptor(null);
-				} else {
-					Encryptor existingEncryptor = encryptorService.getEncryptor(encryptorName);
-					if (existingEncryptor == null) {
-						Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
-						if (addedEncryptor == null) {
-							encryptorId++;
-							encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
-							addedEncryptors.put(encryptorName, encryptor);
-						} else {
-							report.setEncryptor(addedEncryptor);
-						}
-					} else {
-						report.setEncryptor(existingEncryptor);
-					}
-				}
-			}
-
-			List<ReportGroup> reportGroups = report.getReportGroups();
-			if (CollectionUtils.isNotEmpty(reportGroups)) {
-				List<ReportGroup> newReportGroups = new ArrayList<>();
-				for (ReportGroup reportGroup : reportGroups) {
-					String reportGroupName = reportGroup.getName();
-					ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
-					if (existingReportGroup == null) {
-						ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
-						if (addedReportGroup == null) {
-							reportGroupId++;
-							reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
-							addedReportGroups.put(reportGroupName, reportGroup);
-							newReportGroups.add(reportGroup);
-						} else {
-							newReportGroups.add(addedReportGroup);
-						}
-					} else {
-						newReportGroups.add(existingReportGroup);
-					}
-				}
-				report.setReportGroups(newReportGroups);
-			}
-
-			saveReport(report, reportId, actionUser, conn);
-			reportGroupMembershipService2.recreateReportGroupMemberships(report);
-		}
-	}
-
-	/**
 	 * Saves a report
 	 *
 	 * @param report the report to save
@@ -1049,9 +940,9 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
-					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS,"
+					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS, LINK, OPEN_IN_NEW_WINDOW,"
 					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 51) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1100,6 +991,8 @@ public class ReportService {
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
 				report.getSelfServiceOptions(),
+				report.getLink(),
+				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				actionUser.getUserId()
@@ -1126,7 +1019,7 @@ public class ReportService {
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
-					+ " SELF_SERVICE_OPTIONS=?,"
+					+ " SELF_SERVICE_OPTIONS=?, LINK=?, OPEN_IN_NEW_WINDOW=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1176,6 +1069,8 @@ public class ReportService {
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
 				report.getSelfServiceOptions(),
+				report.getLink(),
+				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

@@ -37,6 +37,21 @@ public class GeneralReportOptions implements Serializable {
 	private PivotTableJsOptions pivotTableJs;
 	private ViewOptions view;
 	private int refreshPeriodSeconds;
+	private Integer queryTimeoutSeconds;
+
+	/**
+	 * @return the queryTimeoutSeconds
+	 */
+	public Integer getQueryTimeoutSeconds() {
+		return queryTimeoutSeconds;
+	}
+
+	/**
+	 * @param queryTimeoutSeconds the queryTimeoutSeconds to set
+	 */
+	public void setQueryTimeoutSeconds(Integer queryTimeoutSeconds) {
+		this.queryTimeoutSeconds = queryTimeoutSeconds;
+	}
 
 	/**
 	 * @return the refreshPeriodSeconds

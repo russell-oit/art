@@ -99,6 +99,20 @@ public class ReportRuleService {
 			return type.cast(reportRule);
 		}
 	}
+	
+	/**
+	 * Returns all report rules
+	 *
+	 * @return all report rules
+	 * @throws SQLException
+	 */
+	@Cacheable("rules")
+	public List<ReportRule> getAllReportRules() throws SQLException {
+		logger.debug("Entering getAllReportRules");
+
+		ResultSetHandler<List<ReportRule>> h = new BeanListHandler<>(ReportRule.class, new ReportRuleMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
 
 	/**
 	 * Returns report rules for a given report

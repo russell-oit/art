@@ -109,7 +109,7 @@ public class RunReportController {
 
 		//check if output is being displayed within the show report page (inline) or in a new page
 		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
-		//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
+		//check if report header and footer should not be included e.g. in a dashboard component
 		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
 		//set appropriate error page to use
@@ -282,6 +282,8 @@ public class RunReportController {
 				}
 
 				return "redirect:/saiku3/" + parametersString + "#query/open/" + reportId;
+			} else if (reportType == ReportType.Link) {
+				return "redirect:" + report.getLink();
 			}
 
 			Integer totalTimeSeconds = null;

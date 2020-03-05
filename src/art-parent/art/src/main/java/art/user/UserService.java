@@ -160,10 +160,10 @@ public class UserService {
 
 	/**
 	 * Returns an object with basic properties loaded from a resultset
-	 * 
+	 *
 	 * @param rs the resultset
 	 * @return the loaded object
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private User loadBasicUser(ResultSet rs) throws SQLException {
 		User user = new User();
@@ -201,7 +201,7 @@ public class UserService {
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns all users with only basic properties filled
 	 *
@@ -628,6 +628,10 @@ public class UserService {
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			Map<String, Role> addedRoles = new HashMap<>();
 
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
+			List<Role> currentRoles = roleService.getAllRoles();
+
 			for (User user : users) {
 				userId++;
 
@@ -637,7 +641,10 @@ public class UserService {
 					if (StringUtils.isBlank(reportGroupName)) {
 						user.setDefaultReportGroup(null);
 					} else {
-						ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+						ReportGroup existingReportGroup = currentReportGroups.stream()
+								.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+								.findFirst()
+								.orElse(null);
 						if (existingReportGroup == null) {
 							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
 							if (addedReportGroup == null) {
@@ -663,7 +670,10 @@ public class UserService {
 							if (StringUtils.isBlank(reportGroupName)) {
 								userGroup.setDefaultReportGroup(null);
 							} else {
-								ReportGroup existingReportGroup = reportGroupService.getReportGroup(reportGroupName);
+								ReportGroup existingReportGroup = currentReportGroups.stream()
+										.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+										.findFirst()
+										.orElse(null);
 								if (existingReportGroup == null) {
 									ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
 									if (addedReportGroup == null) {
@@ -680,7 +690,10 @@ public class UserService {
 						}
 
 						String userGroupName = userGroup.getName();
-						UserGroup existingUserGroup = userGroupService.getUserGroup(userGroupName);
+						UserGroup existingUserGroup = currentUserGroups.stream()
+								.filter(g -> StringUtils.equals(userGroupName, g.getName()))
+								.findFirst()
+								.orElse(null);
 						if (existingUserGroup == null) {
 							UserGroup addedUserGroup = addedUserGroups.get(userGroupName);
 							if (addedUserGroup == null) {
@@ -703,7 +716,10 @@ public class UserService {
 					List<Role> newRoles = new ArrayList<>();
 					for (Role role : roles) {
 						String roleName = role.getName();
-						Role existingRole = roleService.getRole(roleName);
+						Role existingRole = currentRoles.stream()
+								.filter(r -> StringUtils.equals(roleName, r.getName()))
+								.findFirst()
+								.orElse(null);
 						if (existingRole == null) {
 							Role addedRole = addedRoles.get(roleName);
 							if (addedRole == null) {

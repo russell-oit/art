@@ -173,12 +173,23 @@ public class ReportController {
 				String name = report.getLocalizedName(locale);
 				String encodedName = Encode.forHtmlContent(name);
 
-				String link = "<a href='" + request.getContextPath()
-						+ "/selectReportParameters?reportId="
-						+ report.getReportId() + "'>" + encodedName + "</a>&nbsp;";
+				String finalLink;
+				if (report.getReportType() == ReportType.Link) {
+					String link = report.getLink();
+					String encodedLink = Encode.forHtmlAttribute(link);
+					String targetAttribute = "";
+					if (report.isOpenInNewWindow()) {
+						targetAttribute = "target='_blank'";
+					}
+					finalLink = "<a href='" + encodedLink + "' " + targetAttribute + ">" + encodedName + "</a>&nbsp;";
+				} else {
+					finalLink = "<a href='" + request.getContextPath()
+							+ "/selectReportParameters?reportId="
+							+ report.getReportId() + "'>" + encodedName + "</a>&nbsp;";
+				}
 
 				String label = ajaxTableHelper.processName("", report.getCreationDate(), report.getUpdateDate());
-				basicReport.setName2(link + label);
+				basicReport.setName2(finalLink + label);
 
 				String description = report.getLocalizedDescription(locale);
 				if (StringUtils.isNotBlank(description)) {

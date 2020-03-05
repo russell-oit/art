@@ -22,6 +22,7 @@ import art.accessright.UserGroupReportRight;
 import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
 import art.accessright.UserReportRightCsvExportMixIn;
+import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.datasource.DatasourceService;
@@ -178,6 +179,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private RoleService roleService;
+
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -1063,93 +1067,10 @@ public class ExportRecordsController {
 		String exportFilePath = null;
 
 		String ids = exportRecords.getIds();
-		List<Report> reports = reportService.getReports(ids);
+		List<Report> exportReports = reportService.getReports(ids);
 
-		List<ReportGroup> allReportGroups = new ArrayList<>();
-		List<ReportParameter> allReportParams = new ArrayList<>();
-		List<UserRuleValue> allUserRuleValues = new ArrayList<>();
-		List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
-		List<ReportRule> allReportRules = new ArrayList<>();
-		List<UserReportRight> allUserReportRights = new ArrayList<>();
-		List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
-		List<Drilldown> allDrilldowns = new ArrayList<>();
-		List<ReportParameter> allDrilldownReportParams = new ArrayList<>();
-
-		for (Report report : reports) {
-			int reportId = report.getReportId();
-
-			List<ReportGroup> reportGroups = report.getReportGroups();
-			for (ReportGroup reportGroup : reportGroups) {
-				reportGroup.setParentId(reportId);
-				allReportGroups.add(reportGroup);
-			}
-
-			List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
-			report.setReportParams(reportParams);
-			for (ReportParameter reportParam : reportParams) {
-				reportParam.setParentId(reportId);
-				allReportParams.add(reportParam);
-			}
-
-			List<UserRuleValue> userRuleValues = ruleValueService.getReportUserRuleValues(reportId);
-			report.setUserRuleValues(userRuleValues);
-			for (UserRuleValue userRuleValue : userRuleValues) {
-				userRuleValue.setParentId(reportId);
-				allUserRuleValues.add(userRuleValue);
-			}
-
-			List<UserGroupRuleValue> userGroupRuleValues = ruleValueService.getReportUserGroupRuleValues(reportId);
-			report.setUserGroupRuleValues(userGroupRuleValues);
-			for (UserGroupRuleValue userGroupRuleValue : userGroupRuleValues) {
-				userGroupRuleValue.setParentId(reportId);
-				allUserGroupRuleValues.add(userGroupRuleValue);
-			}
-
-			List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
-			report.setReportRules(reportRules);
-			for (ReportRule reportRule : reportRules) {
-				reportRule.setParentId(reportId);
-				allReportRules.add(reportRule);
-			}
-
-			List<UserReportRight> userReportRights = accessRightService.getUserReportRightsForReport(reportId);
-			report.setUserReportRights(userReportRights);
-			for (UserReportRight userReportRight : userReportRights) {
-				userReportRight.setParentId(reportId);
-				allUserReportRights.add(userReportRight);
-			}
-
-			List<UserGroupReportRight> userGroupReportRights = accessRightService.getUserGroupReportRightsForReport(reportId);
-			report.setUserGroupReportRights(userGroupReportRights);
-			for (UserGroupReportRight userGroupReportRight : userGroupReportRights) {
-				userGroupReportRight.setParentId(reportId);
-				allUserGroupReportRights.add(userGroupReportRight);
-			}
-
-			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
-			report.setDrilldowns(drilldowns);
-			for (Drilldown drilldown : drilldowns) {
-				drilldown.setParentId(reportId);
-				allDrilldowns.add(drilldown);
-
-				Report drilldownReport = drilldown.getDrilldownReport();
-				int drilldownReportId = drilldownReport.getReportId();
-				List<ReportParameter> drilldownReportParams = reportParameterService.getReportParameters(drilldownReportId);
-				for (ReportParameter drilldownReportParam : drilldownReportParams) {
-					drilldownReportParam.setParentId(drilldownReportId);
-					allDrilldownReportParams.add(drilldownReportParam);
-				}
-			}
-		}
-
-		for (Report report : reports) {
-			report.encryptAllPasswords();
-		}
-
-		for (Drilldown drilldown : allDrilldowns) {
-			Report drilldownReport = drilldown.getDrilldownReport();
-			drilldownReport.encryptAllPasswords();
-		}
+		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
+		List<Report> reports = reportServiceHelper.prepareReportsForExport(exportReports);
 
 		MigrationLocation location = exportRecords.getLocation();
 		switch (location) {
@@ -1180,6 +1101,41 @@ public class ExportRecordsController {
 						reportsFilePath = recordsExportPath + ExportRecords.EMBEDDED_CSV_REPORTS_FILENAME;
 						reportsFile = new File(reportsFilePath);
 						exportToCsv(reportsFile, reports, Report.class, ReportCsvExportMixIn.class);
+
+						List<ReportGroup> allReportGroups = new ArrayList<>();
+						List<ReportParameter> allReportParams = new ArrayList<>();
+						List<UserRuleValue> allUserRuleValues = new ArrayList<>();
+						List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
+						List<ReportRule> allReportRules = new ArrayList<>();
+						List<UserReportRight> allUserReportRights = new ArrayList<>();
+						List<UserGroupReportRight> allUserGroupReportRights = new ArrayList<>();
+						List<Drilldown> allDrilldowns = new ArrayList<>();
+
+						for (Report report : reports) {
+							List<ReportGroup> reportGroups = report.getReportGroups();
+							allReportGroups.addAll(reportGroups);
+
+							List<ReportParameter> reportParams = report.getReportParams();
+							allReportParams.addAll(reportParams);
+
+							List<UserRuleValue> userRuleValues = report.getUserRuleValues();
+							allUserRuleValues.addAll(userRuleValues);
+
+							List<UserGroupRuleValue> userGroupRuleValues = report.getUserGroupRuleValues();
+							allUserGroupRuleValues.addAll(userGroupRuleValues);
+
+							List<ReportRule> reportRules = report.getReportRules();
+							allReportRules.addAll(reportRules);
+
+							List<UserReportRight> userReportRights = report.getUserReportRights();
+							allUserReportRights.addAll(userReportRights);
+
+							List<UserGroupReportRight> userGroupReportRights = report.getUserGroupReportRights();
+							allUserGroupReportRights.addAll(userGroupReportRights);
+
+							List<Drilldown> drilldowns = report.getDrilldowns();
+							allDrilldowns.addAll(drilldowns);
+						}
 
 						if (CollectionUtils.isNotEmpty(allReportGroups)
 								|| CollectionUtils.isNotEmpty(allReportParams)
@@ -1215,9 +1171,6 @@ public class ExportRecordsController {
 
 							String drilldownsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNS_FILENAME;
 							File drilldownsFile = new File(drilldownsFilePath);
-
-							String drilldownReportParamsFilePath = recordsExportPath + ExportRecords.EMBEDDED_DRILLDOWNREPORTPARAMETERS_FILENAME;
-							File drilldownReportParamsFile = new File(drilldownReportParamsFilePath);
 
 							if (CollectionUtils.isNotEmpty(allReportGroups)) {
 								exportToCsv(reportGroupsFile, allReportGroups, ReportGroup.class);
@@ -1257,11 +1210,6 @@ public class ExportRecordsController {
 							if (CollectionUtils.isNotEmpty(allDrilldowns)) {
 								exportToCsv(drilldownsFile, allDrilldowns, Drilldown.class, DrilldownCsvExportMixIn.class);
 								filesToZip.add(drilldownsFilePath);
-
-								if (CollectionUtils.isNotEmpty(allDrilldownReportParams)) {
-									exportToCsv(drilldownReportParamsFile, allDrilldownReportParams, ReportParameter.class, ReportParameterCsvExportMixIn.class);
-									filesToZip.add(drilldownReportParamsFilePath);
-								}
 							}
 
 							exportFilePath = zipFilePath;
@@ -1275,7 +1223,6 @@ public class ExportRecordsController {
 							userReportRightsFile.delete();
 							userGroupReportRightsFile.delete();
 							drilldownsFile.delete();
-							drilldownReportParamsFile.delete();
 						} else {
 							exportFilePath = reportsFilePath;
 						}
@@ -1285,13 +1232,18 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 				boolean local = false;
 				reportServiceHelper.importReports(reports, sessionUser, conn, local);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
 		}
+
+		//clear objects that could have had their passwords encrypted, so as to have fresh start
+		cacheHelper.clearReports();
+		cacheHelper.clearDatasources();
+		cacheHelper.clearEncryptors();
+		cacheHelper.clearParameters();
 
 		return exportFilePath;
 	}

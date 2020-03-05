@@ -298,6 +298,8 @@ public class ScheduleService {
 
 			Map<String, Holiday> addedHolidays = new HashMap<>();
 			
+			List<Holiday> currentHolidays = holidayService.getAllHolidays();
+			
 			for (Schedule schedule : schedules) {
 				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
@@ -305,7 +307,10 @@ public class ScheduleService {
 					List<Holiday> newSharedHolidays = new ArrayList<>();
 					for (Holiday holiday : sharedHolidays) {
 						String holidayName = holiday.getName();
-						Holiday existingHoliday = holidayService.getHoliday(holidayName);
+						Holiday existingHoliday = currentHolidays.stream()
+							.filter(h -> StringUtils.equals(holidayName, h.getName()))
+							.findFirst()
+							.orElse(null);
 						if (existingHoliday == null) {
 							Holiday addedHoliday = addedHolidays.get(holidayName);
 							if (addedHoliday == null) {
