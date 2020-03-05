@@ -52,7 +52,7 @@ public enum ReportType {
 	C3(142), Plotly(160), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
-	ReportEngine(158), ReportEngineFile(159), View(161), File(162);
+	ReportEngine(158), ReportEngineFile(159), View(161), File(162), Link(163);
 
 	private final int value;
 
@@ -797,6 +797,8 @@ public enum ReportType {
 				return "View";
 			case File:
 				return "File";
+			case Link:
+				return "Link";
 			default:
 				return this.name();
 		}

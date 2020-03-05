@@ -284,6 +284,8 @@ public class ReportService {
 		report.setGridstackSavedOptions(rs.getString("GRIDSTACK_SAVED_OPTIONS"));
 		report.setViewReportId(rs.getInt("VIEW_REPORT_ID"));
 		report.setSelfServiceOptions(rs.getString("SELF_SERVICE_OPTIONS"));
+		report.setLink(rs.getString("LINK"));
+		report.setOpenInNewWindow(rs.getBoolean("OPEN_IN_NEW_WINDOW"));
 		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -938,9 +940,9 @@ public class ReportService {
 					+ " REPORT_OPTIONS, PAGE_ORIENTATION, LOV_USE_DYNAMIC_DATASOURCE,"
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
-					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS,"
+					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS, LINK, OPEN_IN_NEW_WINDOW,"
 					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 51) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -989,6 +991,8 @@ public class ReportService {
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
 				report.getSelfServiceOptions(),
+				report.getLink(),
+				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				actionUser.getUserId()
@@ -1015,7 +1019,7 @@ public class ReportService {
 					+ " OPEN_PASSWORD=?, MODIFY_PASSWORD=?, ENCRYPTOR_ID=?,"
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
-					+ " SELF_SERVICE_OPTIONS=?,"
+					+ " SELF_SERVICE_OPTIONS=?, LINK=?, OPEN_IN_NEW_WINDOW=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1065,6 +1069,8 @@ public class ReportService {
 				report.getGridstackSavedOptions(),
 				report.getViewReportId(),
 				report.getSelfServiceOptions(),
+				report.getLink(),
+				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

@@ -506,6 +506,7 @@ Edit report page
 						case 145: //datamaps file
 						case 150: //saiku connection
 						case 159: //reportengine file
+						case 163: //link
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -555,6 +556,7 @@ Edit report page
 					case 145: //datamaps file
 					case 150: //saiku connection
 					case 159: //reportengine file
+					case 163: //link
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -612,6 +614,7 @@ Edit report page
 					case 155: //org chart json
 					case 151: //mongodb
 					case 111: //text
+					case 163: //link
 						$("#sourceReportIdDiv").hide();
 						break;
 					default:
@@ -637,6 +640,7 @@ Edit report page
 					case 145: //datamaps file
 					case 150: //saiku connection
 					case 159: //reportengine file
+					case 163: //link
 						$("#useGroovyDiv").hide();
 						break;
 					default:
@@ -666,6 +670,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 163: //link
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -690,6 +695,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 163: //link
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -809,6 +815,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 163: //link
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -889,6 +896,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 160: //plotly
+					case 163: //link
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -949,6 +957,7 @@ Edit report page
 					case 156: //org chart list
 					case 157: //org chart ajax
 					case 159: //reportengine file
+					case 163: //link
 						$("#fetchSizeDiv").hide();
 						break;
 					default:
@@ -1099,6 +1108,7 @@ Edit report page
 					case 149: //saiku report
 					case 150: //saiku connection
 					case 120: //lov static
+					case 163: //link
 						$("#testReport").hide();
 						break;
 					default:
@@ -1131,10 +1141,38 @@ Edit report page
 					case 157: //org chart ajax
 					case 159: //report engine file
 					case 161: //view
+					case 163: //link
 						$("#testReportData").hide();
 						break;
 					default:
 						$("#testReportData").show();
+				}
+				
+				//show/hide show parameters checkbox
+				switch (reportTypeId) {
+					case 163: //link
+						$("#showParameters").hide();
+						break;
+					default:
+						$("#showParameters").show();
+				}
+				
+				//show/hide link fields
+				switch (reportTypeId) {
+					case 163: //link
+						$("#linkFields").show();
+						break;
+					default:
+						$("#linkFields").hide();
+				}
+				
+				//show/hide options div
+				switch (reportTypeId) {
+					case 163: //link
+						$("#optionsDiv").hide();
+						break;
+					default:
+						$("#optionsDiv").show();
 				}
 			}
 		</script>
@@ -1871,6 +1909,29 @@ Edit report page
 					</div>
 				</fieldset>
 
+				<fieldset id="linkFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="link">
+							<spring:message code="reports.label.link"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="link" maxlength="2000" class="form-control"/>
+							<form:errors path="link" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="openInNewWindow">
+							<spring:message code="drilldowns.label.openInNewWindow"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="openInNewWindow" id="openInNewWindow" class="switch-yes-no"/>
+							</div>
+							<form:errors path="openInNewWindow" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
 				<div id="sourceReportIdDiv" class="form-group">
 					<label class="control-label col-md-4" for="sourceReportId">
 						<spring:message code="reports.label.sourceReport"/>
@@ -1963,7 +2024,7 @@ Edit report page
 				<div class="form-group">
 					<div class="col-md-12">
 						<span class="pull-right">
-							<label class="checkbox-inline">
+							<label class="checkbox-inline" id="showParameters">
 								<input type="checkbox" name="showSelectedParameters" checked>
 								<spring:message code="reports.label.showParameters"/>
 							</label>

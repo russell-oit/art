@@ -282,6 +282,8 @@ public class RunReportController {
 				}
 
 				return "redirect:/saiku3/" + parametersString + "#query/open/" + reportId;
+			} else if (reportType == ReportType.Link) {
+				return "redirect:" + report.getLink();
 			}
 
 			Integer totalTimeSeconds = null;

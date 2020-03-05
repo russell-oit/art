@@ -149,6 +149,8 @@ public class Report implements Serializable {
 	private String comment;
 	private int viewReportId;
 	private String selfServiceOptions;
+	private String link;
+	private boolean openInNewWindow;
 	private Datasource datasource;
 	private Encryptor encryptor;
 	private List<ReportParameter> reportParams; //used in import/export
@@ -171,6 +173,34 @@ public class Report implements Serializable {
 	private boolean selfServicePreview;
 	@JsonIgnore
 	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
+
+	/**
+	 * @return the openInNewWindow
+	 */
+	public boolean isOpenInNewWindow() {
+		return openInNewWindow;
+	}
+
+	/**
+	 * @param openInNewWindow the openInNewWindow to set
+	 */
+	public void setOpenInNewWindow(boolean openInNewWindow) {
+		this.openInNewWindow = openInNewWindow;
+	}
+
+	/**
+	 * @return the link
+	 */
+	public String getLink() {
+		return link;
+	}
+
+	/**
+	 * @param link the link to set
+	 */
+	public void setLink(String link) {
+		this.link = link;
+	}
 
 	/**
 	 * @return the passwordsEncrypted
