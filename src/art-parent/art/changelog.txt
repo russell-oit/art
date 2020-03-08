@@ -1,3 +1,6 @@
+ART 4.12.1
+* Fix for error with multi parameter
+
 ART 4.12
 * Fix for incorrect export of reports that share datasources
 * Fix for report import on sql server
