@@ -464,8 +464,10 @@ public class ParameterProcessor {
 				}
 
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
-					//do nothing. all possible values will be added later
+					//all possible values will be added later
 					//so that parameter substitution is available
+					//set to empty list so that property isn't null
+					reportParam.setActualParameterValues(actualValues);
 				} else {
 					for (String actualValueString : actualValueStrings) {
 						//convert string value to appropriate object
