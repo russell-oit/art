@@ -1520,7 +1520,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				roleService.importRoles(roles, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				roleService.importRoles(roles, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

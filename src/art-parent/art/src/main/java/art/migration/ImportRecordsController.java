@@ -255,7 +255,7 @@ public class ImportRecordsController {
 						importReports(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Roles:
-						importRoles(tempFile, sessionUser, conn, fileFormat);
+						importRoles(tempFile, sessionUser, conn, importRecords);
 						break;
 					default:
 						break;
@@ -1505,16 +1505,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importRoles(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importRoles: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importRoles");
 
 		List<Role> roles;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				roles = importFromJson(file, new TypeReference<List<Role>>() {
@@ -1570,7 +1570,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		roleService.importRoles(roles, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		roleService.importRoles(roles, sessionUser, conn, overwrite);
 	}
 
 	/**
