@@ -608,7 +608,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				reportGroupService.importReportGroups(reportGroups, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
