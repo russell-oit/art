@@ -598,13 +598,15 @@ public class UserService {
 	 * @param users the list of users to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void importUsers(List<User> users, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importUsers: actionUser={}", actionUser);
+		logger.debug("Entering importUsers: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -621,6 +623,15 @@ public class UserService {
 			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
 			int roleId = dbService.getMaxRecordId(sql);
 
+			List<User> currentUsers = new ArrayList<>();
+			if (overwrite) {
+				currentUsers = getAllUsers();
+			}
+
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
+			List<Role> currentRoles = roleService.getAllRoles();
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
@@ -628,13 +639,7 @@ public class UserService {
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			Map<String, Role> addedRoles = new HashMap<>();
 
-			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
-			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
-			List<Role> currentRoles = roleService.getAllRoles();
-
 			for (User user : users) {
-				userId++;
-
 				ReportGroup userDefaultReportGroup = user.getDefaultReportGroup();
 				if (userDefaultReportGroup != null) {
 					String reportGroupName = userDefaultReportGroup.getName();
@@ -655,7 +660,12 @@ public class UserService {
 								user.setDefaultReportGroup(addedReportGroup);
 							}
 						} else {
-							user.setDefaultReportGroup(existingReportGroup);
+							if (overwrite) {
+								userDefaultReportGroup.setReportGroupId(existingReportGroup.getReportGroupId());
+								reportGroupService.updateReportGroup(userDefaultReportGroup, actionUser, conn);
+							} else {
+								user.setDefaultReportGroup(existingReportGroup);
+							}
 						}
 					}
 				}
@@ -684,7 +694,12 @@ public class UserService {
 										userGroup.setDefaultReportGroup(addedReportGroup);
 									}
 								} else {
-									userGroup.setDefaultReportGroup(existingReportGroup);
+									if (overwrite) {
+										userGroupDefaultReportGroup.setReportGroupId(existingReportGroup.getReportGroupId());
+										reportGroupService.updateReportGroup(userGroupDefaultReportGroup, actionUser, conn);
+									} else {
+										userGroup.setDefaultReportGroup(existingReportGroup);
+									}
 								}
 							}
 						}
@@ -705,7 +720,13 @@ public class UserService {
 								newUserGroups.add(addedUserGroup);
 							}
 						} else {
-							newUserGroups.add(existingUserGroup);
+							if (overwrite) {
+								userGroup.setUserGroupId(existingUserGroup.getUserGroupId());
+								userGroupService.updateUserGroup(userGroup, actionUser, conn);
+								newUserGroups.add(userGroup);
+							} else {
+								newUserGroups.add(existingUserGroup);
+							}
 						}
 					}
 					user.setUserGroups(newUserGroups);
@@ -731,13 +752,39 @@ public class UserService {
 								newRoles.add(addedRole);
 							}
 						} else {
-							newRoles.add(existingRole);
+							if (overwrite) {
+								role.setRoleId(existingRole.getRoleId());
+								roleService.updateRole(role, actionUser, conn);
+								newRoles.add(role);
+							} else {
+								newRoles.add(existingRole);
+							}
 						}
 					}
 					user.setRoles(newRoles);
 				}
 
-				saveUser(user, userId, actionUser, conn);
+				String username = user.getUsername();
+				boolean update = false;
+				if (overwrite) {
+					User existingUser = currentUsers.stream()
+							.filter(d -> StringUtils.equals(username, d.getUsername()))
+							.findFirst()
+							.orElse(null);
+					if (existingUser != null) {
+						update = true;
+						user.setUserId(existingUser.getUserId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					userId++;
+					newRecordId = userId;
+				}
+				saveUser(user, newRecordId, actionUser, conn);
 				userGroupMembershipService2.recreateUserGroupMemberships(user);
 				userPermissionService.recreateUserPermissions(user);
 				userRoleService.recreateUserRoles(user);

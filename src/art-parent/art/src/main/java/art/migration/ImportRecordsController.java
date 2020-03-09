@@ -243,7 +243,7 @@ public class ImportRecordsController {
 						importSchedules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Users:
-						importUsers(tempFile, sessionUser, conn, fileFormat);
+						importUsers(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Rules:
 						importRules(tempFile, sessionUser, conn, importRecords);
@@ -762,16 +762,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUsers(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importUsers: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importUsers");
 
 		List<User> users;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				users = importFromJson(file, new TypeReference<List<User>>() {
@@ -878,7 +878,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		userService.importUsers(users, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		userService.importUsers(users, sessionUser, conn, overwrite);
 	}
 
 	/**

@@ -345,10 +345,26 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateUserGroup(group, actionUser, conn);
+	}
+
+	/**
+	 * Updates a user group
+	 *
+	 * @param group the updated user group
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "users"}, allEntries = true)
+	public void updateUserGroup(UserGroup group, User actionUser, Connection conn)
+			throws SQLException {
+
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
 		Integer newRecordId = null;
-		saveUserGroup(group, newRecordId, actionUser);
+		saveUserGroup(group, newRecordId, actionUser, conn);
 	}
 
 	/**
