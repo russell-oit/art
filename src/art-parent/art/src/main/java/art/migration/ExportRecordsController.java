@@ -566,7 +566,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				holidayService.importHolidays(holidays, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				holidayService.importHolidays(holidays, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

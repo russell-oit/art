@@ -306,7 +306,7 @@ public class DatasourceService {
 			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
 			int id = dbService.getMaxRecordId(conn, sql);
 
-			List<Datasource> currentDatasources = new ArrayList<>();;
+			List<Datasource> currentDatasources = new ArrayList<>();
 			if (overwrite) {
 				currentDatasources = getAllDatasources();
 			}

@@ -228,7 +228,7 @@ public class ImportRecordsController {
 						importEncryptors(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Holidays:
-						importHolidays(tempFile, sessionUser, conn, fileFormat);
+						importHolidays(tempFile, sessionUser, conn, importRecords);
 						break;
 					case ReportGroups:
 						importReportGroups(tempFile, sessionUser, conn, fileFormat);
@@ -487,16 +487,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importHolidays(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importHolidays: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importHolidays");
 
 		List<Holiday> holidays;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				holidays = importFromJson(file, new TypeReference<List<Holiday>>() {
@@ -509,7 +509,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		holidayService.importHolidays(holidays, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		holidayService.importHolidays(holidays, sessionUser, conn, overwrite);
 	}
 
 	/**

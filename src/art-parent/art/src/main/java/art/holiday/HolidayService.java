@@ -274,13 +274,15 @@ public class HolidayService {
 	 * @param holidays the list of holidays to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "holidays", allEntries = true)
 	public void importHolidays(List<Holiday> holidays, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importHolidays: actionUser={}", actionUser);
+		logger.debug("Entering importHolidays: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -288,12 +290,36 @@ public class HolidayService {
 			String sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Holiday> currentHolidays = new ArrayList<>();
+			if (overwrite) {
+				currentHolidays = getAllHolidays();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Holiday holiday : holidays) {
-				id++;
-				saveHoliday(holiday, id, actionUser, conn);
+				String holidayName = holiday.getName();
+				boolean update = false;
+				if (overwrite) {
+					Holiday existingHoliday = currentHolidays.stream()
+							.filter(d -> StringUtils.equals(holidayName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingHoliday != null) {
+						update = true;
+						holiday.setHolidayId(existingHoliday.getHolidayId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveHoliday(holiday, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
