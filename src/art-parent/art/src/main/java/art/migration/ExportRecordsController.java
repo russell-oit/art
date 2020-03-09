@@ -652,7 +652,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

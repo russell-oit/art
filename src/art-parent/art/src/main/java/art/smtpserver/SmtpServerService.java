@@ -302,13 +302,15 @@ public class SmtpServerService {
 	 * @param smtpServers the list of smtp servers to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "smtpServers", allEntries = true)
 	public void importSmtpServers(List<SmtpServer> smtpServers, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importSmtpServers: actionUser={}", actionUser);
+		logger.debug("Entering importSmtpServers: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -316,12 +318,36 @@ public class SmtpServerService {
 			String sql = "SELECT MAX(SMTP_SERVER_ID) FROM ART_SMTP_SERVERS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<SmtpServer> currentSmtpServers = new ArrayList<>();
+			if (overwrite) {
+				currentSmtpServers = getAllSmtpServers();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (SmtpServer smtpServer : smtpServers) {
-				id++;
-				saveSmtpServer(smtpServer, id, actionUser, conn);
+				String smtpServerName = smtpServer.getName();
+				boolean update = false;
+				if (overwrite) {
+					SmtpServer existingSmtpServer = currentSmtpServers.stream()
+							.filter(d -> StringUtils.equals(smtpServerName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingSmtpServer != null) {
+						update = true;
+						smtpServer.setSmtpServerId(existingSmtpServer.getSmtpServerId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveSmtpServer(smtpServer, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

@@ -376,7 +376,7 @@ public class ReportGroupService {
 		try {
 			String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
 			int id = dbService.getMaxRecordId(conn, sql);
-			
+
 			List<ReportGroup> currentReportGroups = new ArrayList<>();
 			if (overwrite) {
 				currentReportGroups = getAllReportGroups();

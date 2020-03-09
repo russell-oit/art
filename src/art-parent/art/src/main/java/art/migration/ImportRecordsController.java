@@ -234,7 +234,7 @@ public class ImportRecordsController {
 						importReportGroups(tempFile, sessionUser, conn, importRecords);
 						break;
 					case SmtpServers:
-						importSmtpServers(tempFile, sessionUser, conn, fileFormat);
+						importSmtpServers(tempFile, sessionUser, conn, importRecords);
 						break;
 					case UserGroups:
 						importUserGroups(tempFile, sessionUser, conn, fileFormat);
@@ -542,7 +542,7 @@ public class ImportRecordsController {
 		}
 
 		boolean overwrite = importRecords.isOverwrite();
-		reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
+		reportGroupService.importReportGroups(reportGroups, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -551,16 +551,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importSmtpServers(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importSmtpServers: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importSmtpServers");
 
 		List<SmtpServer> smtpServers;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				smtpServers = importFromJson(file, new TypeReference<List<SmtpServer>>() {
@@ -579,7 +579,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn, overwrite);
 	}
 
 	/**
