@@ -246,7 +246,7 @@ public class ImportRecordsController {
 						importUsers(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Rules:
-						importRules(tempFile, sessionUser, conn, fileFormat);
+						importRules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Parameters:
 						importParameters(tempFile, sessionUser, conn, fileFormat);
@@ -885,16 +885,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importRules(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importRules: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importRules");
 
 		List<Rule> rules;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				rules = importFromJson(file, new TypeReference<List<Rule>>() {
@@ -907,7 +907,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		ruleService.importRules(rules, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		ruleService.importRules(rules, sessionUser, conn, overwrite);
 	}
 
 	/**

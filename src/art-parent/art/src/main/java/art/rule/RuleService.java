@@ -17,6 +17,7 @@
  */
 package art.rule;
 
+import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
@@ -295,26 +296,52 @@ public class RuleService {
 	 * @param rules the list of rules to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
 	public void importRules(List<Rule> rules, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importRules: actionUser={}", actionUser);
+		logger.debug("Entering importRules: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
 		try {
 			String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
 			int id = dbService.getMaxRecordId(conn, sql);
+			
+			List<Rule> currentRules = new ArrayList<>();
+			if (overwrite) {
+				currentRules = getAllRules();
+			}
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Rule rule : rules) {
-				id++;
-				saveRule(rule, id, actionUser, conn);
+				String ruleName = rule.getName();
+				boolean update = false;
+				if (overwrite) {
+					Rule existingRule = currentRules.stream()
+							.filter(d -> StringUtils.equals(ruleName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingRule != null) {
+						update = true;
+						rule.setRuleId(existingRule.getRuleId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveRule(rule, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
