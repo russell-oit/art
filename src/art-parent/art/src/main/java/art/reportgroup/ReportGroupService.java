@@ -349,10 +349,26 @@ public class ReportGroupService {
 	 */
 	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateReportGroup(group, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing report group
+	 *
+	 * @param group the updated report group
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
+	public void updateReportGroup(ReportGroup group, User actionUser, Connection conn)
+			throws SQLException {
+		
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
 		Integer newRecordId = null;
-		saveReportGroup(group, newRecordId, actionUser);
+		saveReportGroup(group, newRecordId, actionUser, conn);
 	}
 
 	/**

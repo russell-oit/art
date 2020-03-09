@@ -277,10 +277,24 @@ public class RoleService {
 	 */
 	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
 	public void updateRole(Role role, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateRole(role, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing role
+	 *
+	 * @param role the updated role
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
+	public void updateRole(Role role, User actionUser, Connection conn) throws SQLException {
 		logger.debug("Entering updateRole: role={}, actionUser={}", role, actionUser);
 
 		Integer newRecordId = null;
-		saveRole(role, newRecordId, actionUser);
+		saveRole(role, newRecordId, actionUser, conn);
 	}
 
 	/**

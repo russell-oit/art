@@ -747,7 +747,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				userGroupService.importUserGroups(userGroups, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				userGroupService.importUserGroups(userGroups, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

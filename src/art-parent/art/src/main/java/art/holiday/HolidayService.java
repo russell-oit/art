@@ -262,8 +262,6 @@ public class HolidayService {
 	 */
 	@CacheEvict(value = "holidays", allEntries = true)
 	public void updateHoliday(Holiday holiday, User actionUser) throws SQLException {
-		logger.debug("Entering updateHoliday: holiday={}, actionUser={}", holiday, actionUser);
-
 		Connection conn = null;
 		updateHoliday(holiday, actionUser, conn);
 	}

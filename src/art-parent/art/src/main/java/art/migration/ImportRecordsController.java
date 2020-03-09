@@ -237,7 +237,7 @@ public class ImportRecordsController {
 						importSmtpServers(tempFile, sessionUser, conn, importRecords);
 						break;
 					case UserGroups:
-						importUserGroups(tempFile, sessionUser, conn, fileFormat);
+						importUserGroups(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Schedules:
 						importSchedules(tempFile, sessionUser, conn, importRecords);
@@ -589,16 +589,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUserGroups(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importUserGroups: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importUserGroups");
 
 		List<UserGroup> userGroups;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				userGroups = importFromJson(file, new TypeReference<List<UserGroup>>() {
@@ -677,7 +677,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		userGroupService.importUserGroups(userGroups, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		userGroupService.importUserGroups(userGroups, sessionUser, conn, overwrite);
 	}
 
 	/**
