@@ -290,13 +290,15 @@ public class DatasourceService {
 	 * @param datasources the list of datasources to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void importDatasources(List<Datasource> datasources, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importDatasources: actionUser={}", actionUser);
+		logger.debug("Entering importDatasources: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -304,12 +306,36 @@ public class DatasourceService {
 			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Datasource> currentDatasources = new ArrayList<>();;
+			if (overwrite) {
+				currentDatasources = getAllDatasources();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Datasource datasource : datasources) {
-				id++;
-				saveDatasource(datasource, id, actionUser, conn);
+				String datasourceName = datasource.getName();
+				boolean update = false;
+				if (overwrite) {
+					Datasource existingDatasource = currentDatasources.stream()
+							.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingDatasource != null) {
+						update = true;
+						datasource.setDatasourceId(existingDatasource.getDatasourceId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveDatasource(datasource, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

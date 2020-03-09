@@ -31,6 +31,7 @@ public class ImportRecords implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private MigrationRecordType recordType;
 	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+	private boolean overwrite;
 
 	/**
 	 * @return the fileFormat
@@ -58,5 +59,19 @@ public class ImportRecords implements Serializable {
 	 */
 	public void setRecordType(MigrationRecordType recordType) {
 		this.recordType = recordType;
+	}
+
+	/**
+	 * @return the overwrite
+	 */
+	public boolean isOverwrite() {
+		return overwrite;
+	}
+
+	/**
+	 * @param overwrite the overwrite to set
+	 */
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
 	}
 }

@@ -405,7 +405,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				datasourceService.importDatasources(datasources, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				datasourceService.importDatasources(datasources, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -448,7 +449,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				destinationService.importDestinations(destinations, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				destinationService.importDestinations(destinations, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

@@ -219,10 +219,10 @@ public class ImportRecordsController {
 						importSettings(tempFile, sessionUser, conn, fileFormat, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn, fileFormat);
+						importDatasources(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Destinations:
-						importDestinations(tempFile, sessionUser, conn, fileFormat);
+						importDestinations(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Encryptors:
 						importEncryptors(tempFile, sessionUser, conn, fileFormat);
@@ -331,16 +331,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importDatasources: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importDatasources");
 
 		List<Datasource> datasources;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				datasources = importFromJson(file, new TypeReference<List<Datasource>>() {
@@ -359,7 +359,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		datasourceService.importDatasources(datasources, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		datasourceService.importDatasources(datasources, sessionUser, conn, overwrite);
 
 		ArtDatabase artDbConfig = Config.getArtDbConfig();
 		for (Datasource datasource : datasources) {
@@ -376,16 +377,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importDestinations: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importDestinations");
 
 		List<Destination> destinations;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				destinations = importFromJson(file, new TypeReference<List<Destination>>() {
@@ -404,7 +405,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		destinationService.importDestinations(destinations, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		destinationService.importDestinations(destinations, sessionUser, conn, overwrite);
 	}
 
 	/**

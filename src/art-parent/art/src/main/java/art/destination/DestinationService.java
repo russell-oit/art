@@ -291,13 +291,15 @@ public class DestinationService {
 	 * @param destinations the list of destinations to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "destinations", allEntries = true)
 	public void importDestinations(List<Destination> destinations, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importDestinations: actionUser={}", actionUser);
+		logger.debug("Entering importDestinations: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -305,12 +307,36 @@ public class DestinationService {
 			String sql = "SELECT MAX(DESTINATION_ID) FROM ART_DESTINATIONS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Destination> currentDestinations = new ArrayList<>();
+			if (overwrite) {
+				currentDestinations = getAllDestinations();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Destination destination : destinations) {
-				id++;
-				saveDestination(destination, id, actionUser, conn);
+				String destinationName = destination.getName();
+				boolean update = false;
+				if (overwrite) {
+					Destination existingDestination = currentDestinations.stream()
+							.filter(d -> StringUtils.equals(destinationName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingDestination != null) {
+						update = true;
+						destination.setDestinationId(existingDestination.getDestinationId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveDestination(destination, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
