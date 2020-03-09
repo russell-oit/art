@@ -301,13 +301,15 @@ public class EncryptorService {
 	 * @param encryptors the list of encryptors to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "encryptors", allEntries = true)
 	public void importEncryptors(List<Encryptor> encryptors, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importEncryptors: actionUser={}", actionUser);
+		logger.debug("Entering importEncryptors: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -315,12 +317,36 @@ public class EncryptorService {
 			String sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Encryptor> currentEncryptors = new ArrayList<>();;
+			if (overwrite) {
+				currentEncryptors = getAllEncryptors();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Encryptor encryptor : encryptors) {
-				id++;
-				saveEncryptor(encryptor, id, actionUser, conn);
+				String encryptorName = encryptor.getName();
+				boolean update = false;
+				if (overwrite) {
+					Encryptor existingEncryptor = currentEncryptors.stream()
+							.filter(d -> StringUtils.equals(encryptorName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingEncryptor != null) {
+						update = true;
+						encryptor.setEncryptorId(existingEncryptor.getEncryptorId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveEncryptor(encryptor, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

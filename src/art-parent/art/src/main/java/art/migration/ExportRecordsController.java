@@ -522,7 +522,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				encryptorService.importEncryptors(encryptors, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				encryptorService.importEncryptors(encryptors, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

@@ -225,7 +225,7 @@ public class ImportRecordsController {
 						importDestinations(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Encryptors:
-						importEncryptors(tempFile, sessionUser, conn, fileFormat);
+						importEncryptors(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Holidays:
 						importHolidays(tempFile, sessionUser, conn, fileFormat);
@@ -415,19 +415,19 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importEncryptors(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importEncryptors: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importEncryptors");
 
 		List<Encryptor> encryptors;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
 
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -477,7 +477,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		encryptorService.importEncryptors(encryptors, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		encryptorService.importEncryptors(encryptors, sessionUser, conn, overwrite);
 	}
 
 	/**
