@@ -264,8 +264,26 @@ public class HolidayService {
 	public void updateHoliday(Holiday holiday, User actionUser) throws SQLException {
 		logger.debug("Entering updateHoliday: holiday={}, actionUser={}", holiday, actionUser);
 
+		Connection conn = null;
+		updateHoliday(holiday, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing holiday
+	 *
+	 * @param holiday the updated holiday
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "holidays", allEntries = true)
+	public void updateHoliday(Holiday holiday, User actionUser, Connection conn)
+			throws SQLException {
+		
+		logger.debug("Entering updateHoliday: holiday={}, actionUser={}", holiday, actionUser);
+
 		Integer newRecordId = null;
-		saveHoliday(holiday, newRecordId, actionUser);
+		saveHoliday(holiday, newRecordId, actionUser, conn);
 	}
 
 	/**

@@ -240,7 +240,7 @@ public class ImportRecordsController {
 						importUserGroups(tempFile, sessionUser, conn, fileFormat);
 						break;
 					case Schedules:
-						importSchedules(tempFile, sessionUser, conn, fileFormat);
+						importSchedules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Users:
 						importUsers(tempFile, sessionUser, conn, fileFormat);
@@ -686,16 +686,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importSchedules(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importSchedules: sessionUser={}, fileFormat",
-				sessionUser, fileFormat);
+		logger.debug("Entering importSchedules");
 
 		List<Schedule> schedules;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				schedules = importFromJson(file, new TypeReference<List<Schedule>>() {
@@ -751,7 +751,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		scheduleService.importSchedules(schedules, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		scheduleService.importSchedules(schedules, sessionUser, conn, overwrite);
 	}
 
 	/**

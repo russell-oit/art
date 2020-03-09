@@ -276,13 +276,15 @@ public class ScheduleService {
 	 * @param schedules the list of schedules to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
 	public void importSchedules(List<Schedule> schedules, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importSchedules: actionUser={}", actionUser);
+		logger.debug("Entering importSchedules: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -293,24 +295,28 @@ public class ScheduleService {
 			sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
 			int holidayId = dbService.getMaxRecordId(sql);
 
+			List<Schedule> currentSchedules = new ArrayList<>();
+			if (overwrite) {
+				currentSchedules = getAllSchedules();
+			}
+
+			List<Holiday> currentHolidays = holidayService.getAllHolidays();
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			Map<String, Holiday> addedHolidays = new HashMap<>();
-			
-			List<Holiday> currentHolidays = holidayService.getAllHolidays();
-			
+
 			for (Schedule schedule : schedules) {
-				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
 				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
 					List<Holiday> newSharedHolidays = new ArrayList<>();
 					for (Holiday holiday : sharedHolidays) {
 						String holidayName = holiday.getName();
 						Holiday existingHoliday = currentHolidays.stream()
-							.filter(h -> StringUtils.equals(holidayName, h.getName()))
-							.findFirst()
-							.orElse(null);
+								.filter(h -> StringUtils.equals(holidayName, h.getName()))
+								.findFirst()
+								.orElse(null);
 						if (existingHoliday == null) {
 							Holiday addedHoliday = addedHolidays.get(holidayName);
 							if (addedHoliday == null) {
@@ -322,12 +328,39 @@ public class ScheduleService {
 								newSharedHolidays.add(addedHoliday);
 							}
 						} else {
-							newSharedHolidays.add(existingHoliday);
+							if (overwrite) {
+								holiday.setHolidayId(existingHoliday.getHolidayId());
+								holidayService.updateHoliday(holiday, actionUser, conn);
+								newSharedHolidays.add(holiday);
+							} else {
+								newSharedHolidays.add(existingHoliday);
+							}
 						}
 					}
 					schedule.setSharedHolidays(newSharedHolidays);
 				}
-				saveSchedule(schedule, scheduleId, actionUser, conn);
+
+				String scheduleName = schedule.getName();
+				boolean update = false;
+				if (overwrite) {
+					Schedule existingSchedule = currentSchedules.stream()
+							.filter(d -> StringUtils.equals(scheduleName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingSchedule != null) {
+						update = true;
+						schedule.setScheduleId(existingSchedule.getScheduleId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					scheduleId++;
+					newRecordId = scheduleId;
+				}
+				saveSchedule(schedule, newRecordId, actionUser, conn);
 				scheduleHolidayService.recreateScheduleHolidays(schedule);
 			}
 			conn.commit();

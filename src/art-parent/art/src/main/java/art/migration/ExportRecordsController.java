@@ -816,7 +816,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				scheduleService.importSchedules(schedules, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				scheduleService.importSchedules(schedules, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
