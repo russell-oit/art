@@ -638,6 +638,9 @@ public class UserService {
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			Map<String, Role> addedRoles = new HashMap<>();
+			List<Integer> updatedReportGroupIds = new ArrayList<>();
+			List<Integer> updatedUserGroupIds = new ArrayList<>();
+			List<Integer> updatedRoleIds = new ArrayList<>();
 
 			for (User user : users) {
 				ReportGroup userDefaultReportGroup = user.getDefaultReportGroup();
@@ -661,8 +664,12 @@ public class UserService {
 							}
 						} else {
 							if (overwrite) {
-								userDefaultReportGroup.setReportGroupId(existingReportGroup.getReportGroupId());
-								reportGroupService.updateReportGroup(userDefaultReportGroup, actionUser, conn);
+								int existingReportGroupId = existingReportGroup.getReportGroupId();
+								if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+									userDefaultReportGroup.setReportGroupId(existingReportGroupId);
+									reportGroupService.updateReportGroup(userDefaultReportGroup, actionUser, conn);
+									updatedReportGroupIds.add(existingReportGroupId);
+								}
 							} else {
 								user.setDefaultReportGroup(existingReportGroup);
 							}
@@ -695,8 +702,12 @@ public class UserService {
 									}
 								} else {
 									if (overwrite) {
-										userGroupDefaultReportGroup.setReportGroupId(existingReportGroup.getReportGroupId());
-										reportGroupService.updateReportGroup(userGroupDefaultReportGroup, actionUser, conn);
+										int existingReportGroupId = existingReportGroup.getReportGroupId();
+										if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+											userGroupDefaultReportGroup.setReportGroupId(existingReportGroupId);
+											reportGroupService.updateReportGroup(userGroupDefaultReportGroup, actionUser, conn);
+											updatedReportGroupIds.add(existingReportGroupId);
+										}
 									} else {
 										userGroup.setDefaultReportGroup(existingReportGroup);
 									}
@@ -721,9 +732,13 @@ public class UserService {
 							}
 						} else {
 							if (overwrite) {
-								userGroup.setUserGroupId(existingUserGroup.getUserGroupId());
-								userGroupService.updateUserGroup(userGroup, actionUser, conn);
-								newUserGroups.add(userGroup);
+								int existingUserGroupId = existingUserGroup.getUserGroupId();
+								if (!updatedUserGroupIds.contains(existingUserGroupId)) {
+									userGroup.setUserGroupId(existingUserGroupId);
+									userGroupService.updateUserGroup(userGroup, actionUser, conn);
+									newUserGroups.add(userGroup);
+									updatedUserGroupIds.add(existingUserGroupId);
+								}
 							} else {
 								newUserGroups.add(existingUserGroup);
 							}
@@ -753,9 +768,13 @@ public class UserService {
 							}
 						} else {
 							if (overwrite) {
-								role.setRoleId(existingRole.getRoleId());
-								roleService.updateRole(role, actionUser, conn);
-								newRoles.add(role);
+								int existingRoleId = existingRole.getRoleId();
+								if (!updatedRoleIds.contains(existingRoleId)) {
+									role.setRoleId(existingRoleId);
+									roleService.updateRole(role, actionUser, conn);
+									newRoles.add(role);
+									updatedRoleIds.add(existingRoleId);
+								}
 							} else {
 								newRoles.add(existingRole);
 							}

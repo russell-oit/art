@@ -306,6 +306,7 @@ public class ScheduleService {
 			conn.setAutoCommit(false);
 
 			Map<String, Holiday> addedHolidays = new HashMap<>();
+			List<Integer> updatedHolidayIds = new ArrayList<>();
 
 			for (Schedule schedule : schedules) {
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
@@ -329,9 +330,13 @@ public class ScheduleService {
 							}
 						} else {
 							if (overwrite) {
-								holiday.setHolidayId(existingHoliday.getHolidayId());
-								holidayService.updateHoliday(holiday, actionUser, conn);
-								newSharedHolidays.add(holiday);
+								int existingHolidayId = existingHoliday.getHolidayId();
+								if (!updatedHolidayIds.contains(existingHolidayId)) {
+									holiday.setHolidayId(existingHolidayId);
+									holidayService.updateHoliday(holiday, actionUser, conn);
+									newSharedHolidays.add(holiday);
+									updatedHolidayIds.add(existingHolidayId);
+								}
 							} else {
 								newSharedHolidays.add(existingHoliday);
 							}
