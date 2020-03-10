@@ -1051,7 +1051,8 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				boolean local = false;
-				parameterService.importParameters(parameters, sessionUser, conn, local);
+				boolean overwrite = exportRecords.isOverwrite();
+				parameterService.importParameters(parameters, sessionUser, conn, local, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);

@@ -17,6 +17,7 @@
  */
 package art.parameter;
 
+import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
@@ -437,20 +438,26 @@ public class ParameterService {
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
+	 * @param overwrite whether to overwrite existing records
 	 * @throws Exception
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void importParameters(List<Parameter> parameters, User actionUser,
-			Connection conn, boolean local) throws Exception {
+			Connection conn, boolean local, boolean overwrite) throws Exception {
 
-		logger.debug("Entering importParameters: actionUser={}, local={}",
-				actionUser, local);
+		logger.debug("Entering importParameters: actionUser={}, local={},"
+				+ " overwrite={}", actionUser, local, overwrite);
 
 		boolean originalAutoCommit = true;
 
 		try {
 			String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 			int id = dbService.getMaxRecordId(conn, sql);
+			
+			List<Parameter> currentParameters = new ArrayList<>();
+			if (overwrite) {
+				currentParameters = getAllParameters();
+			}
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
@@ -474,8 +481,27 @@ public class ParameterService {
 			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
 
 			for (Parameter parameter : parameters) {
-				id++;
-				saveParameter(parameter, id, actionUser, conn);
+				int parameterId = parameter.getParameterId();
+				boolean update = false;
+				if (overwrite) {
+					Parameter existingParameter = currentParameters.stream()
+							.filter(d -> parameterId == d.getParameterId())
+							.findFirst()
+							.orElse(null);
+					if (existingParameter != null) {
+						update = true;
+						parameter.setParameterId(existingParameter.getParameterId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveParameter(parameter, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (Exception ex) {

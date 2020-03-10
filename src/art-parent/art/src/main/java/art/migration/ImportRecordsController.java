@@ -249,7 +249,7 @@ public class ImportRecordsController {
 						importRules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Parameters:
-						importParameters(tempFile, sessionUser, conn, fileFormat);
+						importParameters(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Reports:
 						importReports(tempFile, sessionUser, conn, fileFormat);
@@ -920,11 +920,11 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importParameters(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
 		logger.debug("Entering importParameters: sessionUser={}, fileFormat={}",
 				sessionUser, fileFormat);
@@ -932,7 +932,7 @@ public class ImportRecordsController {
 		List<Parameter> parameters;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
-
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -988,7 +988,8 @@ public class ImportRecordsController {
 		}
 
 		boolean local = true;
-		parameterService.importParameters(parameters, sessionUser, conn, local);
+		boolean overwrite = importRecords.isOverwrite();
+		parameterService.importParameters(parameters, sessionUser, conn, local, overwrite);
 	}
 
 	/**
