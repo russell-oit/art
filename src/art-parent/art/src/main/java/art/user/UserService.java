@@ -228,6 +228,10 @@ public class UserService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -528,10 +532,24 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUser(User user, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateUser(user, actionUser, conn);
+	}
+
+	/**
+	 * Updates a user record
+	 *
+	 * @param user the updated user record
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void updateUser(User user, User actionUser, Connection conn) throws SQLException {
 		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
 		Integer newRecordId = null;
-		saveUser(user, newRecordId, actionUser);
+		saveUser(user, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -543,11 +561,17 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUsers(MultipleUserEdit multipleUserEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateUsers: multipleUserEdit={}, actionUser={}", multipleUserEdit, actionUser);
+		logger.debug("Entering updateUsers: multipleUserEdit={}, actionUser={}",
+				multipleUserEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleUserEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleUserEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
@@ -618,10 +642,10 @@ public class UserService {
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			int userGroupId = dbService.getMaxRecordId(sql);
+			int userGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
-			int roleId = dbService.getMaxRecordId(sql);
+			int roleId = dbService.getMaxRecordId(conn, sql);
 
 			List<User> currentUsers = new ArrayList<>();
 			if (overwrite) {
@@ -804,9 +828,9 @@ public class UserService {
 					newRecordId = userId;
 				}
 				saveUser(user, newRecordId, actionUser, conn);
-				userGroupMembershipService2.recreateUserGroupMemberships(user);
-				userPermissionService.recreateUserPermissions(user);
-				userRoleService.recreateUserRoles(user);
+				userGroupMembershipService2.recreateUserGroupMemberships(user, conn);
+				userPermissionService.recreateUserPermissions(user, conn);
+				userRoleService.recreateUserRoles(user, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

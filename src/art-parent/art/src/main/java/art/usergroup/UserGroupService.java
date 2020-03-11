@@ -158,6 +158,10 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE USER_GROUP_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -393,7 +397,7 @@ public class UserGroupService {
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
-			int roleId = dbService.getMaxRecordId(sql);
+			int roleId = dbService.getMaxRecordId(conn, sql);
 
 			List<UserGroup> currentUserGroups = new ArrayList<>();
 			if (overwrite) {
@@ -503,8 +507,8 @@ public class UserGroupService {
 					newRecordId = userGroupId;
 				}
 				saveUserGroup(userGroup, newRecordId, actionUser, conn);
-				userGroupPermissionService.recreateUserGroupPermissions(userGroup);
-				userGroupRoleService.recreateUserGroupRoles(userGroup);
+				userGroupPermissionService.recreateUserGroupPermissions(userGroup, conn);
+				userGroupRoleService.recreateUserGroupRoles(userGroup, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

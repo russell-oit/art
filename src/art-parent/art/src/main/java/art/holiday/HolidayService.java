@@ -121,6 +121,10 @@ public class HolidayService {
 		logger.debug("Entering getHolidays: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE HOLIDAY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

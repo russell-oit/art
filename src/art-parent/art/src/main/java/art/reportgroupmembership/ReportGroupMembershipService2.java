@@ -20,6 +20,7 @@ package art.reportgroupmembership;
 import art.dbutils.DbService;
 import art.report.Report;
 import art.reportgroup.ReportGroup;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,24 +81,43 @@ public class ReportGroupMembershipService2 {
 	 */
 	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
 	public void recreateReportGroupMemberships(Report report) throws SQLException {
+		Connection conn = null;
+		recreateReportGroupMemberships(report, conn);
+	}
+
+	/**
+	 * Recreates report group membership records for a given report
+	 *
+	 * @param report the report
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
+	public void recreateReportGroupMemberships(Report report, Connection conn) throws SQLException {
 		logger.debug("Entering recreateReportGroupMemberships: report={}", report);
 
-		deleteAllReportGroupMembershipsForReport(report.getReportId());
-		addReportGroupMemberships(report, report.getReportGroups());
+		deleteAllReportGroupMembershipsForReport(report.getReportId(), conn);
+		addReportGroupMemberships(report, report.getReportGroups(), conn);
 	}
 
 	/**
 	 * Delete all report group memberships for the given report
 	 *
 	 * @param reportId the report id
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
-	public void deleteAllReportGroupMembershipsForReport(int reportId) throws SQLException {
+	private void deleteAllReportGroupMembershipsForReport(int reportId,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering deleteAllReportGroupMembershipsForReport: reportId={}", reportId);
 
 		String sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
-		dbService.update(sql, reportId);
+		if (conn == null) {
+			dbService.update(sql, reportId);
+		} else {
+			dbService.update(conn, sql, reportId);
+		}
 	}
 
 	/**
@@ -105,10 +125,12 @@ public class ReportGroupMembershipService2 {
 	 *
 	 * @param report the report, not null
 	 * @param reportGroups the report groups
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
-	public void addReportGroupMemberships(Report report, List<ReportGroup> reportGroups) throws SQLException {
+	public void addReportGroupMemberships(Report report,
+			List<ReportGroup> reportGroups, Connection conn) throws SQLException {
 		logger.debug("Entering addReportGroupMemberships: report={}", report);
 
 		Objects.requireNonNull(report, "report must not be null");
@@ -123,7 +145,7 @@ public class ReportGroupMembershipService2 {
 		}
 		Integer[] reports = {report.getReportId()};
 		String action = "add";
-		updateReportGroupMembership(action, reports, reportGroupIds.toArray(new Integer[0]));
+		updateReportGroupMembership(action, reports, reportGroupIds.toArray(new Integer[0]), conn);
 	}
 
 	/**
@@ -135,7 +157,26 @@ public class ReportGroupMembershipService2 {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
-	public void updateReportGroupMembership(String action, Integer[] reports, Integer[] reportGroups) throws SQLException {
+	public void updateReportGroupMembership(String action, Integer[] reports,
+			Integer[] reportGroups) throws SQLException {
+
+		Connection conn = null;
+		updateReportGroupMembership(action, reports, reportGroups, conn);
+	}
+
+	/**
+	 * Adds or removes report group memberships
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param reports report ids
+	 * @param reportGroups report group ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"reports", "reportGroups"}, allEntries = true)
+	public void updateReportGroupMembership(String action, Integer[] reports,
+			Integer[] reportGroups, Connection conn) throws SQLException {
+
 		logger.debug("Entering updateReportGroupMemberships: action='{}'", action);
 
 		logger.debug("(reports == null) = {}", reports == null);
@@ -169,14 +210,23 @@ public class ReportGroupMembershipService2 {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, reportId, reportId, reportGroupId);
+					if (conn == null) {
+						affectedRows = dbService.update(sqlTest, reportId, reportId, reportGroupId);
+					} else {
+						affectedRows = dbService.update(conn, sqlTest, reportId, reportId, reportGroupId);
+					}
+
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRecord = false;
 					}
 				}
 				if (updateRecord) {
-					dbService.update(sql, reportId, reportGroupId);
+					if (conn == null) {
+						dbService.update(sql, reportId, reportGroupId);
+					} else {
+						dbService.update(conn, sql, reportId, reportGroupId);
+					}
 				}
 			}
 		}

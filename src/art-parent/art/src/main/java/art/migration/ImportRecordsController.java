@@ -252,7 +252,7 @@ public class ImportRecordsController {
 						importParameters(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Reports:
-						importReports(tempFile, sessionUser, conn, fileFormat);
+						importReports(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Roles:
 						importRoles(tempFile, sessionUser, conn, importRecords);
@@ -926,8 +926,7 @@ public class ImportRecordsController {
 	private void importParameters(File file, User sessionUser, Connection conn,
 			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importParameters: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importParameters");
 
 		List<Parameter> parameters;
 		String extension = FilenameUtils.getExtension(file.getName());
@@ -998,19 +997,18 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importReports: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importReports");
 
 		List<Report> reports;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
-
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -1272,7 +1270,9 @@ public class ImportRecordsController {
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 		boolean local = true;
-		reportServiceHelper.importReports(reports, sessionUser, conn, local);
+		boolean overwrite = importRecords.isOverwrite();
+		reportServiceHelper.importReports(reports, sessionUser, conn, local, overwrite);
+		
 		cacheHelper.clearReports();
 		cacheHelper.clearReportGroups();
 		cacheHelper.clearDatasources();

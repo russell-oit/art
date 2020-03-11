@@ -199,6 +199,7 @@ public class RuleValueService {
 	 */
 	public boolean userRuleValueExists(int userId, int ruleId,
 			String ruleValue) throws SQLException {
+
 		Connection conn = null;
 		return userRuleValueExists(userId, ruleId, ruleValue, conn);
 

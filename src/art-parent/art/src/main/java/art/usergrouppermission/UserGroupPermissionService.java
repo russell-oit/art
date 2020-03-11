@@ -20,6 +20,7 @@ package art.usergrouppermission;
 import art.dbutils.DbService;
 import art.permission.Permission;
 import art.usergroup.UserGroup;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class UserGroupPermissionService {
 		ResultSetHandler<List<UserGroupPermission>> h = new BeanListHandler<>(UserGroupPermission.class, new UserGroupPermissionMapper());
 		return dbService.query(sql, h, userGroupId);
 	}
-	
+
 	/**
 	 * Returns the user group permissions for a given permission
 	 *
@@ -159,7 +160,7 @@ public class UserGroupPermissionService {
 		sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=? AND PERMISSION_ID=?";
 		dbService.update(sql, userGroupId, permissionId);
 	}
-	
+
 	/**
 	 * Recreates user group-permission records for a given user group
 	 *
@@ -168,25 +169,45 @@ public class UserGroupPermissionService {
 	 */
 	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
 	public void recreateUserGroupPermissions(UserGroup userGroup) throws SQLException {
+		Connection conn = null;
+		recreateUserGroupPermissions(userGroup, conn);
+	}
+
+	/**
+	 * Recreates user group-permission records for a given user group
+	 *
+	 * @param userGroup the user group
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void recreateUserGroupPermissions(UserGroup userGroup, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserGroupPermissions: userGroup={}", userGroup);
 
 		int userGroupId = userGroup.getUserGroupId();
-		deleteAllUserGroupPermissionsForUserGroup(userGroupId);
-		addUserGroupPermissions(userGroupId, userGroup.getPermissions());
+		deleteAllUserGroupPermissionsForUserGroup(userGroupId, conn);
+		addUserGroupPermissions(userGroupId, userGroup.getPermissions(), conn);
 	}
 
 	/**
 	 * Delete all user group-permission records for the given user group
 	 *
 	 * @param userGroupId the user group id
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
-	public void deleteAllUserGroupPermissionsForUserGroup(int userGroupId) throws SQLException {
-		logger.debug("Entering deleteAllUserGroupPermissionsForUserGroup: userGroupId={}", userGroupId);
+	public void deleteAllUserGroupPermissionsForUserGroup(int userGroupId,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering deleteAllUserGroupPermissionsForUserGroup:"
+				+ " userGroupId={}", userGroupId);
 
 		String sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=?";
-		dbService.update(sql, userGroupId);
+		if (conn == null) {
+			dbService.update(sql, userGroupId);
+		} else {
+			dbService.update(conn, sql, userGroupId);
+		}
 	}
 
 	/**
@@ -194,10 +215,12 @@ public class UserGroupPermissionService {
 	 *
 	 * @param userGroupId the user group id
 	 * @param permissions the permissions
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
-	public void addUserGroupPermissions(int userGroupId, List<Permission> permissions) throws SQLException {
+	private void addUserGroupPermissions(int userGroupId, List<Permission> permissions,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addUserGroupPermissions: userGroupId={}", userGroupId);
 
 		if (CollectionUtils.isEmpty(permissions)) {
@@ -211,7 +234,7 @@ public class UserGroupPermissionService {
 
 		Integer[] userGroups = {userGroupId};
 		String action = "add";
-		updateUserGroupPermissions(action, userGroups, permissionIds.toArray(new Integer[0]));
+		updateUserGroupPermissions(action, userGroups, permissionIds.toArray(new Integer[0]), conn);
 	}
 
 	/**
@@ -223,7 +246,26 @@ public class UserGroupPermissionService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
-	public void updateUserGroupPermissions(String action, Integer[] userGroups, Integer[] permissions) throws SQLException {
+	public void updateUserGroupPermissions(String action, Integer[] userGroups,
+			Integer[] permissions) throws SQLException {
+
+		Connection conn = null;
+		updateUserGroupPermissions(action, userGroups, permissions, conn);
+	}
+
+	/**
+	 * Adds or removes user group-permission records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param userGroups user group ids
+	 * @param permissions permission ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	public void updateUserGroupPermissions(String action, Integer[] userGroups,
+			Integer[] permissions, Connection conn) throws SQLException {
+
 		logger.debug("Entering updateUserGroupPermissions: action='{}'", action);
 
 		logger.debug("(userGroups == null) = {}", userGroups == null);
@@ -256,14 +298,23 @@ public class UserGroupPermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, permissionId);
+					if (conn == null) {
+						affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, permissionId);
+					} else {
+						affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, permissionId);
+					}
+
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRecord = false;
 					}
 				}
 				if (updateRecord) {
-					dbService.update(sql, userGroupId, permissionId);
+					if (conn == null) {
+						dbService.update(sql, userGroupId, permissionId);
+					} else {
+						dbService.update(conn, sql, userGroupId, permissionId);
+					}
 				}
 			}
 		}

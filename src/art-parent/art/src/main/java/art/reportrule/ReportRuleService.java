@@ -218,6 +218,10 @@ public class ReportRuleService {
 	@CacheEvict(value = "rules", allEntries = true)
 	public void deleteReportRules(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReportRules: ids={}", (Object) ids);
+		
+		if (ids.length == 0) {
+			return;
+		}
 
 		String sql;
 
@@ -255,10 +259,23 @@ public class ReportRuleService {
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
 	public void updateReportRule(ReportRule reportRule) throws SQLException {
+		Connection conn = null;
+		updateReportRule(reportRule, conn);
+	}
+	
+	/**
+	 * Updates an existing report rule
+	 *
+	 * @param reportRule the updated report rule
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void updateReportRule(ReportRule reportRule, Connection conn) throws SQLException {
 		logger.debug("Entering updateReportRule: reportRule={}", reportRule);
 
 		Integer newRecordId = null;
-		saveReportRule(reportRule, newRecordId);
+		saveReportRule(reportRule, newRecordId, conn);
 	}
 
 	/**

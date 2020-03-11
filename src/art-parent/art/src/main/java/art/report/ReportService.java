@@ -524,6 +524,10 @@ public class ReportService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -1103,12 +1107,20 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void updateReports(MultipleReportEdit multipleReportEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateReports: multipleReportEdit={}, actionUser={}", multipleReportEdit, actionUser);
+	public void updateReports(MultipleReportEdit multipleReportEdit,
+			User actionUser) throws SQLException {
+
+		logger.debug("Entering updateReports: multipleReportEdit={},"
+				+ " actionUser={}", multipleReportEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleReportEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleReportEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_QUERIES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

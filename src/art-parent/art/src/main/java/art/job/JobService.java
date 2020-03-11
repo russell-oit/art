@@ -270,6 +270,10 @@ public class JobService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -700,11 +704,17 @@ public class JobService {
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void updateJobs(MultipleJobEdit multipleJobEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateJobs: multipleJobEdit={}, actionUser={}", multipleJobEdit, actionUser);
+		logger.debug("Entering updateJobs: multipleJobEdit={}, actionUser={}",
+				multipleJobEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleJobEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleJobEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_JOBS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

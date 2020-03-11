@@ -138,6 +138,10 @@ public class EncryptorService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -482,15 +486,20 @@ public class EncryptorService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
-	public void updateEncryptors(MultipleEncryptorEdit multipleEncryptorEdit, User actionUser)
-			throws SQLException {
+	public void updateEncryptors(MultipleEncryptorEdit multipleEncryptorEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateEncryptors: multipleEncryptorEdit={}, actionUser={}",
-				multipleEncryptorEdit, actionUser);
+		logger.debug("Entering updateEncryptors: multipleEncryptorEdit={},"
+				+ " actionUser={}", multipleEncryptorEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleEncryptorEdit.getIds());
+		
+		if(idsList.isEmpty()){
+			return;
+		}
+		
 		if (!multipleEncryptorEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_ENCRYPTORS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

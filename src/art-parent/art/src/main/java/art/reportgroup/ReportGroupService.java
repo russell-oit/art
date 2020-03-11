@@ -171,6 +171,10 @@ public class ReportGroupService {
 		logger.debug("Entering getReportGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE QUERY_GROUP_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";

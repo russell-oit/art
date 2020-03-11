@@ -122,6 +122,10 @@ public class RuleService {
 		logger.debug("Entering getRules: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE RULE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -284,10 +288,24 @@ public class RuleService {
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
 	public void updateRule(Rule rule, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateRule(rule, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing rule
+	 *
+	 * @param rule the updated rule
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void updateRule(Rule rule, User actionUser, Connection conn) throws SQLException {
 		logger.debug("Entering updateRule: rule={}, actionUser={}", rule, actionUser);
 
 		Integer newRecordId = null;
-		saveRule(rule, newRecordId, actionUser);
+		saveRule(rule, newRecordId, actionUser, conn);
 	}
 
 	/**

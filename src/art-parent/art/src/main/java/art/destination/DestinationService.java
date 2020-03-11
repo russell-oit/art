@@ -141,6 +141,10 @@ public class DestinationService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -498,17 +502,20 @@ public class DestinationService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"destinations", "jobs"}, allEntries = true)
-	public void updateDestinations(MultipleDestinationEdit multipleDestinationEdit, User actionUser)
-			throws SQLException {
+	public void updateDestinations(MultipleDestinationEdit multipleDestinationEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateDestinations: multipleDestinationEdit={}, actionUser={}",
-				multipleDestinationEdit, actionUser);
-
-		String sql;
+		logger.debug("Entering updateDestinations: multipleDestinationEdit={},"
+				+ " actionUser={}", multipleDestinationEdit, actionUser);
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleDestinationEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleDestinationEdit.isActiveUnchanged()) {
-			sql = "UPDATE ART_DESTINATIONS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+			String sql = "UPDATE ART_DESTINATIONS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE DESTINATION_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();

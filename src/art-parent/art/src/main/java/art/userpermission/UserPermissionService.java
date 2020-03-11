@@ -20,6 +20,7 @@ package art.userpermission;
 import art.dbutils.DbService;
 import art.permission.Permission;
 import art.user.User;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class UserPermissionService {
 		ResultSetHandler<List<UserPermission>> h = new BeanListHandler<>(UserPermission.class, new UserPermissionMapper());
 		return dbService.query(sql, h, userId);
 	}
-	
+
 	/**
 	 * Returns the user permissions for a given permission
 	 *
@@ -167,25 +168,42 @@ public class UserPermissionService {
 	 */
 	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
 	public void recreateUserPermissions(User user) throws SQLException {
+		Connection conn = null;
+		recreateUserPermissions(user, conn);
+	}
+
+	/**
+	 * Recreates user-permission records for a given user
+	 *
+	 * @param user the user
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void recreateUserPermissions(User user, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserPermissions: user={}", user);
 
 		int userId = user.getUserId();
-		deleteAllUserPermissionsForUser(userId);
-		addUserPermissions(userId, user.getPermissions());
+		deleteAllUserPermissionsForUser(userId, conn);
+		addUserPermissions(userId, user.getPermissions(), conn);
 	}
 
 	/**
 	 * Delete all user-permission records for the given user
 	 *
 	 * @param userId the user id
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
-	public void deleteAllUserPermissionsForUser(int userId) throws SQLException {
+	private void deleteAllUserPermissionsForUser(int userId, Connection conn) throws SQLException {
 		logger.debug("Entering deleteAllUserPermissionsForUser: userId={}", userId);
 
 		String sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=?";
-		dbService.update(sql, userId);
+		if (conn == null) {
+			dbService.update(sql, userId);
+		} else {
+			dbService.update(conn, sql, userId);
+		}
 	}
 
 	/**
@@ -193,10 +211,12 @@ public class UserPermissionService {
 	 *
 	 * @param userId the user id
 	 * @param permissions the permissions
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
-	public void addUserPermissions(int userId, List<Permission> permissions) throws SQLException {
+	private void addUserPermissions(int userId, List<Permission> permissions,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addUserPermissions: userId={}", userId);
 
 		if (CollectionUtils.isEmpty(permissions)) {
@@ -210,7 +230,7 @@ public class UserPermissionService {
 
 		Integer[] users = {userId};
 		String action = "add";
-		updateUserPermissions(action, users, permissionIds.toArray(new Integer[0]));
+		updateUserPermissions(action, users, permissionIds.toArray(new Integer[0]), conn);
 	}
 
 	/**
@@ -222,7 +242,26 @@ public class UserPermissionService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
-	public void updateUserPermissions(String action, Integer[] users, Integer[] permissions) throws SQLException {
+	public void updateUserPermissions(String action, Integer[] users,
+			Integer[] permissions) throws SQLException {
+
+		Connection conn = null;
+		updateUserPermissions(action, users, permissions, conn);
+	}
+
+	/**
+	 * Adds or removes user-permission records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param users user ids
+	 * @param permissions permission ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	public void updateUserPermissions(String action, Integer[] users,
+			Integer[] permissions, Connection conn) throws SQLException {
+
 		logger.debug("Entering updateUserPermissions: action='{}'", action);
 
 		logger.debug("(users == null) = {}", users == null);
@@ -255,14 +294,23 @@ public class UserPermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, userId, userId, permissionId);
+					if (conn == null) {
+						affectedRows = dbService.update(sqlTest, userId, userId, permissionId);
+					} else {
+						affectedRows = dbService.update(conn, sqlTest, userId, userId, permissionId);
+					}
+
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRecord = false;
 					}
 				}
 				if (updateRecord) {
-					dbService.update(sql, userId, permissionId);
+					if (conn == null) {
+						dbService.update(sql, userId, permissionId);
+					} else {
+						dbService.update(conn, sql, userId, permissionId);
+					}
 				}
 			}
 		}

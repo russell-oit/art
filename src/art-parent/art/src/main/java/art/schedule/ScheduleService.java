@@ -145,6 +145,10 @@ public class ScheduleService {
 		logger.debug("Entering getSchedules: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -293,7 +297,7 @@ public class ScheduleService {
 			int scheduleId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
-			int holidayId = dbService.getMaxRecordId(sql);
+			int holidayId = dbService.getMaxRecordId(conn, sql);
 
 			List<Schedule> currentSchedules = new ArrayList<>();
 			if (overwrite) {
@@ -366,7 +370,7 @@ public class ScheduleService {
 					newRecordId = scheduleId;
 				}
 				saveSchedule(schedule, newRecordId, actionUser, conn);
-				scheduleHolidayService.recreateScheduleHolidays(schedule);
+				scheduleHolidayService.recreateScheduleHolidays(schedule, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

@@ -132,6 +132,10 @@ public class RoleService {
 		logger.debug("Entering getRoles: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE ROLE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -349,7 +353,7 @@ public class RoleService {
 					newRecordId = id;
 				}
 				saveRole(role, newRecordId, actionUser, conn);
-				rolePermissionService.recreateRolePermissions(role);
+				rolePermissionService.recreateRolePermissions(role, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

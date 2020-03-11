@@ -208,6 +208,10 @@ public class ParameterService {
 		logger.debug("Entering getParameters: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE PARAMETER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -478,7 +482,7 @@ public class ParameterService {
 			List<Report> reports = reportServiceHelper.prepareReportsForExport(parameterReports);
 
 			boolean commitReports = false;
-			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
+			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports, overwrite);
 
 			for (Parameter parameter : parameters) {
 				int parameterId = parameter.getParameterId();

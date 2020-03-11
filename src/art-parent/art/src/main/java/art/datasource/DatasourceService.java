@@ -90,6 +90,10 @@ public class DatasourceService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -541,17 +545,20 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
-	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser)
-			throws SQLException {
+	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}",
-				multipleDatasourceEdit, actionUser);
-
-		String sql;
+		logger.debug("Entering updateDatasources: multipleDatasourceEdit={},"
+				+ " actionUser={}", multipleDatasourceEdit, actionUser);
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleDatasourceEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleDatasourceEdit.isActiveUnchanged()) {
-			sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+			String sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();

@@ -20,6 +20,7 @@ package art.usergrouprole;
 import art.dbutils.DbService;
 import art.role.Role;
 import art.usergroup.UserGroup;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -168,26 +169,43 @@ public class UserGroupRoleService {
 	 */
 	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
 	public void recreateUserGroupRoles(UserGroup userGroup) throws SQLException {
+		Connection conn = null;
+		recreateUserGroupRoles(userGroup, conn);
+	}
+
+	/**
+	 * Recreates user group-role records for a given user group
+	 *
+	 * @param userGroup the user group
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	public void recreateUserGroupRoles(UserGroup userGroup, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserGroupRoles: userGroup={}", userGroup);
 
 		int userGroupId = userGroup.getUserGroupId();
 
-		deleteAllRolesForUserGroup(userGroupId);
-		addUserGroupRoles(userGroupId, userGroup.getRoles());
+		deleteAllRolesForUserGroup(userGroupId, conn);
+		addUserGroupRoles(userGroupId, userGroup.getRoles(), conn);
 	}
 
 	/**
 	 * Delete all user group-role records for the given user group
 	 *
 	 * @param userGroupId the user group id
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
-	public void deleteAllRolesForUserGroup(int userGroupId) throws SQLException {
+	private void deleteAllRolesForUserGroup(int userGroupId, Connection conn) throws SQLException {
 		logger.debug("Entering deleteAllRolesForUserGroup: userGroupId={}", userGroupId);
 
 		String sql = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=?";
-		dbService.update(sql, userGroupId);
+		if (conn == null) {
+			dbService.update(sql, userGroupId);
+		} else {
+			dbService.update(conn, sql, userGroupId);
+		}
 	}
 
 	/**
@@ -195,10 +213,12 @@ public class UserGroupRoleService {
 	 *
 	 * @param userGroupId the user group id
 	 * @param roles the roles
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
-	public void addUserGroupRoles(int userGroupId, List<Role> roles) throws SQLException {
+	public void addUserGroupRoles(int userGroupId, List<Role> roles,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addUserGroupRoles: userGroupId={}", userGroupId);
 
 		if (CollectionUtils.isEmpty(roles)) {
@@ -224,7 +244,26 @@ public class UserGroupRoleService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
-	public void updateUserGroupRoles(String action, Integer[] userGroups, Integer[] roles) throws SQLException {
+	public void updateUserGroupRoles(String action, Integer[] userGroups,
+			Integer[] roles) throws SQLException {
+
+		Connection conn = null;
+		updateUserGroupRoles(action, userGroups, roles, conn);
+	}
+
+	/**
+	 * Adds or removes user group-role records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param userGroups user group ids
+	 * @param roles role ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	public void updateUserGroupRoles(String action, Integer[] userGroups,
+			Integer[] roles, Connection conn) throws SQLException {
+
 		logger.debug("Entering updateUserGroupRoles: action='{}'", action);
 
 		logger.debug("(userGroups == null) = {}", userGroups == null);
@@ -257,14 +296,23 @@ public class UserGroupRoleService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, roleId);
+					if (conn == null) {
+						affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, roleId);
+					} else {
+						affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, roleId);
+					}
+
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRecord = false;
 					}
 				}
 				if (updateRecord) {
-					dbService.update(sql, userGroupId, roleId);
+					if (conn == null) {
+						dbService.update(sql, userGroupId, roleId);
+					} else {
+						dbService.update(conn, sql, userGroupId, roleId);
+					}
 				}
 			}
 		}

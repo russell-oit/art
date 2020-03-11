@@ -155,6 +155,10 @@ public class SmtpServerService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -492,15 +496,20 @@ public class SmtpServerService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"smtpServers", "jobs"}, allEntries = true)
-	public void updateSmtpServers(MultipleSmtpServerEdit multipleSmtpServerEdit, User actionUser)
-			throws SQLException {
+	public void updateSmtpServers(MultipleSmtpServerEdit multipleSmtpServerEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateSmtpServers: multipleSmtpServerEdit={}, actionUser={}",
-				multipleSmtpServerEdit, actionUser);
+		logger.debug("Entering updateSmtpServers: multipleSmtpServerEdit={},"
+				+ " actionUser={}", multipleSmtpServerEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleSmtpServerEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleSmtpServerEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_SMTP_SERVERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

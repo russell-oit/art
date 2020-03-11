@@ -1244,7 +1244,8 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				boolean local = false;
-				reportServiceHelper.importReports(reports, sessionUser, conn, local);
+				boolean overwrite = exportRecords.isOverwrite();
+				reportServiceHelper.importReports(reports, sessionUser, conn, local, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
