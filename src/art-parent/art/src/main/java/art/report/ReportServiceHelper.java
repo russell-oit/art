@@ -147,149 +147,134 @@ public class ReportServiceHelper {
 			sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
-			Map<String, Report> addedReports = new HashMap<>();
 			Map<String, Datasource> addedDatasources = new HashMap<>();
 			Map<String, Encryptor> addedEncryptors = new HashMap<>();
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
-			List<Integer> updatedReportIds = new ArrayList<>();
 			List<Integer> updatedDatasourceIds = new ArrayList<>();
 			List<Integer> updatedEncryptorIds = new ArrayList<>();
 			List<Integer> updatedReportGroupIds = new ArrayList<>();
 			List<Datasource> updatedDatasources = new ArrayList<>();
 
 			for (Report report : reports) {
+				Datasource datasource = report.getDatasource();
+				if (datasource != null) {
+					String datasourceName = datasource.getName();
+					Datasource existingDatasource = currentDatasources.stream()
+							.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingDatasource == null) {
+						Datasource addedDatasource = addedDatasources.get(datasourceName);
+						if (addedDatasource == null) {
+							datasourceId++;
+							datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
+							addedDatasources.put(datasourceName, datasource);
+						} else {
+							report.setDatasource(addedDatasource);
+						}
+					} else {
+						if (overwrite) {
+							int existingDatasourceId = existingDatasource.getDatasourceId();
+							if (!updatedDatasourceIds.contains(existingDatasourceId)) {
+								datasource.setDatasourceId(existingDatasourceId);
+								datasourceService.updateDatasource(datasource, actionUser, conn);
+								updatedDatasourceIds.add(existingDatasourceId);
+								updatedDatasources.add(datasource);
+							}
+						} else {
+							report.setDatasource(existingDatasource);
+						}
+					}
+				}
+
+				Encryptor encryptor = report.getEncryptor();
+				if (encryptor != null) {
+					String encryptorName = encryptor.getName();
+					Encryptor existingEncryptor = currentEncryptors.stream()
+							.filter(e -> StringUtils.equals(encryptorName, e.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingEncryptor == null) {
+						Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
+						if (addedEncryptor == null) {
+							encryptorId++;
+							encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
+							addedEncryptors.put(encryptorName, encryptor);
+						} else {
+							report.setEncryptor(addedEncryptor);
+						}
+					} else {
+						if (overwrite) {
+							int existingEncryptorId = existingEncryptor.getEncryptorId();
+							if (!updatedEncryptorIds.contains(existingEncryptorId)) {
+								encryptor.setEncryptorId(existingEncryptorId);
+								encryptorService.updateEncryptor(encryptor, actionUser, conn);
+								updatedEncryptorIds.add(existingEncryptorId);
+							}
+						} else {
+							report.setEncryptor(existingEncryptor);
+						}
+					}
+				}
+
+				List<ReportGroup> reportGroups = report.getReportGroups();
+				if (CollectionUtils.isNotEmpty(reportGroups)) {
+					List<ReportGroup> newReportGroups = new ArrayList<>();
+					for (ReportGroup reportGroup : reportGroups) {
+						String reportGroupName = reportGroup.getName();
+						ReportGroup existingReportGroup = currentReportGroups.stream()
+								.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+								.findFirst()
+								.orElse(null);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, reportGroup);
+								newReportGroups.add(reportGroup);
+							} else {
+								newReportGroups.add(addedReportGroup);
+							}
+						} else {
+							if (overwrite) {
+								int existingReportGroupId = existingReportGroup.getReportGroupId();
+								if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+									reportGroup.setReportGroupId(existingReportGroupId);
+									reportGroupService.updateReportGroup(reportGroup, actionUser, conn);
+									newReportGroups.add(reportGroup);
+									updatedReportGroupIds.add(existingReportGroupId);
+								}
+							} else {
+								newReportGroups.add(existingReportGroup);
+							}
+						}
+					}
+					report.setReportGroups(newReportGroups);
+				}
+
 				String reportName = report.getName();
-				if (StringUtils.isNotBlank(reportName)) {
+				boolean update = false;
+				if (overwrite) {
 					Report existingReport = currentReports.stream()
 							.filter(r -> StringUtils.equals(reportName, r.getName()))
 							.findFirst()
 							.orElse(null);
-					if (existingReport == null) {
-						Report addedReport = addedReports.get(reportName);
-						if (addedReport == null) {
-							reportId++;
-
-							Datasource datasource = report.getDatasource();
-							if (datasource != null) {
-								String datasourceName = datasource.getName();
-								if (StringUtils.isBlank(datasourceName)) {
-									report.setDatasource(null);
-								} else {
-									Datasource existingDatasource = currentDatasources.stream()
-											.filter(d -> StringUtils.equals(datasourceName, d.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingDatasource == null) {
-										Datasource addedDatasource = addedDatasources.get(datasourceName);
-										if (addedDatasource == null) {
-											datasourceId++;
-											datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
-											addedDatasources.put(datasourceName, datasource);
-										} else {
-											report.setDatasource(addedDatasource);
-										}
-									} else {
-										if (overwrite) {
-											int existingDatasourceId = existingDatasource.getDatasourceId();
-											if (!updatedDatasourceIds.contains(existingDatasourceId)) {
-												datasource.setDatasourceId(existingDatasourceId);
-												datasourceService.updateDatasource(datasource, actionUser, conn);
-												updatedDatasourceIds.add(existingDatasourceId);
-												updatedDatasources.add(datasource);
-											}
-										} else {
-											report.setDatasource(existingDatasource);
-										}
-									}
-								}
-							}
-
-							Encryptor encryptor = report.getEncryptor();
-							if (encryptor != null) {
-								String encryptorName = encryptor.getName();
-								if (StringUtils.isBlank(encryptorName)) {
-									report.setEncryptor(null);
-								} else {
-									Encryptor existingEncryptor = currentEncryptors.stream()
-											.filter(e -> StringUtils.equals(encryptorName, e.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingEncryptor == null) {
-										Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
-										if (addedEncryptor == null) {
-											encryptorId++;
-											encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
-											addedEncryptors.put(encryptorName, encryptor);
-										} else {
-											report.setEncryptor(addedEncryptor);
-										}
-									} else {
-										if (overwrite) {
-											int existingEncryptorId = existingEncryptor.getEncryptorId();
-											if (!updatedEncryptorIds.contains(existingEncryptorId)) {
-												encryptor.setEncryptorId(existingEncryptorId);
-												encryptorService.updateEncryptor(encryptor, actionUser, conn);
-												updatedEncryptorIds.add(existingEncryptorId);
-											}
-										} else {
-											report.setEncryptor(existingEncryptor);
-										}
-									}
-								}
-							}
-
-							List<ReportGroup> reportGroups = report.getReportGroups();
-							if (CollectionUtils.isNotEmpty(reportGroups)) {
-								List<ReportGroup> newReportGroups = new ArrayList<>();
-								for (ReportGroup reportGroup : reportGroups) {
-									String reportGroupName = reportGroup.getName();
-									ReportGroup existingReportGroup = currentReportGroups.stream()
-											.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingReportGroup == null) {
-										ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
-										if (addedReportGroup == null) {
-											reportGroupId++;
-											reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
-											addedReportGroups.put(reportGroupName, reportGroup);
-											newReportGroups.add(reportGroup);
-										} else {
-											newReportGroups.add(addedReportGroup);
-										}
-									} else {
-										if (overwrite) {
-											int existingReportGroupId = existingReportGroup.getReportGroupId();
-											if (!updatedReportGroupIds.contains(existingReportGroupId)) {
-												reportGroup.setReportGroupId(existingReportGroupId);
-												reportGroupService.updateReportGroup(reportGroup, actionUser, conn);
-												newReportGroups.add(reportGroup);
-												updatedReportGroupIds.add(existingReportGroupId);
-											}
-										} else {
-											newReportGroups.add(existingReportGroup);
-										}
-									}
-								}
-								report.setReportGroups(newReportGroups);
-							}
-
-							reportService.saveReport(report, reportId, actionUser, conn);
-							reportGroupMembershipService2.recreateReportGroupMemberships(report, conn);
-							addedReports.put(reportName, report);
-						} else {
-							report.setReportId(addedReport.getReportId());
-						}
-					} else {
-						int existingReportId = existingReport.getReportId();
-						report.setReportId(existingReportId);
-						if (overwrite && !updatedReportIds.contains(existingReportId)) {
-							reportService.updateReport(report, actionUser, conn);
-							reportGroupMembershipService2.recreateReportGroupMemberships(report, conn);
-							updatedReportIds.add(existingReportId);
-						}
+					if (existingReport != null) {
+						update = true;
+						report.setReportId(existingReport.getReportId());
 					}
 				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					reportId++;
+					newRecordId = reportId;
+				}
+				reportService.saveReport(report, newRecordId, actionUser, conn);
+				reportGroupMembershipService2.recreateReportGroupMemberships(report, conn);
 			}
 
 			if (local) {
@@ -411,7 +396,7 @@ public class ReportServiceHelper {
 				} else {
 					int existingRuleId = existingRule.getRuleId();
 					rule.setRuleId(existingRuleId);
-					if(overwrite && !updatedRuleIds.contains(existingRuleId)){
+					if (overwrite && !updatedRuleIds.contains(existingRuleId)) {
 						ruleService.updateRule(rule, actionUser, conn);
 						updatedRuleIds.add(existingRuleId);
 					}
@@ -449,7 +434,7 @@ public class ReportServiceHelper {
 				} else {
 					int existingUserId = existingUser.getUserId();
 					user.setUserId(existingUserId);
-					if(overwrite && !updatedUserIds.contains(existingUserId)){
+					if (overwrite && !updatedUserIds.contains(existingUserId)) {
 						userService.updateUser(user, actionUser, conn);
 						updatedUserIds.add(existingUserId);
 					}
@@ -487,7 +472,7 @@ public class ReportServiceHelper {
 				} else {
 					int existingUserGroupId = existingUserGroup.getUserGroupId();
 					userGroup.setUserGroupId(existingUserGroupId);
-					if(overwrite && !updatedUserGroupIds.contains(existingUserGroupId)){
+					if (overwrite && !updatedUserGroupIds.contains(existingUserGroupId)) {
 						userGroupService.updateUserGroup(userGroup, actionUser, conn);
 						updatedUserGroupIds.add(existingUserGroupId);
 					}
@@ -516,7 +501,7 @@ public class ReportServiceHelper {
 				} else {
 					int existingReportRuleId = existingReportRule.getReportRuleId();
 					reportRule.setReportRuleId(existingReportRuleId);
-					if(overwrite && !updatedReportRuleIds.contains(existingReportRuleId)){
+					if (overwrite && !updatedReportRuleIds.contains(existingReportRuleId)) {
 						reportRuleService.updateReportRule(reportRule, conn);
 						updatedReportRuleIds.add(existingReportRuleId);
 					}
