@@ -25,8 +25,8 @@
 
 Online translation
 ART has a translation project on the Crowdin platform. You can create an account on Crowdin and
-join the ART translation project at the following link. https://crowdin.com/project/artreporting. You
-can then translate online. If your language is not available, create a post on the ART sourceforge
+join the ART translation project at the following link. https://crowdin.com/project/artreporting
+You can then translate online. If your language is not available, create a post on the ART sourceforge
 forum requesting for the new language to be added to the Crowdin project.
 
 Translators/Credits

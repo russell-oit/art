@@ -140,8 +140,22 @@ public class ReportController {
 	@Autowired
 	private MailService mailService;
 
-	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
-	public String showReports(HttpSession session, Model model) {
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String showHome(HttpSession session) {
+		logger.debug("Entering showHome");
+
+		User sessionUser = (User) session.getAttribute("sessionUser");
+
+		String startReport = sessionUser.getEffectiveStartReport();
+		if (StringUtils.isBlank(startReport)) {
+			return "reports";
+		} else {
+			return "redirect:/runReport?reportId=" + startReport;
+		}
+	}
+
+	@RequestMapping(value = "/reports", method = RequestMethod.GET)
+	public String showReports() {
 		logger.debug("Entering showReports");
 
 		return "reports";
