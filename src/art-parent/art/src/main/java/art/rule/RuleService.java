@@ -17,7 +17,6 @@
  */
 package art.rule;
 
-import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;

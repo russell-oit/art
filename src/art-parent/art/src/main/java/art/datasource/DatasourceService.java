@@ -133,6 +133,28 @@ public class DatasourceService {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h);
 	}
+	
+	/**
+	 * Returns unused datasources
+	 *
+	 * @return unused datasources
+	 * @throws SQLException
+	 */
+	public List<Datasource> getUnusedDatasources() throws SQLException {
+		logger.debug("Entering getUnusedDatasources");
+
+		String sql = "SELECT * FROM ART_DATABASES AD"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT * FROM ART_QUERIES WHERE DATASOURCE_ID = AD.DATABASE_ID"
+				+ " UNION ALL"
+				+ " SELECT * FROM ART_JOBS WHERE CACHED_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " UNION ALL"
+				+ " SELECT * FROM ART_SETTINGS WHERE LOGS_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " )";
+
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns a datasource with the given id

@@ -17,7 +17,6 @@
  */
 package art.migration;
 
-import art.accessright.AccessRightService;
 import art.accessright.UserGroupReportRight;
 import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
@@ -31,7 +30,6 @@ import art.destination.Destination;
 import art.destination.DestinationService;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownCsvExportMixIn;
-import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.EncryptorType;
@@ -61,15 +59,12 @@ import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterCsvExportMixIn;
-import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleCsvExportMixIn;
-import art.reportrule.ReportRuleService;
 import art.role.Role;
 import art.role.RoleService;
 import art.rule.Rule;
 import art.rule.RuleService;
-import art.ruleValue.RuleValueService;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserGroupRuleValueCsvExportMixIn;
 import art.ruleValue.UserRuleValue;
@@ -161,21 +156,6 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportService reportService;
-
-	@Autowired
-	private ReportParameterService reportParameterService;
-
-	@Autowired
-	private RuleValueService ruleValueService;
-
-	@Autowired
-	private ReportRuleService reportRuleService;
-
-	@Autowired
-	private AccessRightService accessRightService;
-
-	@Autowired
-	private DrilldownService drilldownService;
 
 	@Autowired
 	private RoleService roleService;
