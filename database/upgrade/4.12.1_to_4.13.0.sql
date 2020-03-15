@@ -3,6 +3,7 @@
 -- CHANGES:
 -- update database version
 -- set cached datasource id to null
+-- set logs datasource id to null
 
 -- ------------------------------------------------
 
@@ -12,3 +13,6 @@ UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='4.13-snapshot';
 
 -- set cached datasource id to null
 UPDATE ART_JOBS SET CACHED_DATASOURCE_ID=NULL WHERE CACHED_DATASOURCE_ID=0;
+
+-- set logs datasource id to null
+UPDATE ART_SETTINGS SET LOGS_DATASOURCE_ID=NULL WHERE LOGS_DATASOURCE_ID=0;
