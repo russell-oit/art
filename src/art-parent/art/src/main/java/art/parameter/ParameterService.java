@@ -195,6 +195,24 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
+	
+	/**
+	 * Returns all unused parameters with only basic properties filled
+	 *
+	 * @return all unused parameters with only basic properties filled
+	 * @throws SQLException
+	 */
+	public List<Parameter> getAllUnusedParametersBasic() throws SQLException {
+		logger.debug("Entering getAllUnusedParametersBasic");
+		
+		String sql = "SELECT * FROM ART_PARAMETERS AP"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT * FROM ART_REPORT_PARAMETERS WHERE PARAMETER_ID = AP.PARAMETER_ID"
+				+ " )";
+
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns parameters with given ids

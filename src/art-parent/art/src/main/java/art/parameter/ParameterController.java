@@ -89,20 +89,49 @@ public class ParameterController {
 	public String showParameters(Model model) {
 		logger.debug("Entering showParameters");
 
+		return showParametersPage("all", model);
+	}
+
+	@RequestMapping(value = "/unusedParameters", method = RequestMethod.GET)
+	public String showUnusedParameters(Model model) {
+		logger.debug("Entering showUnusedParameters");
+
+		return showParametersPage("unused", model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param action "all" or "unused"
+	 * @param model the spring model
+	 * @return the jsp file to display
+	 */
+	private String showParametersPage(String action, Model model) {
+		logger.debug("Entering showParametersPage: action='{}'", action);
+
+		model.addAttribute("action", action);
+
 		return "parameters";
 	}
 
 	@GetMapping("/getParameters")
 	public @ResponseBody
 	AjaxResponse getParameters(Locale locale, HttpServletRequest request,
-			HttpServletResponse httpResponse) throws SQLException, IOException {
+			HttpServletResponse httpResponse,
+			@RequestParam(value = "action", required = false) String action)
+			throws SQLException, IOException {
 
-		logger.debug("Entering getParameters");
+		logger.debug("Entering getParameters: action='{}'", action);
 
 		AjaxResponse ajaxResponse = new AjaxResponse();
 
 		try {
-			List<Parameter> parameters = parameterService.getAllParametersBasic();
+			List<Parameter> parameters;
+			if (StringUtils.equals(action, "unused")) {
+				parameters = parameterService.getAllUnusedParametersBasic();
+			} else {
+				parameters = parameterService.getAllParametersBasic();
+			}
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
 			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);

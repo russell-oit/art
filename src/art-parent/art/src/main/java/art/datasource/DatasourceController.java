@@ -115,7 +115,7 @@ public class DatasourceController {
 	 * @return the jsp file to display
 	 */
 	private String showDatasourcesPage(String action, Model model) {
-		logger.debug("Entering showJobsPage: action='{}'", action);
+		logger.debug("Entering showDatasourcesPage: action='{}'", action);
 
 		model.addAttribute("action", action);
 
