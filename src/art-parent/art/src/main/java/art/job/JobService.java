@@ -18,6 +18,8 @@
 package art.job;
 
 import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
+import art.datasource.DatasourceService;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.destination.Destination;
@@ -90,12 +92,13 @@ public class JobService {
 	private final HolidayService holidayService;
 	private final DestinationService destinationService;
 	private final SmtpServerService smtpServerService;
+	private final DatasourceService datasourceService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, ScheduleService scheduleService,
 			HolidayService holidayService, DestinationService destinationService,
-			SmtpServerService smtpServerService) {
+			SmtpServerService smtpServerService, DatasourceService datasourceService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -104,6 +107,7 @@ public class JobService {
 		this.holidayService = holidayService;
 		this.destinationService = destinationService;
 		this.smtpServerService = smtpServerService;
+		this.datasourceService = datasourceService;
 	}
 
 	public JobService() {
@@ -114,6 +118,7 @@ public class JobService {
 		holidayService = new HolidayService();
 		destinationService = new DestinationService();
 		smtpServerService = new SmtpServerService();
+		datasourceService = new DatasourceService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -193,7 +198,6 @@ public class JobService {
 		job.setMailBcc(rs.getString("MAIL_BCC"));
 		job.setMailSubject(rs.getString("SUBJECT"));
 		job.setMailMessage(rs.getString("MESSAGE"));
-		job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
 		job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
 		job.setStartDate(rs.getTimestamp("START_DATE"));
 		job.setEndDate(rs.getTimestamp("END_DATE"));
@@ -236,6 +240,9 @@ public class JobService {
 
 		SmtpServer smtpServer = smtpServerService.getSmtpServer(rs.getInt("SMTP_SERVER_ID"));
 		job.setSmtpServer(smtpServer);
+
+		Datasource cachedDatasource = datasourceService.getDatasource(rs.getInt("CACHED_DATASOURCE_ID"));
+		job.setCachedDatasource(cachedDatasource);
 
 		List<Holiday> sharedHolidays = holidayService.getJobHolidays(job.getJobId());
 		job.setSharedHolidays(sharedHolidays);
@@ -525,6 +532,14 @@ public class JobService {
 			}
 		}
 
+		Integer cachedDatasourceId = null;
+		if (job.getCachedDatasource() != null) {
+			cachedDatasourceId = job.getCachedDatasource().getDatasourceId();
+			if (cachedDatasourceId == 0) {
+				cachedDatasourceId = null;
+			}
+		}
+
 		int affectedRows;
 
 		boolean newRecord = false;
@@ -572,7 +587,7 @@ public class JobService {
 				job.getMailBcc(),
 				job.getMailSubject(),
 				job.getMailMessage(),
-				job.getCachedDatasourceId(),
+				cachedDatasourceId,
 				job.getCachedTableName(),
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
@@ -646,7 +661,7 @@ public class JobService {
 				job.getMailBcc(),
 				job.getMailSubject(),
 				job.getMailMessage(),
-				job.getCachedDatasourceId(),
+				cachedDatasourceId,
 				job.getCachedTableName(),
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),

@@ -17,6 +17,7 @@
  */
 package art.job;
 
+import art.datasource.Datasource;
 import art.destination.Destination;
 import art.enums.JobType;
 import art.holiday.Holiday;
@@ -82,7 +83,6 @@ public class Job implements Serializable {
 	private String lastRunMessage;
 	private String lastEndDateString;
 	private String nextRunDateString;
-	private int cachedDatasourceId;
 	private String batchFile;
 	private String fixedFileName;
 	private String emailTemplate;
@@ -101,6 +101,21 @@ public class Job implements Serializable {
 	private Schedule schedule;
 	private SmtpServer smtpServer;
 	private boolean overwriteFiles;
+	private Datasource cachedDatasource;
+
+	/**
+	 * @return the cachedDatasource
+	 */
+	public Datasource getCachedDatasource() {
+		return cachedDatasource;
+	}
+
+	/**
+	 * @param cachedDatasource the cachedDatasource to set
+	 */
+	public void setCachedDatasource(Datasource cachedDatasource) {
+		this.cachedDatasource = cachedDatasource;
+	}
 
 	/**
 	 * @return the overwriteFiles
@@ -366,20 +381,6 @@ public class Job implements Serializable {
 	 */
 	public void setBatchFile(String batchFile) {
 		this.batchFile = batchFile;
-	}
-
-	/**
-	 * @return the cachedDatasourceId
-	 */
-	public int getCachedDatasourceId() {
-		return cachedDatasourceId;
-	}
-
-	/**
-	 * @param cachedDatasourceId the cachedDatasourceId to set
-	 */
-	public void setCachedDatasourceId(int cachedDatasourceId) {
-		this.cachedDatasourceId = cachedDatasourceId;
 	}
 
 	/**

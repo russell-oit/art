@@ -627,24 +627,29 @@
 					</div>
 					<fieldset id="cachedFields">
 						<div id="datasourceDiv" class="form-group">
-							<label class="col-md-4 control-label " for="cachedDatasourceId">
+							<label class="col-md-4 control-label " for="cachedDatasource">
 								<spring:message code="jobs.label.cachedDatasource"/>
 							</label>
 							<div class="col-md-8">
-								<form:select path="cachedDatasourceId" class="form-control selectpicker">
+								<form:select path="cachedDatasource" class="form-control selectpicker">
 									<form:option value="0">--</form:option>
 										<option data-divider="true"></option>
 									<c:forEach var="datasource" items="${datasources}">
 										<c:set var="datasourceStatus">
 											<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
 										</c:set>
-										<form:option value="${datasource.datasourceId}"
-													 data-content="${datasource.name} ${datasourceStatus}">
-											${datasource.name} 
-										</form:option>
+										<c:if test="${job.cachedDatasource != null}">
+											<c:set var="selected">
+												${job.cachedDatasource.datasourceId == datasource.datasourceId ? "selected" : ""}
+											</c:set>
+										</c:if>
+										<option value="${datasource.datasourceId}" ${selected}
+												data-content="${encode:forHtmlAttribute(datasource.name)}&nbsp;${encode:forHtmlAttribute(datasourceStatus)}">
+											${encode:forHtmlContent(datasource.name)}
+										</option>
 									</c:forEach>
 								</form:select>
-								<form:errors path="cachedDatasourceId" cssClass="error"/>
+								<form:errors path="cachedDatasource" cssClass="error"/>
 							</div>
 						</div>
 						<div class="form-group">
