@@ -96,6 +96,7 @@ public class RunReportController {
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "statementId", required = false) String statementId,
 			@ModelAttribute("report") Report testReport,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
@@ -108,7 +109,8 @@ public class RunReportController {
 		runningReportsCount++;
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
+		boolean showInlineParameterValue = BooleanUtils.toBoolean(request.getParameter("showInline"));
+		boolean showInline = showInlineParameterValue;
 		//check if report header and footer should not be included e.g. in a dashboard component
 		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
@@ -122,6 +124,7 @@ public class RunReportController {
 
 		String reportName = null;
 		RunReportHelper runReportHelper = new RunReportHelper();
+		PrintWriter writer = null;
 
 		try {
 			if (testReport.getTestRun() == null) {
@@ -292,10 +295,8 @@ public class RunReportController {
 			Date overallStartTime = new Date();
 			Instant overallStart = Instant.now();
 
-			//this will be initialized according to the content type of the report output
+			//writer will be initialized according to the content type of the report output
 			//setContentType() must be called before getWriter()
-			PrintWriter writer;
-
 			boolean showReportHeaderAndFooter = true;
 
 			if (reportType.isStandardOutput() && reportFormat.hasStandardOutputInstance()) {
@@ -371,21 +372,31 @@ public class RunReportController {
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
 			} else {
-				//output report header
-				if (showReportHeaderAndFooter) {
-					request.setAttribute("reportName", reportName);
-					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
-					writer.flush();
-
-					//display initial report progress
-					displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
+				if (isFragment) {
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/addJquery.jsp").include(request, response);
 				}
+
+				if (StringUtils.isBlank(statementId) && reportType.isJdbcRunnableByArt()) {
+					statementId = ArtUtils.getUniqueId(reportId);
+					request.setAttribute("statementId", statementId);
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showCancelQuery.jsp").include(request, response);
+					//https://stackoverflow.com/questions/21070101/show-hide-div-using-javascript
+					//writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'block';</script>");
+					writer.println("<script>$('#cancelQueryDiv').show();</script>");
+					writer.flush();
+				}
+
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+
+				//display initial report progress
+				displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
 
 				//run report
 				Integer rowsRetrieved = null; //use Integer in order to have unknown status e.g. for template reports for which you can't know the number of rows in the report
 
 				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
+				reportRunner.setStatementId(statementId);
 
 				reportRunner.setReport(report);
 
@@ -418,21 +429,6 @@ public class RunReportController {
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
-				// JavaScript code to write status
-				if (showReportHeaderAndFooter) {
-					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
-				}
-
-				int resultSetType = runReportHelper.getResultSetType(reportType);
-
-				//run query
-				Instant queryStart = Instant.now();
-
-				reportRunner.execute(resultSetType);
-
-				Instant queryEnd = Instant.now();
-
-				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getLocalizedShortDescription(locale);
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
@@ -450,9 +446,21 @@ public class RunReportController {
 							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";
 
 					displayReportInfo(writer, reportInfo);
+				}
 
-					displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
+				displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
 
+				int resultSetType = runReportHelper.getResultSetType(reportType);
+
+				//run query
+				Instant queryStart = Instant.now();
+
+				reportRunner.execute(resultSetType);
+
+				Instant queryEnd = Instant.now();
+
+				//display parameters and final sql
+				if (showReportHeaderAndFooter) {
 					//display parameters
 					if (showParams) {
 						request.setAttribute("reportParamEntries", reportParamEntries);
@@ -474,9 +482,9 @@ public class RunReportController {
 						request.setAttribute("codeClass", codeClass);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showFinalSql.jsp").include(request, response);
 					}
-
-					writer.flush();
 				}
+
+				displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
 
 				if (reportType == ReportType.Update) {
 					reportRunner.getResultSet();
@@ -557,8 +565,6 @@ public class RunReportController {
 					}
 
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
-
-					clearReportProgress(writer);
 				}
 			}
 
@@ -580,6 +586,8 @@ public class RunReportController {
 			if (reportRunner != null) {
 				reportRunner.close();
 			}
+
+			clearReportProgress(writer);
 		}
 
 		return null;
@@ -627,6 +635,10 @@ public class RunReportController {
 	 * @param writer the output writer to use
 	 */
 	private void clearReportProgress(PrintWriter writer) {
-		displayReportProgress(writer, "");
+		if (writer != null) {
+			displayReportProgress(writer, "");
+			writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'none';</script>");
+			writer.println("<script>$('#cancelQueryDiv').hide();</script>");
+		}
 	}
 }

@@ -210,6 +210,16 @@ public class ArtUtils {
 		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(5);
 	}
 
+	/**
+	 * Get random string that can be used as a unique record id
+	 *
+	 * @param objectId id to be prepended to the unique id
+	 * @return unique id string
+	 */
+	public static String getUniqueId(int objectId) {
+		return String.valueOf(objectId) + "-" + getUniqueId();
+	}
+
 //	/**
 //	 * Get random string that can be used as a unique file name
 //	 *
@@ -820,7 +830,7 @@ public class ArtUtils {
 
 	/**
 	 * Returns a properties object populated from contents of a properties file
-	 * 
+	 *
 	 * @param propertiesFilePath the path of the properties file
 	 * @return the loaded properties object
 	 * @throws java.io.IOException

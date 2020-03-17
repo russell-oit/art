@@ -54,6 +54,11 @@ Edit report page
 	<jsp:attribute name="belowPanel">
 		<div class="row">
 			<div class="col-md-12">
+				<jsp:include page="/WEB-INF/jsp/showCancelQuery.jsp"/>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
 				<div id="reportOutput"></div>
 			</div>
 		</div>
@@ -215,6 +220,7 @@ Edit report page
 
 					//disable buttons
 					$('.action').prop('disabled', true);
+					$("#cancelQueryDiv").show();
 
 					$.ajax({
 						type: "POST",
@@ -229,6 +235,7 @@ Edit report page
 						},
 						complete: function () {
 							$('.action').prop('disabled', false);
+							$("#cancelQueryDiv").hide();
 						}
 					});
 				});
@@ -236,6 +243,7 @@ Edit report page
 				$("#testReportData").on("click", function () {
 					//disable buttons
 					$('.action').prop('disabled', true);
+					$("#cancelQueryDiv").show();
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
@@ -251,6 +259,7 @@ Edit report page
 						},
 						complete: function () {
 							$('.action').prop('disabled', false);
+							$("#cancelQueryDiv").hide();
 						}
 					});
 				});
@@ -1147,7 +1156,7 @@ Edit report page
 					default:
 						$("#testReportData").show();
 				}
-				
+
 				//show/hide show parameters checkbox
 				switch (reportTypeId) {
 					case 163: //link
@@ -1156,7 +1165,7 @@ Edit report page
 					default:
 						$("#showParameters").show();
 				}
-				
+
 				//show/hide link fields
 				switch (reportTypeId) {
 					case 163: //link
@@ -1165,7 +1174,7 @@ Edit report page
 					default:
 						$("#linkFields").hide();
 				}
-				
+
 				//show/hide options div
 				switch (reportTypeId) {
 					case 163: //link
@@ -1222,6 +1231,7 @@ Edit report page
 
 				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
+				<input type="hidden" name="statementId" value="${statementId}">
 
 				<form:hidden path="testRun" value="true"/>
 

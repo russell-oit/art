@@ -61,6 +61,42 @@ public enum ReportType {
 	}
 
 	/**
+	 * Returns <code>true</code> if this report type uses jdbc that will be
+	 * executed directly by the art application
+	 *
+	 * @return <code>true</code> if this report type uses jdbc that will be run
+	 * by art
+	 */
+	public boolean isJdbcRunnableByArt() {
+		switch (this) {
+			case JasperReportsTemplate:
+			case JxlsTemplate:
+			case JPivotMondrian:
+			case JPivotMondrianXmla:
+			case JPivotSqlServerXmla:
+			case LovStatic:
+			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
+			case DygraphsCsvLocal:
+			case DygraphsCsvServer:
+			case DataTablesCsvLocal:
+			case DataTablesCsvServer:
+			case DatamapsFile:
+			case SaikuReport:
+			case MongoDB:
+			case OrgChartJson:
+			case OrgChartList:
+			case OrgChartAjax:
+			case ReportEngineFile:
+			case Dashboard:
+			case GridstackDashboard:
+				return false;
+			default:
+				return true;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if this is a vertical bar or stacked vertical
 	 * bar 2D chart report
 	 *

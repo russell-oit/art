@@ -117,9 +117,24 @@ public class ReportRunner {
 	private boolean useViewColumns;
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
+	private String statementId;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the statementId
+	 */
+	public String getStatementId() {
+		return statementId;
+	}
+
+	/**
+	 * @param statementId the statementId to set
+	 */
+	public void setStatementId(String statementId) {
+		this.statementId = statementId;
 	}
 
 	/**
@@ -1172,31 +1187,8 @@ public class ReportRunner {
 
 		//don't execute sql source for report types that don't have runnable sql
 		ReportType reportType = report.getReportType();
-		switch (reportType) {
-			case JasperReportsTemplate:
-			case JxlsTemplate:
-			case JPivotMondrian:
-			case JPivotMondrianXmla:
-			case JPivotSqlServerXmla:
-			case LovStatic:
-			case PivotTableJsCsvLocal:
-			case PivotTableJsCsvServer:
-			case DygraphsCsvLocal:
-			case DygraphsCsvServer:
-			case DataTablesCsvLocal:
-			case DataTablesCsvServer:
-			case DatamapsFile:
-			case SaikuReport:
-			case MongoDB:
-			case OrgChartJson:
-			case OrgChartList:
-			case OrgChartAjax:
-			case ReportEngineFile:
-			case Dashboard:
-			case GridstackDashboard:
-				return;
-			default:
-				break;
+		if (!reportType.isJdbcRunnableByArt()) {
+			return;
 		}
 
 		if (groovyData != null) {
@@ -1274,6 +1266,10 @@ public class ReportRunner {
 			} else {
 				psQuery.setQueryTimeout(queryTimeoutSeconds);
 			}
+		}
+
+		if (StringUtils.isNotBlank(statementId)) {
+			Config.addRunningStatement(statementId, psQuery);
 		}
 
 		psQuery.execute();
@@ -1554,6 +1550,10 @@ public class ReportRunner {
 			} catch (SQLException ex) {
 				logger.error("Error", ex);
 			}
+		}
+
+		if (StringUtils.isNotBlank(statementId)) {
+			Config.removeRunningStatement(statementId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);
