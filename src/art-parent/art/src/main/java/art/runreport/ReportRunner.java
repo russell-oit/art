@@ -117,24 +117,24 @@ public class ReportRunner {
 	private boolean useViewColumns;
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
-	private String statementId;
+	private String runId;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 	}
 
 	/**
-	 * @return the statementId
+	 * @return the runId
 	 */
-	public String getStatementId() {
-		return statementId;
+	public String getRunId() {
+		return runId;
 	}
 
 	/**
-	 * @param statementId the statementId to set
+	 * @param runId the runId to set
 	 */
-	public void setStatementId(String statementId) {
-		this.statementId = statementId;
+	public void setRunId(String runId) {
+		this.runId = runId;
 	}
 
 	/**
@@ -1268,8 +1268,8 @@ public class ReportRunner {
 			}
 		}
 
-		if (StringUtils.isNotBlank(statementId)) {
-			Config.addRunningStatement(statementId, psQuery);
+		if (StringUtils.isNotBlank(runId)) {
+			Config.addRunningStatement(runId, psQuery);
 		}
 
 		psQuery.execute();
@@ -1552,8 +1552,8 @@ public class ReportRunner {
 			}
 		}
 
-		if (StringUtils.isNotBlank(statementId)) {
-			Config.removeRunningStatement(statementId);
+		if (StringUtils.isNotBlank(runId)) {
+			Config.removeRunningStatement(runId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);

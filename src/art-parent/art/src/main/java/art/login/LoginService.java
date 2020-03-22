@@ -63,7 +63,7 @@ public class LoginService {
 				+ " (LOGGED_IN_USERS_ID, USER_ID, USERNAME, LOGIN_DATE, IP_ADDRESS)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
 
-		String id = ArtUtils.getUniqueId() + "-" + user.getUserId();
+		String id = ArtUtils.getDatabaseUniqueId() + "-" + user.getUserId();
 
 		Object[] values = {
 			id,

@@ -307,7 +307,7 @@ public class RunReportHelper {
 		}
 		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
 		
-		request.setAttribute("statementId", ArtUtils.getUniqueId());
+		request.setAttribute("runId", ArtUtils.getUniqueId(report.getReportId()));
 
 		boolean enableReportFormats;
 		switch (reportType) {

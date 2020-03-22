@@ -80,6 +80,7 @@ public class RunReportController {
 	private static final Logger logger = LoggerFactory.getLogger(RunReportController.class);
 
 	private int runningReportsCount = 0;
+	private String runId;
 
 	@Autowired
 	private ReportService reportService;
@@ -96,7 +97,7 @@ public class RunReportController {
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
-			@RequestParam(value = "statementId", required = false) String statementId,
+			@RequestParam(value = "runId", required = false) String runIdParameter,
 			@ModelAttribute("report") Report testReport,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
@@ -109,8 +110,8 @@ public class RunReportController {
 		runningReportsCount++;
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInlineParameterValue = BooleanUtils.toBoolean(request.getParameter("showInline"));
-		boolean showInline = showInlineParameterValue;
+		boolean showInlineParameter = BooleanUtils.toBoolean(request.getParameter("showInline"));
+		boolean showInline = showInlineParameter;
 		//check if report header and footer should not be included e.g. in a dashboard component
 		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
 
@@ -125,6 +126,7 @@ public class RunReportController {
 		String reportName = null;
 		RunReportHelper runReportHelper = new RunReportHelper();
 		PrintWriter writer = null;
+		boolean ajax = false;
 
 		try {
 			if (testReport.getTestRun() == null) {
@@ -372,31 +374,38 @@ public class RunReportController {
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
 			} else {
-				if (isFragment) {
+				if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+					ajax = true;
+				}
+
+				if (isFragment && !ajax) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/addJquery.jsp").include(request, response);
 				}
 
-				if (StringUtils.isBlank(statementId) && reportType.isJdbcRunnableByArt()) {
-					statementId = ArtUtils.getUniqueId(reportId);
-					request.setAttribute("statementId", statementId);
+				if (runIdParameter == null) {
+					runId = ArtUtils.getUniqueId(reportId);
+				} else {
+					runId = runIdParameter;
+				}
+				request.setAttribute("runId", runId);
+
+				if (!ajax && reportType.isJdbcRunnableByArt()) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showCancelQuery.jsp").include(request, response);
-					//https://stackoverflow.com/questions/21070101/show-hide-div-using-javascript
-					//writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'block';</script>");
-					writer.println("<script>$('#cancelQueryDiv').show();</script>");
-					writer.flush();
 				}
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
 
 				//display initial report progress
-				displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
+				if (!ajax) {
+					displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
+				}
 
 				//run report
 				Integer rowsRetrieved = null; //use Integer in order to have unknown status e.g. for template reports for which you can't know the number of rows in the report
 
 				reportRunner = new ReportRunner();
 				reportRunner.setUser(sessionUser);
-				reportRunner.setStatementId(statementId);
+				reportRunner.setRunId(runId);
 
 				reportRunner.setReport(report);
 
@@ -448,7 +457,10 @@ public class RunReportController {
 					displayReportInfo(writer, reportInfo);
 				}
 
-				displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
+				if (!ajax) {
+					showCancelQueryDiv(writer);
+					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
+				}
 
 				int resultSetType = runReportHelper.getResultSetType(reportType);
 
@@ -458,6 +470,8 @@ public class RunReportController {
 				reportRunner.execute(resultSetType);
 
 				Instant queryEnd = Instant.now();
+
+				hideCancelQueryDiv(writer);
 
 				//display parameters and final sql
 				if (showReportHeaderAndFooter) {
@@ -484,7 +498,9 @@ public class RunReportController {
 					}
 				}
 
-				displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
+				if (!ajax) {
+					displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
+				}
 
 				if (reportType == ReportType.Update) {
 					reportRunner.getResultSet();
@@ -587,7 +603,9 @@ public class RunReportController {
 				reportRunner.close();
 			}
 
-			clearReportProgress(writer);
+			if (!ajax) {
+				clearReportProgress(writer);
+			}
 		}
 
 		return null;
@@ -624,6 +642,7 @@ public class RunReportController {
 	private void displayInfo(PrintWriter out, String message, String elementId) {
 		//can use jquery, e.g. $('reportProgress').html(), but need to ensure jquery library 
 		//has been included in the page before calling this method
+		elementId += "-" + runId;
 		out.println("<script type='text/javascript'>"
 				+ "document.getElementById('" + elementId + "').innerHTML='" + message + "';"
 				+ "</script>");
@@ -637,8 +656,30 @@ public class RunReportController {
 	private void clearReportProgress(PrintWriter writer) {
 		if (writer != null) {
 			displayReportProgress(writer, "");
-			writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'none';</script>");
-			writer.println("<script>$('#cancelQueryDiv').hide();</script>");
+			hideCancelQueryDiv(writer);
 		}
+	}
+
+	/**
+	 * Show the cancel query div
+	 *
+	 * @param writer the output writer to use
+	 */
+	private void showCancelQueryDiv(PrintWriter writer) {
+		//https://stackoverflow.com/questions/21070101/show-hide-div-using-javascript
+		//writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'block';</script>");
+		String divId = "cancelQueryDiv-" + runId;
+		writer.println("<script>$('#" + divId + "').show();</script>");
+	}
+
+	/**
+	 * Hides the cancel query div
+	 *
+	 * @param writer the output writer to use
+	 */
+	private void hideCancelQueryDiv(PrintWriter writer) {
+		//writer.println("<script>document.getElementById('cancelQueryDiv').style.display = 'none';</script>");
+		String divId = "cancelQueryDiv-" + runId;
+		writer.println("<script>$('#" + divId + "').hide();</script>");
 	}
 }

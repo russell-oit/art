@@ -14,11 +14,11 @@ e.g. report name and report generation progress
 
 <br>
 <div class="reportBanner">
-	<span id="reportProgress" class="pull-right">
+	<span id="reportProgress-${runId}" class="pull-right">
 	</span>
 </div>
 <div class="reportBanner">
-	<span id="reportInfo">
+	<span id="reportInfo-${runId}">
 		<encode:forHtmlContent value="${reportName}"/>
 	</span>
 </div>

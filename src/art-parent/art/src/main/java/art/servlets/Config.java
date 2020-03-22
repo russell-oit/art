@@ -1551,11 +1551,11 @@ public class Config extends HttpServlet {
 	/**
 	 * Cancels a running statement
 	 *
-	 * @param statementId the statement id
+	 * @param runId the run id
 	 * @throws SQLException
 	 */
-	public static void cancelQuery(String statementId) throws SQLException {
-		Statement statement = runningStatements.get(statementId);
+	public static void cancelQuery(String runId) throws SQLException {
+		Statement statement = runningStatements.get(runId);
 		if (statement != null) {
 			statement.cancel();
 		}

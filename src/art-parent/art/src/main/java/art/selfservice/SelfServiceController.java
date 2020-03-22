@@ -173,7 +173,7 @@ public class SelfServiceController {
 		if (languageFile.exists()) {
 			model.addAttribute("languageFileName", languageFileName);
 		}
-
+		
 		return "selfServiceReports";
 	}
 

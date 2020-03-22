@@ -845,7 +845,7 @@ public class ReportController {
 			model.addAttribute("reportFormats", ReportFormat.list());
 			model.addAttribute("pageOrientations", PageOrientation.list());
 			model.addAttribute("encryptors", encryptorService.getAllEncryptors());
-			model.addAttribute("statementId", ArtUtils.getUniqueId());
+			model.addAttribute("runId", ArtUtils.getUniqueId());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -1565,8 +1565,8 @@ public class ReportController {
 
 	@PostMapping("/cancelQuery")
 	@ResponseBody
-	public AjaxResponse cancelQuery(@RequestParam("statementId") String statementId) {
-		logger.debug("Entering cancelQuery: statementId='{}'", statementId);
+	public AjaxResponse cancelQuery(@RequestParam("runId") String runId) {
+		logger.debug("Entering cancelQuery: runId='{}'", runId);
 		
 		//https://stackoverflow.com/questions/15067563/spring-controller-404-retuned-after-post-method-invoked
 		//https://www.baeldung.com/spring-request-response-body
@@ -1574,7 +1574,7 @@ public class ReportController {
 		AjaxResponse response = new AjaxResponse();
 		
 		try {
-			Config.cancelQuery(statementId);
+			Config.cancelQuery(runId);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

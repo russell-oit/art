@@ -361,6 +361,7 @@ public class DashboardController {
 
 				portlet.setIndex(itemIndex);
 				portlet.setColumnIndex(columnIndex);
+				portlet.setRunId(ArtUtils.getUniqueId());
 
 				setPortletProperties(portlet, portletNode, request, locale, columnSize);
 

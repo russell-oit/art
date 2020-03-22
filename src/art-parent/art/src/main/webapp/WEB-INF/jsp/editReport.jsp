@@ -218,9 +218,9 @@ Edit report page
 					//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
 					tinymce.triggerSave();
 
-					//disable buttons
 					$('.action').prop('disabled', true);
-					$("#cancelQueryDiv").show();
+					$("#reportOutput").empty();
+					$("#cancelQueryDiv-${runId}").show();
 
 					$.ajax({
 						type: "POST",
@@ -235,15 +235,15 @@ Edit report page
 						},
 						complete: function () {
 							$('.action').prop('disabled', false);
-							$("#cancelQueryDiv").hide();
+							$("#cancelQueryDiv-${runId}").hide();
 						}
 					});
 				});
 
 				$("#testReportData").on("click", function () {
-					//disable buttons
 					$('.action').prop('disabled', true);
-					$("#cancelQueryDiv").show();
+					$("#reportOutput").empty();
+					$("#cancelQueryDiv-${runId}").show();
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
@@ -259,7 +259,7 @@ Edit report page
 						},
 						complete: function () {
 							$('.action').prop('disabled', false);
-							$("#cancelQueryDiv").hide();
+							$("#cancelQueryDiv-${runId}").hide();
 						}
 					});
 				});
@@ -1231,7 +1231,7 @@ Edit report page
 
 				<input type="hidden" name="showInline" id="showInline" value="true">
 				<input type="hidden" name="action" value="${action}">
-				<input type="hidden" name="statementId" value="${statementId}">
+				<input type="hidden" name="runId" value="${runId}">
 
 				<form:hidden path="testRun" value="true"/>
 

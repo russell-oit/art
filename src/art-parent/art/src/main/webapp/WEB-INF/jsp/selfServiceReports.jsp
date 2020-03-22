@@ -258,6 +258,8 @@
 						data.showSql = true;
 					}
 
+					$("#reportOutput").empty();
+
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
 						type: "POST",
@@ -403,7 +405,7 @@
 				var valueSeparator;
 				var filterOptions;
 				var allColumnName;
-				
+
 				if (viewOptions) {
 					valueSeparator = viewOptions.valueSeparator;
 					filterOptions = viewOptions.filterOptions;
@@ -422,7 +424,7 @@
 					//use label as id rather than arbitrary value
 					//filter id in rules must match that of the condition columns and condition columns sort order may change
 					var id = column.label;
-					
+
 					if ($.inArray(id, ids) !== -1) {
 						id += index;
 					}
@@ -478,7 +480,7 @@
 							$.extend(filter, result[0].options);
 						}
 					}
-					
+
 					filters.push(filter);
 				});
 
