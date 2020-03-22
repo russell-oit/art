@@ -54,6 +54,11 @@
 												<%-- don't encode title because it may contain image source where onload is false --%>
 												${portlet.title}
 											</div>
+											<div id="cancelQueryDiv-${portlet.runId}" class="pull-right" style="display:none">
+												<button type="button" class="cancelQuery" data-run-id="${portlet.runId}">
+													<spring:message code="dialog.button.cancel"/>
+												</button>
+											</div>
 											<div id="portletContent_${portlet.index}"
 												 class="${encode:forHtmlAttribute(portlet.classNamePrefix)}Content">
 											</div>
@@ -144,6 +149,8 @@
 				//use single quote as json string will have double quotes for attribute names and values
 				var parametersJson = '${encode:forJavaScript(portlet.parametersJson)}';
 				var parametersObject = JSON.parse(parametersJson);
+				parametersObject.runId = "${portlet.runId}";
+				$("#cancelQueryDiv-${portlet.runId}").show();
 				$(contentDivId).load(baseUrl, parametersObject);
 			} else {
 				$(contentDivId).load(portletUrl);
@@ -240,6 +247,20 @@
 
 				intervalIds[contentDivId] = setIntervalId;
 			}
+		});
+
+		$('.cancelQuery').on('click', function () {
+			var runId = $(this).attr("data-run-id");
+
+			$.ajax({
+				type: 'POST',
+				url: '${pageContext.request.contextPath}/cancelQuery',
+				data: {runId: runId},
+				error: function (xhr) {
+					//https://stackoverflow.com/questions/6186770/ajax-request-returns-200-ok-but-an-error-event-is-fired-instead-of-success
+					console.log("Error", xhr);
+				}
+			});
 		});
 
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
