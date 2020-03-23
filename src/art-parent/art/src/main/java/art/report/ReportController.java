@@ -1567,20 +1567,21 @@ public class ReportController {
 	@ResponseBody
 	public AjaxResponse cancelQuery(@RequestParam("runId") String runId) {
 		logger.debug("Entering cancelQuery: runId='{}'", runId);
-		
+
 		//https://stackoverflow.com/questions/15067563/spring-controller-404-retuned-after-post-method-invoked
 		//https://www.baeldung.com/spring-request-response-body
-		
 		AjaxResponse response = new AjaxResponse();
-		
+
 		try {
-			Config.cancelQuery(runId);
-			response.setSuccess(true);
+			boolean cancelled = Config.cancelQuery(runId);
+			if (cancelled) {
+				response.setSuccess(true);
+			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
-		
+
 		return response;
 	}
 
