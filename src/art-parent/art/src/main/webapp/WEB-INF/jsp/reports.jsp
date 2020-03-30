@@ -76,6 +76,9 @@ Reports page. Also main/home page
 						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: function () {
+			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
+						yadcf.exFilterColumn(oTable, [[1, '${encode:forHtml(sessionUser.effectiveDefaultReportGroup.name)}']], true);
+			</c:if>
 						datatablesInitComplete();
 					},
 					deferRender: true,
@@ -135,10 +138,6 @@ Reports page. Also main/home page
 						],
 						{filters_tr_index: 1}
 				);
-
-			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
-				yadcf.exFilterColumn(oTable, [[1, '${encode:forHtml(sessionUser.effectiveDefaultReportGroup.name)}']]);
-			</c:if>
 
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
