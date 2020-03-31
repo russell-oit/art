@@ -77,7 +77,8 @@ Reports page. Also main/home page
 					},
 					initComplete: function () {
 			<c:if test="${not empty sessionUser.effectiveDefaultReportGroup}">
-						yadcf.exFilterColumn(oTable, [[1, '${encode:forHtml(sessionUser.effectiveDefaultReportGroup.name)}']], true);
+						var ajaxSource = true;
+						yadcf.exFilterColumn(oTable, [[1, '${encode:forHtml(sessionUser.effectiveDefaultReportGroup.name)}']], ajaxSource);
 			</c:if>
 						datatablesInitComplete();
 					},
