@@ -12,13 +12,18 @@
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="reportParam" type="art.reportparameter.ReportParameter" required="true"%>
-<%@attribute name="locale" required="true"%>
+<%@attribute name="locale" type="java.util.Locale" required="true"%>
 <%@attribute name="defaultFormat" %>
 
 <%-- any content can be specified here e.g.: --%>
 <c:if test="${empty defaultFormat}">
 	<c:set var="defaultFormat" value="YYYY-MM-DD"/>
 </c:if>
+
+<input type="hidden"
+	   name="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
+	   id="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
+	   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
 
 <script>
 	var javaDateFormat = '${encode:forJavaScript(reportParam.parameter.dateFormat)}';
@@ -38,5 +43,11 @@
 		format: momentDateFormat,
 		keepInvalid: true,
 		useStrict: true
+	});
+	
+	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').on('dp.change', function(e) {
+		var chosenDate = e.date.format(momentDateFormat);
+		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').val(chosenDate);
+		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').change();
 	});
 </script>

@@ -4,6 +4,7 @@ ART 4.13
 * Show start report on home page if configured
 * Allow cancelling of running queries
 * Fix for default report group selection not working
+* Allow date parameters to act as parents for chained parameters
 
 ART 4.12.1
 * Fix for error with multi parameter

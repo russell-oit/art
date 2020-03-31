@@ -418,6 +418,28 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
+	 * Returns the html element name to be used with a hidden input for this
+	 * parameter
+	 *
+	 * @return the html element name to be used with a hidden input for this
+	 * parameter
+	 */
+	public String getHiddenHtmlElementName() {
+		return getHtmlElementName() + "-hidden";
+	}
+
+	/**
+	 * Returns the html element name to be used with a null check box for this
+	 * parameter
+	 *
+	 * @return the html element name to be used with a null check box for this
+	 * parameter
+	 */
+	public String getNullHtmlElementName() {
+		return getHtmlElementName() + "-null";
+	}
+
+	/**
 	 * Returns the html element value to be used for this parameter
 	 *
 	 * @return the html element value to be used for this parameter

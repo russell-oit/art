@@ -121,6 +121,7 @@
 	<c:if test="${reportParam.chainedParent}">
 		<script type="text/javascript">
 			$("#${reportParam.htmlElementName}").change();
+			$("#${reportParam.hiddenHtmlElementName}").change();
 		</script>
 	</c:if>
 </c:forEach>
