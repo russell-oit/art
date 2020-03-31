@@ -59,7 +59,8 @@ Display section to allow selecting of report parameters and initiate running of 
 			//some report types interfere with share modal selectpicker when run inline. Because they include bootstrap.js or jquery?
 			$('#shareReport').hide();
 
-			if (${report.reportType.jdbcRunnableByArt}) {
+			var showCancel = ${report.showCancel};
+			if (showCancel) {
 				$("#cancelQueryDiv-${runId}").show();
 			}
 

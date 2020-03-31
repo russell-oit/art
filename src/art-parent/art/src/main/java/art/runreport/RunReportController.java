@@ -389,7 +389,7 @@ public class RunReportController {
 				}
 				request.setAttribute("runId", runId);
 
-				if (!ajax && reportType.isJdbcRunnableByArt()) {
+				if (!ajax && report.isShowCancel()) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showCancelQuery.jsp").include(request, response);
 				}
 

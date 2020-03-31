@@ -1849,4 +1849,20 @@ public class Report implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if the cancel button should be shown when
+	 * running the report
+	 *
+	 * @return <code>true</code> if the cancel button should be shown when
+	 * running the report
+	 */
+	@JsonIgnore
+	public boolean isShowCancel() {
+		if (reportType != null && reportType.isJdbcRunnableByArt() && !useGroovy) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }
