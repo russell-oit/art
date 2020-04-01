@@ -12,9 +12,16 @@
   };
 
   callWithJQuery(function($) {
-    var frFmt, frFmtInt, frFmtPct, nf, tpl;
+    var c3r, d3r, frFmt, frFmtInt, frFmtPct, gcr, nf, r, tpl, plr, er, sr;
     nf = $.pivotUtilities.numberFormat;
     tpl = $.pivotUtilities.aggregatorTemplates;
+    r = $.pivotUtilities.renderers;
+    gcr = $.pivotUtilities.gchart_renderers;
+    d3r = $.pivotUtilities.d3_renderers;
+    c3r = $.pivotUtilities.c3_renderers;
+	plr = $.pivotUtilities.plotly_renderers;
+	er = $.pivotUtilities.export_renderers;
+	sr = $.pivotUtilities.subtotal_renderers;
     frFmt = nf({
       thousandsSep: " ",
       decimalSep: ","
@@ -31,7 +38,7 @@
       thousandsSep: " ",
       decimalSep: ","
     });
-    return $.pivotUtilities.locales.de = {
+    $.pivotUtilities.locales.de = {
       localeStrings: {
         renderError: "Bei der Darstellung der Pivot-Tabelle ist ein Fehler aufgetreten.",
         computeError: "Bei der Berechnung der Pivot-Tabelle ist ein Fehler aufgetreten.",
@@ -40,7 +47,9 @@
         selectNone: "Nichts auswählen",
         tooMany: "(zu viele für Liste)",
         filterResults: "Ergebnisse filtern",
-        totals: "Gesamt",
+		apply: "Anwenden",
+		cancel: "Abbrechen",
+		totals: "Gesamt",
         vs: "gegen",
         by: "pro"
       },
@@ -53,6 +62,8 @@
         "Durchschnitt": tpl.average(frFmt),
         "Minimum": tpl.min(frFmt),
         "Maximum": tpl.max(frFmt),
+		"Erster": tpl.first(frFmt),
+        "Letzter": tpl.last(frFmt),
         "Summe über Summe": tpl.sumOverSum(frFmt),
         "80% Obergrenze": tpl.sumOverSumBound80(true, frFmt),
         "80% Untergrenze": tpl.sumOverSumBound80(false, frFmt),
@@ -71,6 +82,58 @@
         "Heatmap pro Spalte": $.pivotUtilities.renderers["Col Heatmap"]
       }
     };
+	if (gcr) {
+      $.pivotUtilities.locales.de.gchart_renderers = {
+        "Line Chart": gcr["Line Chart"],
+        "Bar Chart": gcr["Bar Chart"],
+        "Stacked Bar Chart": gcr["Stacked Bar Chart"],
+        "Area Chart": gcr["Area Chart"],
+		"Scatter Chart": gcr["Scatter Chart"]
+      };
+    }
+    if (d3r) {
+      $.pivotUtilities.locales.de.d3_renderers = {
+        "Treemap": d3r["Treemap"]
+      };
+    }
+    if (c3r) {
+      $.pivotUtilities.locales.de.c3_renderers = {
+        "C3 Liniendiagramm": c3r["Line Chart"],
+        "C3 Balkendiagramm": c3r["Bar Chart"],
+        "C3 gestapeltes Balkendiagramm": c3r["Stacked Bar Chart"],
+        "C3 Flächenduagramm": c3r["Area Chart"],
+		"C3 horizontales Balkendiagramm": c3r["Horizontal Bar Chart"],
+		"C3 horizontal gestapeltes Balkendiagramm": c3r["Horizontal Stacked Bar Chart"],
+		"Verteilungsdiagramm": c3r["Scatter Chart"]
+      };
+    }
+	if (plr) {
+      $.pivotUtilities.locales.de.plotly_renderers = {
+        "Plotly Line Chart": plr["Line Chart"],
+        "Plotly Bar Chart": plr["Bar Chart"],
+        "Plotly Stacked Bar Chart": plr["Stacked Bar Chart"],
+		"Plotly Area Chart": plr["Area Chart"],
+		"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
+		"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
+		"Plotly Scatter Chart": plr["Scatter Chart"],
+		"Plotly Multiple Pie Chart": plr["Multiple Pie Chart"]
+      };
+    }
+	if (er) {
+		$.pivotUtilities.locales.de.export_renderers = {
+			"TSV Export" : er["TSV Export"]
+		};
+	}
+	if (sr) {
+		$.pivotUtilities.locales.de.subtotal_renderers = {
+			"Table With Subtotal" : sr["Table With Subtotal"],
+			"Table With Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
+			"Table With Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
+			"Table With Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
+			"Table With Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
+		};
+	}
+	return $.pivotUtilities.locales.de;
   });
 
 }).call(this);
