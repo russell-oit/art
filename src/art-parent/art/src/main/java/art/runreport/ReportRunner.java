@@ -28,7 +28,6 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
-import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
@@ -433,9 +432,7 @@ public class ReportRunner {
 	private void applyUsesGroovy() {
 		logger.debug("Entering applyUsesGroovy");
 
-		GeneralReportOptions generalOptions = report.getGeneralOptions();
-
-		if (report.isUseGroovy() || generalOptions.isUsesGroovy()) {
+		if (report.isEffectiveUseGroovy()) {
 			CompilerConfiguration cc = new CompilerConfiguration();
 			cc.addCompilationCustomizers(new SandboxTransformer());
 

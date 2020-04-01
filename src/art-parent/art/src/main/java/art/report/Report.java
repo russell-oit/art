@@ -1850,6 +1850,21 @@ public class Report implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if the report uses groovy, determined from use
+	 * groovy field or general report options
+	 *
+	 * @return <code>true</code> if the report uses groovy
+	 */
+	@JsonIgnore
+	public boolean isEffectiveUseGroovy() {
+		if (useGroovy || (generalOptions != null && generalOptions.isUsesGroovy())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if the cancel button should be shown when
 	 * running the report
 	 *
@@ -1858,7 +1873,8 @@ public class Report implements Serializable {
 	 */
 	@JsonIgnore
 	public boolean isShowCancel() {
-		if (reportType != null && reportType.isJdbcRunnableByArt() && !useGroovy) {
+		if (reportType != null && reportType.isJdbcRunnableByArt()
+				&& !isEffectiveUseGroovy()) {
 			return true;
 		} else {
 			return false;
