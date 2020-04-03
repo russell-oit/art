@@ -248,17 +248,20 @@
 					var selfServiceOptionsString = getSelfServiceOptionsString();
 
 					var limit = $("#limit").val();
+					var runId = '${runId}';
 
 					var data = {testRun: true, reportId: reportId,
 						selfServicePreview: true, reportFormat: "htmlDataTable",
 						selfServiceOptions: selfServiceOptionsString,
-						showInline: true, limit: limit};
+						showInline: true, limit: limit, runId: runId};
 
 					if ($('#showSql').is(':checked')) {
 						data.showSql = true;
 					}
 
 					$("#reportOutput").empty();
+					
+					$("#cancelQueryDiv-${runId}").show();
 
 					//https://stackoverflow.com/questions/10398783/jquery-form-serialize-and-other-parameters
 					$.ajax({
@@ -274,6 +277,7 @@
 						},
 						complete: function () {
 							$('#preview').prop('disabled', false);
+							$("#cancelQueryDiv-${runId}").hide();
 						}
 					});
 				});
@@ -596,6 +600,12 @@
 						<div id="builder"></div>
 					</div>
 				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<jsp:include page="/WEB-INF/jsp/showCancelQuery.jsp"/>
 			</div>
 		</div>
 

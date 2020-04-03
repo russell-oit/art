@@ -306,7 +306,7 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
-		
+
 		request.setAttribute("runId", ArtUtils.getUniqueId(report.getReportId()));
 
 		boolean enableReportFormats;
@@ -1401,15 +1401,16 @@ public class RunReportHelper {
 	 *
 	 * @param report the report
 	 * @param user the user
+	 * @param runId the run id of the report
 	 * @return self service columns
 	 * @throws SQLException
 	 */
 	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
-			User user) throws SQLException {
+			User user, String runId) throws SQLException {
 
 		boolean nameAsLabel = false;
 		boolean setType = false;
-		return getSelfServiceColumns(report, user, nameAsLabel, setType);
+		return getSelfServiceColumns(report, user, nameAsLabel, setType, runId);
 	}
 
 	/**
@@ -1443,6 +1444,25 @@ public class RunReportHelper {
 	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
 			User user, boolean nameAsLabel, boolean setType) throws SQLException {
 
+		String runId = null;
+		return getSelfServiceColumns(report, user, nameAsLabel, setType, runId);
+	}
+
+	/**
+	 * Returns self service columns based on the report configuration
+	 *
+	 * @param report the report
+	 * @param user the current user
+	 * @param nameAsLabel whether name should be used for the label for self
+	 * service reports
+	 * @param setType whether the type field should be set
+	 * @param runId the run id for the report
+	 * @return self service columns
+	 * @throws SQLException
+	 */
+	private List<SelfServiceColumn> getSelfServiceColumns(Report report,
+			User user, boolean nameAsLabel, boolean setType, String runId) throws SQLException {
+
 		Objects.requireNonNull(report, "report must not be null");
 
 		List<SelfServiceColumn> columns = new ArrayList<>();
@@ -1467,6 +1487,7 @@ public class RunReportHelper {
 			reportRunner.setUseViewColumns(true);
 			reportRunner.setUser(user);
 			reportRunner.setReport(report);
+			reportRunner.setRunId(runId);
 
 			rs = reportRunner.executeQuery();
 
@@ -1583,13 +1604,30 @@ public class RunReportHelper {
 	 * @throws SQLException
 	 */
 	public void applySelfServiceFields(Report report, User user) throws IOException, SQLException {
+		String runId = null;
+		applySelfServiceFields(report, user, runId);
+	}
+
+	/**
+	 * Verifies the selected self service columns and sets the final columns
+	 * string to use
+	 *
+	 * @param report the report
+	 * @param user the current user
+	 * @param runId the run id for the report
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void applySelfServiceFields(Report report, User user, String runId)
+			throws IOException, SQLException {
+
 		Objects.requireNonNull(report, "report must not be null");
 
 		if (!report.isViewOrSelfService()) {
 			return;
 		}
 
-		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(report, user);
+		List<SelfServiceColumn> selfServiceColumns = getSelfServiceColumns(report, user, runId);
 
 		SelfServiceOptions selfServiceOptions;
 		String selfServiceOptionsString = report.getSelfServiceOptions();

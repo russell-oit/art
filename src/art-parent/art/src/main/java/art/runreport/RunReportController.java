@@ -109,6 +109,12 @@ public class RunReportController {
 
 		runningReportsCount++;
 
+		if (runIdParameter == null) {
+			runId = ArtUtils.getUniqueId(reportId);
+		} else {
+			runId = runIdParameter;
+		}
+
 		//check if output is being displayed within the show report page (inline) or in a new page
 		boolean showInlineParameter = BooleanUtils.toBoolean(request.getParameter("showInline"));
 		boolean showInline = showInlineParameter;
@@ -169,7 +175,7 @@ public class RunReportController {
 				}
 
 				if (testReport.getReportType() != ReportType.View) {
-					runReportHelper.applySelfServiceFields(testReport, sessionUser);
+					runReportHelper.applySelfServiceFields(testReport, sessionUser, runId);
 				}
 
 				report = testReport;
@@ -215,7 +221,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType == ReportType.View) {
-				runReportHelper.applySelfServiceFields(report, sessionUser);
+				runReportHelper.applySelfServiceFields(report, sessionUser, runId);
 			}
 
 			ReportFormat reportFormat;
@@ -382,11 +388,6 @@ public class RunReportController {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/addJquery.jsp").include(request, response);
 				}
 
-				if (runIdParameter == null) {
-					runId = ArtUtils.getUniqueId(reportId);
-				} else {
-					runId = runIdParameter;
-				}
 				request.setAttribute("runId", runId);
 
 				if (!ajax && report.isShowCancel()) {
