@@ -315,7 +315,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				"showDashboard", "getLovValues", "runReport", "emailReport",
 				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
 				"saveParameterSelection", "clearSavedParameterSelection",
-				"getAvailableReports")) {
+				"getAvailableReports", "cancelQuery")) {
 			if (user.hasPermission("view_reports")) {
 				authorised = true;
 			}
@@ -404,7 +404,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_datasources")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources", "reportConfig")
+		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources",
+				"reportConfig", "cancelQuery")
 				|| StringUtils.endsWithAny(page, "Report", "Reports")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;

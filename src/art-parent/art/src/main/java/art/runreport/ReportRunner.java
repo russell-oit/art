@@ -28,7 +28,6 @@ import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
-import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.ViewOptions;
 import art.reportparameter.ReportParameter;
 import art.reportrule.ReportRule;
@@ -117,9 +116,24 @@ public class ReportRunner {
 	private boolean useViewColumns;
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
+	private String runId;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the runId
+	 */
+	public String getRunId() {
+		return runId;
+	}
+
+	/**
+	 * @param runId the runId to set
+	 */
+	public void setRunId(String runId) {
+		this.runId = runId;
 	}
 
 	/**
@@ -418,9 +432,7 @@ public class ReportRunner {
 	private void applyUsesGroovy() {
 		logger.debug("Entering applyUsesGroovy");
 
-		GeneralReportOptions generalOptions = report.getGeneralOptions();
-
-		if (report.isUseGroovy() || generalOptions.isUsesGroovy()) {
+		if (report.isEffectiveUseGroovy()) {
 			CompilerConfiguration cc = new CompilerConfiguration();
 			cc.addCompilationCustomizers(new SandboxTransformer());
 
@@ -1172,31 +1184,8 @@ public class ReportRunner {
 
 		//don't execute sql source for report types that don't have runnable sql
 		ReportType reportType = report.getReportType();
-		switch (reportType) {
-			case JasperReportsTemplate:
-			case JxlsTemplate:
-			case JPivotMondrian:
-			case JPivotMondrianXmla:
-			case JPivotSqlServerXmla:
-			case LovStatic:
-			case PivotTableJsCsvLocal:
-			case PivotTableJsCsvServer:
-			case DygraphsCsvLocal:
-			case DygraphsCsvServer:
-			case DataTablesCsvLocal:
-			case DataTablesCsvServer:
-			case DatamapsFile:
-			case SaikuReport:
-			case MongoDB:
-			case OrgChartJson:
-			case OrgChartList:
-			case OrgChartAjax:
-			case ReportEngineFile:
-			case Dashboard:
-			case GridstackDashboard:
-				return;
-			default:
-				break;
+		if (!reportType.isJdbcRunnableByArt()) {
+			return;
 		}
 
 		if (groovyData != null) {
@@ -1274,6 +1263,10 @@ public class ReportRunner {
 			} else {
 				psQuery.setQueryTimeout(queryTimeoutSeconds);
 			}
+		}
+
+		if (StringUtils.isNotBlank(runId)) {
+			Config.addRunningStatement(runId, psQuery);
 		}
 
 		psQuery.execute();
@@ -1554,6 +1547,10 @@ public class ReportRunner {
 			} catch (SQLException ex) {
 				logger.error("Error", ex);
 			}
+		}
+
+		if (StringUtils.isNotBlank(runId)) {
+			Config.removeRunningStatement(runId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);

@@ -14,9 +14,11 @@ e.g. report name and report generation progress
 
 <br>
 <div class="reportBanner">
-	<span id="reportInfo">
-		<encode:forHtmlContent value="${reportName}"/>
+	<span id="reportProgress-${runId}" class="pull-right">
 	</span>
-	<span id="reportProgress" class="pull-right">
+</div>
+<div class="reportBanner">
+	<span id="reportInfo-${runId}">
+		<encode:forHtmlContent value="${reportName}"/>
 	</span>
 </div>

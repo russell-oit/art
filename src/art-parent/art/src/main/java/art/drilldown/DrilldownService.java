@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -157,11 +158,41 @@ public class DrilldownService {
 	public void deleteDrilldowns(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteDrilldowns: ids={}", (Object) ids);
 
+		if (ids.length == 0) {
+			return;
+		}
+
 		String sql;
 
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES"
 				+ " WHERE DRILLDOWN_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 		dbService.update(sql, (Object[]) ids);
+	}
+
+	/**
+	 * Deletes drilldowns for given reports
+	 *
+	 * @param reportIds the report ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "drilldowns", allEntries = true)
+	public void deleteDrilldownsForReports(Integer[] reportIds, Connection conn) throws SQLException {
+		logger.debug("Entering deleteDrilldownsForReports: reportIds={}", (Object) reportIds);
+
+		if (reportIds.length == 0) {
+			return;
+		}
+
+		String sql;
+
+		sql = "DELETE FROM ART_DRILLDOWN_QUERIES"
+				+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", reportIds.length) + ")";
+		if (conn == null) {
+			dbService.update(sql, (Object[]) reportIds);
+		} else {
+			dbService.update(conn, sql, (Object[]) reportIds);
+		}
 	}
 
 	/**
@@ -225,7 +256,16 @@ public class DrilldownService {
 		}
 
 		String sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
-		int drilldownId = dbService.getMaxRecordId(sql);
+		int drilldownId = dbService.getMaxRecordId(conn, sql);
+
+		//https://stackoverflow.com/questions/10975913/how-to-make-a-new-list-with-a-property-of-an-object-which-is-in-another-list
+		//https://howtodoinjava.com/java8/java-stream-distinct-examples/
+		List<Integer> reportIds = drilldowns.stream()
+				.map(Drilldown::getParentReportId)
+				.distinct()
+				.collect(Collectors.toList());
+
+		deleteDrilldownsForReports(reportIds.toArray(new Integer[0]), conn);
 
 		for (Drilldown drilldown : drilldowns) {
 			drilldownId++;

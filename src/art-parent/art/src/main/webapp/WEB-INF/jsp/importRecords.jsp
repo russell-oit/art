@@ -21,15 +21,30 @@
 	${panelTitle}
 </c:set>
 
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
+
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+
+		<script type="text/javascript">
+			$(document).ready(function () {
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
+				});
+			});
+		</script>
 	</jsp:attribute>
 
 	<jsp:body>
@@ -87,6 +102,16 @@
 							</label>
 						</c:forEach>
 						<form:errors path="fileFormat" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="overwrite">
+						<spring:message code="reports.text.overwrite"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="overwrite" id="overwrite" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">

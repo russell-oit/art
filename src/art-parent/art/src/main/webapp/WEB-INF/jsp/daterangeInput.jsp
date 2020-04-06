@@ -37,6 +37,11 @@
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   value="">
 
+<input type="hidden"
+	   name="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
+	   id="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
+	   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
+
 <script>
 	var locale = '${locale}';
 	moment.locale(locale);
@@ -88,13 +93,20 @@
 
 
 	function rangeUpdated(start, end) {
+		var fromParameterDate = start.format(fromParameterMomentFormat);
 		if (fromParameter) {
-			$(fromParameterSelector).val(start.format(fromParameterMomentFormat));
+			$(fromParameterSelector).val(fromParameterDate);
 		}
 
+		var toParameterDate = end.format(toParameterMomentFormat);
 		if (toParameter) {
-			$(toParameterSelector).val(end.format(toParameterMomentFormat));
+			$(toParameterSelector).val(toParameterDate);
 		}
+		
+		var fullDateRange = fromParameterDate + options.locale.separator + toParameterDate;
+		
+		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').val(fullDateRange);
+		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').change();
 	}
 
 	var todayText = '${todayText}';

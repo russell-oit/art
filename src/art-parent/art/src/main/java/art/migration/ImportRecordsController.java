@@ -219,43 +219,43 @@ public class ImportRecordsController {
 						importSettings(tempFile, sessionUser, conn, fileFormat, session);
 						break;
 					case Datasources:
-						importDatasources(tempFile, sessionUser, conn, fileFormat);
+						importDatasources(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Destinations:
-						importDestinations(tempFile, sessionUser, conn, fileFormat);
+						importDestinations(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Encryptors:
-						importEncryptors(tempFile, sessionUser, conn, fileFormat);
+						importEncryptors(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Holidays:
-						importHolidays(tempFile, sessionUser, conn, fileFormat);
+						importHolidays(tempFile, sessionUser, conn, importRecords);
 						break;
 					case ReportGroups:
-						importReportGroups(tempFile, sessionUser, conn, fileFormat);
+						importReportGroups(tempFile, sessionUser, conn, importRecords);
 						break;
 					case SmtpServers:
-						importSmtpServers(tempFile, sessionUser, conn, fileFormat);
+						importSmtpServers(tempFile, sessionUser, conn, importRecords);
 						break;
 					case UserGroups:
-						importUserGroups(tempFile, sessionUser, conn, fileFormat);
+						importUserGroups(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Schedules:
-						importSchedules(tempFile, sessionUser, conn, fileFormat);
+						importSchedules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Users:
-						importUsers(tempFile, sessionUser, conn, fileFormat);
+						importUsers(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Rules:
-						importRules(tempFile, sessionUser, conn, fileFormat);
+						importRules(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Parameters:
-						importParameters(tempFile, sessionUser, conn, fileFormat);
+						importParameters(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Reports:
-						importReports(tempFile, sessionUser, conn, fileFormat);
+						importReports(tempFile, sessionUser, conn, importRecords);
 						break;
 					case Roles:
-						importRoles(tempFile, sessionUser, conn, fileFormat);
+						importRoles(tempFile, sessionUser, conn, importRecords);
 						break;
 					default:
 						break;
@@ -331,16 +331,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importDatasources(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importDatasources: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importDatasources");
 
 		List<Datasource> datasources;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				datasources = importFromJson(file, new TypeReference<List<Datasource>>() {
@@ -359,7 +359,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		datasourceService.importDatasources(datasources, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		datasourceService.importDatasources(datasources, sessionUser, conn, overwrite);
 
 		ArtDatabase artDbConfig = Config.getArtDbConfig();
 		for (Datasource datasource : datasources) {
@@ -376,16 +377,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importDestinations(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importDestinations: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importDestinations");
 
 		List<Destination> destinations;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				destinations = importFromJson(file, new TypeReference<List<Destination>>() {
@@ -404,7 +405,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		destinationService.importDestinations(destinations, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		destinationService.importDestinations(destinations, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -413,19 +415,19 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importEncryptors(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importEncryptors: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importEncryptors");
 
 		List<Encryptor> encryptors;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
 
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -475,7 +477,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		encryptorService.importEncryptors(encryptors, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		encryptorService.importEncryptors(encryptors, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -484,16 +487,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importHolidays(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importHolidays: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importHolidays");
 
 		List<Holiday> holidays;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				holidays = importFromJson(file, new TypeReference<List<Holiday>>() {
@@ -506,7 +509,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		holidayService.importHolidays(holidays, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		holidayService.importHolidays(holidays, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -515,16 +519,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importReportGroups(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importReportGroups: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importReportGroups");
 
 		List<ReportGroup> reportGroups;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				reportGroups = importFromJson(file, new TypeReference<List<ReportGroup>>() {
@@ -537,7 +541,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		reportGroupService.importReportGroups(reportGroups, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -546,16 +551,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importSmtpServers(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importSmtpServers: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importSmtpServers");
 
 		List<SmtpServer> smtpServers;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				smtpServers = importFromJson(file, new TypeReference<List<SmtpServer>>() {
@@ -574,7 +579,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		smtpServerService.importSmtpServers(smtpServers, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -583,16 +589,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUserGroups(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importUserGroups: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importUserGroups");
 
 		List<UserGroup> userGroups;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				userGroups = importFromJson(file, new TypeReference<List<UserGroup>>() {
@@ -671,7 +677,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		userGroupService.importUserGroups(userGroups, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		userGroupService.importUserGroups(userGroups, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -680,16 +687,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importSchedules(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importSchedules: sessionUser={}, fileFormat",
-				sessionUser, fileFormat);
+		logger.debug("Entering importSchedules");
 
 		List<Schedule> schedules;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				schedules = importFromJson(file, new TypeReference<List<Schedule>>() {
@@ -745,7 +752,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		scheduleService.importSchedules(schedules, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		scheduleService.importSchedules(schedules, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -754,16 +762,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importUsers(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importUsers: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importUsers");
 
 		List<User> users;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				users = importFromJson(file, new TypeReference<List<User>>() {
@@ -870,7 +878,8 @@ public class ImportRecordsController {
 			}
 		}
 
-		userService.importUsers(users, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		userService.importUsers(users, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -879,16 +888,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importRules(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importRules: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importRules");
 
 		List<Rule> rules;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				rules = importFromJson(file, new TypeReference<List<Rule>>() {
@@ -901,7 +910,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		ruleService.importRules(rules, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		ruleService.importRules(rules, sessionUser, conn, overwrite);
 	}
 
 	/**
@@ -910,19 +920,18 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importParameters(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importParameters: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importParameters");
 
 		List<Parameter> parameters;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
-
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -978,7 +987,8 @@ public class ImportRecordsController {
 		}
 
 		boolean local = true;
-		parameterService.importParameters(parameters, sessionUser, conn, local);
+		boolean overwrite = importRecords.isOverwrite();
+		parameterService.importParameters(parameters, sessionUser, conn, local, overwrite);
 	}
 
 	/**
@@ -987,19 +997,18 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws Exception
 	 */
 	private void importReports(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws Exception {
+			ImportRecords importRecords) throws Exception {
 
-		logger.debug("Entering importReports: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importReports");
 
 		List<Report> reports;
 		String extension = FilenameUtils.getExtension(file.getName());
 		String artTempPath = Config.getArtTempPath();
-
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				if (StringUtils.equalsIgnoreCase(extension, "json")) {
@@ -1261,7 +1270,9 @@ public class ImportRecordsController {
 
 		ReportServiceHelper reportServiceHelper = new ReportServiceHelper();
 		boolean local = true;
-		reportServiceHelper.importReports(reports, sessionUser, conn, local);
+		boolean overwrite = importRecords.isOverwrite();
+		reportServiceHelper.importReports(reports, sessionUser, conn, local, overwrite);
+		
 		cacheHelper.clearReports();
 		cacheHelper.clearReportGroups();
 		cacheHelper.clearDatasources();
@@ -1498,16 +1509,16 @@ public class ImportRecordsController {
 	 * @param file the file that contains the records to import
 	 * @param sessionUser the session user
 	 * @param conn the connection to use
-	 * @param fileFormat the format of the file
+	 * @param importRecords the import records object
 	 * @throws SQLException
 	 */
 	private void importRoles(File file, User sessionUser, Connection conn,
-			MigrationFileFormat fileFormat) throws SQLException, IOException {
+			ImportRecords importRecords) throws SQLException, IOException {
 
-		logger.debug("Entering importRoles: sessionUser={}, fileFormat={}",
-				sessionUser, fileFormat);
+		logger.debug("Entering importRoles");
 
 		List<Role> roles;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
 		switch (fileFormat) {
 			case json:
 				roles = importFromJson(file, new TypeReference<List<Role>>() {
@@ -1563,7 +1574,8 @@ public class ImportRecordsController {
 				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
 		}
 
-		roleService.importRoles(roles, sessionUser, conn);
+		boolean overwrite = importRecords.isOverwrite();
+		roleService.importRoles(roles, sessionUser, conn, overwrite);
 	}
 
 	/**

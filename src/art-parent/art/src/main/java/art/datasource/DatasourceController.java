@@ -52,6 +52,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -88,6 +89,35 @@ public class DatasourceController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
+
+		return showDatasourcesPage("all", model);
+	}
+
+	@GetMapping("/unusedDatasources")
+	public String showUnusedDatasources(Model model) {
+		logger.debug("Entering showUnusedDatasources");
+
+		try {
+			model.addAttribute("datasources", datasourceService.getUnusedDatasources());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showDatasourcesPage("unused", model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param action "all" or "unused"
+	 * @param model the spring model
+	 * @return the jsp file to display
+	 */
+	private String showDatasourcesPage(String action, Model model) {
+		logger.debug("Entering showDatasourcesPage: action='{}'", action);
+
+		model.addAttribute("action", action);
 
 		return "datasources";
 	}

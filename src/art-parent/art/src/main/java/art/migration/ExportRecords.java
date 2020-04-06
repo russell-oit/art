@@ -61,6 +61,21 @@ public class ExportRecords implements Serializable {
 	private MigrationLocation location = MigrationLocation.File;
 	private Datasource datasource;
 	private MigrationFileFormat fileFormat = MigrationFileFormat.json;
+	private boolean overwrite;
+
+	/**
+	 * @return the overwrite
+	 */
+	public boolean isOverwrite() {
+		return overwrite;
+	}
+
+	/**
+	 * @param overwrite the overwrite to set
+	 */
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
+	}
 
 	/**
 	 * @return the fileFormat

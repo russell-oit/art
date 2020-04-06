@@ -155,6 +155,10 @@ public class SmtpServerService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -302,13 +306,15 @@ public class SmtpServerService {
 	 * @param smtpServers the list of smtp servers to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "smtpServers", allEntries = true)
 	public void importSmtpServers(List<SmtpServer> smtpServers, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importSmtpServers: actionUser={}", actionUser);
+		logger.debug("Entering importSmtpServers: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -316,12 +322,36 @@ public class SmtpServerService {
 			String sql = "SELECT MAX(SMTP_SERVER_ID) FROM ART_SMTP_SERVERS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<SmtpServer> currentSmtpServers = new ArrayList<>();
+			if (overwrite) {
+				currentSmtpServers = getAllSmtpServers();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (SmtpServer smtpServer : smtpServers) {
-				id++;
-				saveSmtpServer(smtpServer, id, actionUser, conn);
+				String smtpServerName = smtpServer.getName();
+				boolean update = false;
+				if (overwrite) {
+					SmtpServer existingSmtpServer = currentSmtpServers.stream()
+							.filter(d -> StringUtils.equals(smtpServerName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingSmtpServer != null) {
+						update = true;
+						smtpServer.setSmtpServerId(existingSmtpServer.getSmtpServerId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveSmtpServer(smtpServer, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -466,15 +496,20 @@ public class SmtpServerService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"smtpServers", "jobs"}, allEntries = true)
-	public void updateSmtpServers(MultipleSmtpServerEdit multipleSmtpServerEdit, User actionUser)
-			throws SQLException {
+	public void updateSmtpServers(MultipleSmtpServerEdit multipleSmtpServerEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateSmtpServers: multipleSmtpServerEdit={}, actionUser={}",
-				multipleSmtpServerEdit, actionUser);
+		logger.debug("Entering updateSmtpServers: multipleSmtpServerEdit={},"
+				+ " actionUser={}", multipleSmtpServerEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleSmtpServerEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleSmtpServerEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_SMTP_SERVERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE SMTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

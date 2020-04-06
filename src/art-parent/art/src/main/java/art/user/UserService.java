@@ -228,6 +228,10 @@ public class UserService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -528,10 +532,24 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUser(User user, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateUser(user, actionUser, conn);
+	}
+
+	/**
+	 * Updates a user record
+	 *
+	 * @param user the updated user record
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void updateUser(User user, User actionUser, Connection conn) throws SQLException {
 		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
 		Integer newRecordId = null;
-		saveUser(user, newRecordId, actionUser);
+		saveUser(user, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -543,11 +561,17 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUsers(MultipleUserEdit multipleUserEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateUsers: multipleUserEdit={}, actionUser={}", multipleUserEdit, actionUser);
+		logger.debug("Entering updateUsers: multipleUserEdit={}, actionUser={}",
+				multipleUserEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleUserEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleUserEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_USERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
@@ -598,13 +622,15 @@ public class UserService {
 	 * @param users the list of users to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void importUsers(List<User> users, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importUsers: actionUser={}", actionUser);
+		logger.debug("Entering importUsers: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -616,10 +642,19 @@ public class UserService {
 			int reportGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			int userGroupId = dbService.getMaxRecordId(sql);
+			int userGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
-			int roleId = dbService.getMaxRecordId(sql);
+			int roleId = dbService.getMaxRecordId(conn, sql);
+
+			List<User> currentUsers = new ArrayList<>();
+			if (overwrite) {
+				currentUsers = getAllUsers();
+			}
+
+			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
+			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
+			List<Role> currentRoles = roleService.getAllRoles();
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
@@ -627,14 +662,11 @@ public class UserService {
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
 			Map<String, Role> addedRoles = new HashMap<>();
-
-			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
-			List<UserGroup> currentUserGroups = userGroupService.getAllUserGroups();
-			List<Role> currentRoles = roleService.getAllRoles();
+			List<Integer> updatedReportGroupIds = new ArrayList<>();
+			List<Integer> updatedUserGroupIds = new ArrayList<>();
+			List<Integer> updatedRoleIds = new ArrayList<>();
 
 			for (User user : users) {
-				userId++;
-
 				ReportGroup userDefaultReportGroup = user.getDefaultReportGroup();
 				if (userDefaultReportGroup != null) {
 					String reportGroupName = userDefaultReportGroup.getName();
@@ -655,7 +687,16 @@ public class UserService {
 								user.setDefaultReportGroup(addedReportGroup);
 							}
 						} else {
-							user.setDefaultReportGroup(existingReportGroup);
+							if (overwrite) {
+								int existingReportGroupId = existingReportGroup.getReportGroupId();
+								if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+									userDefaultReportGroup.setReportGroupId(existingReportGroupId);
+									reportGroupService.updateReportGroup(userDefaultReportGroup, actionUser, conn);
+									updatedReportGroupIds.add(existingReportGroupId);
+								}
+							} else {
+								user.setDefaultReportGroup(existingReportGroup);
+							}
 						}
 					}
 				}
@@ -684,7 +725,16 @@ public class UserService {
 										userGroup.setDefaultReportGroup(addedReportGroup);
 									}
 								} else {
-									userGroup.setDefaultReportGroup(existingReportGroup);
+									if (overwrite) {
+										int existingReportGroupId = existingReportGroup.getReportGroupId();
+										if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+											userGroupDefaultReportGroup.setReportGroupId(existingReportGroupId);
+											reportGroupService.updateReportGroup(userGroupDefaultReportGroup, actionUser, conn);
+											updatedReportGroupIds.add(existingReportGroupId);
+										}
+									} else {
+										userGroup.setDefaultReportGroup(existingReportGroup);
+									}
 								}
 							}
 						}
@@ -705,7 +755,17 @@ public class UserService {
 								newUserGroups.add(addedUserGroup);
 							}
 						} else {
-							newUserGroups.add(existingUserGroup);
+							if (overwrite) {
+								int existingUserGroupId = existingUserGroup.getUserGroupId();
+								if (!updatedUserGroupIds.contains(existingUserGroupId)) {
+									userGroup.setUserGroupId(existingUserGroupId);
+									userGroupService.updateUserGroup(userGroup, actionUser, conn);
+									newUserGroups.add(userGroup);
+									updatedUserGroupIds.add(existingUserGroupId);
+								}
+							} else {
+								newUserGroups.add(existingUserGroup);
+							}
 						}
 					}
 					user.setUserGroups(newUserGroups);
@@ -731,16 +791,46 @@ public class UserService {
 								newRoles.add(addedRole);
 							}
 						} else {
-							newRoles.add(existingRole);
+							if (overwrite) {
+								int existingRoleId = existingRole.getRoleId();
+								if (!updatedRoleIds.contains(existingRoleId)) {
+									role.setRoleId(existingRoleId);
+									roleService.updateRole(role, actionUser, conn);
+									newRoles.add(role);
+									updatedRoleIds.add(existingRoleId);
+								}
+							} else {
+								newRoles.add(existingRole);
+							}
 						}
 					}
 					user.setRoles(newRoles);
 				}
 
-				saveUser(user, userId, actionUser, conn);
-				userGroupMembershipService2.recreateUserGroupMemberships(user);
-				userPermissionService.recreateUserPermissions(user);
-				userRoleService.recreateUserRoles(user);
+				String username = user.getUsername();
+				boolean update = false;
+				if (overwrite) {
+					User existingUser = currentUsers.stream()
+							.filter(d -> StringUtils.equals(username, d.getUsername()))
+							.findFirst()
+							.orElse(null);
+					if (existingUser != null) {
+						update = true;
+						user.setUserId(existingUser.getUserId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					userId++;
+					newRecordId = userId;
+				}
+				saveUser(user, newRecordId, actionUser, conn);
+				userGroupMembershipService2.recreateUserGroupMemberships(user, conn);
+				userPermissionService.recreateUserPermissions(user, conn);
+				userRoleService.recreateUserRoles(user, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

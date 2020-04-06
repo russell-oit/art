@@ -101,6 +101,8 @@
 				}
 
 				function runReport(reportId) {
+					$("#content_" + reportId).empty();
+					
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/runReport',

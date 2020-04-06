@@ -92,13 +92,14 @@ public class ReportServiceHelper {
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
+	 * @param overwrite whether to overwrite existing records
 	 * @throws Exception
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn, boolean local) throws Exception {
+			Connection conn, boolean local, boolean overwrite) throws Exception {
 
 		boolean commit = true;
-		importReports(reports, actionUser, conn, local, commit);
+		importReports(reports, actionUser, conn, local, commit, overwrite);
 	}
 
 	/**
@@ -109,13 +110,15 @@ public class ReportServiceHelper {
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
 	 * @param commit whether to perform a commit after a successful import
+	 * @param overwrite whether to overwrite existing records
 	 * @throws Exception
 	 */
 	public void importReports(List<Report> reports, User actionUser,
-			Connection conn, boolean local, boolean commit) throws Exception {
+			Connection conn, boolean local, boolean commit, boolean overwrite)
+			throws Exception {
 
 		logger.debug("Entering importReports: actionUser={}, local={},"
-				+ " commit={}", actionUser, local, commit);
+				+ " commit={}, overwrite={}", actionUser, local, commit, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -123,7 +126,7 @@ public class ReportServiceHelper {
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			List<Report> currentReports = reportService.getAllReportsBasic();
+			List<Report> currentReports = reportService.getAllReports();
 			List<Datasource> currentDatasources = datasourceService.getAllDatasources();
 			List<Encryptor> currentEncryptors = encryptorService.getAllEncryptors();
 			List<ReportGroup> currentReportGroups = reportGroupService.getAllReportGroups();
@@ -147,114 +150,144 @@ public class ReportServiceHelper {
 			Map<String, Datasource> addedDatasources = new HashMap<>();
 			Map<String, Encryptor> addedEncryptors = new HashMap<>();
 			Map<String, ReportGroup> addedReportGroups = new HashMap<>();
-			Map<String, Report> addedReports = new HashMap<>();
+			List<Integer> updatedDatasourceIds = new ArrayList<>();
+			List<Integer> updatedEncryptorIds = new ArrayList<>();
+			List<Integer> updatedReportGroupIds = new ArrayList<>();
+			List<Datasource> updatedDatasources = new ArrayList<>();
 
 			for (Report report : reports) {
+				Datasource datasource = report.getDatasource();
+				if (datasource != null) {
+					String datasourceName = datasource.getName();
+					Datasource existingDatasource = currentDatasources.stream()
+							.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingDatasource == null) {
+						Datasource addedDatasource = addedDatasources.get(datasourceName);
+						if (addedDatasource == null) {
+							datasourceId++;
+							datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
+							addedDatasources.put(datasourceName, datasource);
+						} else {
+							report.setDatasource(addedDatasource);
+						}
+					} else {
+						if (overwrite) {
+							int existingDatasourceId = existingDatasource.getDatasourceId();
+							if (!updatedDatasourceIds.contains(existingDatasourceId)) {
+								datasource.setDatasourceId(existingDatasourceId);
+								datasourceService.updateDatasource(datasource, actionUser, conn);
+								updatedDatasourceIds.add(existingDatasourceId);
+								updatedDatasources.add(datasource);
+							}
+						} else {
+							report.setDatasource(existingDatasource);
+						}
+					}
+				}
+
+				Encryptor encryptor = report.getEncryptor();
+				if (encryptor != null) {
+					String encryptorName = encryptor.getName();
+					Encryptor existingEncryptor = currentEncryptors.stream()
+							.filter(e -> StringUtils.equals(encryptorName, e.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingEncryptor == null) {
+						Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
+						if (addedEncryptor == null) {
+							encryptorId++;
+							encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
+							addedEncryptors.put(encryptorName, encryptor);
+						} else {
+							report.setEncryptor(addedEncryptor);
+						}
+					} else {
+						if (overwrite) {
+							int existingEncryptorId = existingEncryptor.getEncryptorId();
+							if (!updatedEncryptorIds.contains(existingEncryptorId)) {
+								encryptor.setEncryptorId(existingEncryptorId);
+								encryptorService.updateEncryptor(encryptor, actionUser, conn);
+								updatedEncryptorIds.add(existingEncryptorId);
+							}
+						} else {
+							report.setEncryptor(existingEncryptor);
+						}
+					}
+				}
+
+				List<ReportGroup> reportGroups = report.getReportGroups();
+				if (CollectionUtils.isNotEmpty(reportGroups)) {
+					List<ReportGroup> newReportGroups = new ArrayList<>();
+					for (ReportGroup reportGroup : reportGroups) {
+						String reportGroupName = reportGroup.getName();
+						ReportGroup existingReportGroup = currentReportGroups.stream()
+								.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
+								.findFirst()
+								.orElse(null);
+						if (existingReportGroup == null) {
+							ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
+							if (addedReportGroup == null) {
+								reportGroupId++;
+								reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
+								addedReportGroups.put(reportGroupName, reportGroup);
+								newReportGroups.add(reportGroup);
+							} else {
+								newReportGroups.add(addedReportGroup);
+							}
+						} else {
+							if (overwrite) {
+								int existingReportGroupId = existingReportGroup.getReportGroupId();
+								if (!updatedReportGroupIds.contains(existingReportGroupId)) {
+									reportGroup.setReportGroupId(existingReportGroupId);
+									reportGroupService.updateReportGroup(reportGroup, actionUser, conn);
+									newReportGroups.add(reportGroup);
+									updatedReportGroupIds.add(existingReportGroupId);
+								}
+							} else {
+								newReportGroups.add(existingReportGroup);
+							}
+						}
+					}
+					report.setReportGroups(newReportGroups);
+				}
+
 				String reportName = report.getName();
-				if (StringUtils.isNotBlank(reportName)) {
+				boolean update = false;
+				if (overwrite) {
 					Report existingReport = currentReports.stream()
 							.filter(r -> StringUtils.equals(reportName, r.getName()))
 							.findFirst()
 							.orElse(null);
-					if (existingReport == null) {
-						Report addedReport = addedReports.get(reportName);
-						if (addedReport == null) {
-							reportId++;
-
-							Datasource datasource = report.getDatasource();
-							if (datasource != null) {
-								String datasourceName = datasource.getName();
-								if (StringUtils.isBlank(datasourceName)) {
-									report.setDatasource(null);
-								} else {
-									Datasource existingDatasource = currentDatasources.stream()
-											.filter(d -> StringUtils.equals(datasourceName, d.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingDatasource == null) {
-										Datasource addedDatasource = addedDatasources.get(datasourceName);
-										if (addedDatasource == null) {
-											datasourceId++;
-											datasourceService.saveDatasource(datasource, datasourceId, actionUser, conn);
-											addedDatasources.put(datasourceName, datasource);
-										} else {
-											report.setDatasource(addedDatasource);
-										}
-									} else {
-										report.setDatasource(existingDatasource);
-									}
-								}
-							}
-
-							Encryptor encryptor = report.getEncryptor();
-							if (encryptor != null) {
-								String encryptorName = encryptor.getName();
-								if (StringUtils.isBlank(encryptorName)) {
-									report.setEncryptor(null);
-								} else {
-									Encryptor existingEncryptor = currentEncryptors.stream()
-											.filter(e -> StringUtils.equals(encryptorName, e.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingEncryptor == null) {
-										Encryptor addedEncryptor = addedEncryptors.get(encryptorName);
-										if (addedEncryptor == null) {
-											encryptorId++;
-											encryptorService.saveEncryptor(encryptor, encryptorId, actionUser, conn);
-											addedEncryptors.put(encryptorName, encryptor);
-										} else {
-											report.setEncryptor(addedEncryptor);
-										}
-									} else {
-										report.setEncryptor(existingEncryptor);
-									}
-								}
-							}
-
-							List<ReportGroup> reportGroups = report.getReportGroups();
-							if (CollectionUtils.isNotEmpty(reportGroups)) {
-								List<ReportGroup> newReportGroups = new ArrayList<>();
-								for (ReportGroup reportGroup : reportGroups) {
-									String reportGroupName = reportGroup.getName();
-									ReportGroup existingReportGroup = currentReportGroups.stream()
-											.filter(g -> StringUtils.equals(reportGroupName, g.getName()))
-											.findFirst()
-											.orElse(null);
-									if (existingReportGroup == null) {
-										ReportGroup addedReportGroup = addedReportGroups.get(reportGroupName);
-										if (addedReportGroup == null) {
-											reportGroupId++;
-											reportGroupService.saveReportGroup(reportGroup, reportGroupId, actionUser, conn);
-											addedReportGroups.put(reportGroupName, reportGroup);
-											newReportGroups.add(reportGroup);
-										} else {
-											newReportGroups.add(addedReportGroup);
-										}
-									} else {
-										newReportGroups.add(existingReportGroup);
-									}
-								}
-								report.setReportGroups(newReportGroups);
-							}
-
-							reportService.saveReport(report, reportId, actionUser, conn);
-							addedReports.put(reportName, report);
-							reportGroupMembershipService2.recreateReportGroupMemberships(report);
-						} else {
-							report.setReportId(addedReport.getReportId());
-						}
-					} else {
+					if (existingReport != null) {
+						update = true;
 						report.setReportId(existingReport.getReportId());
 					}
 				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					reportId++;
+					newRecordId = reportId;
+				}
+				reportService.saveReport(report, newRecordId, actionUser, conn);
+				reportGroupMembershipService2.recreateReportGroupMemberships(report, conn);
 			}
 
 			if (local) {
 				ArtDatabase artDbConfig = Config.getArtDbConfig();
-				for (Datasource datasource : addedDatasources.values()) {
+				List<Datasource> addedOrUpdatedDatasources = new ArrayList<>();
+				addedOrUpdatedDatasources.addAll(addedDatasources.values());
+				addedOrUpdatedDatasources.addAll(updatedDatasources);
+				for (Datasource datasource : addedOrUpdatedDatasources) {
 					if (datasource.isActive()) {
 						datasource.decryptPassword();
 						DbConnections.createDatasourceConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+					} else {
+						DbConnections.removeConnectionPool(datasource.getDatasourceId());
 					}
 				}
 			}
@@ -281,10 +314,10 @@ public class ReportServiceHelper {
 			int userId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			int userGroupId = dbService.getMaxRecordId(sql);
+			int userGroupId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
-			int reportRuleId = dbService.getMaxRecordId(sql);
+			int reportRuleId = dbService.getMaxRecordId(conn, sql);
 
 			List<UserRuleValue> allUserRuleValues = new ArrayList<>();
 			List<UserGroupRuleValue> allUserGroupRuleValues = new ArrayList<>();
@@ -344,6 +377,7 @@ public class ReportServiceHelper {
 			}
 
 			Map<String, Rule> addedRules = new HashMap<>();
+			List<Integer> updatedRuleIds = new ArrayList<>();
 			for (Rule rule : allRules) {
 				String ruleName = rule.getName();
 				Rule existingRule = currentRules.stream()
@@ -360,7 +394,12 @@ public class ReportServiceHelper {
 						rule.setRuleId(addedRule.getRuleId());
 					}
 				} else {
-					rule.setRuleId(existingRule.getRuleId());
+					int existingRuleId = existingRule.getRuleId();
+					rule.setRuleId(existingRuleId);
+					if (overwrite && !updatedRuleIds.contains(existingRuleId)) {
+						ruleService.updateRule(rule, actionUser, conn);
+						updatedRuleIds.add(existingRuleId);
+					}
 				}
 			}
 
@@ -376,6 +415,7 @@ public class ReportServiceHelper {
 			}
 
 			Map<String, User> addedUsers = new HashMap<>();
+			List<Integer> updatedUserIds = new ArrayList<>();
 			for (User user : allUsers) {
 				String username = user.getUsername();
 				User existingUser = currentUsers.stream()
@@ -392,7 +432,12 @@ public class ReportServiceHelper {
 						user.setUserId(addedUser.getUserId());
 					}
 				} else {
-					user.setUserId(existingUser.getUserId());
+					int existingUserId = existingUser.getUserId();
+					user.setUserId(existingUserId);
+					if (overwrite && !updatedUserIds.contains(existingUserId)) {
+						userService.updateUser(user, actionUser, conn);
+						updatedUserIds.add(existingUserId);
+					}
 				}
 			}
 
@@ -408,6 +453,7 @@ public class ReportServiceHelper {
 			}
 
 			Map<String, UserGroup> addedUserGroups = new HashMap<>();
+			List<Integer> updatedUserGroupIds = new ArrayList<>();
 			for (UserGroup userGroup : allUserGroups) {
 				String userGroupName = userGroup.getName();
 				UserGroup existingUserGroup = currentUserGroups.stream()
@@ -424,11 +470,17 @@ public class ReportServiceHelper {
 						userGroup.setUserGroupId(addedUserGroup.getUserGroupId());
 					}
 				} else {
-					userGroup.setUserGroupId(existingUserGroup.getUserGroupId());
+					int existingUserGroupId = existingUserGroup.getUserGroupId();
+					userGroup.setUserGroupId(existingUserGroupId);
+					if (overwrite && !updatedUserGroupIds.contains(existingUserGroupId)) {
+						userGroupService.updateUserGroup(userGroup, actionUser, conn);
+						updatedUserGroupIds.add(existingUserGroupId);
+					}
 				}
 			}
 
 			Map<String, ReportRule> addedReportRules = new HashMap<>();
+			List<Integer> updatedReportRuleIds = new ArrayList<>();
 			for (ReportRule reportRule : allReportRules) {
 				int tempReportId = reportRule.getReportId();
 				int tempRuleId = reportRule.getRule().getRuleId();
@@ -447,7 +499,12 @@ public class ReportServiceHelper {
 						reportRule.setReportRuleId(addedReportRule.getReportRuleId());
 					}
 				} else {
-					reportRule.setReportRuleId(existingReportRule.getReportRuleId());
+					int existingReportRuleId = existingReportRule.getReportRuleId();
+					reportRule.setReportRuleId(existingReportRuleId);
+					if (overwrite && !updatedReportRuleIds.contains(existingReportRuleId)) {
+						reportRuleService.updateReportRule(reportRule, conn);
+						updatedReportRuleIds.add(existingReportRuleId);
+					}
 				}
 			}
 
@@ -483,7 +540,7 @@ public class ReportServiceHelper {
 				Integer[] tempReports = {tempReportId};
 				Integer[] reportGroups = null;
 				Integer[] jobs = null;
-				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs);
+				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs, conn);
 			}
 
 			for (UserGroupReportRight userGroupReportRight : allUserGroupReportRights) {
@@ -497,7 +554,7 @@ public class ReportServiceHelper {
 				Integer[] tempReports = {tempReportId};
 				Integer[] reportGroups = null;
 				Integer[] jobs = null;
-				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs);
+				accessRightService.updateAccessRights(action, users, userGroups, tempReports, reportGroups, jobs, conn);
 			}
 
 			if (commit) {
@@ -512,15 +569,16 @@ public class ReportServiceHelper {
 	}
 
 	/**
-	 * Returns a list of reports to be exported with appropriate details filled in
-	 * 
+	 * Returns a list of reports to be exported with appropriate details filled
+	 * in
+	 *
 	 * @param exportReports the initial list of report objects to export
 	 * @return the final list of reports to export
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public List<Report> prepareReportsForExport(List<Report> exportReports) throws Exception {
 		logger.debug("Entering prepareReportsForExport");
-		
+
 		List<Report> reports = new ArrayList<>();
 
 		for (Report report : exportReports) {

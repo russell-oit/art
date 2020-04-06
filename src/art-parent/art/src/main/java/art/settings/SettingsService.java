@@ -247,6 +247,11 @@ public class SettingsService {
 
 		setSettingsDefaults(settings);
 
+		Integer logsDatasourceId = settings.getLogsDatasourceId();
+		if (logsDatasourceId == 0) {
+			logsDatasourceId = null;
+		}
+
 		sql = "INSERT INTO ART_SETTINGS"
 				+ " (SMTP_SERVER, SMTP_PORT, SMTP_USE_STARTTLS,"
 				+ " USE_SMTP_AUTHENTICATION, SMTP_USERNAME, SMTP_PASSWORD,"
@@ -317,7 +322,7 @@ public class SettingsService {
 			settings.getMaxFileUploadSizeMB(),
 			settings.getArtBaseUrl(),
 			settings.getSystemLocale(),
-			settings.getLogsDatasourceId(),
+			logsDatasourceId,
 			settings.getErrorNotificationTo(),
 			settings.getErrorNotificationFrom(),
 			settings.getErrorNotificationSubjectPattern(),

@@ -23,6 +23,7 @@ import art.report.Report;
 import art.reportgroup.ReportGroup;
 import art.user.User;
 import art.usergroup.UserGroup;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -339,7 +340,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserReportRight>> h = new BeanListHandler<>(UserReportRight.class, new UserReportRightMapper());
 		return dbService.query(sql, h, reportId);
 	}
-	
+
 	/**
 	 * Returns the user-report rights for a given user
 	 *
@@ -377,14 +378,14 @@ public class AccessRightService {
 	 */
 	public List<UserReportGroupRight> getUserReportGroupRightsForReportGroup(int reportGroupId)
 			throws SQLException {
-		
+
 		logger.debug("Entering getUserReportGroupRightsForReportGroup: reportGroupId={}", reportGroupId);
 
 		String sql = SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS + " WHERE AQG.QUERY_GROUP_ID=?";
 		ResultSetHandler<List<UserReportGroupRight>> h = new BeanListHandler<>(UserReportGroupRight.class, new UserReportGroupRightMapper());
 		return dbService.query(sql, h, reportGroupId);
 	}
-	
+
 	/**
 	 * Returns user-report group rights for a given user
 	 *
@@ -394,7 +395,7 @@ public class AccessRightService {
 	 */
 	public List<UserReportGroupRight> getUserReportGroupRightsForUser(int userId)
 			throws SQLException {
-		
+
 		logger.debug("Entering getUserReportGroupRightsForUser: userId={}", userId);
 
 		String sql = SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS + " WHERE AU.USER_ID=?";
@@ -429,7 +430,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserJobRight>> h = new BeanListHandler<>(UserJobRight.class, new UserJobRightMapper());
 		return dbService.query(sql, h, jobId);
 	}
-	
+
 	/**
 	 * Returns user-user rights for a given user
 	 *
@@ -472,7 +473,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserGroupReportRight>> h = new BeanListHandler<>(UserGroupReportRight.class, new UserGroupReportRightMapper());
 		return dbService.query(sql, h, reportId);
 	}
-	
+
 	/**
 	 * Returns user group-report rights for a given user group
 	 *
@@ -482,7 +483,7 @@ public class AccessRightService {
 	 */
 	public List<UserGroupReportRight> getUserGroupReportRightsForUserGroup(int userGroupId)
 			throws SQLException {
-		
+
 		logger.debug("Entering getUserGroupReportRightsForUserGroup: userGroupId={}", userGroupId);
 
 		String sql = SQL_SELECT_ALL_USER_GROUP_REPORT_RIGHTS + " WHERE AUG.USER_GROUP_ID=?";
@@ -518,7 +519,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserGroupReportGroupRight>> h = new BeanListHandler<>(UserGroupReportGroupRight.class, new UserGroupReportGroupRightMapper());
 		return dbService.query(sql, h, reportGroupId);
 	}
-	
+
 	/**
 	 * Returns user group-report group rights for a given user group
 	 *
@@ -528,7 +529,7 @@ public class AccessRightService {
 	 */
 	public List<UserGroupReportGroupRight> getUserGroupReportGroupRightsForUserGroup(int userGroupId)
 			throws SQLException {
-		
+
 		logger.debug("Entering getUserGroupReportGroupRightsForUserGroup: userGroupId={}", userGroupId);
 
 		String sql = SQL_SELECT_ALL_USER_GROUP_REPORT_GROUP_RIGHTS + " WHERE AUG.USER_GROUP_ID=?";
@@ -563,7 +564,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserGroupJobRight>> h = new BeanListHandler<>(UserGroupJobRight.class, new UserGroupJobRightMapper());
 		return dbService.query(sql, h, jobId);
 	}
-	
+
 	/**
 	 * Returns user group-job rights for a given user group
 	 *
@@ -573,7 +574,7 @@ public class AccessRightService {
 	 */
 	public List<UserGroupJobRight> getUserGroupJobRightsForUserGroup(int userGroupId)
 			throws SQLException {
-		
+
 		logger.debug("Entering getUserGroupJobRightsForUserGroup: userGroupId={}", userGroupId);
 
 		String sql = SQL_SELECT_ALL_USER_GROUP_JOB_RIGHTS + " WHERE AUG.USER_GROUP_ID=?";
@@ -694,8 +695,31 @@ public class AccessRightService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
-	public void updateAccessRights(String action, Integer[] users, Integer[] userGroups,
-			Integer[] reports, Integer[] reportGroups, Integer[] jobs) throws SQLException {
+	public void updateAccessRights(String action, Integer[] users,
+			Integer[] userGroups, Integer[] reports, Integer[] reportGroups,
+			Integer[] jobs) throws SQLException {
+
+		Connection conn = null;
+		updateAccessRights(action, users, userGroups, reports, reportGroups, jobs, conn);
+	}
+
+	/**
+	 * Grants or revokes access rights
+	 *
+	 * @param action "grant" or "revoke". anything else will be treated as
+	 * revoke
+	 * @param users the relevant user ids
+	 * @param userGroups the relevant user group ids
+	 * @param reports the relevant report ids
+	 * @param reportGroups the relevant report group ids
+	 * @param jobs the relevant job ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
+	public void updateAccessRights(String action, Integer[] users,
+			Integer[] userGroups, Integer[] reports, Integer[] reportGroups,
+			Integer[] jobs, Connection conn) throws SQLException {
 
 		logger.debug("Entering updateAccessRights: action='{}'", action);
 
@@ -726,6 +750,8 @@ public class AccessRightService {
 			String sqlTestUserReportGroup = "UPDATE ART_USER_REPORTGROUP_MAP SET USER_ID=? WHERE USER_ID=? AND REPORT_GROUP_ID=?";
 			String sqlTestUserJob = "UPDATE ART_USER_JOB_MAP SET USER_ID=? WHERE USER_ID=? AND JOB_ID=?";
 
+			int affectedRows;
+
 			for (Integer userId : users) {
 				//update report rights
 				if (reports != null) {
@@ -735,14 +761,23 @@ public class AccessRightService {
 						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							int affectedRows = dbService.update(sqlTestUserReport, userId, userId, reportId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserReport, userId, userId, reportId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserReport, userId, userId, reportId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserReport, userId, reportId);
+							if (conn == null) {
+								dbService.update(sqlUserReport, userId, reportId);
+							} else {
+								dbService.update(conn, sqlUserReport, userId, reportId);
+							}
 						}
 					}
 				}
@@ -753,14 +788,23 @@ public class AccessRightService {
 						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							int affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, reportGroupId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, reportGroupId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserReportGroup, userId, userId, reportGroupId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserReportGroup, userId, reportGroupId);
+							if (conn == null) {
+								dbService.update(sqlUserReportGroup, userId, reportGroupId);
+							} else {
+								dbService.update(conn, sqlUserReportGroup, userId, reportGroupId);
+							}
 						}
 					}
 				}
@@ -771,14 +815,23 @@ public class AccessRightService {
 						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							int affectedRows = dbService.update(sqlTestUserJob, userId, userId, jobId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserJob, userId, userId, jobId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserJob, userId, userId, jobId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserJob, userId, jobId);
+							if (conn == null) {
+								dbService.update(sqlUserJob, userId, jobId);
+							} else {
+								dbService.update(conn, sqlUserJob, userId, jobId);
+							}
 						}
 					}
 				}
@@ -819,14 +872,23 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserGroupReport, userGroupId, reportId);
+							if (conn == null) {
+								dbService.update(sqlUserGroupReport, userGroupId, reportId);
+							} else {
+								dbService.update(conn, sqlUserGroupReport, userGroupId, reportId);
+							}
 						}
 					}
 				}
@@ -837,14 +899,23 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserGroupReportGroup, userGroupId, reportGroupId);
+							if (conn == null) {
+								dbService.update(sqlUserGroupReportGroup, userGroupId, reportGroupId);
+							} else {
+								dbService.update(conn, sqlUserGroupReportGroup, userGroupId, reportGroupId);
+							}
 						}
 					}
 				}
@@ -855,18 +926,26 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							affectedRows = dbService.update(sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
+							if (conn == null) {
+								affectedRows = dbService.update(sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
+							} else {
+								affectedRows = dbService.update(conn, sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
+							}
+
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
 								updateRight = false;
 							}
 						}
 						if (updateRight) {
-							dbService.update(sqlUserGroupJob, userGroupId, jobId);
+							if (conn == null) {
+								dbService.update(sqlUserGroupJob, userGroupId, jobId);
+							} else {
+								dbService.update(conn, sqlUserGroupJob, userGroupId, jobId);
+							}
 						}
 					}
 				}
-
 			}
 		}
 	}

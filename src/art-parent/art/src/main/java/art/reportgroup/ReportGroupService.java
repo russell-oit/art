@@ -171,6 +171,10 @@ public class ReportGroupService {
 		logger.debug("Entering getReportGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE QUERY_GROUP_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -349,10 +353,26 @@ public class ReportGroupService {
 	 */
 	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateReportGroup(group, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing report group
+	 *
+	 * @param group the updated report group
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
+	public void updateReportGroup(ReportGroup group, User actionUser, Connection conn)
+			throws SQLException {
+		
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
 		Integer newRecordId = null;
-		saveReportGroup(group, newRecordId, actionUser);
+		saveReportGroup(group, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -361,13 +381,15 @@ public class ReportGroupService {
 	 * @param reportGroups the list of report groups to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
 	public void importReportGroups(List<ReportGroup> reportGroups, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importReportGroups: actionUser={}", actionUser);
+		logger.debug("Entering importReportGroups: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -375,12 +397,36 @@ public class ReportGroupService {
 			String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<ReportGroup> currentReportGroups = new ArrayList<>();
+			if (overwrite) {
+				currentReportGroups = getAllReportGroups();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (ReportGroup reportGroup : reportGroups) {
-				id++;
-				saveReportGroup(reportGroup, id, actionUser, conn);
+				String reportGroupName = reportGroup.getName();
+				boolean update = false;
+				if (overwrite) {
+					ReportGroup existingReportGroup = currentReportGroups.stream()
+							.filter(d -> StringUtils.equals(reportGroupName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingReportGroup != null) {
+						update = true;
+						reportGroup.setReportGroupId(existingReportGroup.getReportGroupId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveReportGroup(reportGroup, newRecordId, actionUser, conn);
 			}
 
 			conn.commit();

@@ -145,6 +145,10 @@ public class ScheduleService {
 		logger.debug("Entering getSchedules: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -276,13 +280,15 @@ public class ScheduleService {
 	 * @param schedules the list of schedules to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
 	public void importSchedules(List<Schedule> schedules, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importSchedules: actionUser={}", actionUser);
+		logger.debug("Entering importSchedules: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -291,26 +297,31 @@ public class ScheduleService {
 			int scheduleId = dbService.getMaxRecordId(conn, sql);
 
 			sql = "SELECT MAX(HOLIDAY_ID) FROM ART_HOLIDAYS";
-			int holidayId = dbService.getMaxRecordId(sql);
+			int holidayId = dbService.getMaxRecordId(conn, sql);
+
+			List<Schedule> currentSchedules = new ArrayList<>();
+			if (overwrite) {
+				currentSchedules = getAllSchedules();
+			}
+
+			List<Holiday> currentHolidays = holidayService.getAllHolidays();
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			Map<String, Holiday> addedHolidays = new HashMap<>();
-			
-			List<Holiday> currentHolidays = holidayService.getAllHolidays();
-			
+			List<Integer> updatedHolidayIds = new ArrayList<>();
+
 			for (Schedule schedule : schedules) {
-				scheduleId++;
 				List<Holiday> sharedHolidays = schedule.getSharedHolidays();
 				if (CollectionUtils.isNotEmpty(sharedHolidays)) {
 					List<Holiday> newSharedHolidays = new ArrayList<>();
 					for (Holiday holiday : sharedHolidays) {
 						String holidayName = holiday.getName();
 						Holiday existingHoliday = currentHolidays.stream()
-							.filter(h -> StringUtils.equals(holidayName, h.getName()))
-							.findFirst()
-							.orElse(null);
+								.filter(h -> StringUtils.equals(holidayName, h.getName()))
+								.findFirst()
+								.orElse(null);
 						if (existingHoliday == null) {
 							Holiday addedHoliday = addedHolidays.get(holidayName);
 							if (addedHoliday == null) {
@@ -322,13 +333,44 @@ public class ScheduleService {
 								newSharedHolidays.add(addedHoliday);
 							}
 						} else {
-							newSharedHolidays.add(existingHoliday);
+							if (overwrite) {
+								int existingHolidayId = existingHoliday.getHolidayId();
+								if (!updatedHolidayIds.contains(existingHolidayId)) {
+									holiday.setHolidayId(existingHolidayId);
+									holidayService.updateHoliday(holiday, actionUser, conn);
+									newSharedHolidays.add(holiday);
+									updatedHolidayIds.add(existingHolidayId);
+								}
+							} else {
+								newSharedHolidays.add(existingHoliday);
+							}
 						}
 					}
 					schedule.setSharedHolidays(newSharedHolidays);
 				}
-				saveSchedule(schedule, scheduleId, actionUser, conn);
-				scheduleHolidayService.recreateScheduleHolidays(schedule);
+
+				String scheduleName = schedule.getName();
+				boolean update = false;
+				if (overwrite) {
+					Schedule existingSchedule = currentSchedules.stream()
+							.filter(d -> StringUtils.equals(scheduleName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingSchedule != null) {
+						update = true;
+						schedule.setScheduleId(existingSchedule.getScheduleId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					scheduleId++;
+					newRecordId = scheduleId;
+				}
+				saveSchedule(schedule, newRecordId, actionUser, conn);
+				scheduleHolidayService.recreateScheduleHolidays(schedule, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

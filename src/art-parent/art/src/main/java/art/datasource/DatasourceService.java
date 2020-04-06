@@ -90,6 +90,10 @@ public class DatasourceService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -125,6 +129,28 @@ public class DatasourceService {
 
 		String sql = SQL_SELECT_ALL + " WHERE DRIVER IN('mondrian.olap4j.MondrianOlap4jDriver',"
 				+ "'org.olap4j.driver.xmla.XmlaOlap4jDriver')";
+
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		return dbService.query(sql, h);
+	}
+	
+	/**
+	 * Returns unused datasources
+	 *
+	 * @return unused datasources
+	 * @throws SQLException
+	 */
+	public List<Datasource> getUnusedDatasources() throws SQLException {
+		logger.debug("Entering getUnusedDatasources");
+
+		String sql = "SELECT * FROM ART_DATABASES AD"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT * FROM ART_QUERIES WHERE DATASOURCE_ID = AD.DATABASE_ID"
+				+ " UNION ALL"
+				+ " SELECT * FROM ART_JOBS WHERE CACHED_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " UNION ALL"
+				+ " SELECT * FROM ART_SETTINGS WHERE LOGS_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " )";
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h);
@@ -290,13 +316,15 @@ public class DatasourceService {
 	 * @param datasources the list of datasources to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void importDatasources(List<Datasource> datasources, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importDatasources: actionUser={}", actionUser);
+		logger.debug("Entering importDatasources: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -304,12 +332,36 @@ public class DatasourceService {
 			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Datasource> currentDatasources = new ArrayList<>();
+			if (overwrite) {
+				currentDatasources = getAllDatasources();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Datasource datasource : datasources) {
-				id++;
-				saveDatasource(datasource, id, actionUser, conn);
+				String datasourceName = datasource.getName();
+				boolean update = false;
+				if (overwrite) {
+					Datasource existingDatasource = currentDatasources.stream()
+							.filter(d -> StringUtils.equals(datasourceName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingDatasource != null) {
+						update = true;
+						datasource.setDatasourceId(existingDatasource.getDatasourceId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveDatasource(datasource, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -515,17 +567,20 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"datasources", "reports"}, allEntries = true)
-	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser)
-			throws SQLException {
+	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}",
-				multipleDatasourceEdit, actionUser);
-
-		String sql;
+		logger.debug("Entering updateDatasources: multipleDatasourceEdit={},"
+				+ " actionUser={}", multipleDatasourceEdit, actionUser);
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleDatasourceEdit.getIds());
+
+		if (idsList.isEmpty()) {
+			return;
+		}
+
 		if (!multipleDatasourceEdit.isActiveUnchanged()) {
-			sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+			String sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
 
 			List<Object> valuesList = new ArrayList<>();

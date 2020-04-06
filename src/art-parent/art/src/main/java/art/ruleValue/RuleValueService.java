@@ -199,6 +199,7 @@ public class RuleValueService {
 	 */
 	public boolean userRuleValueExists(int userId, int ruleId,
 			String ruleValue) throws SQLException {
+
 		Connection conn = null;
 		return userRuleValueExists(userId, ruleId, ruleValue, conn);
 
@@ -509,12 +510,12 @@ public class RuleValueService {
 
 				if (conn == null) {
 					if (!userRuleValueExists(userId, ruleId, ruleValue)) {
-						dbService.update(sql, ArtUtils.getUniqueId(), userId, username,
+						dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userId, username,
 								ruleId, ruleName, ruleValue);
 					}
 				} else {
 					if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
-						dbService.update(conn, sql, ArtUtils.getUniqueId(), userId, username,
+						dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userId, username,
 								ruleId, ruleName, ruleValue);
 					}
 				}
@@ -530,12 +531,12 @@ public class RuleValueService {
 			for (Integer userGroupId : userGroups) {
 				if (conn == null) {
 					if (!userGroupRuleValueExists(userGroupId, ruleId, ruleValue)) {
-						dbService.update(sql, ArtUtils.getUniqueId(), userGroupId,
+						dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userGroupId,
 								ruleId, ruleName, ruleValue);
 					}
 				} else {
 					if (!userGroupRuleValueExists(userGroupId, ruleId, ruleValue, conn)) {
-						dbService.update(conn, sql, ArtUtils.getUniqueId(), userGroupId,
+						dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userGroupId,
 								ruleId, ruleName, ruleValue);
 					}
 				}

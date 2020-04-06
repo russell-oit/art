@@ -138,6 +138,10 @@ public class EncryptorService {
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
 
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
+
 		String sql = SQL_SELECT_ALL
 				+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
 
@@ -301,13 +305,15 @@ public class EncryptorService {
 	 * @param encryptors the list of encryptors to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "encryptors", allEntries = true)
 	public void importEncryptors(List<Encryptor> encryptors, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importEncryptors: actionUser={}", actionUser);
+		logger.debug("Entering importEncryptors: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -315,12 +321,36 @@ public class EncryptorService {
 			String sql = "SELECT MAX(ENCRYPTOR_ID) FROM ART_ENCRYPTORS";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Encryptor> currentEncryptors = new ArrayList<>();;
+			if (overwrite) {
+				currentEncryptors = getAllEncryptors();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Encryptor encryptor : encryptors) {
-				id++;
-				saveEncryptor(encryptor, id, actionUser, conn);
+				String encryptorName = encryptor.getName();
+				boolean update = false;
+				if (overwrite) {
+					Encryptor existingEncryptor = currentEncryptors.stream()
+							.filter(d -> StringUtils.equals(encryptorName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingEncryptor != null) {
+						update = true;
+						encryptor.setEncryptorId(existingEncryptor.getEncryptorId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveEncryptor(encryptor, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -456,15 +486,20 @@ public class EncryptorService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"encryptors", "reports"}, allEntries = true)
-	public void updateEncryptors(MultipleEncryptorEdit multipleEncryptorEdit, User actionUser)
-			throws SQLException {
+	public void updateEncryptors(MultipleEncryptorEdit multipleEncryptorEdit,
+			User actionUser) throws SQLException {
 
-		logger.debug("Entering updateEncryptors: multipleEncryptorEdit={}, actionUser={}",
-				multipleEncryptorEdit, actionUser);
+		logger.debug("Entering updateEncryptors: multipleEncryptorEdit={},"
+				+ " actionUser={}", multipleEncryptorEdit, actionUser);
 
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleEncryptorEdit.getIds());
+		
+		if(idsList.isEmpty()){
+			return;
+		}
+		
 		if (!multipleEncryptorEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_ENCRYPTORS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

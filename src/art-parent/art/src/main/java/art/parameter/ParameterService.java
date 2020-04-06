@@ -195,6 +195,24 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
+	
+	/**
+	 * Returns all unused parameters with only basic properties filled
+	 *
+	 * @return all unused parameters with only basic properties filled
+	 * @throws SQLException
+	 */
+	public List<Parameter> getAllUnusedParametersBasic() throws SQLException {
+		logger.debug("Entering getAllUnusedParametersBasic");
+		
+		String sql = "SELECT * FROM ART_PARAMETERS AP"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT * FROM ART_REPORT_PARAMETERS WHERE PARAMETER_ID = AP.PARAMETER_ID"
+				+ " )";
+
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns parameters with given ids
@@ -207,6 +225,10 @@ public class ParameterService {
 		logger.debug("Entering getParameters: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE PARAMETER_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -437,20 +459,26 @@ public class ParameterService {
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
 	 * @param local whether the import is to the local/current art instance
+	 * @param overwrite whether to overwrite existing records
 	 * @throws Exception
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void importParameters(List<Parameter> parameters, User actionUser,
-			Connection conn, boolean local) throws Exception {
+			Connection conn, boolean local, boolean overwrite) throws Exception {
 
-		logger.debug("Entering importParameters: actionUser={}, local={}",
-				actionUser, local);
+		logger.debug("Entering importParameters: actionUser={}, local={},"
+				+ " overwrite={}", actionUser, local, overwrite);
 
 		boolean originalAutoCommit = true;
 
 		try {
 			String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 			int id = dbService.getMaxRecordId(conn, sql);
+			
+			List<Parameter> currentParameters = new ArrayList<>();
+			if (overwrite) {
+				currentParameters = getAllParameters();
+			}
 
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
@@ -471,11 +499,30 @@ public class ParameterService {
 			List<Report> reports = reportServiceHelper.prepareReportsForExport(parameterReports);
 
 			boolean commitReports = false;
-			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports);
+			reportServiceHelper.importReports(reports, actionUser, conn, local, commitReports, overwrite);
 
 			for (Parameter parameter : parameters) {
-				id++;
-				saveParameter(parameter, id, actionUser, conn);
+				int parameterId = parameter.getParameterId();
+				boolean update = false;
+				if (overwrite) {
+					Parameter existingParameter = currentParameters.stream()
+							.filter(d -> parameterId == d.getParameterId())
+							.findFirst()
+							.orElse(null);
+					if (existingParameter != null) {
+						update = true;
+						parameter.setParameterId(existingParameter.getParameterId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveParameter(parameter, newRecordId, actionUser, conn);
 			}
 			conn.commit();
 		} catch (Exception ex) {

@@ -20,6 +20,7 @@ package art.rolepermission;
 import art.dbutils.DbService;
 import art.permission.Permission;
 import art.role.Role;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -167,26 +168,43 @@ public class RolePermissionService {
 	 */
 	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
 	public void recreateRolePermissions(Role role) throws SQLException {
+		Connection conn = null;
+		recreateRolePermissions(role, conn);
+	}
+
+	/**
+	 * Recreates role-permission records for a given role
+	 *
+	 * @param role the role
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	public void recreateRolePermissions(Role role, Connection conn) throws SQLException {
 		logger.debug("Entering recreateRolePermissions: role={}", role);
 
 		int roleId = role.getRoleId();
 
-		deleteAllPermissionsForRole(roleId);
-		addRolePermissions(roleId, role.getPermissions());
+		deleteAllPermissionsForRole(roleId, conn);
+		addRolePermissions(roleId, role.getPermissions(), conn);
 	}
 
 	/**
 	 * Delete all role-permission records for the given role
 	 *
 	 * @param roleId the role id
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
-	public void deleteAllPermissionsForRole(int roleId) throws SQLException {
+	private void deleteAllPermissionsForRole(int roleId, Connection conn) throws SQLException {
 		logger.debug("Entering deleteAllPermissionsForRole: roleId={}", roleId);
 
 		String sql = "DELETE FROM ART_ROLE_PERMISSION_MAP WHERE ROLE_ID=?";
-		dbService.update(sql, roleId);
+		if (conn == null) {
+			dbService.update(sql, roleId);
+		} else {
+			dbService.update(conn, sql, roleId);
+		}
 	}
 
 	/**
@@ -194,10 +212,12 @@ public class RolePermissionService {
 	 *
 	 * @param roleId the role id
 	 * @param permissions the permissions
+	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
-	public void addRolePermissions(int roleId, List<Permission> permissions) throws SQLException {
+	private void addRolePermissions(int roleId, List<Permission> permissions,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering addRolePermissions: roleId={}", roleId);
 
 		if (CollectionUtils.isEmpty(permissions)) {
@@ -211,7 +231,7 @@ public class RolePermissionService {
 
 		Integer[] roles = {roleId};
 		String action = "add";
-		updateRolePermissions(action, roles, permissionIds.toArray(new Integer[0]));
+		updateRolePermissions(action, roles, permissionIds.toArray(new Integer[0]), conn);
 	}
 
 	/**
@@ -223,7 +243,26 @@ public class RolePermissionService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
-	public void updateRolePermissions(String action, Integer[] roles, Integer[] permissions) throws SQLException {
+	public void updateRolePermissions(String action, Integer[] roles,
+			Integer[] permissions) throws SQLException {
+
+		Connection conn = null;
+		updateRolePermissions(action, roles, permissions, conn);
+	}
+
+	/**
+	 * Adds or removes role-permission records
+	 *
+	 * @param action "add" or "remove". anything else will be treated as remove
+	 * @param roles role ids
+	 * @param permissions permission ids
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	public void updateRolePermissions(String action, Integer[] roles,
+			Integer[] permissions, Connection conn) throws SQLException {
+
 		logger.debug("Entering updateRolePermissions: action='{}'", action);
 
 		logger.debug("(roles == null) = {}", roles == null);
@@ -256,14 +295,23 @@ public class RolePermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					affectedRows = dbService.update(sqlTest, roleId, roleId, permissionId);
+					if (conn == null) {
+						affectedRows = dbService.update(sqlTest, roleId, roleId, permissionId);
+					} else {
+						affectedRows = dbService.update(conn, sqlTest, roleId, roleId, permissionId);
+					}
+
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
 						updateRecord = false;
 					}
 				}
 				if (updateRecord) {
-					dbService.update(sql, roleId, permissionId);
+					if (conn == null) {
+						dbService.update(sql, roleId, permissionId);
+					} else {
+						dbService.update(conn, sql, roleId, permissionId);
+					}
 				}
 			}
 		}

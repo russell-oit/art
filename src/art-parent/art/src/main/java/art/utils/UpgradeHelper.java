@@ -705,7 +705,7 @@ public class UpgradeHelper {
 				sql = "UPDATE ART_USER_RULES SET RULE_VALUE_KEY=?"
 						+ " WHERE USERNAME=? AND RULE_NAME=? AND RULE_VALUE=?"
 						+ " AND RULE_TYPE='EXACT'";
-				dbService.update(sql, ArtUtils.getUniqueId(), username, ruleName, ruleValue);
+				dbService.update(sql, ArtUtils.getDatabaseUniqueId(), username, ruleName, ruleValue);
 			}
 		}
 	}
@@ -738,7 +738,7 @@ public class UpgradeHelper {
 				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_VALUE_KEY=?"
 						+ " WHERE USER_GROUP_ID=? AND RULE_NAME=? AND RULE_VALUE=?"
 						+ " AND RULE_TYPE='EXACT'";
-				dbService.update(sql, ArtUtils.getUniqueId(), userGroupId, ruleName, ruleValue);
+				dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userGroupId, ruleName, ruleValue);
 			}
 		}
 	}

@@ -20,6 +20,7 @@ package art.jobrunners;
 import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
 import art.dashboard.PdfDashboard;
+import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.destination.Destination;
@@ -367,7 +368,7 @@ public class ReportJob implements org.quartz.Job {
 
 	/**
 	 * Run post run reports
-	 * 
+	 *
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 * @throws java.io.IOException
@@ -2811,8 +2812,16 @@ public class ReportJob implements org.quartz.Job {
 		ResultSet rs = null;
 
 		try {
-			int targetDatabaseId = job.getCachedDatasourceId();
-			cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
+			Datasource cachedDatasource = job.getCachedDatasource();
+			if (cachedDatasource == null) {
+				throw new RuntimeException("Cached datasource not defined");
+			}
+
+			cacheDatabaseConnection = DbConnections.getConnection(cachedDatasource.getDatasourceId());
+			if (cacheDatabaseConnection == null) {
+				throw new RuntimeException("Cached datasource connection not available");
+			}
+
 			rs = reportRunner.getResultSet();
 
 			CachedResult cr = new CachedResult();

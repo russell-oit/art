@@ -24,7 +24,7 @@ Display input for date and datetime parameters
 		<span class="glyphicon glyphicon-calendar"></span>
 	</span>
 </div>
-	
+
 <c:if test="${reportParam.parameter.allowNull}">
 	<div>
 		<label class="checkbox-inline">

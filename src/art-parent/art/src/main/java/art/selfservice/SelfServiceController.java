@@ -173,7 +173,9 @@ public class SelfServiceController {
 		if (languageFile.exists()) {
 			model.addAttribute("languageFileName", languageFileName);
 		}
-
+		
+		model.addAttribute("runId", ArtUtils.getUniqueId());
+		
 		return "selfServiceReports";
 	}
 

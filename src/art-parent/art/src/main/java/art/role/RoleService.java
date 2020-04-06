@@ -132,6 +132,10 @@ public class RoleService {
 		logger.debug("Entering getRoles: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
+		
+		if (idsArray.length == 0) {
+			return new ArrayList<>();
+		}
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE ROLE_ID IN(" + StringUtils.repeat("?", ",", idsArray.length) + ")";
@@ -217,8 +221,8 @@ public class RoleService {
 	 * Deletes multiple roles
 	 *
 	 * @param ids the ids of the roles to delete
-	  * @return ActionResult. if not successful, data contains details of
-	 * roles which weren't deleted
+	 * @return ActionResult. if not successful, data contains details of roles
+	 * which weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
@@ -277,10 +281,24 @@ public class RoleService {
 	 */
 	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
 	public void updateRole(Role role, User actionUser) throws SQLException {
+		Connection conn = null;
+		updateRole(role, actionUser, conn);
+	}
+	
+	/**
+	 * Updates an existing role
+	 *
+	 * @param role the updated role
+	 * @param actionUser the user who is performing the action
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"roles", "users", "userGroups"}, allEntries = true)
+	public void updateRole(Role role, User actionUser, Connection conn) throws SQLException {
 		logger.debug("Entering updateRole: role={}, actionUser={}", role, actionUser);
 
 		Integer newRecordId = null;
-		saveRole(role, newRecordId, actionUser);
+		saveRole(role, newRecordId, actionUser, conn);
 	}
 
 	/**
@@ -289,13 +307,15 @@ public class RoleService {
 	 * @param roles the list of roles to import
 	 * @param actionUser the user who is performing the import
 	 * @param conn the connection to use
+	 * @param overwrite whether to overwrite existing records
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "roles", allEntries = true)
 	public void importRoles(List<Role> roles, User actionUser,
-			Connection conn) throws SQLException {
+			Connection conn, boolean overwrite) throws SQLException {
 
-		logger.debug("Entering importRoles: actionUser={}", actionUser);
+		logger.debug("Entering importRoles: actionUser={}, overwrite={}",
+				actionUser, overwrite);
 
 		boolean originalAutoCommit = true;
 
@@ -303,13 +323,37 @@ public class RoleService {
 			String sql = "SELECT MAX(ROLE_ID) FROM ART_ROLES";
 			int id = dbService.getMaxRecordId(conn, sql);
 
+			List<Role> currentRoles = new ArrayList<>();
+			if (overwrite) {
+				currentRoles = getAllRoles();
+			}
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
 			for (Role role : roles) {
-				id++;
-				saveRole(role, id, actionUser, conn);
-				rolePermissionService.recreateRolePermissions(role);
+				String roleName = role.getName();
+				boolean update = false;
+				if (overwrite) {
+					Role existingRole = currentRoles.stream()
+							.filter(d -> StringUtils.equals(roleName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingRole != null) {
+						update = true;
+						role.setRoleId(existingRole.getRoleId());
+					}
+				}
+
+				Integer newRecordId;
+				if (update) {
+					newRecordId = null;
+				} else {
+					id++;
+					newRecordId = id;
+				}
+				saveRole(role, newRecordId, actionUser, conn);
+				rolePermissionService.recreateRolePermissions(role, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {

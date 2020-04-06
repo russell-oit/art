@@ -15,7 +15,14 @@ Display parameters
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<spring:message code="page.title.parameters" var="pageTitle"/>
+<c:choose>
+	<c:when test="${action == 'all'}">
+		<spring:message code="page.title.parameters" var="pageTitle"/>
+	</c:when>
+	<c:when test="${action == 'unused'}">
+		<spring:message code="page.title.unusedParameters" var="pageTitle"/>
+	</c:when>
+</c:choose>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
@@ -51,7 +58,7 @@ Display parameters
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var dataUrl = "${pageContext.request.contextPath}/getParameters";
+				var dataUrl = "${pageContext.request.contextPath}/getParameters?action=${action}";
 				var deleteRecordText = "${deleteRecordText}";
 				var okText = "${okText}";
 				var cancelText = "${cancelText}";
@@ -177,6 +184,9 @@ Display parameters
 					<spring:message code="page.action.refresh"/>
 				</button>
 			</div>
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedParameters">
+				<spring:message code="page.text.unused"/>
+			</a>
 			<c:if test="${sessionUser.hasPermission('migrate_records')}">
 				<div class="btn-group">
 					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">

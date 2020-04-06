@@ -437,7 +437,7 @@ public class ParamDefaultService {
 
 			for (Integer userId : users) {
 				if (!userParamDefaultExists(userId, parameterId, value)) {
-					dbService.update(sql, ArtUtils.getUniqueId(), userId,
+					dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userId,
 							parameterId, value);
 				}
 			}
@@ -451,7 +451,7 @@ public class ParamDefaultService {
 
 			for (Integer userGroupId : userGroups) {
 				if (!userGroupParamDefaultExists(userGroupId, parameterId, value)) {
-					dbService.update(sql, ArtUtils.getUniqueId(), userGroupId,
+					dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userGroupId,
 							parameterId, value);
 				}
 			}

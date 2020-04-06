@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,6 +125,7 @@ public class Config extends HttpServlet {
 	private static VelocityEngine velocityEngine;
 	private static String serverTimeZoneDescription;
 	private static final Map<String, String> timeZones = new LinkedHashMap<>();
+	private static final Map<String, Statement> runningStatements = new HashMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -142,6 +144,9 @@ public class Config extends HttpServlet {
 		SchedulerUtils.shutdownScheduler();
 
 		closeSaikuConnections();
+
+		logger.debug("runningStatements.size()={}", runningStatements.size());
+		runningStatements.clear();
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -1513,6 +1518,53 @@ public class Config extends HttpServlet {
 		digestLogger.addAppender(errorDigestAppender);
 
 		rootLogger.addAppender(whisperAppender);
+	}
+
+	/**
+	 * Returns running statements
+	 *
+	 * @return running statements
+	 */
+	public static Map<String, Statement> getRunningStatements() {
+		return runningStatements;
+	}
+
+	/**
+	 * Adds a statement to the running statements map
+	 *
+	 * @param id the id for the statement
+	 * @param statement the statement to add
+	 */
+	public static void addRunningStatement(String id, Statement statement) {
+		runningStatements.put(id, statement);
+	}
+
+	/**
+	 * Removes a statement from the running statements map
+	 *
+	 * @param id the statement id
+	 */
+	public static void removeRunningStatement(String id) {
+		runningStatements.remove(id);
+	}
+
+	/**
+	 * Cancels a running statement
+	 *
+	 * @param runId the run id
+	 * @return <code>true</code> if the statement was cancelled
+	 * @throws SQLException
+	 */
+	public static boolean cancelQuery(String runId) throws SQLException {
+		boolean cancelled = false;
+
+		Statement statement = runningStatements.get(runId);
+		if (statement != null) {
+			statement.cancel();
+			cancelled = true;
+		}
+
+		return cancelled;
 	}
 
 }

@@ -263,11 +263,36 @@ public class ReportParameterService {
 	public void deleteReportParameters(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReportParameters: ids={}", (Object) ids);
 
+		if (ids.length == 0) {
+			return;
+		}
+
 		String sql;
 
 		sql = "DELETE FROM ART_REPORT_PARAMETERS"
 				+ " WHERE REPORT_PARAMETER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 		dbService.update(sql, (Object[]) ids);
+	}
+
+	/**
+	 * Deletes all report parameters for a particular report
+	 *
+	 * @param reportId the report id
+	 * @param conn the connection to use
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void deleteReportParametersForReport(int reportId, Connection conn) throws SQLException {
+		logger.debug("Entering deleteReportParametersForReport: reportId={}", reportId);
+
+		String sql;
+
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
+		if (conn == null) {
+			dbService.update(sql, reportId);
+		} else {
+			dbService.update(conn, sql, reportId);
+		}
 	}
 
 	/**
@@ -335,6 +360,8 @@ public class ReportParameterService {
 	public void importReportParameters(List<Report> reports,
 			User actionUser, Connection conn) throws SQLException {
 
+		logger.debug("Entering importReportParameters: actionUser={}", actionUser);
+
 		String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 		int parameterId = dbService.getMaxRecordId(conn, sql);
 
@@ -358,10 +385,11 @@ public class ReportParameterService {
 		}
 
 		sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
-		int reportParamId = dbService.getMaxRecordId(sql);
+		int reportParamId = dbService.getMaxRecordId(conn, sql);
 
 		for (Report report : reports) {
 			List<ReportParameter> reportParams = report.getReportParams();
+			deleteReportParametersForReport(report.getReportId(), conn);
 			if (CollectionUtils.isNotEmpty(reportParams)) {
 				for (ReportParameter reportParam : reportParams) {
 					reportParamId++;

@@ -17,7 +17,6 @@
  */
 package art.migration;
 
-import art.accessright.AccessRightService;
 import art.accessright.UserGroupReportRight;
 import art.accessright.UserGroupReportRightCsvExportMixIn;
 import art.accessright.UserReportRight;
@@ -31,7 +30,6 @@ import art.destination.Destination;
 import art.destination.DestinationService;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownCsvExportMixIn;
-import art.drilldown.DrilldownService;
 import art.encryptor.Encryptor;
 import art.encryptor.EncryptorService;
 import art.enums.EncryptorType;
@@ -61,15 +59,12 @@ import art.reportoptions.TemplateResultOptions;
 import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterCsvExportMixIn;
-import art.reportparameter.ReportParameterService;
 import art.reportrule.ReportRule;
 import art.reportrule.ReportRuleCsvExportMixIn;
-import art.reportrule.ReportRuleService;
 import art.role.Role;
 import art.role.RoleService;
 import art.rule.Rule;
 import art.rule.RuleService;
-import art.ruleValue.RuleValueService;
 import art.ruleValue.UserGroupRuleValue;
 import art.ruleValue.UserGroupRuleValueCsvExportMixIn;
 import art.ruleValue.UserRuleValue;
@@ -161,21 +156,6 @@ public class ExportRecordsController {
 
 	@Autowired
 	private ReportService reportService;
-
-	@Autowired
-	private ReportParameterService reportParameterService;
-
-	@Autowired
-	private RuleValueService ruleValueService;
-
-	@Autowired
-	private ReportRuleService reportRuleService;
-
-	@Autowired
-	private AccessRightService accessRightService;
-
-	@Autowired
-	private DrilldownService drilldownService;
 
 	@Autowired
 	private RoleService roleService;
@@ -405,7 +385,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				datasourceService.importDatasources(datasources, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				datasourceService.importDatasources(datasources, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -448,7 +429,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				destinationService.importDestinations(destinations, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				destinationService.importDestinations(destinations, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -520,7 +502,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				encryptorService.importEncryptors(encryptors, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				encryptorService.importEncryptors(encryptors, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -563,7 +546,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				holidayService.importHolidays(holidays, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				holidayService.importHolidays(holidays, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -604,7 +588,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				reportGroupService.importReportGroups(reportGroups, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				reportGroupService.importReportGroups(reportGroups, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -647,7 +632,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				smtpServerService.importSmtpServers(smtpServers, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -741,7 +727,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				userGroupService.importUserGroups(userGroups, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				userGroupService.importUserGroups(userGroups, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -810,7 +797,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				scheduleService.importSchedules(schedules, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				scheduleService.importSchedules(schedules, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -924,7 +912,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				userService.importUsers(users, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				userService.importUsers(users, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -967,7 +956,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				ruleService.importRules(rules, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				ruleService.importRules(rules, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -1041,7 +1031,8 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				boolean local = false;
-				parameterService.importParameters(parameters, sessionUser, conn, local);
+				boolean overwrite = exportRecords.isOverwrite();
+				parameterService.importParameters(parameters, sessionUser, conn, local, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -1233,7 +1224,8 @@ public class ExportRecordsController {
 				break;
 			case Datasource:
 				boolean local = false;
-				reportServiceHelper.importReports(reports, sessionUser, conn, local);
+				boolean overwrite = exportRecords.isOverwrite();
+				reportServiceHelper.importReports(reports, sessionUser, conn, local, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
@@ -1513,7 +1505,8 @@ public class ExportRecordsController {
 				}
 				break;
 			case Datasource:
-				roleService.importRoles(roles, sessionUser, conn);
+				boolean overwrite = exportRecords.isOverwrite();
+				roleService.importRoles(roles, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
