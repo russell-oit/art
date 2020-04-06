@@ -31,7 +31,7 @@ QueryBuilder.regional['de'] = {
   "operators": {
     "equal": "gleich",
     "not_equal": "ungleich",
-    "in": "in",
+    "in": "innerhalb",
     "not_in": "nicht in",
     "less": "kleiner",
     "less_or_equal": "kleiner gleich",
@@ -66,10 +66,17 @@ QueryBuilder.regional['de'] = {
     "number_exceed_min": "Muss größer als {0} sein",
     "number_exceed_max": "Muss kleiner als {0} sein",
     "number_wrong_step": "Muss ein Vielfaches von {0} sein",
+    "number_between_invalid": "Ungültige Werte, {0} ist größer als {1}",
+    "datetime_empty": "Leerer Wert",
     "datetime_invalid": "Ungültiges Datumsformat ({0})",
     "datetime_exceed_min": "Muss nach dem {0} sein",
-    "datetime_exceed_max": "Muss vor dem {0} sein"
-  }
+    "datetime_exceed_max": "Muss vor dem {0} sein",
+    "datetime_between_invalid": "Ungültige Werte, {0} ist größer als {1}",
+    "boolean_not_valid": "Kein boolescher Wert",
+    "operator_not_multiple": "Operator \"{1}\" akzeptieren mehrer Werte nicht"
+  },
+  "invert": "Invertieren",
+  "NOT": "NICHT"
 };
 
 QueryBuilder.defaults({ lang_code: 'de' });

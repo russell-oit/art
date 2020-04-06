@@ -23,19 +23,19 @@
 	er = $.pivotUtilities.export_renderers;
 	sr = $.pivotUtilities.subtotal_renderers;
     frFmt = nf({
-      thousandsSep: " ",
+      thousandsSep: ".",
       decimalSep: ","
     });
     frFmtInt = nf({
       digitsAfterDecimal: 0,
-      thousandsSep: " ",
+      thousandsSep: ".",
       decimalSep: ","
     });
     frFmtPct = nf({
       digitsAfterDecimal: 1,
       scaler: 100,
       suffix: "%",
-      thousandsSep: " ",
+      thousandsSep: ".",
       decimalSep: ","
     });
     $.pivotUtilities.locales.de = {
@@ -43,11 +43,11 @@
         renderError: "Bei der Darstellung der Pivot-Tabelle ist ein Fehler aufgetreten.",
         computeError: "Bei der Berechnung der Pivot-Tabelle ist ein Fehler aufgetreten.",
         uiRenderError: "Bei der Darstellung Oberfläche der Pivot-Tabelle ist ein Fehler aufgetreten.",
-        selectAll: "Alles auswählen",
+        selectAll: "Alle auswählen",
         selectNone: "Nichts auswählen",
         tooMany: "(zu viele für Liste)",
         filterResults: "Ergebnisse filtern",
-		apply: "Anwenden",
+		apply: "Übernehmen",
 		cancel: "Abbrechen",
 		totals: "Gesamt",
         vs: "gegen",
@@ -67,12 +67,12 @@
         "Summe über Summe": tpl.sumOverSum(frFmt),
         "80% Obergrenze": tpl.sumOverSumBound80(true, frFmt),
         "80% Untergrenze": tpl.sumOverSumBound80(false, frFmt),
-        "Summe als Anteil von Gesamt": tpl.fractionOf(tpl.sum(), "total", frFmtPct),
-        "Summe als Anteil von Zeile": tpl.fractionOf(tpl.sum(), "row", frFmtPct),
-        "Summe als Anteil von Spalte": tpl.fractionOf(tpl.sum(), "col", frFmtPct),
-        "Anzahl als Anteil von Gesamt": tpl.fractionOf(tpl.count(), "total", frFmtPct),
-        "Anzahl als Anteil von Zeile": tpl.fractionOf(tpl.count(), "row", frFmtPct),
-        "Anzahl als Anteil von Spalte": tpl.fractionOf(tpl.count(), "col", frFmtPct)
+        "Summe als Anteil vom Gesamten": tpl.fractionOf(tpl.sum(), "total", frFmtPct),
+        "Summe als Anteil der Zeilen": tpl.fractionOf(tpl.sum(), "row", frFmtPct),
+        "Summe als Anteil der Spalten": tpl.fractionOf(tpl.sum(), "col", frFmtPct),
+        "Anzahl als Anteil vom Gesamten": tpl.fractionOf(tpl.count(), "total", frFmtPct),
+        "Anzahl als Anteil der Zeilen": tpl.fractionOf(tpl.count(), "row", frFmtPct),
+        "Anzahl als Anteil der Spalten": tpl.fractionOf(tpl.count(), "col", frFmtPct)
       },
       renderers: {
         "Tabelle": $.pivotUtilities.renderers["Table"],
@@ -109,14 +109,14 @@
     }
 	if (plr) {
       $.pivotUtilities.locales.de.plotly_renderers = {
-        "Plotly Line Chart": plr["Line Chart"],
-        "Plotly Bar Chart": plr["Bar Chart"],
-        "Plotly Stacked Bar Chart": plr["Stacked Bar Chart"],
-		"Plotly Area Chart": plr["Area Chart"],
-		"Plotly Horizontal Bar Chart": plr["Horizontal Bar Chart"],
-		"Plotly Horizontal Stacked Bar Chart": plr["Horizontal Stacked Bar Chart"],
-		"Plotly Scatter Chart": plr["Scatter Chart"],
-		"Plotly Multiple Pie Chart": plr["Multiple Pie Chart"]
+        "Plotly Liniendiagramm": plr["Line Chart"],
+        "Plotly Säulendiagramm": plr["Bar Chart"],
+        "Plotly Gestapeltes Säulendiagramm": plr["Stacked Bar Chart"],
+		"Plotly Flächendiagramm": plr["Area Chart"],
+		"Plotly horizontales Säulendiagramm": plr["Horizontal Bar Chart"],
+		"Plotly Horizontal gestapeltes Säulendiagramm": plr["Horizontal Stacked Bar Chart"],
+		"Plotly Streudiagramm": plr["Scatter Chart"],
+		"Plotly Mehrfach Tortendiagramm": plr["Multiple Pie Chart"]
       };
     }
 	if (er) {
@@ -126,11 +126,11 @@
 	}
 	if (sr) {
 		$.pivotUtilities.locales.de.subtotal_renderers = {
-			"Table With Subtotal" : sr["Table With Subtotal"],
-			"Table With Subtotal Bar Chart" : sr["Table With Subtotal Bar Chart"],
-			"Table With Subtotal Heatmap" : sr["Table With Subtotal Heatmap"],
-			"Table With Subtotal Row Heatmap" : sr["Table With Subtotal Row Heatmap"],
-			"Table With Subtotal Col Heatmap" : sr["Table With Subtotal Col Heatmap"]
+			"Tabelle mit Zwischensumme" : sr["Table With Subtotal"],
+			"Tabelle mit Zwischensumme Säulendiagramm" : sr["Table With Subtotal Bar Chart"],
+			"Tabelle mit Zwischensumme Heatmap" : sr["Table With Subtotal Heatmap"],
+			"Tabelle mit Zwischensumme Zeilen Heatmap" : sr["Table With Subtotal Row Heatmap"],
+			"Tabelle mit Zwischensumme Spalten Heatmap" : sr["Table With Subtotal Col Heatmap"]
 		};
 	}
 	return $.pivotUtilities.locales.de;
