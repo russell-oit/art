@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.12.1"> 
+  <meta name="version" content="4.13"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -2774,7 +2774,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h3 id="openlayers">OpenLayers</h3> 
      <p>Enables display of data on a web map using the <a class="" href="http://openlayers.org/" rel="nofollow">OpenLayers</a> library. A javascript file containing the openlayers configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified. These attributes are the same as those for Leaflet reports.</p> 
      <h3 id="saiku-connection">Saiku: Connection</h3> 
-     <p>Provides a connection that will be used to generate cubes in the Analytics view. ART uses the <a class="" href="http://meteorite.bi/products/saiku" rel="nofollow">Saiku</a> library to provide the Analytics functionality.</p> 
+     <p>Provides a connection that will be used to generate cubes in the Analytics view. ART uses the <a class="" href="https://github.com/OSBI/saiku" rel="nofollow">Saiku</a> library to provide the Analytics functionality.</p> 
      <p>You would first create a <strong>Datasource</strong> from the <strong>Configure | Datasources</strong> menu. The <strong>Datasource Type</strong> should be <strong>OLAP</strong> and the <strong>Database Type</strong> will need to be of either the Olap4J Mondrian or Olap4j XMLA type. You would then fill the other datasource details as appropriate and then specify this datasource in the <strong>Datasource</strong> field when creating the saiku connection report. After doing this, if you click on the <strong>Analytics</strong> menu and then the <strong>Add query</strong> icon, you will see in the <strong>Cubes</strong> drop down, your connection and the cubes it has.</p> 
      <p>If you use an Olap4j Mondrian datasource, you can specify different roles that different users will have when using the connection. To do this, create a rule for the saiku connection report. Use a dummy column name. Next, specify rule values for that rule for different users. If you need to specify multiple roles, add multiple rule values.</p> 
      <p>Also for Olap4j Mondrian datasources, you can omit the <strong>Catalog</strong> part from the JDBC URL and instead upload the catalog (schema xml file) to use in the <strong>Template</strong> field. Note that when you test or save an olap4j mondrian datasource without specifying the Catalog, you will get an error. You can ignore this error if you will be specifying the Catalog in the saiku connection.</p> 
@@ -3950,7 +3950,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
     <span class="nv">FROM</span> <span class="nv">orders</span>
     <span class="nv">WHERE</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span>#
-    <span class="nv">AND</span> <span class="nv">vendor_name</span> <span class="nv">like</span> #<span class="nv">vendor</span># <span class="o">--</span> <span class="nv">you</span> <span class="k">do</span> <span class="nv">not</span> <span class="nv">need</span> <span class="nv">to</span> <span class="nv">put</span> <span class="nv">the</span> <span class="s1">'</span><span class="s"> character around the name</span>
+    <span class="nv">AND</span> <span class="nv">vendor_name</span> <span class="nv">like</span> #<span class="nv">vendor</span># <span class="o">--</span> <span class="k">do</span> <span class="nv">not</span> <span class="nv">put</span> <span class="nv">the</span> <span class="s1">'</span><span class="s"> character around the name</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a single-value parameter</p> 
@@ -4549,31 +4549,31 @@ where #rules#
      <ul> 
       <li> <p>Create a Dynamic LOV report named <strong>Countries</strong> that will display country names. Depending on what country is selected, the available cities will change. The countries report would have the following SQL.</p> 
        <div class="codehilite"> 
-        <pre><span></span>SELECT COUNTRY_ID, COUNTRY_NAME
-FROM COUNTRIES
-ORDER BY 2
+        <pre><span></span><span class="k">SELECT</span> <span class="n">COUNTRY_ID</span><span class="p">,</span> <span class="n">COUNTRY_NAME</span>
+<span class="k">FROM</span> <span class="n">COUNTRIES</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="mi">2</span>
 </pre> 
        </div> </li> 
       <li> <p>Create a Dynamic LOV report named <strong>Cities</strong> that will display city names. The query needs to have a parameter label for the country parameter. This will be replaced at runtime with the country selected.</p> 
        <div class="codehilite"> 
-        <pre><span></span>SELECT CITY_ID, CITY_NAME
-FROM CITIES
-WHERE COUNTRY_ID = #countryId#
-ORDER BY 2
+        <pre><span></span><span class="k">SELECT</span> <span class="n">CITY_ID</span><span class="p">,</span> <span class="n">CITY_NAME</span>
+<span class="k">FROM</span> <span class="n">CITIES</span>
+<span class="k">WHERE</span> <span class="n">COUNTRY_ID</span> <span class="o">=</span> <span class="o">#</span><span class="n">countryId</span><span class="o">#</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="mi">2</span>
 </pre> 
        </div> </li> 
       <li> <p>Once you have saved the Cities report, click on the <strong>Parameters</strong> option to assign the countryId parameter</p> </li> 
       <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>countryId</strong>, Label of <strong>Country</strong>, Data Type of <strong>Integer</strong>, set it to <strong>Shared</strong>, set it to <strong>Use LOV</strong> and select <strong>Countries</strong> as the <strong>LOV Report</strong>.</li> 
       <li> <p>Create the main report. The SQL for the report will need to have a placeholder for the cityId parameter. </p> 
        <div class="codehilite"> 
-        <pre><span></span>SELECT FIRST_NAME, LAST_NAME, EMAIL
-FROM CUSTOMERS
-WHERE CITY_ID = #cityId#
+        <pre><span></span><span class="k">SELECT</span> <span class="n">FIRST_NAME</span><span class="p">,</span> <span class="n">LAST_NAME</span><span class="p">,</span> <span class="n">EMAIL</span>
+<span class="k">FROM</span> <span class="n">CUSTOMERS</span>
+<span class="k">WHERE</span> <span class="n">CITY_ID</span> <span class="o">=</span> <span class="o">#</span><span class="n">cityId</span><span class="o">#</span>
 </pre> 
        </div> </li> 
       <li> <p>Once you have saved the main report, click on the <strong>Parameters</strong> option to allocate the report parameters</p> </li> 
       <li>Use the <strong>Add Existing</strong> option to add the <strong>countryId</strong> shared parameter created earlier</li> 
-      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>cityId</strong>, Label of <strong>City</strong> and Data Type of <strong>Integer</strong>. Once you have saved this parameter, click on its <strong>Edit</strong> button on the Report Parameters page and set the <strong>Chained Parents</strong> field to <strong>countryId</strong> i.e. the name of the parent parameter for this chained parameter.</li> 
+      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>cityId</strong>, Label of <strong>City</strong> and Data Type of <strong>Integer</strong>. Once you have saved this parameter, click on its <strong>Edit</strong> button on the Report Parameters page and set the <strong>Chained Parents</strong> field to <strong>countryId</strong> i.e. the name of the parent parameter for this chained parameter. If the parent parameter data type is <strong>Date</strong>, <strong>DateTime</strong> or <strong>DateRange</strong>, in the <strong>Chained Parents</strong> field, put the name of the parent parameter and a "-hidden" suffix e.g. <strong>countryId-hidden</strong>, and then set the <strong>Chained Depends</strong> field to the name of the parent parameter e.g. <strong>countryId</strong>.</li> 
      </ul> 
      <p>Now when you run the main report, you are presented with two drop down boxes. Depending on what country you select, a different set of cities is displayed, from which you can choose and run the report to see the final results.</p> 
     </div> 
@@ -7461,14 +7461,14 @@ a2enmod proxy_http
      <h2 id="translating-art">Translating ART</h2> 
      <p>You can translate ART so that the user interface is displayed in your own language.</p> 
      <h3 id="online">Online</h3> 
-     <p>ART has a translation project on the <a class="" href="https://crowdin.com/" rel="nofollow">Crowdin</a> platform. You can create an account on Crowdin and join the ART translation project at the following link. <a href="https://crowdin.com/project/artreporting." rel="nofollow">https://crowdin.com/project/artreporting.</a> You can then translate online.</p> 
+     <p>ART has a translation project on the <a class="" href="https://crowdin.com/" rel="nofollow">Crowdin</a> platform. You can create an account on Crowdin and join the ART translation project at the following link. <a href="https://crowdin.com/project/artreporting." rel="nofollow">https://crowdin.com/project/artreporting.</a> You can then translate online. If your language is not available, create a post on the ART sourceforge<br> forum requesting for the new language to be added to the Crowdin project.</p> 
      <h3 id="offline">Offline</h3> 
      <ul> 
       <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>ART_HOME\WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found <a class="" href="http://www.mathguide.de/info/tools/languagecode.html" rel="nofollow">here</a>. An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that you have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes <a class="" href="http://www.immigration-usa.com/country_digraphs.html" rel="nofollow">here</a>.</li> 
       <li>Change all the text in your new properties file after the = signs to your language </li> 
       <li> <p>If your language uses a non ISO-8859-1 (Latin-1) character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to the ISO-8859-1 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
        <div class="codehilite"> 
-        <pre><span></span>native2ascii -encoding utf-8 ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
+        <pre><span></span><span class="n">native2ascii</span> <span class="o">-</span><span class="k">encoding</span> <span class="n">utf</span><span class="o">-</span><span class="mi">8</span> <span class="n">ArtMessages_xx</span><span class="o">-</span><span class="n">UTF8</span><span class="p">.</span><span class="n">properties</span> <span class="n">ArtMessages_xx</span><span class="p">.</span><span class="n">properties</span>
 </pre> 
        </div> </li> 
       <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
