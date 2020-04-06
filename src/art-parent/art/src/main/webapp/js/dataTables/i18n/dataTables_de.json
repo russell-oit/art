@@ -8,13 +8,13 @@
 	"sLengthMenu": "_MENU_ Einträge anzeigen",
 	"sLoadingRecords": "Wird geladen...",
 	"sProcessing": "Bitte warten...",
-	"sSearch": "Suchen",
+	"sSearch": "Suchen:",
 	"sZeroRecords": "Keine Einträge vorhanden.",
 	"oPaginate": {
 		"sFirst": "Erste",
 		"sLast": "Letzte",
 		"sNext": "Nächste",
-		"sPrevious": "Zurück"
+		"sPrevious": "Vorheriges"
 	},
 	"oAria": {
 		"sSortAscending": ": aktivieren, um Spalte aufsteigend zu sortieren",
