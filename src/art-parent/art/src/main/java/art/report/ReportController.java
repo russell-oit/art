@@ -36,6 +36,7 @@ import art.reportoptions.GridstackItemOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportRunDetails;
 import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
@@ -1584,27 +1585,37 @@ public class ReportController {
 
 		return response;
 	}
-	
+
 	@GetMapping("/runningQueries")
-	public String showRunningQueries(Model model){
+	public String showRunningQueries(Model model) {
 		logger.debug("Entering showRunningQueries");
-		
-		model.addAttribute("queries", Config.getRunningQueries());
-		
+
 		return "runningQueries";
 	}
-	
+
 	@GetMapping("/getRunningQueries")
 	@ResponseBody
-	public AjaxResponse getRunningQueries(){
+	public AjaxResponse getRunningQueries(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse) {
+
 		logger.debug("Entering getRunningQueries");
-		
-		AjaxResponse response = new AjaxResponse();
-		
-		response.setData(Config.getRunningQueries());
-		response.setSuccess(true);
-		
-		return response;
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
+		WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+
+		String templateName = "runningQueriesAction";
+		String dtAction = defaultTemplateEngine.process(templateName, ctx);
+
+		List<ReportRunDetails> runningQueries = Config.getRunningQueries();
+		for (ReportRunDetails query : runningQueries) {
+			query.setDtAction(dtAction);
+		}
+
+		ajaxResponse.setData(runningQueries);
+		ajaxResponse.setSuccess(true);
+
+		return ajaxResponse;
 	}
 
 }

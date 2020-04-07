@@ -37,6 +37,21 @@ public class ReportRunDetails implements Serializable {
 	private User user;
 	private Date startTime;
 	private String runId;
+	private String dtAction;
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
 
 	/**
 	 * @return the report
@@ -125,9 +140,15 @@ public class ReportRunDetails implements Serializable {
 	public String getDtName() {
 		String name = report.getName() + " - ";
 
-		if (job != null) {
-			name += job.getName() + " - ";
+		String jobName;
+		if (job == null) {
+			jobName = " ";
+		} else {
+			jobName = job.getName();
 		}
+
+		name += jobName + " - ";
+
 		if (user != null) {
 			name += user.getUsername();
 		}

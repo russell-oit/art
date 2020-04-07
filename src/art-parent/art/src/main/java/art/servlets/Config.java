@@ -1525,6 +1525,15 @@ public class Config extends HttpServlet {
 	}
 
 	/**
+	 * Returns the running queries
+	 *
+	 * @return the running queries
+	 */
+	public static List<ReportRunDetails> getRunningQueries() {
+		return runningQueries;
+	}
+
+	/**
 	 * Cancels a running query
 	 *
 	 * @param runId the run id
@@ -1542,24 +1551,24 @@ public class Config extends HttpServlet {
 
 		return cancelled;
 	}
-	
+
 	/**
 	 * Adds a running query
-	 * 
+	 *
 	 * @param reportRunDetails details of the query
 	 * @param statement the statement object for the query
 	 */
-	public static void addRunningQuery(ReportRunDetails reportRunDetails, Statement statement){
+	public static void addRunningQuery(ReportRunDetails reportRunDetails, Statement statement) {
 		runningQueries.add(reportRunDetails);
 		runningStatements.put(reportRunDetails.getRunId(), statement);
 	}
-	
+
 	/**
 	 * Removes a running query
-	 * 
+	 *
 	 * @param runId the run id for the query
 	 */
-	public static void removeRunningQuery(String runId){
+	public static void removeRunningQuery(String runId) {
 		runningStatements.remove(runId);
 		runningQueries.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
 	}
