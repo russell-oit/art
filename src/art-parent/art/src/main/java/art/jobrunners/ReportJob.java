@@ -3016,10 +3016,13 @@ public class ReportJob implements org.quartz.Job {
 	private ReportRunner prepareReportRunner(User user, Report report) throws SQLException {
 		logger.debug("Entering prepareReportRunner: user={}, report={}", user, report);
 
+		String runId = ArtUtils.getUniqueId(jobId);
+		
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUser(user);
 		reportRunner.setReport(report);
 		reportRunner.setJob(job);
+		reportRunner.setRunId(runId);
 
 		return reportRunner;
 	}

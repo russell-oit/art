@@ -406,7 +406,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources",
 				"reportConfig", "cancelQuery")
-				|| StringUtils.endsWithAny(page, "Report", "Reports")) {
+				|| StringUtils.endsWithAny(page, "Report", "Reports", "Queries")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}

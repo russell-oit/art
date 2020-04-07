@@ -1584,5 +1584,27 @@ public class ReportController {
 
 		return response;
 	}
+	
+	@GetMapping("/runningQueries")
+	public String showRunningQueries(Model model){
+		logger.debug("Entering showRunningQueries");
+		
+		model.addAttribute("queries", Config.getRunningQueries());
+		
+		return "runningQueries";
+	}
+	
+	@GetMapping("/getRunningQueries")
+	@ResponseBody
+	public AjaxResponse getRunningQueries(){
+		logger.debug("Entering getRunningQueries");
+		
+		AjaxResponse response = new AjaxResponse();
+		
+		response.setData(Config.getRunningQueries());
+		response.setSuccess(true);
+		
+		return response;
+	}
 
 }

@@ -1266,7 +1266,15 @@ public class ReportRunner {
 		}
 
 		if (StringUtils.isNotBlank(runId)) {
-			Config.addRunningStatement(runId, psQuery);
+			ReportRunDetails reportRunDetails = new ReportRunDetails();
+			reportRunDetails.setReport(report);
+			reportRunDetails.setJob(job);
+			reportRunDetails.setUser(user);
+			reportRunDetails.setRunId(runId);
+			reportRunDetails.setStartTime(new Date());
+			
+			Config.addRunningQuery(reportRunDetails, psQuery);
+			//Config.addRunningStatement(runId, psQuery);
 		}
 
 		psQuery.execute();
@@ -1550,7 +1558,8 @@ public class ReportRunner {
 		}
 
 		if (StringUtils.isNotBlank(runId)) {
-			Config.removeRunningStatement(runId);
+			Config.removeRunningQuery(runId);
+			//Config.removeRunningStatement(runId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);
