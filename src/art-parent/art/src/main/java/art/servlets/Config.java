@@ -1525,38 +1525,10 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns running statements
-	 *
-	 * @return running statements
-	 */
-	public static Map<String, Statement> getRunningStatements() {
-		return runningStatements;
-	}
-
-	/**
-	 * Adds a statement to the running statements map
-	 *
-	 * @param id the id for the statement
-	 * @param statement the statement to add
-	 */
-	public static void addRunningStatement(String id, Statement statement) {
-		runningStatements.put(id, statement);
-	}
-
-	/**
-	 * Removes a statement from the running statements map
-	 *
-	 * @param id the statement id
-	 */
-	public static void removeRunningStatement(String id) {
-		runningStatements.remove(id);
-	}
-
-	/**
-	 * Cancels a running statement
+	 * Cancels a running query
 	 *
 	 * @param runId the run id
-	 * @return <code>true</code> if the statement was cancelled
+	 * @return <code>true</code> if the query was cancelled
 	 * @throws SQLException
 	 */
 	public static boolean cancelQuery(String runId) throws SQLException {
@@ -1569,15 +1541,6 @@ public class Config extends HttpServlet {
 		}
 
 		return cancelled;
-	}
-	
-	/**
-	 * Returns the running queries
-	 * 
-	 * @return the running queries
-	 */
-	public static List<ReportRunDetails> getRunningQueries(){
-		return runningQueries;
 	}
 	
 	/**
