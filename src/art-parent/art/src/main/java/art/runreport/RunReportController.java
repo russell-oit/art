@@ -453,7 +453,7 @@ public class RunReportController {
 
 					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
 							+ Encode.forHtmlContent(description) + " :: "
-							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";
+							+ startTimeString + "</small></h4>";
 
 					displayReportInfo(writer, reportInfo);
 				}
@@ -645,7 +645,7 @@ public class RunReportController {
 		//has been included in the page before calling this method
 		elementId += "-" + runId;
 		out.println("<script type='text/javascript'>"
-				+ "document.getElementById('" + elementId + "').innerHTML='" + message + "';"
+				+ "document.getElementById('" + elementId + "').innerHTML='" + Encode.forJavaScript(message) + "';"
 				+ "</script>");
 	}
 
