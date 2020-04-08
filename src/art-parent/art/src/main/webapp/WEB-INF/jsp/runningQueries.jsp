@@ -71,9 +71,13 @@
 							}
 						}
 					},
-					{"data": "job.name", "defaultContent": "",
+					{"data": "job",
 						render: function (data) {
-							return escapeHtmlContent(data);
+							if (data === null) {
+								return "";
+							} else {
+								return escapeHtmlContent(data.name) + " (" + data.jobId + ")";
+							}
 						}
 					},
 					{"data": "user.username", "defaultContent": "",
@@ -109,7 +113,7 @@
 				];
 
 				//initialize datatable
-				var oTable = initAjaxConfigTable(tbl, pageLength, showAllRowsText,
+				var oTable = initAjaxBasicTable(tbl, pageLength, showAllRowsText,
 						contextPath, localeCode, dataUrl, errorOccurredText,
 						showErrors, columnDefs, columns);
 
