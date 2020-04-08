@@ -20,6 +20,7 @@ package art.runreport;
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.export.ExportHelper;
 import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
@@ -32,6 +33,7 @@ import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rits.cloning.Cloner;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -116,14 +118,14 @@ public class RunReportController {
 		}
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInlineParameter = BooleanUtils.toBoolean(request.getParameter("showInline"));
-		boolean showInline = showInlineParameter;
+		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 		//check if report header and footer should not be included e.g. in a dashboard component
 		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
+		boolean directDownload = BooleanUtils.toBoolean(request.getParameter("directDownload"));
 
 		//set appropriate error page to use
 		String errorPage;
-		if (showInline || isFragment) {
+		if (showInline || isFragment || directDownload) {
 			errorPage = "reportErrorInline";
 		} else {
 			errorPage = "reportError";
@@ -329,7 +331,7 @@ public class RunReportController {
 				writer = response.getWriter();
 			}
 
-			if (isFragment) {
+			if (isFragment || directDownload) {
 				//report header and footer not shown for fragments
 				showReportHeaderAndFooter = false;
 				showInline = true;
@@ -384,20 +386,22 @@ public class RunReportController {
 					ajax = true;
 				}
 
-				if (isFragment && !ajax) {
+				if (isFragment && !ajax && !directDownload) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/addJquery.jsp").include(request, response);
 				}
 
 				request.setAttribute("runId", runId);
 
-				if (!ajax && report.isShowCancel()) {
+				if (!ajax && report.isShowCancel() && !directDownload) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showCancelQuery.jsp").include(request, response);
 				}
 
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+				if (!directDownload) {
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+				}
 
 				//display initial report progress
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
 				}
 
@@ -458,7 +462,7 @@ public class RunReportController {
 					displayReportInfo(writer, reportInfo);
 				}
 
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					showCancelQueryDiv(writer);
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
 				}
@@ -472,7 +476,9 @@ public class RunReportController {
 
 				Instant queryEnd = Instant.now();
 
-				hideCancelQueryDiv(writer);
+				if (!directDownload) {
+					hideCancelQueryDiv(writer);
+				}
 
 				//display parameters and final sql
 				if (showReportHeaderAndFooter) {
@@ -499,7 +505,7 @@ public class RunReportController {
 					}
 				}
 
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
 				}
 
@@ -548,6 +554,16 @@ public class RunReportController {
 
 					//encrypt file if applicable
 					report.encryptFile(outputFileName);
+
+					if (directDownload) {
+						File file = new File(outputFileName);
+
+						if (file.exists()) {
+							response.reset();
+							ExportHelper exportHelper = new ExportHelper();
+							exportHelper.serveFile(file, response);
+						}
+					}
 				}
 
 				// Print the "working" time elapsed
@@ -604,7 +620,7 @@ public class RunReportController {
 				reportRunner.close();
 			}
 
-			if (!ajax) {
+			if (!ajax && !directDownload) {
 				clearReportProgress(writer);
 			}
 		}

@@ -673,9 +673,12 @@ public class ReportOutputGenerator {
 			return;
 		}
 
-		//display link to access report
-		request.setAttribute("fileName", fileName);
-		servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
+		boolean directDownload = BooleanUtils.toBoolean(request.getParameter("directDownload"));
+		if (!directDownload) {
+			//display link to access report
+			request.setAttribute("fileName", fileName);
+			servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
+		}
 	}
 
 	/**

@@ -21,18 +21,14 @@ import art.report.ReportService;
 import art.servlets.Config;
 import art.user.User;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -156,41 +152,8 @@ public class ExportController {
 		File file = new File(fullFilename);
 
 		if (file.exists()) {
-			// Determine the file's content type
-			//https://stackoverflow.com/questions/19711956/alternative-to-files-probecontenttype
-			//https://odoepner.wordpress.com/2013/07/29/transparently-improve-java-7-mime-type-recognition-with-apache-tika/
-			//https://dzone.com/articles/determining-file-types-java
-			//http://www.rgagnon.com/javadetails/java-0487.html
-			//https://howtodoinjava.com/spring/spring-mvc/spring-mvc-download-file-controller-example/
-			Tika tika = new Tika();
-			String filename = file.getName();
-			String mimeType = tika.detect(filename);
-
-			response.setContentType(mimeType);
-			if (!StringUtils.containsIgnoreCase(mimeType, "html")) {
-				//https://stackoverflow.com/questions/18634337/how-to-set-filename-containing-spaces-in-content-disposition-header
-				response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-			}
-
-			FileInputStream fs = null;
-			OutputStream os = null;
-
-			try {
-				fs = new FileInputStream(file);
-				os = response.getOutputStream();
-				IOUtils.copyLarge(fs, os);
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			} finally {
-				IOUtils.closeQuietly(fs);
-				try {
-					if (os != null) {
-						os.flush();
-					}
-				} catch (IOException ex) {
-					logger.debug("Error", ex);
-				}
-			}
+			ExportHelper exportHelper = new ExportHelper();
+			exportHelper.serveFile(file, response);
 		} else {
 			request.setAttribute("message", "reports.message.fileNotFound");
 			try {
