@@ -111,8 +111,7 @@ public class UserController {
 	@GetMapping("/getUsers")
 	public @ResponseBody
 	AjaxResponse getUsers(Locale locale, HttpServletRequest request,
-			HttpServletResponse httpResponse, HttpSession session)
-			throws SQLException, IOException {
+			HttpServletResponse httpResponse, HttpSession session) {
 
 		logger.debug("Entering getUsers");
 
