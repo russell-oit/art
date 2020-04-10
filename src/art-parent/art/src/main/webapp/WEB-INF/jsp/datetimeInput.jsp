@@ -26,7 +26,7 @@
 <c:if test="${reportParam.parameter.allowNull}">
 	<div>
 		<label class="checkbox-inline">
-			<input type="checkbox" name="${encode:forHtmlAttribute(reportParam.htmlElementName)}-null"
+			<input type="checkbox" name="${encode:forHtmlAttribute(reportParam.nullHtmlElementName)}"
 				   ${reportParam.actualParameterValues.contains(null) ? "checked" : ""}>
 			<spring:message code="reports.checkbox.null"/>
 		</label>
