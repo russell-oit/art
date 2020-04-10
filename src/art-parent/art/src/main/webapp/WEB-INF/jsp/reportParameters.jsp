@@ -40,6 +40,11 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/Inputmask-4.0.3/min/jquery.inputmask.bundle.min.js"></script>
 </c:if>
 
+<c:if test="${hasFileParam}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+</c:if>
+
 <c:forEach var="reportParameter" items="${reportParams}">
 	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
 
@@ -87,6 +92,9 @@
 								</c:when>
 								<c:when test="${reportParam.parameter.dataType == 'DateRange'}">
 									<jsp:include page="daterangeInput.jsp" />
+								</c:when>
+								<c:when test="${reportParam.parameter.dataType == 'File'}">
+									<jsp:include page="fileInput.jsp" />
 								</c:when>
 								<c:when test="${reportParam.parameter.dataType.numeric}">
 									<jsp:include page="numberInput.jsp" />

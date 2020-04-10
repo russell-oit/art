@@ -127,6 +127,7 @@ import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Generates report output
@@ -2290,6 +2291,11 @@ public class ReportOutputGenerator {
 
 		Map<String, Object> variables = new HashMap<>();
 		variables.putAll(reportParamsMap);
+
+		Map<String, MultipartFile> filesMap = reportRunner.getFilesMap();
+		if (filesMap != null) {
+			variables.putAll(filesMap);
+		}
 
 		MongoClient mongoClient = null;
 		Datasource datasource = report.getDatasource();

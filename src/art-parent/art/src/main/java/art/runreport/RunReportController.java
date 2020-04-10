@@ -34,7 +34,6 @@ import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rits.cloning.Cloner;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -69,6 +68,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -96,14 +97,39 @@ public class RunReportController {
 	@Autowired
 	private DrilldownService drilldownService;
 
+	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST}, headers = "content-type=multipart/form-data")
+	public String runReportMultipart(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "runId", required = false) String runIdParameter,
+			@ModelAttribute("report") Report testReport,
+			MultipartHttpServletRequest request, HttpServletResponse response,
+			HttpSession session, Model model, Locale locale,
+			RedirectAttributes redirectAttributes) {
+
+		//https://stackoverflow.com/questions/20162474/how-do-i-receive-a-file-upload-in-spring-mvc-using-both-multipart-form-and-chunk
+		Map<String, MultipartFile> filesMap = request.getFileMap();
+		return runReport(session, runIdParameter, reportId, request, testReport,
+				model, locale, response, redirectAttributes, filesMap);
+	}
+
 	//use post to allow for large parameter input and get to allow for direct url execution
-	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
-	public String runReport(@RequestParam("reportId") Integer reportId,
+	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST}, headers = "content-type!=multipart/form-data")
+	public String runReportPlain(@RequestParam("reportId") Integer reportId,
 			@RequestParam(value = "runId", required = false) String runIdParameter,
 			@ModelAttribute("report") Report testReport,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
-			RedirectAttributes redirectAttributes) throws IOException {
+			RedirectAttributes redirectAttributes) {
+
+		Map<String, MultipartFile> filesMap = null;
+		return runReport(session, runIdParameter, reportId, request, testReport,
+				model, locale, response, redirectAttributes, filesMap);
+	}
+
+	private String runReport(HttpSession session, String runIdParameter,
+			Integer reportId, HttpServletRequest request, Report testReport,
+			Model model, Locale locale, HttpServletResponse response,
+			RedirectAttributes redirectAttributes,
+			Map<String, MultipartFile> filesMap) {
 
 		Report report = null;
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -348,7 +374,7 @@ public class RunReportController {
 				//do nothing
 			}
 
-			//output page header. if showInline, page header and footer already exist. 
+			//output page header. if showInline, page header and footer already exist.
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
@@ -442,6 +468,8 @@ public class RunReportController {
 				}
 
 				reportRunner.setReportParamsMap(reportParamsMap);
+
+				reportRunner.setFilesMap(filesMap);
 
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getLocalizedShortDescription(locale);

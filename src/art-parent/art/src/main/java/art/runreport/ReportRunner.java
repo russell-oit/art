@@ -82,6 +82,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Runs a report
@@ -117,9 +118,24 @@ public class ReportRunner {
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
 	private String runId;
+	private Map<String, MultipartFile> filesMap;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the filesMap
+	 */
+	public Map<String, MultipartFile> getFilesMap() {
+		return filesMap;
+	}
+
+	/**
+	 * @param filesMap the filesMap to set
+	 */
+	public void setFilesMap(Map<String, MultipartFile> filesMap) {
+		this.filesMap = filesMap;
 	}
 
 	/**
@@ -439,6 +455,10 @@ public class ReportRunner {
 			Map<String, Object> variables = new HashMap<>();
 			if (reportParamsMap != null) {
 				variables.putAll(reportParamsMap);
+			}
+
+			if (filesMap != null) {
+				variables.putAll(filesMap);
 			}
 
 			MongoClient mongoClient = null;
@@ -1272,7 +1292,7 @@ public class ReportRunner {
 			reportRunDetails.setUser(user);
 			reportRunDetails.setRunId(runId);
 			reportRunDetails.setStartTime(new Date());
-			
+
 			Config.addRunningQuery(reportRunDetails, psQuery);
 		}
 

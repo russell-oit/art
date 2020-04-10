@@ -29,7 +29,8 @@ import java.util.List;
 public enum ParameterDataType {
 
 	Varchar("Varchar"), Text("Text"), Integer("Integer"), Double("Double"),
-	Date("Date"), DateTime("DateTime"), DateRange("DateRange"), Datasource("Datasource");
+	Date("Date"), DateTime("DateTime"), DateRange("DateRange"),
+	Datasource("Datasource"), File("File");
 	
 	private final String value;
 

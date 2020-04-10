@@ -306,6 +306,16 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
+		
+		boolean hasFileParam = false;
+		for (ReportParameter reportParam : reportParamsList) {
+			Parameter param = reportParam.getParameter();
+			if (param.isForDisplay() && param.getDataType() == ParameterDataType.File) {
+				hasFileParam = true;
+				break;
+			}
+		}
+		request.setAttribute("hasFileParam", hasFileParam);
 
 		request.setAttribute("runId", ArtUtils.getUniqueId(report.getReportId()));
 
