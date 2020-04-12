@@ -2413,12 +2413,30 @@ public class ReportOutputGenerator {
 						column.setLabel(columnLabel);
 					}
 
+					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+					//https://github.com/wnameless/json-flattener
+					//https://www.baeldung.com/jackson-serialize-dates
+					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
+					ObjectMapper mapper = new ObjectMapper();
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+					mapper.setDateFormat(df);
+
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
 					//also need to create a new list in case some columns are omitted in finalColumnNames
 					List<Map<String, Object>> finalResultList = new ArrayList<>();
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
-						Map<String, Object> map = ArtUtils.objectToMap(object);
+						Map<String, Object> map;
+						if (object instanceof Map) {
+							@SuppressWarnings("unchecked")
+							Map<String, Object> map2 = (Map<String, Object>) object;
+							map = map2;
+						} else {
+							@SuppressWarnings("unchecked")
+							Map<String, Object> map2 = mapper.convertValue(object, Map.class);
+							map = map2;
+						}
+
 						for (ResultSetColumn column : columns) {
 							String columnName = column.getName();
 							Object value = map.get(columnName);
@@ -2439,13 +2457,6 @@ public class ReportOutputGenerator {
 
 					rowsRetrieved = finalResultList.size();
 
-					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
-					//https://github.com/wnameless/json-flattener
-					//https://www.baeldung.com/jackson-serialize-dates
-					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
-					ObjectMapper mapper = new ObjectMapper();
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-					mapper.setDateFormat(df);
 					resultString = mapper.writeValueAsString(finalResultList);
 				}
 
