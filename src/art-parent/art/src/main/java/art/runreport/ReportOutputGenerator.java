@@ -2355,7 +2355,7 @@ public class ReportOutputGenerator {
 						//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
 						//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
 						//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-						Map<String, Object> map = ArtUtils.objectToMap(sample);
+						Map<String, Object> map = ArtUtils.objectToDefaultMap(sample);
 						for (Entry<String, Object> entry : map.entrySet()) {
 							String name = entry.getKey();
 							Object value = entry.getValue();
@@ -2426,16 +2426,7 @@ public class ReportOutputGenerator {
 					List<Map<String, Object>> finalResultList = new ArrayList<>();
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
-						Map<String, Object> map;
-						if (object instanceof Map) {
-							@SuppressWarnings("unchecked")
-							Map<String, Object> map2 = (Map<String, Object>) object;
-							map = map2;
-						} else {
-							@SuppressWarnings("unchecked")
-							Map<String, Object> map2 = mapper.convertValue(object, Map.class);
-							map = map2;
-						}
+						Map<String, Object> map = ArtUtils.objectToDefaultMap(object, mapper);
 
 						for (ResultSetColumn column : columns) {
 							String columnName = column.getName();

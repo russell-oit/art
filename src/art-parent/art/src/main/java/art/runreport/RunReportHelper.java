@@ -306,7 +306,7 @@ public class RunReportHelper {
 			}
 		}
 		request.setAttribute("hasRobinHerbotsMask", hasRobinHerbotsMask);
-		
+
 		boolean hasFileParam = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
@@ -893,7 +893,7 @@ public class RunReportHelper {
 			} else {
 				//https://stackoverflow.com/questions/3333974/how-to-loop-over-a-class-attributes-in-java
 				//https://stackoverflow.com/questions/2638590/best-way-of-invoking-getter-by-reflection
-				Map<String, Object> sampleRow = ArtUtils.objectToMap(sample);
+				Map<String, Object> sampleRow = ArtUtils.objectToDefaultMap(sample);
 
 				for (Entry<String, Object> entry : sampleRow.entrySet()) {
 					colCount++;
@@ -1059,8 +1059,9 @@ public class RunReportHelper {
 					finalData.add(rowMap);
 				}
 			} else {
+				ObjectMapper mapper = new ObjectMapper();
 				for (Object row : dataList) {
-					Map<String, Object> rowMap = ArtUtils.objectToMap(row);
+					Map<String, Object> rowMap = ArtUtils.objectToDefaultMap(row, mapper);
 					finalData.add(rowMap);
 				}
 			}
