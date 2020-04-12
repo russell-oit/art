@@ -116,9 +116,6 @@ Edit parameter definition
 				//show/hide parameter type field
 				switch (dataType) {
 					case "File":
-					case "Date":
-					case "DateTime":
-					case "DateRange":
 						$("#parameterTypeDiv").hide();
 						break;
 					default:
@@ -150,15 +147,6 @@ Edit parameter definition
 						break;
 					default:
 						$("#templateDiv").show();
-				}
-
-				//show/hide hidded field
-				switch (dataType) {
-					case "File":
-						$("#hiddenDiv").hide();
-						break;
-					default:
-						$("#hiddenDiv").show();
 				}
 
 				//show/hide lov fields
