@@ -18,7 +18,7 @@
 			<spring:message code="reports.text.change"/>
 		</span>
 		<input type="file"
-			   name="${encode:forHtmlAttribute(reportParam.parameter.name)}"
+			   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 			   accept=".json, .csv, .zip">
 	</span>
 	<span class="fileinput-filename"></span>

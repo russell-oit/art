@@ -414,7 +414,11 @@ public class ReportParameter implements Serializable {
 	 * @return the html element name to be used for this parameter
 	 */
 	public String getHtmlElementName() {
-		return ArtUtils.PARAM_PREFIX + parameter.getName();
+		if (parameter.getDataType() == ParameterDataType.File) {
+			return parameter.getName();
+		} else {
+			return ArtUtils.PARAM_PREFIX + parameter.getName();
+		}
 	}
 
 	/**
