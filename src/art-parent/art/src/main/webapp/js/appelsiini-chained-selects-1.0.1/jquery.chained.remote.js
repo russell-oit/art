@@ -90,9 +90,11 @@
 
             /* Build the select from given data. */
             function build(json) {
+				//Timothy Anyona 20200414. Allow selecting of multiple options
+				var selected = [];
                 /* If select already had something selected, preserve it. */
-                var selected_key = $(":selected", self).val();
-
+//                var selected_key = $(":selected", self).val();
+				
                 /* Clear the select. */
                 $("option", self).remove();
 
@@ -128,7 +130,8 @@
 
                     /* Set the selected option from JSON. */
                     if ("selected" === key) {
-                        selected_key = value;
+//                        selected_key = value;
+						selected.push(value);
                         continue;
                     }
                     var option = $("<option />").val(key).append(value);
@@ -137,9 +140,12 @@
 
                 /* Loop option again to set selected. IE needed this... */
                 $(self).children().each(function() {
-                    if ($(this).val() === selected_key + "") {
-                        $(this).attr("selected", "selected");
-                    }
+					if($.inArray($(this).val(), selected) > -1){
+						$(this).attr("selected", "selected");
+					}
+//                    if ($(this).val() === selected_key + "") {
+//                        $(this).attr("selected", "selected");
+//                    }
                 });
 
                 /* If we have only the default value disable select. */

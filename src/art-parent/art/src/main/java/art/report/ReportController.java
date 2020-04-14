@@ -1530,7 +1530,8 @@ public class ReportController {
 		if (defaultValues != null) {
 			for (String defaultValue : defaultValues) {
 				Map<String, String> value = new HashMap<>();
-				value.put("selected", defaultValue);
+				String encodedDefaultValue = Encode.forHtmlAttribute(defaultValue);
+				value.put("selected", encodedDefaultValue);
 				list.add(value);
 			}
 		}
