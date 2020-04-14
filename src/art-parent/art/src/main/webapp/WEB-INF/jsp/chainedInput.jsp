@@ -34,8 +34,10 @@ Display report parameter that uses dropdown input
 	//https://api.jquery.com/category/selectors/
 	var url = "${pageContext.request.contextPath}/getLovValues?reportId=${reportParam.parameter.lovReport.reportId}";
 
+	var defaultValue;
 	<c:forEach var="defaultValue" items="${reportParam.defaultValues}">
-		url += "&defaultValues=" + ${encode:forUriComponent(defaultValue)};
+		defaultValue = "${encode:forJavaScript(encode:forUriComponent(defaultValue))}";
+		url += "&defaultValues=" + defaultValue;
 	</c:forEach>
 
 		$("#${encode:forJavaScript(reportParam.htmlElementName)}").remoteChained({
