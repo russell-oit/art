@@ -24,7 +24,6 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.GeneralReportOptions;
 import art.reportoptions.ViewOptions;
-import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtUtils;
@@ -173,9 +172,9 @@ public class SelfServiceController {
 		if (languageFile.exists()) {
 			model.addAttribute("languageFileName", languageFileName);
 		}
-		
+
 		model.addAttribute("runId", ArtUtils.getUniqueId());
-		
+
 		return "selfServiceReports";
 	}
 
