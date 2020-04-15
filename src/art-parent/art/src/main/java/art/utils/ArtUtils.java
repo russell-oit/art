@@ -166,15 +166,15 @@ public class ArtUtils {
 	 * Removes characters from file name that may be invalid or result in a
 	 * dangerous file name on the system
 	 *
-	 * @param filename the initial file name, including the extension
+	 * @param fullFilename the initial file name, including the extension
 	 * @return final file name with unwanted characters replaced with
 	 * underscores
 	 */
-	public static String cleanFilename(String filename) {
+	public static String cleanFullFilename(String fullFilename) {
 		String finalFilename;
 
-		String base = FilenameUtils.getBaseName(filename);
-		String extension = FilenameUtils.getExtension(filename);
+		String base = FilenameUtils.getBaseName(fullFilename);
+		String extension = FilenameUtils.getExtension(fullFilename);
 
 		if (StringUtils.containsAny(extension, "aes", "gpg")) {
 			//allow second extension to be used for encryped files
