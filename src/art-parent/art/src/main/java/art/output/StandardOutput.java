@@ -1333,13 +1333,13 @@ public abstract class StandardOutput {
 						fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
 
 						fixedFileName = fixedFileName + "-BurstId-" + fileNameBurstId;
-						fixedFileName = ArtUtils.cleanFilename(fixedFileName);
+						fixedFileName = ArtUtils.cleanBaseFilename(fixedFileName);
 
 						String extension = filenameHelper.getFilenameExtension(report, reportFormat);
 
 						fileName = fixedFileName + "." + extension;
 
-						if (!FinalFilenameValidator.isValid(fileName)) {
+						if (!FinalFilenameValidator.isValidTwoDot(fileName)) {
 							throw new IllegalArgumentException("Invalid burst file name - " + fileName);
 						}
 
@@ -1354,7 +1354,7 @@ public abstract class StandardOutput {
 					} else {
 						fileName = filenameHelper.getFilename(job, fileNameBurstId, locale, reportFormat, reportParamsMap);
 
-						if (!FinalFilenameValidator.isValid(fileName)) {
+						if (!FinalFilenameValidator.isValidTwoDot(fileName)) {
 							throw new IllegalArgumentException("Invalid file name - " + fileName);
 						}
 					}

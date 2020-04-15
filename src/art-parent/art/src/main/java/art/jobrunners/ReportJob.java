@@ -2587,7 +2587,7 @@ public class ReportJob implements org.quartz.Job {
 			ExpressionHelper expressionHelper = new ExpressionHelper();
 			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
 
-			fixedFileName = ArtUtils.cleanFilename(fixedFileName);
+			fixedFileName = ArtUtils.cleanBaseFilename(fixedFileName);
 
 			String extension = filenameHelper.getFilenameExtension(report, reportFormat);
 
