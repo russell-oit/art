@@ -177,7 +177,7 @@ public class FilenameHelper {
 	 * @return the file name extension to be used for the given report
 	 * @throws java.io.IOException
 	 */
-	private String getFilenameExtension(Report report, ReportFormat reportFormat)
+	public String getFilenameExtension(Report report, ReportFormat reportFormat)
 			throws IOException {
 
 		String extension;

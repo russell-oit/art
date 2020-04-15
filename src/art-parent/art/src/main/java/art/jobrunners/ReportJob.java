@@ -131,7 +131,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -2579,7 +2578,9 @@ public class ReportJob implements org.quartz.Job {
 		String fixedFileName = job.getFixedFileName();
 		logger.debug("fixedFileName='{}'", fixedFileName);
 
+		FilenameHelper filenameHelper = new FilenameHelper();
 		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+
 		if (StringUtils.isNotBlank(fixedFileName)) {
 			String username = job.getUser().getUsername();
 
@@ -2588,21 +2589,14 @@ public class ReportJob implements org.quartz.Job {
 
 			fixedFileName = ArtUtils.cleanFilename(fixedFileName);
 
+			String extension = filenameHelper.getFilenameExtension(report, reportFormat);
+
 			if (job.getRunsToArchive() > 0) {
 				int randomNumber = ArtUtils.getRandomNumber(100, 999);
-				String baseFilename = FilenameUtils.getBaseName(fixedFileName);
-				String extension = FilenameUtils.getExtension(fixedFileName);
-				if (StringUtils.containsAny(extension, "aes", "gpg")) {
-					//allow second extension to be used for encryped files
-					String base2 = FilenameUtils.getBaseName(baseFilename);
-					String extension2 = FilenameUtils.getExtension(baseFilename);
-					fileName = base2 + "-" + String.valueOf(randomNumber) + "." + extension2 + "." + extension;
-				} else {
-					fileName = baseFilename + "-" + String.valueOf(randomNumber) + "." + extension;
-				}
+				fileName = fixedFileName + "-" + String.valueOf(randomNumber) + "." + extension;
 			} else {
-				fileName = fixedFileName;
-				String fullFixedFileName = exportPath + fixedFileName;
+				fileName = fixedFileName + "." + extension;
+				String fullFixedFileName = exportPath + fileName;
 				File fixedFile = new File(fullFixedFileName);
 				if (fixedFile.exists()) {
 					boolean fileDeleted = fixedFile.delete();
@@ -2612,7 +2606,6 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		} else {
-			FilenameHelper filenameHelper = new FilenameHelper();
 			fileName = filenameHelper.getFilename(job, locale, reportFormat, reportParamsMap);
 		}
 
@@ -2676,9 +2669,11 @@ public class ReportJob implements org.quartz.Job {
 	 * @param paramProcessorResult the parameter processor result
 	 * @throws SQLException
 	 * @throws IOException
+	 * @throws java.text.ParseException
 	 */
 	private void runBurstJob(ReportRunner reportRunner,
-			ParameterProcessorResult paramProcessorResult) throws SQLException, IOException {
+			ParameterProcessorResult paramProcessorResult)
+			throws SQLException, IOException, ParseException {
 
 		logger.debug("Entering runBurstJob");
 
@@ -2714,7 +2709,8 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job, reportParamsMap);
+			String username = job.getUser().getUsername();
+			standardOutput.generateBurstOutput(rs, reportFormat, job, reportParamsMap, username);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);
