@@ -25,8 +25,6 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
-import art.connectionpool.DbConnections;
-import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
@@ -89,11 +87,8 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
-import art.utils.GroovySandbox;
+import art.utils.ExpressionHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -103,7 +98,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -122,8 +116,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -2286,44 +2278,15 @@ public class ReportOutputGenerator {
 		//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
 		//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
 		//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
-		CompilerConfiguration cc = new CompilerConfiguration();
-		cc.addCompilationCustomizers(new SandboxTransformer());
-
-		Map<String, Object> variables = new HashMap<>();
-		variables.putAll(reportParamsMap);
-
-		Map<String, MultipartFile> filesMap = reportRunner.getFilesMap();
-		if (filesMap != null) {
-			variables.putAll(filesMap);
-		}
-
-		MongoClient mongoClient = null;
-		Datasource datasource = report.getDatasource();
-		if (datasource != null) {
-			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-		}
-		variables.put("mongoClient", mongoClient);
-
-		Binding binding = new Binding(variables);
-
-		GroovyShell shell = new GroovyShell(binding, cc);
-
-		GroovySandbox sandbox = null;
-		if (Config.getCustomSettings().isEnableGroovySandbox()) {
-			sandbox = new GroovySandbox();
-			sandbox.register();
-		}
 
 		//get report source with direct parameters, rules etc applied
 		String reportSource = reportRunner.getQuerySql();
-		Object result;
-		try {
-			result = shell.evaluate(reportSource);
-		} finally {
-			if (sandbox != null) {
-				sandbox.unregister();
-			}
-		}
+
+		Map<String, MultipartFile> filesMap = reportRunner.getFilesMap();
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Object result = expressionHelper.runGroovyExpression(reportSource, report, reportParamsMap, filesMap);
+
 		if (result != null) {
 			if (result instanceof List) {
 				String optionsString = report.getOptions();

@@ -17,9 +17,14 @@
  */
 package art.utils;
 
+import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
+import art.enums.DatasourceType;
 import art.enums.DateFieldType;
+import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.text.ParseException;
@@ -41,6 +46,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Processes strings that may contain parameter, field or groovy expressions
@@ -564,6 +570,39 @@ public class ExpressionHelper {
 	 */
 	public Object runGroovyExpression(String string) {
 		Map<String, Object> variables = null;
+		return runGroovyExpression(string, variables);
+	}
+
+	/**
+	 * Runs a groovy expression and returns the result
+	 *
+	 * @param string the string containing the groovy script
+	 * @param report the report being run
+	 * @param reportParamsMap report parameters
+	 * @param filesMap files to be included as variables
+	 * @return the object returned by the groovy script
+	 */
+	public Object runGroovyExpression(String string, Report report,
+			Map<String, ReportParameter> reportParamsMap,
+			Map<String, MultipartFile> filesMap) {
+
+		Map<String, Object> variables = new HashMap<>();
+
+		if (reportParamsMap != null) {
+			variables.putAll(reportParamsMap);
+		}
+
+		if (filesMap != null) {
+			variables.putAll(filesMap);
+		}
+
+		MongoClient mongoClient = null;
+		Datasource datasource = report.getDatasource();
+		if (datasource != null && datasource.getDatasourceType() == DatasourceType.MongoDB) {
+			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
+		}
+		variables.put("mongoClient", mongoClient);
+
 		return runGroovyExpression(string, variables);
 	}
 
