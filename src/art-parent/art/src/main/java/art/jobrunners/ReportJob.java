@@ -2579,8 +2579,8 @@ public class ReportJob implements org.quartz.Job {
 		String fixedFileName = job.getFixedFileName();
 		logger.debug("fixedFileName='{}'", fixedFileName);
 
+		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 		if (StringUtils.isNotBlank(fixedFileName)) {
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			String username = job.getUser().getUsername();
 
 			ExpressionHelper expressionHelper = new ExpressionHelper();
@@ -2613,7 +2613,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			fileName = filenameHelper.getFilename(job, locale, reportFormat);
+			fileName = filenameHelper.getFilename(job, locale, reportFormat, reportParamsMap);
 		}
 
 		logger.debug("fileName = '{}'", fileName);
@@ -2684,7 +2684,6 @@ public class ReportJob implements org.quartz.Job {
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
-		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
 		if (!reportType.isTabular()) {
 			logger.warn("Invalid report type for burst job: {}. Job Id {}", reportType, jobId);
@@ -2693,16 +2692,18 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
-		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-
-		//generate output
-		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-
-		reportOutputGenerator.setIsJob(true);
-
 		ResultSet rs = null;
 		try {
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+
+			//generate output
+			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+			reportOutputGenerator.setIsJob(true);
+
+			ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 			boolean isJob = true;
 			StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
 
@@ -2713,7 +2714,7 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job);
+			standardOutput.generateBurstOutput(rs, reportFormat, job, reportParamsMap);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);
@@ -3017,7 +3018,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering prepareReportRunner: user={}, report={}", user, report);
 
 		String runId = ArtUtils.getUniqueId(jobId);
-		
+
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUser(user);
 		reportRunner.setReport(report);

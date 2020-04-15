@@ -313,9 +313,7 @@ public class ReportRestController {
 				rowsUpdated = reportRunner.getUpdateCount();
 			} else {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				fileName = filenameHelper.getFilename(report, locale, reportFormat);
-				String exportPath = Config.getReportsExportPath();
-				String outputFileName = exportPath + fileName;
+				String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
 
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 

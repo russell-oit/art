@@ -1233,11 +1233,13 @@ public abstract class StandardOutput {
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
 	 * @param job the job that is generating the burst output
+	 * @param reportParamsMap report parameters
 	 * @throws SQLException
 	 * @throws java.io.IOException
 	 */
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat,
-			Job job) throws SQLException, IOException {
+			Job job, Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, IOException {
 
 		logger.debug("Entering generateBurstOutput: reportFormat={}, job={},",
 				reportFormat, job);
@@ -1344,7 +1346,7 @@ public abstract class StandardOutput {
 						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
-						fileName = filenameHelper.getFilename(job, fileNameBurstId, locale, reportFormat); //getFilename() does cleaning
+						fileName = filenameHelper.getFilename(job, fileNameBurstId, locale, reportFormat, reportParamsMap);
 
 						if (!FinalFilenameValidator.isValid(fileName)) {
 							throw new IllegalArgumentException("Invalid file name - " + fileName);

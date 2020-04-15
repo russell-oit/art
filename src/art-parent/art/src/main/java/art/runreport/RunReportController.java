@@ -546,7 +546,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat);
+					String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
 
 					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 

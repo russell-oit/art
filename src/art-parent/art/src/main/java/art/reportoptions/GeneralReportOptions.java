@@ -38,6 +38,21 @@ public class GeneralReportOptions implements Serializable {
 	private ViewOptions view;
 	private int refreshPeriodSeconds;
 	private Integer queryTimeoutSeconds;
+	private String fileName;
+
+	/**
+	 * @return the fileName
+	 */
+	public String getFileName() {
+		return fileName;
+	}
+
+	/**
+	 * @param fileName the fileName to set
+	 */
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 
 	/**
 	 * @return the queryTimeoutSeconds

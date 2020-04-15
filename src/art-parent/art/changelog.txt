@@ -2,6 +2,7 @@ ART 4.14
 * Added directDownload url option
 * Added File parameter type
 * Fix for problem with chained parameter with default values
+* Added fileName report option
 
 ART 4.13
 * Added overwrite option for record import

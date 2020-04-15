@@ -52,9 +52,9 @@ public class ExpressionHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
 	public static final String GROOVY_START_STRING = "g[";
-	private final String GROOVY_END_STRING = "]g";
-	private final String FIELD_START_STRING = "f[";
-	private final String FIELD_END_STRING = "]f";
+	public final String GROOVY_END_STRING = "]g";
+	public final String FIELD_START_STRING = "f[";
+	public final String FIELD_END_STRING = "]f";
 
 	/**
 	 * Processes a string that may have parameter or field expressions and
@@ -379,8 +379,8 @@ public class ExpressionHelper {
 
 		logger.debug("Entering convertStringToDate: string='{}',"
 				+ " dateFormat='{}', locale={}", string, dateFormat, locale);
-		
-		if(string == null){
+
+		if (string == null) {
 			return null;
 		}
 
@@ -472,12 +472,12 @@ public class ExpressionHelper {
 	 */
 	public String processDateString(String dateString, String format,
 			Locale locale) throws ParseException {
-		
+
 		logger.debug("Entering processDateString: dateString='{}',"
 				+ " format='{}', locale={}", dateString, format, locale);
-		
+
 		Objects.requireNonNull(format, "format must not be null");
-		
+
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
