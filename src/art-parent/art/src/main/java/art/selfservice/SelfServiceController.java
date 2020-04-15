@@ -221,8 +221,8 @@ public class SelfServiceController {
 			Report report = reportService.getReport(reportId);
 			String selfServiceOptionsString = report.getSelfServiceOptions();
 
-			RunReportHelper runReportHelper = new RunReportHelper();
-			List<SelfServiceColumn> columns = runReportHelper.getSelfServiceColumnsForView(report, sessionUser);
+			SelfServiceHelper selfServiceHelper = new SelfServiceHelper();
+			List<SelfServiceColumn> columns = selfServiceHelper.getSelfServiceColumnsForView(report, sessionUser);
 
 			GeneralReportOptions generalOptions = report.getGeneralOptions();
 			ViewOptions viewOptions = generalOptions.getView();

@@ -26,6 +26,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
+import art.selfservice.SelfServiceHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtLogsHelper;
@@ -159,6 +160,7 @@ public class RunReportController {
 
 		String reportName = null;
 		RunReportHelper runReportHelper = new RunReportHelper();
+		SelfServiceHelper selfServiceHelper = new SelfServiceHelper();
 		PrintWriter writer = null;
 		boolean ajax = false;
 
@@ -203,7 +205,7 @@ public class RunReportController {
 				}
 
 				if (testReport.getReportType() != ReportType.View) {
-					runReportHelper.applySelfServiceFields(testReport, sessionUser, runId);
+					selfServiceHelper.applySelfServiceFields(testReport, sessionUser, runId);
 				}
 
 				report = testReport;
@@ -249,7 +251,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType == ReportType.View) {
-				runReportHelper.applySelfServiceFields(report, sessionUser, runId);
+				selfServiceHelper.applySelfServiceFields(report, sessionUser, runId);
 			}
 
 			ReportFormat reportFormat;

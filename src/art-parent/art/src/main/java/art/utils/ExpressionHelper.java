@@ -563,10 +563,27 @@ public class ExpressionHelper {
 	 * @return the object returned by the groovy script
 	 */
 	public Object runGroovyExpression(String string) {
+		Map<String, Object> variables = null;
+		return runGroovyExpression(string, variables);
+	}
+
+	/**
+	 * Runs a groovy expression and returns the result
+	 *
+	 * @param string the string containing the groovy script
+	 * @param variables the variables to pass
+	 * @return the object returned by the groovy script
+	 */
+	public Object runGroovyExpression(String string, Map<String, Object> variables) {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new SandboxTransformer());
 
-		Binding binding = new Binding();
+		Binding binding;
+		if (variables == null) {
+			binding = new Binding();
+		} else {
+			binding = new Binding(variables);
+		}
 
 		GroovyShell shell = new GroovyShell(binding, cc);
 

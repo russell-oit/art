@@ -172,7 +172,7 @@ public class PdfDashboard {
 						reportRunner.execute(resultSetType);
 
 						FilenameHelper filenameHelper = new FilenameHelper();
-						String reportFileName = filenameHelper.getFullFilename(report, locale, reportFormat);
+						String reportFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
 
 						ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 

@@ -40,6 +40,7 @@ import art.runreport.ReportRunDetails;
 import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
+import art.selfservice.SelfServiceHelper;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
@@ -1439,8 +1440,8 @@ public class ReportController {
 					}
 				} else {
 					report.setSelfServiceOptions(config);
-					RunReportHelper runReportHelper = new RunReportHelper();
-					runReportHelper.applySelfServiceFields(report, sessionUser);
+					SelfServiceHelper selfServiceHelper = new SelfServiceHelper();
+					selfServiceHelper.applySelfServiceFields(report, sessionUser);
 				}
 
 				if (overwrite) {
