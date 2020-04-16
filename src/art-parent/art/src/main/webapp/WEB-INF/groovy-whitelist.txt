@@ -36,3 +36,4 @@ java.util.Date
 java.util.HashMap
 [Ljava.lang.Object;
 [Ljava.lang.String;
+java.util.LinkedList
