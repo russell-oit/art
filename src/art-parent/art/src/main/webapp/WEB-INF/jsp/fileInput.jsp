@@ -19,7 +19,7 @@
 		</span>
 		<input type="file"
 			   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
-			   accept=".json, .csv, .zip">
+			   accept=".json, .csv, .zip" multiple>
 	</span>
 	<span class="fileinput-filename"></span>
 	<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>

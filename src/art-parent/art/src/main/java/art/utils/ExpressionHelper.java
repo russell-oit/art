@@ -46,6 +46,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -579,12 +580,12 @@ public class ExpressionHelper {
 	 * @param string the string containing the groovy script
 	 * @param report the report being run
 	 * @param reportParamsMap report parameters
-	 * @param filesMap files to be included as variables
+	 * @param multiFileMap files to be included as variables
 	 * @return the object returned by the groovy script
 	 */
 	public Object runGroovyExpression(String string, Report report,
 			Map<String, ReportParameter> reportParamsMap,
-			Map<String, MultipartFile> filesMap) {
+			MultiValueMap<String, MultipartFile> multiFileMap) {
 
 		Map<String, Object> variables = new HashMap<>();
 
@@ -592,8 +593,8 @@ public class ExpressionHelper {
 			variables.putAll(reportParamsMap);
 		}
 
-		if (filesMap != null) {
-			variables.putAll(filesMap);
+		if (multiFileMap != null) {
+			variables.putAll(multiFileMap);
 		}
 
 		MongoClient mongoClient = null;

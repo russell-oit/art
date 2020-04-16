@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -107,9 +108,11 @@ public class RunReportController {
 			RedirectAttributes redirectAttributes) {
 
 		//https://stackoverflow.com/questions/20162474/how-do-i-receive-a-file-upload-in-spring-mvc-using-both-multipart-form-and-chunk
-		Map<String, MultipartFile> filesMap = request.getFileMap();
+		//https://www.tothenew.com/blog/uploading-multiple-files-with-same-name/
+		//https://stackoverflow.com/questions/60291483/how-to-get-all-submitted-multipartfiles-regardless-of-their-name
+		MultiValueMap<String, MultipartFile> multiFileMap = request.getMultiFileMap();
 		return runReport(session, runIdParameter, reportId, request, testReport,
-				model, locale, response, redirectAttributes, filesMap);
+				model, locale, response, redirectAttributes, multiFileMap);
 	}
 
 	//use post to allow for large parameter input and get to allow for direct url execution
@@ -121,16 +124,16 @@ public class RunReportController {
 			HttpSession session, Model model, Locale locale,
 			RedirectAttributes redirectAttributes) {
 
-		Map<String, MultipartFile> filesMap = null;
+		MultiValueMap<String, MultipartFile> multiFileMap = null;
 		return runReport(session, runIdParameter, reportId, request, testReport,
-				model, locale, response, redirectAttributes, filesMap);
+				model, locale, response, redirectAttributes, multiFileMap);
 	}
 
 	private String runReport(HttpSession session, String runIdParameter,
 			Integer reportId, HttpServletRequest request, Report testReport,
 			Model model, Locale locale, HttpServletResponse response,
 			RedirectAttributes redirectAttributes,
-			Map<String, MultipartFile> filesMap) {
+			MultiValueMap<String, MultipartFile> multiFileMap) {
 
 		Report report = null;
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -471,7 +474,7 @@ public class RunReportController {
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
-				reportRunner.setFilesMap(filesMap);
+				reportRunner.setMultiFileMap(multiFileMap);
 
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getLocalizedShortDescription(locale);

@@ -74,6 +74,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -110,24 +111,24 @@ public class ReportRunner {
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
 	private String runId;
-	private Map<String, MultipartFile> filesMap;
+	private MultiValueMap<String, MultipartFile> multiFileMap;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 	}
 
 	/**
-	 * @return the filesMap
+	 * @return the multiFileMap
 	 */
-	public Map<String, MultipartFile> getFilesMap() {
-		return filesMap;
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		return multiFileMap;
 	}
 
 	/**
-	 * @param filesMap the filesMap to set
+	 * @param multiFileMap the multiFileMap to set
 	 */
-	public void setFilesMap(Map<String, MultipartFile> filesMap) {
-		this.filesMap = filesMap;
+	public void setMultiFileMap(MultiValueMap<String, MultipartFile> multiFileMap) {
+		this.multiFileMap = multiFileMap;
 	}
 
 	/**
@@ -445,7 +446,7 @@ public class ReportRunner {
 			logger.debug("Groovy source before evaluation: \n{}", querySql);
 
 			ExpressionHelper expressionHelper = new ExpressionHelper();
-			Object result = expressionHelper.runGroovyExpression(querySql, report, reportParamsMap, filesMap);
+			Object result = expressionHelper.runGroovyExpression(querySql, report, reportParamsMap, multiFileMap);
 
 			groovyData = null;
 			if (result != null) {

@@ -119,6 +119,7 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -2282,10 +2283,10 @@ public class ReportOutputGenerator {
 		//get report source with direct parameters, rules etc applied
 		String reportSource = reportRunner.getQuerySql();
 
-		Map<String, MultipartFile> filesMap = reportRunner.getFilesMap();
+		MultiValueMap<String, MultipartFile> multiFileMap = reportRunner.getMultiFileMap();
 
 		ExpressionHelper expressionHelper = new ExpressionHelper();
-		Object result = expressionHelper.runGroovyExpression(reportSource, report, reportParamsMap, filesMap);
+		Object result = expressionHelper.runGroovyExpression(reportSource, report, reportParamsMap, multiFileMap);
 
 		if (result != null) {
 			if (result instanceof List) {
