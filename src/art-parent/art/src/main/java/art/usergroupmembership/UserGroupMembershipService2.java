@@ -141,7 +141,7 @@ public class UserGroupMembershipService2 {
 		}
 		Integer[] users = {user.getUserId()};
 		String action = "add";
-		updateUserGroupMembership(action, users, userGroupIds.toArray(new Integer[0]));
+		updateUserGroupMembership(action, users, userGroupIds.toArray(new Integer[0]), conn);
 	}
 
 	/**

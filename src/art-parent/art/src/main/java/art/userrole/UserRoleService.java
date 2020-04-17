@@ -229,7 +229,7 @@ public class UserRoleService {
 
 		Integer[] users = {userId};
 		String action = "add";
-		updateUserRoles(action, users, roleIds.toArray(new Integer[0]));
+		updateUserRoles(action, users, roleIds.toArray(new Integer[0]), conn);
 	}
 
 	/**

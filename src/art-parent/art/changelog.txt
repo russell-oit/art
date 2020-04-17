@@ -4,6 +4,7 @@ ART 4.14
 * Fix for problem with chained parameter with default values
 * Added fileName report option
 * Modified job fixed file name to be the base file name
+* Fix for error while importing users
 * Updated jasny-bootstrap
 
 ART 4.13
