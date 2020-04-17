@@ -122,6 +122,15 @@ Edit parameter definition
 						$("#parameterTypeDiv").show();
 				}
 
+				//show/hide file fields
+				switch (dataType) {
+					case "File":
+						$("#fileFields").show();
+						break;
+					default:
+						$("#fileFields").hide();
+				}
+
 				//show/hide help fields
 				switch (dataType) {
 					case "File":
@@ -340,6 +349,19 @@ Edit parameter definition
 						<form:errors path="dateFormat" cssClass="error"/>
 					</div>
 				</div>
+
+				<fieldset id="fileFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="multipleFiles">
+							<spring:message code="parameters.label.multipleFiles"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="multipleFiles" id="multipleFiles" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+				</fieldset>
 
 				<fieldset id="defaultValueFields">
 					<div class="form-group">
