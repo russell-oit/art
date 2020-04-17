@@ -66,7 +66,7 @@ Edit report page
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/css/jasny-bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/css/jquery.fileupload.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
@@ -74,7 +74,7 @@ Edit report page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/js/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/vendor/jquery.ui.widget.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.iframe-transport.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/jquery.fileupload.js"></script>
