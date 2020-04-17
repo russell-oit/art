@@ -21,6 +21,7 @@ import art.connectionpool.DbConnections;
 import art.datasource.Datasource;
 import art.enums.DatasourceType;
 import art.enums.DateFieldType;
+import art.enums.ParameterDataType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -590,7 +591,15 @@ public class ExpressionHelper {
 		Map<String, Object> variables = new HashMap<>();
 
 		if (reportParamsMap != null) {
-			variables.putAll(reportParamsMap);
+			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+				String paramName = entry.getKey();
+				ReportParameter reportParam = entry.getValue();
+				if (reportParam.getParameter().getDataType() == ParameterDataType.File) {
+					variables.put(paramName, null);
+				} else {
+					variables.put(paramName, reportParam);
+				}
+			}
 		}
 
 		if (multiFileMap != null) {
