@@ -33,7 +33,10 @@
 
 <script type="text/javascript">
 	var dataString = '${encode:forJavaScript(data)}';
-	var jsonData = JSON.parse(dataString);
+	var jsonData = [];
+	if (dataString) {
+		jsonData = JSON.parse(dataString);
+	}
 
 	//https://github.com/c3js/c3/issues/236
 	//http://c3js.org/reference.html
@@ -58,7 +61,7 @@
 	if (type) {
 		data.type = type;
 	}
-	
+
 	var groupsString = '${encode:forJavaScript(groups)}';
 	if (groupsString) {
 		var groups = JSON.parse(groupsString);

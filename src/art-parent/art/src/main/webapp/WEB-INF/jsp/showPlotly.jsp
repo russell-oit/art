@@ -44,13 +44,21 @@
 	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
 	//https://plot.ly/javascript/line-charts/
 	var dataString = '${encode:forJavaScript(data)}';
-	var data = JSON.parse(dataString);
+	var data = [];
+	if (dataString) {
+		data = JSON.parse(dataString);
+	}
+
 	var traces = [];
 	var xColumn = '${encode:forJavaScript(xColumn)}';
 	var type = '${encode:forJavaScript(type)}';
 	var mode = '${encode:forJavaScript(mode)}';
 	var yColumnsString = '${encode:forJavaScript(yColumns)}';
-	var yColumns = JSON.parse(yColumnsString);
+	var yColumns = [];
+	if (yColumnsString) {
+		yColumns = JSON.parse(yColumnsString);
+	}
+
 	var hole = ${options.hole};
 	var pieValueColumn = '${encode:forJavaScript(options.pieValueColumn)}';
 	if (xColumn) {

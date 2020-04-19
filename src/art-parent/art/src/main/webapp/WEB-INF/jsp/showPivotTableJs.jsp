@@ -122,7 +122,7 @@
 	} else {
 		$.extend(renderers, $.pivotUtilities.subtotal_renderers);
 	}
-	
+
 	//https://github.com/nicolaskruchten/pivottable/wiki/Optional-Extra-Renderers
 	//https://github.com/nicolaskruchten/pivottable/wiki/Renderers
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
@@ -194,8 +194,10 @@
 	<c:when test="${reportType == 'PivotTableJs'}">
 		<script type="text/javascript">
 			var inputString = '${encode:forJavaScript(input)}';
-			var input = JSON.parse(inputString);
-			$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
+			if (inputString) {
+				var input = JSON.parse(inputString);
+				$("#${outputDivId}").pivotUI(input, options, overwrite, locale);
+			}
 		</script>
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
