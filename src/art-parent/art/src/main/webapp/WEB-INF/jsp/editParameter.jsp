@@ -361,6 +361,15 @@ Edit parameter definition
 							</div>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="fileAccept">
+							<spring:message code="parameters.label.accept"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="fileAccept" maxlength="100" class="form-control"/>
+							<form:errors path="fileAccept" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset id="defaultValueFields">

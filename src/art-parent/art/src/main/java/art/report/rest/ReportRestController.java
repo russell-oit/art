@@ -31,7 +31,6 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportOutputGeneratorResult;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
-import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
 import art.utils.ArtLogsHelper;

@@ -70,6 +70,7 @@ public class Parameter implements Serializable {
 	private boolean useDefaultValueInJobs;
 	private boolean allowNull;
 	private boolean multipleFiles;
+	private String fileAccept;
 	private String template;
 	@JsonIgnore
 	private ParameterOptions parameterOptions;
@@ -79,6 +80,20 @@ public class Parameter implements Serializable {
 	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
+
+	/**
+	 * @return the fileAccept
+	 */
+	public String getFileAccept() {
+		return fileAccept;
+	}
+
+	/**
+	 * @param fileAccept the fileAccept to set
+	 */
+	public void setFileAccept(String fileAccept) {
+		this.fileAccept = fileAccept;
+	}
 
 	/**
 	 * @return the multipleFiles
