@@ -97,11 +97,6 @@
 		if (toParameter) {
 			$(toParameterSelector).val(toParameterDate);
 		}
-		
-		var fullDateRange = fromParameterDate + options.locale.separator + toParameterDate;
-		
-		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').val(fullDateRange);
-		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').change();
 	}
 
 	var todayText = '${todayText}';
