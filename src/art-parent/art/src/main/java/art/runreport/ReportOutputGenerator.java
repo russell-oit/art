@@ -2280,16 +2280,8 @@ public class ReportOutputGenerator {
 		//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
 		//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
 
-		//get report source with direct parameters, rules etc applied
-		String reportSource = reportRunner.getQuerySql();
-
-		MultiValueMap<String, MultipartFile> multiFileMap = reportRunner.getMultiFileMap();
-
-		ExpressionHelper expressionHelper = new ExpressionHelper();
-		Object result = expressionHelper.runGroovyExpression(reportSource, report, reportParamsMap, multiFileMap);
-
-		if (result != null) {
-			if (result instanceof List) {
+		if (groovyData != null) {
+			if (groovyData instanceof List) {
 				String optionsString = report.getOptions();
 				List<String> optionsColumnNames = null;
 				List<Map<String, String>> columnDataTypes = null;
@@ -2306,7 +2298,7 @@ public class ReportOutputGenerator {
 				}
 
 				@SuppressWarnings("unchecked")
-				List<Object> resultList = (List<Object>) result;
+				List<Object> resultList = (List<Object>) groovyData;
 				List<ResultSetColumn> columns = new ArrayList<>();
 				String resultString = null;
 				if (resultList.isEmpty()) {
@@ -2422,7 +2414,7 @@ public class ReportOutputGenerator {
 
 				showDataTablesJsp();
 			} else {
-				writer.print(result);
+				writer.print(reportRunner.getQuerySql());
 			}
 		}
 	}

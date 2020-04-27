@@ -1162,11 +1162,7 @@ public class ReportRunner {
 
 		//don't execute sql source for report types that don't have runnable sql
 		ReportType reportType = report.getReportType();
-		if (!reportType.isJdbcRunnableByArt()) {
-			return;
-		}
-
-		if (groovyData != null) {
+		if (!reportType.isJdbcRunnableByArt() || groovyData != null) {
 			return;
 		}
 

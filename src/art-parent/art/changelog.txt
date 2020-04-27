@@ -6,6 +6,7 @@ ART 4.14
 * Modified job fixed file name to be the base file name
 * Fix for error while importing users
 * Fix for MongoDB report error when data is empty
+* Fix for groovy code run twice for MongoDB report type
 * Updated jasny-bootstrap
 
 ART 4.13
