@@ -36,12 +36,6 @@
 	</build>
 	
 	<repositories>
-		<!-- repository for custom mondrian 4 that saiku uses -->
-		<repository>
-			<id>Analytical Labs Repo</id>
-			<name>Analytical Labs Repo-releases</name>
-			<url>http://repo.meteorite.bi/repository/alabs-release-local/</url>
-		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
 		repository e.g. saiku-olap-util, saiku-query -->
 		<repository>
