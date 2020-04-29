@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>pentaho</groupId>
+  <artifactId>mondrian</artifactId>
+  <versioning>
+    <release>4.3.0.1.1-SPARK</release>
+    <versions>
+      <version>4.3.0.1.1-SPARK</version>
+    </versions>
+    <lastUpdated>20200429074828</lastUpdated>
+  </versioning>
+</metadata>
