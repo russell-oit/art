@@ -1522,17 +1522,15 @@ public class ReportController {
 
 		for (Map.Entry<String, String> entry : values.entrySet()) {
 			Map<String, String> value = new HashMap<>();
-			String encodedKey = Encode.forHtmlAttribute(entry.getKey());
 			String encodedValue = Encode.forHtmlContent(entry.getValue());
-			value.put(encodedKey, encodedValue);
+			value.put(entry.getKey(), encodedValue);
 			list.add(value);
 		}
 
 		if (defaultValues != null) {
 			for (String defaultValue : defaultValues) {
 				Map<String, String> value = new HashMap<>();
-				String encodedDefaultValue = Encode.forHtmlAttribute(defaultValue);
-				value.put("selected", encodedDefaultValue);
+				value.put("selected", defaultValue);
 				list.add(value);
 			}
 		}
