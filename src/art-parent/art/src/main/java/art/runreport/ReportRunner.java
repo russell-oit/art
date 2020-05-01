@@ -441,7 +441,7 @@ public class ReportRunner {
 	private void applyUsesGroovy() {
 		logger.debug("Entering applyUsesGroovy");
 
-		if (report.isEffectiveUseGroovy()) {
+		if (report.isEffectiveUseGroovy() || report.getReportType() == ReportType.MongoDB) {
 			String querySql = querySb.toString();
 			logger.debug("Groovy source before evaluation: \n{}", querySql);
 
