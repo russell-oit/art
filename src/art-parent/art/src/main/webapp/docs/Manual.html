@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.13"> 
+  <meta name="version" content="4.14"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -194,12 +194,13 @@
       <ol> 
        <li><a href="#using-groovy">Using Groovy</a> 
         <ol> 
-         <li><a href="#example">Example</a></li> 
+         <li><a href="#accessing-parameter-values">Accessing parameter values</a></li> 
+         <li><a href="#examples">Examples</a></li> 
         </ol></li> 
        <li><a href="#using-xml-tags">Using XML tags</a> 
         <ol> 
          <li><a href="#operators">Operators</a></li> 
-         <li><a href="#examples">Examples</a></li> 
+         <li><a href="#examples_1">Examples</a></li> 
         </ol></li> 
       </ol></li> 
      <li><a href="#multiple-statements">Multiple Statements</a></li> 
@@ -3299,6 +3300,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>Integer</td> 
         <td>Enables setting of a query timeout for a report that uses a JDBC query. If the timeout expires before the query completes, the query execution will stop and an exception will be thrown. The value if defined should be &gt;= 0, with 0 meaning no timeout.</td> 
        </tr> 
+       <tr> 
+        <td><strong>fileName</strong></td> 
+        <td>String</td> 
+        <td>Allows for specifying the base file name that should be used for report output. Parameter values can be included by specifying the parameter name enclosed with # e.g. <code>#param1#</code>. To include the default generated name, use the tag <code>{default}</code> e.g. <code>#param1#{default}</code>. This base file name does not include the extension. The extension will be automatically provided depending on the report and report format.</td> 
+       </tr> 
       </tbody> 
      </table> 
      <h3 id="pdf-options">PDF Options</h3> 
@@ -3490,7 +3496,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>prettyPrint</strong></td> 
         <td>Boolean</td> 
-        <td>For <strong>json</strong> and <strong>jsonBrowser</strong> report formats, determines if the json output should be pretty printed.</td> 
+        <td>For <strong>json</strong> and <strong>jsonBrowser</strong> report formats, determines if the json output should be pretty printed</td> 
        </tr> 
        <tr> 
         <td><strong>refreshPeriodSeconds</strong></td> 
@@ -3506,6 +3512,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td><strong>isFragment</strong></td> 
         <td>Boolean</td> 
         <td>If set to true e.g. <code>isFragment=true</code>, the report information header and footer showing the start time of execution and the number of rows retrieved will not be shown.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>directDownload</strong></td> 
+        <td>Boolean</td> 
+        <td>For file output, determines if the file should be served directly instead of showing a "Download" link</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -3888,11 +3899,19 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Data Type</strong></td> 
-        <td>The type of data that the parameter can hold</td> 
+        <td>The type of data that the parameter can hold. A <strong>File</strong> data type will return a list of objects of type <a class="" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/commons/CommonsMultipartFile.html" rel="nofollow">CommonsMultipartFile</a> that would be available from the groovy source of the report.</td> 
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
         <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Multiple Files</strong></td> 
+        <td>For the <strong>File</strong> data type, whether the user is allowed to select multiple files</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Accept</strong></td> 
+        <td>For the <strong>File</strong> data type, a comma separated list of file extensions that will be displayed by the file input control e.g. <code>.csv, .txt</code>. This goes to the <a class="" href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#accept" rel="nofollow">accept</a> attribute of the file input.</td> 
        </tr> 
        <tr> 
         <td><strong>Default Value</strong></td> 
@@ -4214,16 +4233,46 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       </tbody> 
      </table> 
      <p>The groovy code is run through a sandbox and depending on the code in the script, you may need to specify additional classes in the <strong>WEB-INF\groovy-whitelist.txt</strong> file. If you get a security exception when running the report, add the indicated class to the groovy whitelist file and run the report again. You can also disable the sandbox completely by modifying the <strong>WEB-INF\art-custom-settings.json</strong> file and setting the <strong>enableGroovySandbox</strong> property to <strong>false</strong>. Modifications of the art-custom-settings.json file require clearing the Custom Settings cache in order to take effect.</p> 
-     <h3 id="example">Example</h3> 
-     <p>A trivial example is given below.</p> 
+     <h3 id="accessing-parameter-values">Accessing parameter values</h3> 
+     <p>To access parameter values in groovy code, use the name of the parameter and call the <strong>value</strong> method e.g. <code>param1.value</code>. For <strong>File</strong> parameters, use the parameter name directly instead of calling the value method. Also, file parameter values are always passed as a list so access the parameter variable using list syntax e.g. <code>fileParam1[0]</code>. If the file parameter has <strong>Multiple Files</strong> enabled, this list may have more than one value.</p> 
+     <h3 id="examples">Examples</h3> 
+     <p><strong>Integer parameter</strong></p> 
      <div class="codehilite"> 
-      <pre><span></span>def sql
+      <pre><span></span><span class="nv">def</span> <span class="nv">sql</span>
 
-//assumes the report has an integer parameter named id
-if(id.value == 0) {
-    sql = 'select id from users'
-} else {
-    sql = 'select name from users'
+<span class="o">//</span><span class="nv">assumes</span> <span class="nv">the</span> <span class="nv">report</span> <span class="nv">has</span> <span class="nv">an</span> <span class="nv">integer</span> <span class="nv">parameter</span> <span class="nv">named</span> <span class="nv">id</span>
+<span class="k">if</span><span class="ss">(</span><span class="nv">id</span>.<span class="nv">value</span> <span class="o">==</span> <span class="mi">0</span><span class="ss">)</span> {
+    <span class="nv">sql</span> <span class="o">=</span> <span class="s1">'</span><span class="s">select id from users</span><span class="s1">'</span>
+} <span class="k">else</span> {
+    <span class="nv">sql</span> <span class="o">=</span> <span class="s1">'</span><span class="s">select name from users</span><span class="s1">'</span>
+}
+</pre> 
+     </div> 
+     <p><strong>File parameter</strong></p> 
+     <div class="codehilite"> 
+      <pre><span></span><span class="o">//</span><span class="nv">assumes</span> <span class="nv">the</span> <span class="nv">report</span> <span class="nv">has</span> <span class="nv">a</span> <span class="nv">file</span> <span class="nv">parameter</span> <span class="nv">named</span> <span class="nv">importFile</span>
+<span class="k">if</span> <span class="ss">(</span><span class="nv">importFile</span> <span class="o">==</span> <span class="nv">null</span><span class="ss">)</span> {
+    <span class="nv">println</span><span class="ss">(</span><span class="s1">'</span><span class="s">report run from url or file parameter not available</span><span class="s1">'</span><span class="ss">)</span>
+} <span class="k">else</span> <span class="k">if</span> <span class="ss">(</span><span class="nv">importFile</span>[<span class="mi">0</span>].<span class="nv">size</span> <span class="o">==</span> <span class="mi">0</span><span class="ss">)</span> {
+    <span class="nv">println</span><span class="ss">(</span><span class="s1">'</span><span class="s">empty file or no file selected</span><span class="s1">'</span><span class="ss">)</span>
+} <span class="k">else</span> {
+    <span class="nv">InputStream</span> <span class="nv">inputStream</span> <span class="o">=</span> <span class="nv">importFile</span>[<span class="mi">0</span>].<span class="nv">getInputStream</span><span class="ss">()</span><span class="c1">;</span>
+    <span class="nv">Scanner</span> <span class="nv">sc</span> <span class="o">=</span> <span class="nv">null</span><span class="c1">;</span>
+
+    <span class="nv">try</span> {
+    <span class="nv">sc</span> <span class="o">=</span> <span class="nv">new</span> <span class="nv">Scanner</span><span class="ss">(</span><span class="nv">inputStream</span>, <span class="s2">"</span><span class="s">UTF-8</span><span class="s2">"</span><span class="ss">)</span><span class="c1">;</span>
+        <span class="k">while</span> <span class="ss">(</span><span class="nv">sc</span>.<span class="nv">hasNextLine</span><span class="ss">())</span> {
+            <span class="nv">String</span> <span class="nv">line</span> <span class="o">=</span> <span class="nv">sc</span>.<span class="nv">nextLine</span><span class="ss">()</span><span class="c1">;</span>
+            <span class="nv">println</span><span class="ss">(</span><span class="nv">line</span><span class="ss">)</span><span class="c1">;</span>
+        }
+    } <span class="nv">finally</span> {
+        <span class="k">if</span> <span class="ss">(</span><span class="nv">inputStream</span> <span class="o">!=</span> <span class="nv">null</span><span class="ss">)</span> {
+            <span class="nv">inputStream</span>.<span class="nv">close</span><span class="ss">()</span><span class="c1">;</span>
+        }
+        <span class="k">if</span> <span class="ss">(</span><span class="nv">sc</span> <span class="o">!=</span> <span class="nv">null</span><span class="ss">)</span> {
+            <span class="nv">sc</span>.<span class="nv">close</span><span class="ss">()</span><span class="c1">;</span>
+        }
+    }
 }
 </pre> 
      </div> 
@@ -4231,40 +4280,40 @@ if(id.value == 0) {
      <h2 id="using-xml-tags">Using XML tags</h2> 
      <p>You can use xml tags in the SQL source section to achieve dynamic sql. The syntax is as follows. Tag names are case sensitive.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="nt">&lt;IF&gt;</span>
-    <span class="nt">&lt;EXP1&gt;</span>value1<span class="nt">&lt;/EXP1&gt;</span> <span class="nt">&lt;OP&gt;</span>operator<span class="nt">&lt;/OP&gt;</span> <span class="nt">&lt;EXP2&gt;</span>value2<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> ... <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> ... <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span><span class="nv">value1</span><span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">operator</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">value2</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> ... <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span> ... <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p>ART parses the query and leaves only the text in the <code>&lt;TEXT&gt;</code> tag if the condition (value1 operator value2) is true or the text in the <code>&lt;ELSETEXT&gt;</code> tag if the condition is false. The EXP1 or EXP2 contents can be static values, single-value parameters or :tags, while the OP content is an operator (see supported list below). </p> 
      <p>For example in the following query:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#level#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>summary<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> orders_summary <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> orders_details <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#date#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>is not null<span class="nt">&lt;/OP&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> AND order_date &gt; #date# <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">level</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">equals</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">summary</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">orders_summary</span> <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span> <span class="nv">orders_details</span> <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">date</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">is</span> <span class="nv">not</span> <span class="nv">null</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">AND</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span># <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p>if the <code>#level#</code> parameter is set to "summary" and the <code>#date#</code> parameter is not null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders_summary
-    WHERE VENDOR like #vendor#
-    AND order_date &gt; #date#
+      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
+    <span class="k">FROM</span> <span class="n">orders_summary</span>
+    <span class="k">WHERE</span> <span class="n">VENDOR</span> <span class="k">like</span> <span class="o">#</span><span class="n">vendor</span><span class="o">#</span>
+    <span class="k">AND</span> <span class="n">order_date</span> <span class="o">&gt;</span> <span class="o">#</span><span class="nb">date</span><span class="o">#</span>
 </pre> 
      </div> 
      <p>if the <code>#level#</code> parameter is not set to "summary" and the <code>#date#</code> is null, ART rewrites the query as:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders_details
-    WHERE VENDOR like #vendor#
+      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
+    <span class="k">FROM</span> <span class="n">orders_details</span>
+    <span class="k">WHERE</span> <span class="n">VENDOR</span> <span class="k">like</span> <span class="o">#</span><span class="n">vendor</span><span class="o">#</span>
 </pre> 
      </div> 
      <h3 id="operators">Operators</h3> 
@@ -4350,72 +4399,72 @@ if(id.value == 0) {
        </tr> 
       </tbody> 
      </table> 
-     <h3 id="examples">Examples</h3> 
+     <h3 id="examples_1">Examples</h3> 
      <p><strong>Dynamic OR/AND selection</strong>:</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders_summary
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#logic#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>OR<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> OR country = #country# <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> AND country = #country# <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="nv">orders_summary</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">logic</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">equals</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">OR</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">OR</span> <span class="nv">country</span> <span class="o">=</span> #<span class="nv">country</span># <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span> <span class="nv">AND</span> <span class="nv">country</span> <span class="o">=</span> #<span class="nv">country</span># <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p><strong>Dynamic ORDER BY</strong>: The order by part is driven by the user input</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders_summary
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#sortby#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>Vendor<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> ORDER BY 1 <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> ORDER BY 2 <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="nv">orders_summary</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">sortby</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">equals</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">Vendor</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">ORDER</span> <span class="nv">BY</span> <span class="mi">1</span> <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span> <span class="nv">ORDER</span> <span class="nv">BY</span> <span class="mi">2</span> <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p><strong>Dynamic query selection</strong>: A different query is executed depending on user input</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#showaddr#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>Y<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span>
-    SELECT name, code, address, phone FROM VENDOR
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span>
-    SELECT name, code, vat, pay_term FROM VENDOR
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">showaddr</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">equals</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">Y</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="nv">SELECT</span> <span class="nv">name</span>, <span class="nv">code</span>, <span class="nv">address</span>, <span class="nv">phone</span> <span class="nv">FROM</span> <span class="nv">VENDOR</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="nv">SELECT</span> <span class="nv">name</span>, <span class="nv">code</span>, <span class="nv">vat</span>, <span class="nv">pay_term</span> <span class="nv">FROM</span> <span class="nv">VENDOR</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p><strong>Dynamic SQL with tags</strong>: The condition is verified only if the date supplied by the user (<code>#date#</code>) is earlier than the system date at report execution time (<code>:DATE</code> tag)</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT *
-    FROM orders_summary
-    WHERE VENDOR like #vendor#
-    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#date#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>la<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>:DATE<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> AND order_date &gt; #date# <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="nv">orders_summary</span>
+    <span class="nv">WHERE</span> <span class="nv">VENDOR</span> <span class="nv">like</span> #<span class="nv">vendor</span>#
+    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">date</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">la</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span>:<span class="nv">DATE</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">AND</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span># <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
      <p><strong>Check user input</strong>: Show a warning instead of executing the query</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#value#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>ln<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>10000<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span> SELECT ... <span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span> SELECT 'Value too High' "Warning" <span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">value</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">ln</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="mi">10000</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span> <span class="nv">SELECT</span> ... <span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span> <span class="nv">SELECT</span> <span class="s1">'</span><span class="s">Value too High</span><span class="s1">'</span> <span class="s2">"</span><span class="s">Warning</span><span class="s2">"</span> <span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 
-    the select statement to use to show the warning depends on the DBMS (for example in
-    Oracle you should use SELECT 'Value too High' "Warning" FROM DUAL)
+    <span class="nv">the</span> <span class="nv">select</span> <span class="nv">statement</span> <span class="nv">to</span> <span class="nv">use</span> <span class="nv">to</span> <span class="k">show</span> <span class="nv">the</span> <span class="nv">warning</span> <span class="nv">depends</span> <span class="nv">on</span> <span class="nv">the</span> <span class="nv">DBMS</span> <span class="ss">(</span><span class="k">for</span> <span class="nv">example</span> <span class="nv">in</span>
+    <span class="nv">Oracle</span> <span class="nv">you</span> <span class="nv">should</span> <span class="nv">use</span> <span class="nv">SELECT</span> <span class="s1">'</span><span class="s">Value too High</span><span class="s1">'</span> <span class="s2">"</span><span class="s">Warning</span><span class="s2">"</span> <span class="nv">FROM</span> <span class="nv">DUAL</span><span class="ss">)</span>
 </pre> 
      </div> 
      <p><strong>Dynamic WHERE condition</strong>: E.g. to drill down on null values</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT * FROM customers
-    WHERE 
-    <span class="nt">&lt;IF&gt;&lt;EXP1&gt;</span>#email#<span class="nt">&lt;/EXP1&gt;&lt;OP&gt;</span>equals<span class="nt">&lt;/OP&gt;&lt;EXP2&gt;</span>null<span class="nt">&lt;/EXP2&gt;</span>
-    <span class="nt">&lt;TEXT&gt;</span>customer_email is null<span class="nt">&lt;/TEXT&gt;</span>
-    <span class="nt">&lt;ELSETEXT&gt;</span>customer_email=#email#<span class="nt">&lt;/ELSETEXT&gt;</span>
-    <span class="nt">&lt;/IF&gt;</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span> <span class="nv">FROM</span> <span class="nv">customers</span>
+    <span class="nv">WHERE</span> 
+    <span class="o">&lt;</span><span class="k">IF</span><span class="o">&gt;&lt;</span><span class="nv">EXP1</span><span class="o">&gt;</span>#<span class="nv">email</span>#<span class="o">&lt;/</span><span class="nv">EXP1</span><span class="o">&gt;&lt;</span><span class="nv">OP</span><span class="o">&gt;</span><span class="nv">equals</span><span class="o">&lt;/</span><span class="nv">OP</span><span class="o">&gt;&lt;</span><span class="nv">EXP2</span><span class="o">&gt;</span><span class="nv">null</span><span class="o">&lt;/</span><span class="nv">EXP2</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">TEXT</span><span class="o">&gt;</span><span class="nv">customer_email</span> <span class="nv">is</span> <span class="nv">null</span><span class="o">&lt;/</span><span class="nv">TEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span><span class="nv">customer_email</span><span class="o">=</span>#<span class="nv">email</span>#<span class="o">&lt;/</span><span class="nv">ELSETEXT</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="k">IF</span><span class="o">&gt;</span>
 </pre> 
      </div> 
     </div> 
@@ -4573,7 +4622,7 @@ where #rules#
        </div> </li> 
       <li> <p>Once you have saved the main report, click on the <strong>Parameters</strong> option to allocate the report parameters</p> </li> 
       <li>Use the <strong>Add Existing</strong> option to add the <strong>countryId</strong> shared parameter created earlier</li> 
-      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>cityId</strong>, Label of <strong>City</strong> and Data Type of <strong>Integer</strong>. Once you have saved this parameter, click on its <strong>Edit</strong> button on the Report Parameters page and set the <strong>Chained Parents</strong> field to <strong>countryId</strong> i.e. the name of the parent parameter for this chained parameter. If the parent parameter data type is <strong>Date</strong>, <strong>DateTime</strong> or <strong>DateRange</strong>, in the <strong>Chained Parents</strong> field, put the name of the parent parameter and a "-hidden" suffix e.g. <strong>countryId-hidden</strong>, and then set the <strong>Chained Depends</strong> field to the name of the parent parameter e.g. <strong>countryId</strong>.</li> 
+      <li>Use the <strong>Add New</strong> option to create a Single-Value parameter with a Name of <strong>cityId</strong>, Label of <strong>City</strong> and Data Type of <strong>Integer</strong>. Once you have saved this parameter, click on its <strong>Edit</strong> button on the Report Parameters page and set the <strong>Chained Parents</strong> field to <strong>countryId</strong> i.e. the name of the parent parameter for this chained parameter. If the parent parameter data type is <strong>Date</strong> or <strong>DateTime</strong>, in the <strong>Chained Parents</strong> field, put the name of the parent parameter and a "-hidden" suffix e.g. <strong>countryId-hidden</strong>, and then set the <strong>Chained Depends</strong> field to the name of the parent parameter e.g. <strong>countryId</strong>.</li> 
      </ul> 
      <p>Now when you run the main report, you are presented with two drop down boxes. Depending on what country you select, a different set of cities is displayed, from which you can choose and run the report to see the final results.</p> 
     </div> 
@@ -5599,7 +5648,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Fixed File Name</strong></td> 
-        <td>The file name to be used for generated output. File names can only contain english alphabet letters, numbers, hyphen and space. Any other characters will be replaced with underscores. Leave this field blank to use a default generated file name.</td> 
+        <td>The base file name to be used for generated output. This base file name does not include the extension. The extension will be automatically provided depending on the report and output format. File names can only contain english alphabet letters, numbers, hyphen and space. Any other characters will be replaced with underscores. Leave this field blank to use a default generated file name.</td> 
        </tr> 
        <tr> 
         <td><strong>Destinations</strong></td> 
@@ -5759,9 +5808,9 @@ WHERE {#!saleTypes#}
      <p>Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</p> 
      <p>Example query to be used for an alert. Send an email if a big order is made</p> 
      <div class="codehilite"> 
-      <pre><span></span>    SELECT count(*)
-    FROM todays_order_details
-    WHERE quantity&gt;100
+      <pre><span></span>    <span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+    <span class="k">FROM</span> <span class="n">todays_order_details</span>
+    <span class="k">WHERE</span> <span class="n">quantity</span><span class="o">&gt;</span><span class="mi">100</span>
 </pre> 
      </div> 
      <h3 id="just-run-it">Just Run It</h3> 
