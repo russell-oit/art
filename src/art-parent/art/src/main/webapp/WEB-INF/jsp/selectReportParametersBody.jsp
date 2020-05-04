@@ -64,10 +64,16 @@ Display section to allow selecting of report parameters and initiate running of 
 				$("#cancelQueryDiv-${runId}").show();
 			}
 
+			//https://stackoverflow.com/questions/10899384/uploading-both-data-and-files-in-one-form-using-ajax
+			var form = $("#parametersForm");
+			var formData = new FormData(form[0]);
+
 			$.ajax({
 				type: "POST",
 				url: "${pageContext.request.contextPath}/runReport",
-				data: $('#parametersForm').serialize(),
+				data: formData,
+				processData: false,
+				contentType: false,
 				success: function (data) {
 					$("#reportOutput").html(data);
 					var mainRefreshPeriodSeconds = ${refreshPeriodSeconds};
@@ -363,7 +369,7 @@ Display section to allow selecting of report parameters and initiate running of 
 			<div id="collapse1" class="panel-collapse collapse in">
 				<div class="panel-body">
 					<spring:url var="formUrl" value="/runReport"/>
-					<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}">
+					<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}" enctype="multipart/form-data">
 						<fieldset>
 							<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 							<input type="hidden" name="reportId" value="${report.reportId}">

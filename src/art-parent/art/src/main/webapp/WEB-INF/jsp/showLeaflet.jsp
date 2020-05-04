@@ -44,7 +44,10 @@
 	//https://en.wikipedia.org/wiki/Tiled_web_map
 	mapId = '${mapId}';
 	var dataString = '${encode:forJavaScript(data)}';
-	var jsonData = JSON.parse(dataString);
+	var jsonData = [];
+	if (dataString) {
+		jsonData = JSON.parse(dataString);
+	}
 
 	var dataFileUrl = null;
 	<c:if test="${not empty options.dataFile}">

@@ -25,11 +25,14 @@ import art.job.Job;
 import art.report.Report;
 import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.FileOptions;
+import art.reportoptions.GeneralReportOptions;
+import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +55,15 @@ public class FilenameHelper {
 	 *
 	 * @param report the report
 	 * @param locale the locale being used
+	 * @param reportParamsMap report parameters
 	 * @return the base file name to be used for the given report
 	 */
-	public String getBaseFilename(Report report, Locale locale) {
-		return getBaseFilename(report, null, null, locale);
+	private String getBaseFilename(Report report, Locale locale,
+			Map<String, ReportParameter> reportParamsMap) {
+
+		Job job = null;
+		String burstId = null;
+		return getBaseFilename(report, job, burstId, locale, reportParamsMap);
 	}
 
 	/**
@@ -64,10 +72,14 @@ public class FilenameHelper {
 	 *
 	 * @param job the job
 	 * @param locale the locale being used
+	 * @param reportParamsMap report parameters
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job, Locale locale) {
-		return getBaseFilename(job.getReport(), job, null, locale);
+	private String getBaseFilename(Job job, Locale locale,
+			Map<String, ReportParameter> reportParamsMap) {
+
+		String burstId = null;
+		return getBaseFilename(job.getReport(), job, burstId, locale, reportParamsMap);
 	}
 
 	/**
@@ -77,10 +89,13 @@ public class FilenameHelper {
 	 * @param job the job
 	 * @param burstId the burst id for the job
 	 * @param locale the locale being used
+	 * @param reportParamsMap report parameters
 	 * @return the base file name to be used for the given job
 	 */
-	public String getBaseFilename(Job job, String burstId, Locale locale) {
-		return getBaseFilename(job.getReport(), job, burstId, locale);
+	private String getBaseFilename(Job job, String burstId, Locale locale,
+			Map<String, ReportParameter> reportParamsMap) {
+
+		return getBaseFilename(job.getReport(), job, burstId, locale, reportParamsMap);
 	}
 
 	/**
@@ -94,7 +109,7 @@ public class FilenameHelper {
 	 * @return the base file name to be used for the given report or job
 	 */
 	private String getBaseFilename(Report report, Job job, String burstId,
-			Locale locale) {
+			Locale locale, Map<String, ReportParameter> reportParamsMap) {
 
 		Objects.requireNonNull(report, "report must not be null");
 
@@ -133,6 +148,22 @@ public class FilenameHelper {
 		String filename = namePart + "-" + timestamp + "-" + randomPart
 				+ "-" + reportId + "-" + jobId;
 
+		GeneralReportOptions generalReportOptions = report.getGeneralOptions();
+		String fileNameOption = generalReportOptions.getFileName();
+		if (StringUtils.isNotBlank(fileNameOption)) {
+			String defaultFileNameIdentifier = "{default}";
+			String startFileName = StringUtils.replaceIgnoreCase(fileNameOption, defaultFileNameIdentifier, filename);
+			if (burstId != null) {
+				String burstIdIdentifier = "{burstId}";
+				startFileName = StringUtils.replaceIgnoreCase(startFileName, burstIdIdentifier, burstId);
+			}
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			String customFileName = expressionHelper.processParameters(startFileName, reportParamsMap);
+			if (StringUtils.isNotBlank(customFileName)) {
+				filename = customFileName;
+			}
+		}
+
 		String cleanFilename = ArtUtils.cleanBaseFilename(filename);
 
 		return cleanFilename;
@@ -142,15 +173,16 @@ public class FilenameHelper {
 	 * Returns the file name extension to be used for the given report
 	 *
 	 * @param report the report object
-	 * @param reportType the report type
 	 * @param reportFormat the report format
 	 * @return the file name extension to be used for the given report
 	 * @throws java.io.IOException
 	 */
-	public String getFilenameExtension(Report report, ReportType reportType,
-			ReportFormat reportFormat) throws IOException {
+	public String getFilenameExtension(Report report, ReportFormat reportFormat)
+			throws IOException {
 
 		String extension;
+
+		ReportType reportType = report.getReportType();
 
 		if (reportType.isJxls()) {
 			String jxlsFilename = report.getTemplate();
@@ -186,18 +218,17 @@ public class FilenameHelper {
 	 *
 	 * @param report the report
 	 * @param locale the locale being used
-	 * @param reportFormat
+	 * @param reportFormat the report format
+	 * @param reportParamsMap report parameters
 	 * @return the file name to be used for the given report
 	 * @throws java.io.IOException
 	 */
 	public String getFilename(Report report, Locale locale,
-			ReportFormat reportFormat) throws IOException {
+			ReportFormat reportFormat, Map<String, ReportParameter> reportParamsMap)
+			throws IOException {
 
-		ReportType reportType = report.getReportType();
-
-		String baseFilename = getBaseFilename(report, null, null, locale);
-		String extension = getFilenameExtension(report, reportType, reportFormat);
-
+		String baseFilename = getBaseFilename(report, locale, reportParamsMap);
+		String extension = getFilenameExtension(report, reportFormat);
 		String filename = baseFilename + "." + extension;
 
 		return filename;
@@ -208,17 +239,19 @@ public class FilenameHelper {
 	 *
 	 * @param report the report
 	 * @param locale the locale being used
-	 * @param reportFormat
+	 * @param reportFormat the report format
+	 * @param reportParamsMap report parameters
 	 * @return the full file name to be used for the given report
 	 * @throws java.io.IOException
 	 */
 	public String getFullFilename(Report report, Locale locale,
-			ReportFormat reportFormat) throws IOException {
+			ReportFormat reportFormat, Map<String, ReportParameter> reportParamsMap)
+			throws IOException {
 
-		String filename = getFilename(report, locale, reportFormat);
+		String filename = getFilename(report, locale, reportFormat, reportParamsMap);
 		String exportPath = Config.getReportsExportPath();
 		String fullFilename = exportPath + filename;
-		
+
 		return fullFilename;
 	}
 
@@ -228,18 +261,15 @@ public class FilenameHelper {
 	 * @param job the job
 	 * @param locale the locale being used
 	 * @param reportFormat the report format
+	 * @param reportParamsMap report parameters
 	 * @return the file name to be used for the given job
 	 * @throws java.io.IOException
 	 */
-	public String getFilename(Job job, Locale locale, ReportFormat reportFormat)
-			throws IOException {
+	public String getFilename(Job job, Locale locale, ReportFormat reportFormat,
+			Map<String, ReportParameter> reportParamsMap) throws IOException {
 
-		Report report = job.getReport();
-		ReportType reportType = report.getReportType();
-
-		String baseFilename = getBaseFilename(report, job, null, locale);
-		String extension = getFilenameExtension(report, reportType, reportFormat);
-
+		String baseFilename = getBaseFilename(job, locale, reportParamsMap);
+		String extension = getFilenameExtension(job.getReport(), reportFormat);
 		String filename = baseFilename + "." + extension;
 
 		return filename;
@@ -251,26 +281,24 @@ public class FilenameHelper {
 	 * @param job the job
 	 * @param burstId the burst id for the job
 	 * @param locale the locale being used
-	 * @param reportFormat
+	 * @param reportFormat the report format
+	 * @param reportParamsMap report parameters
 	 * @return the file name to be used for the given job
 	 * @throws java.io.IOException
 	 */
 	public String getFilename(Job job, String burstId, Locale locale,
-			ReportFormat reportFormat) throws IOException {
+			ReportFormat reportFormat, Map<String, ReportParameter> reportParamsMap)
+			throws IOException {
 
-		Report report = job.getReport();
-		ReportType reportType = report.getReportType();
-
-		String baseFilename = getBaseFilename(report, job, burstId, locale);
-		String extension = getFilenameExtension(report, reportType, reportFormat);
-
+		String baseFilename = getBaseFilename(job, burstId, locale, reportParamsMap);
+		String extension = getFilenameExtension(job.getReport(), reportFormat);
 		String filename = baseFilename + "." + extension;
 
 		return filename;
 	}
 
 	/**
-	 * Returns the file name extension to use for a csv file. "csv" if delimited
+	 * Returns the file name extension to use for a csv file. "csv" if delimiter
 	 * is comma, "txt" otherwise
 	 *
 	 * @param report the report object

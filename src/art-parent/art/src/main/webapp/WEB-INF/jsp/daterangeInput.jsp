@@ -37,11 +37,6 @@
 	   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 	   value="">
 
-<input type="hidden"
-	   name="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
-	   id="${encode:forHtmlAttribute(reportParam.hiddenHtmlElementName)}"
-	   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
-
 <script>
 	var locale = '${locale}';
 	moment.locale(locale);
@@ -102,11 +97,6 @@
 		if (toParameter) {
 			$(toParameterSelector).val(toParameterDate);
 		}
-		
-		var fullDateRange = fromParameterDate + options.locale.separator + toParameterDate;
-		
-		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').val(fullDateRange);
-		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').change();
 	}
 
 	var todayText = '${todayText}';

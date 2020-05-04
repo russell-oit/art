@@ -23,7 +23,10 @@
 	//http://www.chartjs.org/docs/
 	//https://www.sitepoint.com/introduction-chart-js-2-0-six-examples/
 	var dataString = '${encode:forJavaScript(data)}';
-	var jsonData = JSON.parse(dataString);
+	var jsonData = [];
+	if (dataString) {
+		jsonData = JSON.parse(dataString);
+	}
 	var config = {};
 </script>
 

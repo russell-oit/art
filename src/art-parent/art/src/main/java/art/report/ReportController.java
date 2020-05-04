@@ -36,9 +36,11 @@ import art.reportoptions.GridstackItemOptions;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportRunDetails;
 import art.runreport.ReportRunner;
 import art.savedparameter.SavedParameter;
 import art.savedparameter.SavedParameterService;
+import art.selfservice.SelfServiceHelper;
 import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
@@ -1438,8 +1440,8 @@ public class ReportController {
 					}
 				} else {
 					report.setSelfServiceOptions(config);
-					RunReportHelper runReportHelper = new RunReportHelper();
-					runReportHelper.applySelfServiceFields(report, sessionUser);
+					SelfServiceHelper selfServiceHelper = new SelfServiceHelper();
+					selfServiceHelper.applySelfServiceFields(report, sessionUser);
 				}
 
 				if (overwrite) {
@@ -1520,9 +1522,8 @@ public class ReportController {
 
 		for (Map.Entry<String, String> entry : values.entrySet()) {
 			Map<String, String> value = new HashMap<>();
-			String encodedKey = Encode.forHtmlAttribute(entry.getKey());
 			String encodedValue = Encode.forHtmlContent(entry.getValue());
-			value.put(encodedKey, encodedValue);
+			value.put(entry.getKey(), encodedValue);
 			list.add(value);
 		}
 
@@ -1583,6 +1584,38 @@ public class ReportController {
 		}
 
 		return response;
+	}
+
+	@GetMapping("/runningQueries")
+	public String showRunningQueries(Model model) {
+		logger.debug("Entering showRunningQueries");
+
+		return "runningQueries";
+	}
+
+	@GetMapping("/getRunningQueries")
+	@ResponseBody
+	public AjaxResponse getRunningQueries(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse) {
+
+		logger.debug("Entering getRunningQueries");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
+		WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+
+		String templateName = "runningQueriesAction";
+		String dtAction = defaultTemplateEngine.process(templateName, ctx);
+
+		List<ReportRunDetails> runningQueries = Config.getRunningQueries();
+		for (ReportRunDetails query : runningQueries) {
+			query.setDtAction(dtAction);
+		}
+
+		ajaxResponse.setData(runningQueries);
+		ajaxResponse.setSuccess(true);
+
+		return ajaxResponse;
 	}
 
 }

@@ -22,7 +22,6 @@ import art.datasource.Datasource;
 import art.datasource.DatasourceOptions;
 import art.dbutils.DatabaseUtils;
 import art.enums.DatabaseProtocol;
-import art.enums.DatasourceType;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.enums.ReportType;
@@ -40,16 +39,12 @@ import art.user.User;
 import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
 import art.utils.ExpressionHelper;
-import art.utils.GroovySandbox;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import com.itfsw.query.builder.SqlQueryBuilderFactory;
 import com.itfsw.query.builder.support.builder.SqlBuilder;
 import com.itfsw.query.builder.support.model.result.SqlQueryResult;
-import com.mongodb.MongoClient;
-import groovy.lang.Binding;
 import groovy.lang.GString;
-import groovy.lang.GroovyShell;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -62,7 +57,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,10 +72,10 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Runs a report
@@ -117,9 +111,24 @@ public class ReportRunner {
 	public static final int RETURN_ALL_RECORDS = -1;
 	public static final int RETURN_ZERO_RECORDS = 0;
 	private String runId;
+	private MultiValueMap<String, MultipartFile> multiFileMap;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the multiFileMap
+	 */
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		return multiFileMap;
+	}
+
+	/**
+	 * @param multiFileMap the multiFileMap to set
+	 */
+	public void setMultiFileMap(MultiValueMap<String, MultipartFile> multiFileMap) {
+		this.multiFileMap = multiFileMap;
 	}
 
 	/**
@@ -432,43 +441,12 @@ public class ReportRunner {
 	private void applyUsesGroovy() {
 		logger.debug("Entering applyUsesGroovy");
 
-		if (report.isEffectiveUseGroovy()) {
-			CompilerConfiguration cc = new CompilerConfiguration();
-			cc.addCompilationCustomizers(new SandboxTransformer());
-
-			Map<String, Object> variables = new HashMap<>();
-			if (reportParamsMap != null) {
-				variables.putAll(reportParamsMap);
-			}
-
-			MongoClient mongoClient = null;
-			Datasource datasource = report.getDatasource();
-			if (datasource != null && datasource.getDatasourceType() == DatasourceType.MongoDB) {
-				mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-			}
-			variables.put("mongoClient", mongoClient);
-
-			Binding binding = new Binding(variables);
-
-			GroovyShell shell = new GroovyShell(binding, cc);
-
-			GroovySandbox sandbox = null;
-			if (Config.getCustomSettings().isEnableGroovySandbox()) {
-				sandbox = new GroovySandbox();
-				sandbox.register();
-			}
-
+		if (report.isEffectiveUseGroovy() || report.getReportType() == ReportType.MongoDB) {
 			String querySql = querySb.toString();
 			logger.debug("Groovy source before evaluation: \n{}", querySql);
 
-			Object result;
-			try {
-				result = shell.evaluate(querySql);
-			} finally {
-				if (sandbox != null) {
-					sandbox.unregister();
-				}
-			}
+			ExpressionHelper expressionHelper = new ExpressionHelper();
+			Object result = expressionHelper.runGroovyExpression(querySql, report, reportParamsMap, multiFileMap);
 
 			groovyData = null;
 			if (result != null) {
@@ -1184,11 +1162,7 @@ public class ReportRunner {
 
 		//don't execute sql source for report types that don't have runnable sql
 		ReportType reportType = report.getReportType();
-		if (!reportType.isJdbcRunnableByArt()) {
-			return;
-		}
-
-		if (groovyData != null) {
+		if (!reportType.isJdbcRunnableByArt() || groovyData != null) {
 			return;
 		}
 
@@ -1266,7 +1240,14 @@ public class ReportRunner {
 		}
 
 		if (StringUtils.isNotBlank(runId)) {
-			Config.addRunningStatement(runId, psQuery);
+			ReportRunDetails reportRunDetails = new ReportRunDetails();
+			reportRunDetails.setReport(report);
+			reportRunDetails.setJob(job);
+			reportRunDetails.setUser(user);
+			reportRunDetails.setRunId(runId);
+			reportRunDetails.setStartTime(new Date());
+
+			Config.addRunningQuery(reportRunDetails, psQuery);
 		}
 
 		psQuery.execute();
@@ -1550,7 +1531,7 @@ public class ReportRunner {
 		}
 
 		if (StringUtils.isNotBlank(runId)) {
-			Config.removeRunningStatement(runId);
+			Config.removeRunningQuery(runId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);

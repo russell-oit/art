@@ -128,6 +128,11 @@ Header that appears at the top of all pages, except the login and logs pages
 												<spring:message code="page.title.addReport"/>
 											</a>
 										</li>
+										<li>
+											<a href="${pageContext.request.contextPath}/runningQueries">
+												<spring:message code="page.title.runningQueries"/>
+											</a>
+										</li>
 									</c:if>
 									<c:if test="${sessionUser.hasPermission('configure_report_groups')}">
 										<li>

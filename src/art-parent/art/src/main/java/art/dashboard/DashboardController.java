@@ -182,7 +182,7 @@ public class DashboardController {
 
 			if (reportFormat == ReportFormat.pdf) {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				String fileName = filenameHelper.getFilename(report, locale, reportFormat);
+				String fileName = filenameHelper.getFilename(report, locale, reportFormat, reportParamsMap);
 				String exportPath = Config.getReportsExportPath();
 				String outputFileName = exportPath + fileName;
 

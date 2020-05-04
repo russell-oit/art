@@ -44,7 +44,10 @@
 	//https://gis.stackexchange.com/questions/188865/error-with-popup-overlay-in-openlayers-3
 	mapId = '${mapId}';
 	var dataString = '${encode:forJavaScript(data)}';
-	var jsonData = JSON.parse(dataString);
+	var jsonData = [];
+	if (dataString) {
+		jsonData = JSON.parse(dataString);
+	}
 	var markerUrl = "${pageContext.request.contextPath}/js/Leaflet-1.3.4/images/marker-icon.png";
 
 	var dataFileUrl = null;

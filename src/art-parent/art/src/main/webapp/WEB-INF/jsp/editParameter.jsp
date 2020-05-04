@@ -41,13 +41,13 @@ Edit parameter definition
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/js/jasny-bootstrap.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -111,6 +111,69 @@ Edit parameter definition
 						break;
 					default:
 						$("#dateFormatDiv").hide();
+				}
+
+				//show/hide parameter type field
+				switch (dataType) {
+					case "File":
+						$("#parameterTypeDiv").hide();
+						break;
+					default:
+						$("#parameterTypeDiv").show();
+				}
+
+				//show/hide file fields
+				switch (dataType) {
+					case "File":
+						$("#fileFields").show();
+						break;
+					default:
+						$("#fileFields").hide();
+				}
+
+				//show/hide help fields
+				switch (dataType) {
+					case "File":
+						$("#helpFields").hide();
+						break;
+					default:
+						$("#helpFields").show();
+				}
+
+				//show/hide default value fields
+				switch (dataType) {
+					case "File":
+						$("#defaultValueFields").hide();
+						break;
+					default:
+						$("#defaultValueFields").show();
+				}
+
+				//show/hide template field
+				switch (dataType) {
+					case "File":
+						$("#templateDiv").hide();
+						break;
+					default:
+						$("#templateDiv").show();
+				}
+
+				//show/hide lov fields
+				switch (dataType) {
+					case "File":
+						$("#lovFields").hide();
+						break;
+					default:
+						$("#lovFields").show();
+				}
+
+				//show/hide other fields
+				switch (dataType) {
+					case "File":
+						$("#otherFields").hide();
+						break;
+					default:
+						$("#otherFields").show();
 				}
 			}
 		</script>
@@ -203,7 +266,7 @@ Edit parameter definition
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="parameterTypeDiv" class="form-group">
 					<label class="col-md-4 control-label " for="parameterType">
 						<spring:message code="parameters.label.parameterType"/>
 					</label>
@@ -235,33 +298,37 @@ Edit parameter definition
 						<form:errors path="label" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="helpText">
-						<spring:message code="parameters.label.helpText"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="helpText" maxlength="500" class="form-control"/>
-							<spring:message code="parameters.help.helpText" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
+
+				<fieldset id="helpFields">
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="helpText">
+							<spring:message code="parameters.label.helpText"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:input path="helpText" maxlength="500" class="form-control"/>
+								<spring:message code="parameters.help.helpText" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="helpText" cssClass="error"/>
 						</div>
-						<form:errors path="helpText" cssClass="error"/>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="placeholderText">
-						<spring:message code="parameters.label.placeholderText"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="placeholderText" maxlength="100" class="form-control"/>
-						<form:errors path="placeholderText" cssClass="error"/>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="placeholderText">
+							<spring:message code="parameters.label.placeholderText"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="placeholderText" maxlength="100" class="form-control"/>
+							<form:errors path="placeholderText" cssClass="error"/>
+						</div>
 					</div>
-				</div>
+				</fieldset>
+
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="dataType">
 						<spring:message code="page.label.dataType"/>
@@ -282,38 +349,64 @@ Edit parameter definition
 						<form:errors path="dateFormat" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultValue">
-						<spring:message code="parameters.label.defaultValue"/>
-					</label>
-					<div class="col-md-8">
-						<form:textarea path="defaultValue" rows="3" class="form-control"/>
-						<form:errors path="defaultValue" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultValueReport">
-						<spring:message code="parameters.label.defaultValueReport"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="defaultValueReport" class="form-control selectpicker">
-							<form:option value="0">--</form:option>
-								<option data-divider="true"></option>
-							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
-						</form:select>
-						<form:errors path="defaultValueReport" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="useDefaultValueInJobs">
-						<spring:message code="parameters.label.useDefaultValueInJobs"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="useDefaultValueInJobs" id="useDefaultValueInJobs" class="switch-yes-no"/>
+
+				<fieldset id="fileFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="multipleFiles">
+							<spring:message code="parameters.label.multipleFiles"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="multipleFiles" id="multipleFiles" class="switch-yes-no"/>
+							</div>
 						</div>
 					</div>
-				</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="fileAccept">
+							<spring:message code="parameters.label.accept"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="fileAccept" maxlength="100" class="form-control"/>
+							<form:errors path="fileAccept" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset id="defaultValueFields">
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="defaultValue">
+							<spring:message code="parameters.label.defaultValue"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="defaultValue" rows="3" class="form-control"/>
+							<form:errors path="defaultValue" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="defaultValueReport">
+							<spring:message code="parameters.label.defaultValueReport"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="defaultValueReport" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
+							</form:select>
+							<form:errors path="defaultValueReport" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="useDefaultValueInJobs">
+							<spring:message code="parameters.label.useDefaultValueInJobs"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="useDefaultValueInJobs" id="useDefaultValueInJobs" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
 				<div id="templateDiv" class="form-group">
 					<label class="control-label col-md-4" for="template">
 						<spring:message code="reports.label.template"/>
@@ -354,7 +447,7 @@ Edit parameter definition
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="hiddenDiv" class="form-group">
 					<label class="control-label col-md-4" for="hidden">
 						<spring:message code="parameters.label.hidden"/>
 					</label>
@@ -364,58 +457,65 @@ Edit parameter definition
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="useLov">
-						<spring:message code="parameters.label.useLov"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="useLov" id="useLov" class="switch-yes-no"/>
+
+				<fieldset id="lovFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="useLov">
+							<spring:message code="parameters.label.useLov"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="useLov" id="useLov" class="switch-yes-no"/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="lovReport">
-						<spring:message code="parameters.label.lovReport"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="lovReport" class="form-control selectpicker">
-							<form:option value="0">--</form:option>
-								<option data-divider="true"></option>
-							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
-						</form:select>
-						<form:errors path="lovReport" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="drilldownColumnIndex">
-						<spring:message code="parameters.label.drilldownColumnIndex"/>
-					</label>
-					<div class="col-md-8">
-						<form:input type="number" path="drilldownColumnIndex" maxlength="2" class="form-control"/>
-						<form:errors path="drilldownColumnIndex" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="fixedValue">
-						<spring:message code="parameters.label.fixedValue"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="fixedValue" id="fixedValue" class="switch-yes-no"/>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="lovReport">
+							<spring:message code="parameters.label.lovReport"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="lovReport" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
+							</form:select>
+							<form:errors path="lovReport" cssClass="error"/>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="allowNull">
-						<spring:message code="parameters.label.allowNull"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="allowNull" id="allowNull" class="switch-yes-no"/>
+				</fieldset>
+
+				<fieldset id="otherFields">
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="drilldownColumnIndex">
+							<spring:message code="parameters.label.drilldownColumnIndex"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="drilldownColumnIndex" maxlength="2" class="form-control"/>
+							<form:errors path="drilldownColumnIndex" cssClass="error"/>
 						</div>
 					</div>
-				</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="fixedValue">
+							<spring:message code="parameters.label.fixedValue"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="fixedValue" id="fixedValue" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="allowNull">
+							<spring:message code="parameters.label.allowNull"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="allowNull" id="allowNull" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
 				<div class="form-group">
 					<label class="control-label col-md-12" style="text-align: center" for="options">
 						<spring:message code="page.label.options"/>

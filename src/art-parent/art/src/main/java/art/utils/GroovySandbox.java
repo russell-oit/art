@@ -42,6 +42,7 @@ public class GroovySandbox extends GroovyValueFilter {
 	//https://github.com/kohsuke/groovy-sandbox/tree/master/src/test/groovy/org/kohsuke/groovy/sandbox/robot
 	//https://github.com/kohsuke/groovy-sandbox/blob/master/src/test/groovy/org/kohsuke/groovy/sandbox/TheTest.groovy
 	//https://stackoverflow.com/questions/6210045/bullet-proof-groovy-script-embedding
+	//https://community.jaspersoft.com/documentation/tibco-jasperreports-server-security-guide/v71/restricting-groovys-access
 
 	private static final Logger logger = LoggerFactory.getLogger(GroovySandbox.class);
 

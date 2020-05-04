@@ -25,8 +25,6 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
-import art.connectionpool.DbConnections;
-import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
@@ -89,11 +87,8 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
-import art.utils.GroovySandbox;
+import art.utils.ExpressionHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -103,7 +98,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -122,11 +116,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Generates report output
@@ -673,9 +667,12 @@ public class ReportOutputGenerator {
 			return;
 		}
 
-		//display link to access report
-		request.setAttribute("fileName", fileName);
-		servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
+		boolean directDownload = BooleanUtils.toBoolean(request.getParameter("directDownload"));
+		if (!directDownload) {
+			//display link to access report
+			request.setAttribute("fileName", fileName);
+			servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
+		}
 	}
 
 	/**
@@ -2282,41 +2279,9 @@ public class ReportOutputGenerator {
 		//https://www.javacodegeeks.com/2015/09/mongodb-and-java-tutorial.html
 		//https://mdahlman.wordpress.com/2011/09/02/cool-reporting-on-mongodb/
 		//https://mdahlman.wordpress.com/2011/09/02/simple-reporting-on-mongodb/
-		CompilerConfiguration cc = new CompilerConfiguration();
-		cc.addCompilationCustomizers(new SandboxTransformer());
 
-		Map<String, Object> variables = new HashMap<>();
-		variables.putAll(reportParamsMap);
-
-		MongoClient mongoClient = null;
-		Datasource datasource = report.getDatasource();
-		if (datasource != null) {
-			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
-		}
-		variables.put("mongoClient", mongoClient);
-
-		Binding binding = new Binding(variables);
-
-		GroovyShell shell = new GroovyShell(binding, cc);
-
-		GroovySandbox sandbox = null;
-		if (Config.getCustomSettings().isEnableGroovySandbox()) {
-			sandbox = new GroovySandbox();
-			sandbox.register();
-		}
-
-		//get report source with direct parameters, rules etc applied
-		String reportSource = reportRunner.getQuerySql();
-		Object result;
-		try {
-			result = shell.evaluate(reportSource);
-		} finally {
-			if (sandbox != null) {
-				sandbox.unregister();
-			}
-		}
-		if (result != null) {
-			if (result instanceof List) {
+		if (groovyData != null) {
+			if (groovyData instanceof List) {
 				String optionsString = report.getOptions();
 				List<String> optionsColumnNames = null;
 				List<Map<String, String>> columnDataTypes = null;
@@ -2333,7 +2298,7 @@ public class ReportOutputGenerator {
 				}
 
 				@SuppressWarnings("unchecked")
-				List<Object> resultList = (List<Object>) result;
+				List<Object> resultList = (List<Object>) groovyData;
 				List<ResultSetColumn> columns = new ArrayList<>();
 				String resultString = null;
 				if (resultList.isEmpty()) {
@@ -2346,7 +2311,7 @@ public class ReportOutputGenerator {
 						//https://stackoverflow.com/questions/26071530/jackson-convert-object-to-map-preserving-date-type
 						//http://cassiomolin.com/converting-pojo-map-vice-versa-jackson/
 						//http://www.makeinjava.com/convert-list-objects-tofrom-json-java-jackson-objectmapper-example/
-						Map<String, Object> map = ArtUtils.objectToMap(sample);
+						Map<String, Object> map = ArtUtils.objectToDefaultMap(sample);
 						for (Entry<String, Object> entry : map.entrySet()) {
 							String name = entry.getKey();
 							Object value = entry.getValue();
@@ -2404,12 +2369,21 @@ public class ReportOutputGenerator {
 						column.setLabel(columnLabel);
 					}
 
+					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+					//https://github.com/wnameless/json-flattener
+					//https://www.baeldung.com/jackson-serialize-dates
+					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
+					ObjectMapper mapper = new ObjectMapper();
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+					mapper.setDateFormat(df);
+
 					//_id is a complex object so we have to iterate and replace it with the toString() representation
 					//also need to create a new list in case some columns are omitted in finalColumnNames
 					List<Map<String, Object>> finalResultList = new ArrayList<>();
 					for (Object object : resultList) {
 						Map<String, Object> row = new LinkedHashMap<>();
-						Map<String, Object> map = ArtUtils.objectToMap(object);
+						Map<String, Object> map = ArtUtils.objectToDefaultMap(object, mapper);
+
 						for (ResultSetColumn column : columns) {
 							String columnName = column.getName();
 							Object value = map.get(columnName);
@@ -2430,13 +2404,6 @@ public class ReportOutputGenerator {
 
 					rowsRetrieved = finalResultList.size();
 
-					//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
-					//https://github.com/wnameless/json-flattener
-					//https://www.baeldung.com/jackson-serialize-dates
-					//https://stackoverflow.com/questions/12463049/date-format-mapping-to-json-jackson
-					ObjectMapper mapper = new ObjectMapper();
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-					mapper.setDateFormat(df);
 					resultString = mapper.writeValueAsString(finalResultList);
 				}
 
@@ -2447,7 +2414,7 @@ public class ReportOutputGenerator {
 
 				showDataTablesJsp();
 			} else {
-				writer.print(result);
+				writer.print(reportRunner.getQuerySql());
 			}
 		}
 	}

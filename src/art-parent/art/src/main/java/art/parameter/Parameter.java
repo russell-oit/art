@@ -67,17 +67,47 @@ public class Parameter implements Serializable {
 	private boolean shared;
 	private String options;
 	private String dateFormat;
+	private boolean useDefaultValueInJobs;
+	private boolean allowNull;
+	private boolean multipleFiles;
+	private String fileAccept;
+	private String template;
 	@JsonIgnore
 	private ParameterOptions parameterOptions;
-	private boolean useDefaultValueInJobs;
-	private String template;
 	private Report defaultValueReport;
 	private Report lovReport;
 	private String name2; //used for holding a processed name
 	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
-	private boolean allowNull;
+
+	/**
+	 * @return the fileAccept
+	 */
+	public String getFileAccept() {
+		return fileAccept;
+	}
+
+	/**
+	 * @param fileAccept the fileAccept to set
+	 */
+	public void setFileAccept(String fileAccept) {
+		this.fileAccept = fileAccept;
+	}
+
+	/**
+	 * @return the multipleFiles
+	 */
+	public boolean isMultipleFiles() {
+		return multipleFiles;
+	}
+
+	/**
+	 * @param multipleFiles the multipleFiles to set
+	 */
+	public void setMultipleFiles(boolean multipleFiles) {
+		this.multipleFiles = multipleFiles;
+	}
 
 	/**
 	 * @return the allowNull

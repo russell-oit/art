@@ -166,15 +166,15 @@ public class ArtUtils {
 	 * Removes characters from file name that may be invalid or result in a
 	 * dangerous file name on the system
 	 *
-	 * @param filename the initial file name, including the extension
+	 * @param fullFilename the initial file name, including the extension
 	 * @return final file name with unwanted characters replaced with
 	 * underscores
 	 */
-	public static String cleanFilename(String filename) {
+	public static String cleanFullFilename(String fullFilename) {
 		String finalFilename;
 
-		String base = FilenameUtils.getBaseName(filename);
-		String extension = FilenameUtils.getExtension(filename);
+		String base = FilenameUtils.getBaseName(fullFilename);
+		String extension = FilenameUtils.getExtension(fullFilename);
 
 		if (StringUtils.containsAny(extension, "aes", "gpg")) {
 			//allow second extension to be used for encryped files
@@ -198,7 +198,7 @@ public class ArtUtils {
 	public static String getRandomFileNameString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(5);
 	}
-	
+
 	/**
 	 * Get random string that can be used as a unique record id
 	 *
@@ -495,6 +495,46 @@ public class ArtUtils {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.readValue(jsonString, clazz);
+		}
+	}
+
+	/**
+	 * Converts an object to a map representation
+	 *
+	 * @param object the object to convert
+	 * @return the map representation. A linked hash map.
+	 */
+	public static Map<String, Object> objectToDefaultMap(Object object) {
+		ObjectMapper mapper = null;
+		return objectToDefaultMap(object, mapper);
+	}
+
+	/**
+	 * Converts an object to a map representation
+	 *
+	 * @param object the object to convert
+	 * @param mapper the object mapper to use
+	 * @return the map representation. A linked hash map.
+	 */
+	public static Map<String, Object> objectToDefaultMap(Object object,
+			ObjectMapper mapper) {
+
+		if (object == null) {
+			return null;
+		}
+
+		if (object instanceof LinkedHashMap) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) object;
+			return map;
+		} else {
+			if (mapper == null) {
+				mapper = new ObjectMapper();
+			}
+
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = mapper.convertValue(object, Map.class);
+			return map;
 		}
 	}
 

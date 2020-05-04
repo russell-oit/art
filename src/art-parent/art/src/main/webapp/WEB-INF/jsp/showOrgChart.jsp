@@ -35,59 +35,61 @@
 </c:if>
 
 <script>
-	var datasource;
+	var datasource = {};
 	var dataString = '${encode:forJavaScript(data)}';
 	var reportType = '${encode:forJavaScript(reportType)}';
 
-	if (reportType === 'OrgChartDatabase') {
-		//http://www.orgchartcomponent.com/walkthrough/Article1/
-		//https://stackoverflow.com/questions/15862976/what-is-the-best-way-to-model-an-organization-using-people-positions-and-teams
-		//http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/
-		//http://www.orgchartcomponent.com/walkthrough/VeryLargeOrgCharts/
-		//https://github.com/dabeng/OrgChart/issues/154
-		//https://codepen.io/dabeng/pen/mRZpLK
-		//https://github.com/dabeng/JSON-Loop
-		//https://support.office.com/en-ie/article/Create-an-organization-chart-automatically-from-employee-data-8f2e693e-25fc-410e-8264-9084eb0b9360
-		//https://www.smartdraw.com/organizational-chart/organizational-chart-tips.htm
-		//https://sharepointorgchart.com/how-to/creating-org-chart-sql-database
+	if (dataString) {
+		if (reportType === 'OrgChartDatabase') {
+			//http://www.orgchartcomponent.com/walkthrough/Article1/
+			//https://stackoverflow.com/questions/15862976/what-is-the-best-way-to-model-an-organization-using-people-positions-and-teams
+			//http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/
+			//http://www.orgchartcomponent.com/walkthrough/VeryLargeOrgCharts/
+			//https://github.com/dabeng/OrgChart/issues/154
+			//https://codepen.io/dabeng/pen/mRZpLK
+			//https://github.com/dabeng/JSON-Loop
+			//https://support.office.com/en-ie/article/Create-an-organization-chart-automatically-from-employee-data-8f2e693e-25fc-410e-8264-9084eb0b9360
+			//https://www.smartdraw.com/organizational-chart/organizational-chart-tips.htm
+			//https://sharepointorgchart.com/how-to/creating-org-chart-sql-database
 
-		var dataset = JSON.parse(dataString);
+			var dataset = JSON.parse(dataString);
 
-		datasource = {};
-		dataset.forEach(function (item, index) {
-			if (!item.parent_id) {
-				delete item.parent_id;
-				Object.assign(datasource, item);
-			} else {
-				var jsonloop = new JSONLoop(datasource, 'id', 'children');
-				jsonloop.findNodeById(datasource, item.parent_id, function (err, node) {
-					if (err) {
-						console.error(err);
-					} else {
-						delete item.parent_id;
-						if (node.children) {
-							node.children.push(item);
-							var b = 2;
+			datasource = {};
+			dataset.forEach(function (item, index) {
+				if (!item.parent_id) {
+					delete item.parent_id;
+					Object.assign(datasource, item);
+				} else {
+					var jsonloop = new JSONLoop(datasource, 'id', 'children');
+					jsonloop.findNodeById(datasource, item.parent_id, function (err, node) {
+						if (err) {
+							console.error(err);
 						} else {
-							node.children = [item];
-							var a = 1;
+							delete item.parent_id;
+							if (node.children) {
+								node.children.push(item);
+								var b = 2;
+							} else {
+								node.children = [item];
+								var a = 1;
+							}
 						}
-					}
-				});
-			}
-		});
-	} else if (reportType === 'OrgChartJson') {
-		//https://www.w3schools.com/js/js_json_parse.asp
-		//https://api.jquery.com/jquery.parsejson/
-		//https://stackoverflow.com/questions/23311182/convert-json-string-to-object-jquery
-		datasource = JSON.parse(dataString);
-	} else if (reportType === 'OrgChartList') {
-		//https://stackoverflow.com/questions/11047670/creating-a-jquery-object-from-a-big-html-string
-		//https://stackoverflow.com/questions/19443345/convert-html-string-into-jquery-object
-		//https://rawgit.com/dabeng/OrgChart/master/demo/ul-datasource.html
-		datasource = $($.parseHTML(dataString));
-	} else if (reportType === 'OrgChartAjax') {
-		datasource = dataString;
+					});
+				}
+			});
+		} else if (reportType === 'OrgChartJson') {
+			//https://www.w3schools.com/js/js_json_parse.asp
+			//https://api.jquery.com/jquery.parsejson/
+			//https://stackoverflow.com/questions/23311182/convert-json-string-to-object-jquery
+			datasource = JSON.parse(dataString);
+		} else if (reportType === 'OrgChartList') {
+			//https://stackoverflow.com/questions/11047670/creating-a-jquery-object-from-a-big-html-string
+			//https://stackoverflow.com/questions/19443345/convert-html-string-into-jquery-object
+			//https://rawgit.com/dabeng/OrgChart/master/demo/ul-datasource.html
+			datasource = $($.parseHTML(dataString));
+		} else if (reportType === 'OrgChartAjax') {
+			datasource = dataString;
+		}
 	}
 
 	var orgChartSettings = {
@@ -102,8 +104,10 @@
 	};
 
 	var optionsString = '${encode:forJavaScript(optionsJson)}';
-	var orgChartOptions = JSON.parse(optionsString);
-	$.extend(orgChartSettings, orgChartOptions);
+	if (optionsString) {
+		var orgChartOptions = JSON.parse(optionsString);
+		$.extend(orgChartSettings, orgChartOptions);
+	}
 
 	var nodeContent = orgChartSettings.nodeContent;
 	if (!nodeContent) {

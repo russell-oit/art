@@ -20,11 +20,13 @@ package art.runreport;
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.export.ExportHelper;
 import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.TabularHeatmapOptions;
 import art.reportparameter.ReportParameter;
+import art.selfservice.SelfServiceHelper;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtLogsHelper;
@@ -32,7 +34,7 @@ import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rits.cloning.Cloner;
-import java.io.IOException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -63,10 +65,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -94,14 +99,41 @@ public class RunReportController {
 	@Autowired
 	private DrilldownService drilldownService;
 
+	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST}, headers = "content-type=multipart/form-data")
+	public String runReportMultipart(@RequestParam("reportId") Integer reportId,
+			@RequestParam(value = "runId", required = false) String runIdParameter,
+			@ModelAttribute("report") Report testReport,
+			MultipartHttpServletRequest request, HttpServletResponse response,
+			HttpSession session, Model model, Locale locale,
+			RedirectAttributes redirectAttributes) {
+
+		//https://stackoverflow.com/questions/20162474/how-do-i-receive-a-file-upload-in-spring-mvc-using-both-multipart-form-and-chunk
+		//https://www.tothenew.com/blog/uploading-multiple-files-with-same-name/
+		//https://stackoverflow.com/questions/60291483/how-to-get-all-submitted-multipartfiles-regardless-of-their-name
+		MultiValueMap<String, MultipartFile> multiFileMap = request.getMultiFileMap();
+		return runReport(session, runIdParameter, reportId, request, testReport,
+				model, locale, response, redirectAttributes, multiFileMap);
+	}
+
 	//use post to allow for large parameter input and get to allow for direct url execution
-	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
-	public String runReport(@RequestParam("reportId") Integer reportId,
+	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST}, headers = "content-type!=multipart/form-data")
+	public String runReportPlain(@RequestParam("reportId") Integer reportId,
 			@RequestParam(value = "runId", required = false) String runIdParameter,
 			@ModelAttribute("report") Report testReport,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
-			RedirectAttributes redirectAttributes) throws IOException {
+			RedirectAttributes redirectAttributes) {
+
+		MultiValueMap<String, MultipartFile> multiFileMap = null;
+		return runReport(session, runIdParameter, reportId, request, testReport,
+				model, locale, response, redirectAttributes, multiFileMap);
+	}
+
+	private String runReport(HttpSession session, String runIdParameter,
+			Integer reportId, HttpServletRequest request, Report testReport,
+			Model model, Locale locale, HttpServletResponse response,
+			RedirectAttributes redirectAttributes,
+			MultiValueMap<String, MultipartFile> multiFileMap) {
 
 		Report report = null;
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -116,14 +148,14 @@ public class RunReportController {
 		}
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInlineParameter = BooleanUtils.toBoolean(request.getParameter("showInline"));
-		boolean showInline = showInlineParameter;
+		boolean showInline = BooleanUtils.toBoolean(request.getParameter("showInline"));
 		//check if report header and footer should not be included e.g. in a dashboard component
 		boolean isFragment = BooleanUtils.toBoolean(request.getParameter("isFragment"));
+		boolean directDownload = BooleanUtils.toBoolean(request.getParameter("directDownload"));
 
 		//set appropriate error page to use
 		String errorPage;
-		if (showInline || isFragment) {
+		if (showInline || isFragment || directDownload) {
 			errorPage = "reportErrorInline";
 		} else {
 			errorPage = "reportError";
@@ -131,6 +163,7 @@ public class RunReportController {
 
 		String reportName = null;
 		RunReportHelper runReportHelper = new RunReportHelper();
+		SelfServiceHelper selfServiceHelper = new SelfServiceHelper();
 		PrintWriter writer = null;
 		boolean ajax = false;
 
@@ -175,7 +208,7 @@ public class RunReportController {
 				}
 
 				if (testReport.getReportType() != ReportType.View) {
-					runReportHelper.applySelfServiceFields(testReport, sessionUser, runId);
+					selfServiceHelper.applySelfServiceFields(testReport, sessionUser, runId);
 				}
 
 				report = testReport;
@@ -221,7 +254,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			if (reportType == ReportType.View) {
-				runReportHelper.applySelfServiceFields(report, sessionUser, runId);
+				selfServiceHelper.applySelfServiceFields(report, sessionUser, runId);
 			}
 
 			ReportFormat reportFormat;
@@ -329,7 +362,7 @@ public class RunReportController {
 				writer = response.getWriter();
 			}
 
-			if (isFragment) {
+			if (isFragment || directDownload) {
 				//report header and footer not shown for fragments
 				showReportHeaderAndFooter = false;
 				showInline = true;
@@ -346,7 +379,7 @@ public class RunReportController {
 				//do nothing
 			}
 
-			//output page header. if showInline, page header and footer already exist. 
+			//output page header. if showInline, page header and footer already exist.
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
@@ -384,20 +417,22 @@ public class RunReportController {
 					ajax = true;
 				}
 
-				if (isFragment && !ajax) {
+				if (isFragment && !ajax && !directDownload) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/addJquery.jsp").include(request, response);
 				}
 
 				request.setAttribute("runId", runId);
 
-				if (!ajax && report.isShowCancel()) {
+				if (!ajax && report.isShowCancel() && !directDownload) {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showCancelQuery.jsp").include(request, response);
 				}
 
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+				if (!directDownload) {
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+				}
 
 				//display initial report progress
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
 				}
 
@@ -439,6 +474,8 @@ public class RunReportController {
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
+				reportRunner.setMultiFileMap(multiFileMap);
+
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getLocalizedShortDescription(locale);
 					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
@@ -453,12 +490,12 @@ public class RunReportController {
 
 					String reportInfo = "<h4>" + Encode.forHtmlContent(reportName) + "<small>"
 							+ Encode.forHtmlContent(description) + " :: "
-							+ Encode.forHtmlContent(startTimeString) + "</small></h4>";
+							+ startTimeString + "</small></h4>";
 
 					displayReportInfo(writer, reportInfo);
 				}
 
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					showCancelQueryDiv(writer);
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
 				}
@@ -472,7 +509,9 @@ public class RunReportController {
 
 				Instant queryEnd = Instant.now();
 
-				hideCancelQueryDiv(writer);
+				if (!directDownload) {
+					hideCancelQueryDiv(writer);
+				}
 
 				//display parameters and final sql
 				if (showReportHeaderAndFooter) {
@@ -499,7 +538,7 @@ public class RunReportController {
 					}
 				}
 
-				if (!ajax) {
+				if (!ajax && !directDownload) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
 				}
 
@@ -512,7 +551,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat);
+					String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
 
 					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
@@ -548,6 +587,16 @@ public class RunReportController {
 
 					//encrypt file if applicable
 					report.encryptFile(outputFileName);
+
+					if (directDownload) {
+						File file = new File(outputFileName);
+
+						if (file.exists()) {
+							response.reset();
+							ExportHelper exportHelper = new ExportHelper();
+							exportHelper.serveFile(file, response);
+						}
+					}
 				}
 
 				// Print the "working" time elapsed
@@ -604,7 +653,7 @@ public class RunReportController {
 				reportRunner.close();
 			}
 
-			if (!ajax) {
+			if (!ajax && !directDownload) {
 				clearReportProgress(writer);
 			}
 		}
@@ -645,7 +694,7 @@ public class RunReportController {
 		//has been included in the page before calling this method
 		elementId += "-" + runId;
 		out.println("<script type='text/javascript'>"
-				+ "document.getElementById('" + elementId + "').innerHTML='" + message + "';"
+				+ "document.getElementById('" + elementId + "').innerHTML='" + Encode.forJavaScript(message) + "';"
 				+ "</script>");
 	}
 

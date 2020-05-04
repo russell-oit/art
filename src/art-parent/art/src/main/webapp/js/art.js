@@ -729,10 +729,28 @@ function initBasicTable(tbl, pageLength, showAllRowsText, contextPath, localeCod
 			localeCode, addColumnFilters, columnDefs, hasSelect);
 }
 
+function initAjaxBasicTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
+
+	var hasSelect = false;
+	return initAjaxTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, dataUrl, errorOccurredText, showErrors, columnDefs,
+			columns, hasSelect);
+
+}
+
 function initAjaxConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
 		dataUrl, errorOccurredText, showErrors, columnDefs, columns) {
 
 	var hasSelect = true;
+	return initAjaxTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, dataUrl, errorOccurredText, showErrors, columnDefs,
+			columns, hasSelect);
+}
+
+function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+		dataUrl, errorOccurredText, showErrors, columnDefs, columns, hasSelect) {
+
 	var options = getConfigTableOptions(pageLength, showAllRowsText,
 			contextPath, localeCode, columnDefs, hasSelect);
 
@@ -1219,7 +1237,7 @@ function filterReportGroups(filterVal, columnVal) {
 
 	var dataSeparator = ", ";
 	var items = columnVal.split(dataSeparator);
-    return items.some(function(arrVal) {
-        return filterVal === arrVal;
-    });
+	return items.some(function (arrVal) {
+		return filterVal === arrVal;
+	});
 }

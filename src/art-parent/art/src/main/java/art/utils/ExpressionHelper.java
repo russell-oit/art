@@ -17,9 +17,15 @@
  */
 package art.utils;
 
+import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
+import art.enums.DatasourceType;
 import art.enums.DateFieldType;
+import art.enums.ParameterDataType;
+import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import com.mongodb.MongoClient;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.text.ParseException;
@@ -41,6 +47,8 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Processes strings that may contain parameter, field or groovy expressions
@@ -52,9 +60,9 @@ public class ExpressionHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
 	public static final String GROOVY_START_STRING = "g[";
-	private final String GROOVY_END_STRING = "]g";
-	private final String FIELD_START_STRING = "f[";
-	private final String FIELD_END_STRING = "]f";
+	public final String GROOVY_END_STRING = "]g";
+	public final String FIELD_START_STRING = "f[";
+	public final String FIELD_END_STRING = "]f";
 
 	/**
 	 * Processes a string that may have parameter or field expressions and
@@ -379,8 +387,8 @@ public class ExpressionHelper {
 
 		logger.debug("Entering convertStringToDate: string='{}',"
 				+ " dateFormat='{}', locale={}", string, dateFormat, locale);
-		
-		if(string == null){
+
+		if (string == null) {
 			return null;
 		}
 
@@ -472,12 +480,12 @@ public class ExpressionHelper {
 	 */
 	public String processDateString(String dateString, String format,
 			Locale locale) throws ParseException {
-		
+
 		logger.debug("Entering processDateString: dateString='{}',"
 				+ " format='{}', locale={}", dateString, format, locale);
-		
+
 		Objects.requireNonNull(format, "format must not be null");
-		
+
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
@@ -563,10 +571,68 @@ public class ExpressionHelper {
 	 * @return the object returned by the groovy script
 	 */
 	public Object runGroovyExpression(String string) {
+		Map<String, Object> variables = null;
+		return runGroovyExpression(string, variables);
+	}
+
+	/**
+	 * Runs a groovy expression and returns the result
+	 *
+	 * @param string the string containing the groovy script
+	 * @param report the report being run
+	 * @param reportParamsMap report parameters
+	 * @param multiFileMap files to be included as variables
+	 * @return the object returned by the groovy script
+	 */
+	public Object runGroovyExpression(String string, Report report,
+			Map<String, ReportParameter> reportParamsMap,
+			MultiValueMap<String, MultipartFile> multiFileMap) {
+
+		Map<String, Object> variables = new HashMap<>();
+
+		if (reportParamsMap != null) {
+			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+				String paramName = entry.getKey();
+				ReportParameter reportParam = entry.getValue();
+				if (reportParam.getParameter().getDataType() == ParameterDataType.File) {
+					variables.put(paramName, null);
+				} else {
+					variables.put(paramName, reportParam);
+				}
+			}
+		}
+
+		if (multiFileMap != null) {
+			variables.putAll(multiFileMap);
+		}
+
+		MongoClient mongoClient = null;
+		Datasource datasource = report.getDatasource();
+		if (datasource != null && datasource.getDatasourceType() == DatasourceType.MongoDB) {
+			mongoClient = DbConnections.getMongodbConnection(datasource.getDatasourceId());
+		}
+		variables.put("mongoClient", mongoClient);
+
+		return runGroovyExpression(string, variables);
+	}
+
+	/**
+	 * Runs a groovy expression and returns the result
+	 *
+	 * @param string the string containing the groovy script
+	 * @param variables the variables to pass
+	 * @return the object returned by the groovy script
+	 */
+	public Object runGroovyExpression(String string, Map<String, Object> variables) {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new SandboxTransformer());
 
-		Binding binding = new Binding();
+		Binding binding;
+		if (variables == null) {
+			binding = new Binding();
+		} else {
+			binding = new Binding(variables);
+		}
 
 		GroovyShell shell = new GroovyShell(binding, cc);
 

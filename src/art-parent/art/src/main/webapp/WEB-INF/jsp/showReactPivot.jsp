@@ -21,7 +21,10 @@
 	//https://github.com/davidguttman/react-pivot
 	//https://github.com/davidguttman/react-pivot/blob/master/index.jsx
 	var rowsString = '${encode:forJavaScript(rows)}';
-	var rows = JSON.parse(rowsString);
+	var rows = [];
+	if (rowsString) {
+		rows = JSON.parse(rowsString);
+	}
 
 	var options = {
 		rows: rows,

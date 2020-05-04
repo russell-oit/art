@@ -118,8 +118,7 @@ public class ParameterController {
 	public @ResponseBody
 	AjaxResponse getParameters(Locale locale, HttpServletRequest request,
 			HttpServletResponse httpResponse,
-			@RequestParam(value = "action", required = false) String action)
-			throws SQLException, IOException {
+			@RequestParam(value = "action", required = false) String action) {
 
 		logger.debug("Entering getParameters: action='{}'", action);
 

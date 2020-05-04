@@ -32,6 +32,7 @@ import art.reportoptions.StandardOutputOptions;
 import art.runreport.GroovyDataDetails;
 import art.runreport.ReportOptions;
 import art.runreport.RunReportHelper;
+import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import groovy.sql.GroovyRowResult;
@@ -47,6 +48,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +68,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1233,14 +1234,18 @@ public abstract class StandardOutput {
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
 	 * @param job the job that is generating the burst output
+	 * @param reportParamsMap report parameters
+	 * @param username the username of the user who is running the job
 	 * @throws SQLException
 	 * @throws java.io.IOException
+	 * @throws java.text.ParseException
 	 */
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat,
-			Job job) throws SQLException, IOException {
+			Job job, Map<String, ReportParameter> reportParamsMap,
+			String username) throws SQLException, IOException, ParseException {
 
-		logger.debug("Entering generateBurstOutput: reportFormat={}, job={},",
-				reportFormat, job);
+		logger.debug("Entering generateBurstOutput: reportFormat={}, job={},"
+				+ " username='{}'", reportFormat, job, username);
 
 		this.report = job.getReport();
 
@@ -1319,18 +1324,22 @@ public abstract class StandardOutput {
 					//generate file name to use
 					String exportPath = Config.getJobsExportPath();
 					String fileName;
-					String baseFileName;
-					String extension;
+
+					FilenameHelper filenameHelper = new FilenameHelper();
 
 					String fixedFileName = job.getFixedFileName();
 					if (StringUtils.isNotBlank(fixedFileName)) {
-						baseFileName = FilenameUtils.getBaseName(fixedFileName);
-						extension = FilenameUtils.getExtension(fixedFileName);
-						String baseFilenameWithBurstId = baseFileName + "-BurstId-" + fileNameBurstId;
-						String finalBaseFilename = ArtUtils.cleanBaseFilename(baseFilenameWithBurstId);
-						fileName = finalBaseFilename + "." + extension;
+						ExpressionHelper expressionHelper = new ExpressionHelper();
+						fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
 
-						if (!FinalFilenameValidator.isValid(fileName)) {
+						fixedFileName = fixedFileName + "-BurstId-" + fileNameBurstId;
+						fixedFileName = ArtUtils.cleanBaseFilename(fixedFileName);
+
+						String extension = filenameHelper.getFilenameExtension(report, reportFormat);
+
+						fileName = fixedFileName + "." + extension;
+
+						if (!FinalFilenameValidator.isValidTwoDot(fileName)) {
 							throw new IllegalArgumentException("Invalid burst file name - " + fileName);
 						}
 
@@ -1339,14 +1348,13 @@ public abstract class StandardOutput {
 						if (fixedFile.exists()) {
 							boolean fileDeleted = fixedFile.delete();
 							if (!fileDeleted) {
-								logger.warn("Could not delete fixed file: " + fullFixedFileName);
+								logger.warn("Could not delete fixed file: '{}'", fullFixedFileName);
 							}
 						}
 					} else {
-						FilenameHelper filenameHelper = new FilenameHelper();
-						fileName = filenameHelper.getFilename(job, fileNameBurstId, locale, reportFormat); //getFilename() does cleaning
+						fileName = filenameHelper.getFilename(job, fileNameBurstId, locale, reportFormat, reportParamsMap);
 
-						if (!FinalFilenameValidator.isValid(fileName)) {
+						if (!FinalFilenameValidator.isValidTwoDot(fileName)) {
 							throw new IllegalArgumentException("Invalid file name - " + fileName);
 						}
 					}

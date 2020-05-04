@@ -131,7 +131,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -2579,30 +2578,25 @@ public class ReportJob implements org.quartz.Job {
 		String fixedFileName = job.getFixedFileName();
 		logger.debug("fixedFileName='{}'", fixedFileName);
 
+		FilenameHelper filenameHelper = new FilenameHelper();
+		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+
 		if (StringUtils.isNotBlank(fixedFileName)) {
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			String username = job.getUser().getUsername();
 
 			ExpressionHelper expressionHelper = new ExpressionHelper();
 			fixedFileName = expressionHelper.processString(fixedFileName, reportParamsMap, username);
 
-			fixedFileName = ArtUtils.cleanFilename(fixedFileName);
+			fixedFileName = ArtUtils.cleanBaseFilename(fixedFileName);
+
+			String extension = filenameHelper.getFilenameExtension(report, reportFormat);
 
 			if (job.getRunsToArchive() > 0) {
 				int randomNumber = ArtUtils.getRandomNumber(100, 999);
-				String baseFilename = FilenameUtils.getBaseName(fixedFileName);
-				String extension = FilenameUtils.getExtension(fixedFileName);
-				if (StringUtils.containsAny(extension, "aes", "gpg")) {
-					//allow second extension to be used for encryped files
-					String base2 = FilenameUtils.getBaseName(baseFilename);
-					String extension2 = FilenameUtils.getExtension(baseFilename);
-					fileName = base2 + "-" + String.valueOf(randomNumber) + "." + extension2 + "." + extension;
-				} else {
-					fileName = baseFilename + "-" + String.valueOf(randomNumber) + "." + extension;
-				}
+				fileName = fixedFileName + "-" + String.valueOf(randomNumber) + "." + extension;
 			} else {
-				fileName = fixedFileName;
-				String fullFixedFileName = exportPath + fixedFileName;
+				fileName = fixedFileName + "." + extension;
+				String fullFixedFileName = exportPath + fileName;
 				File fixedFile = new File(fullFixedFileName);
 				if (fixedFile.exists()) {
 					boolean fileDeleted = fixedFile.delete();
@@ -2612,8 +2606,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 		} else {
-			FilenameHelper filenameHelper = new FilenameHelper();
-			fileName = filenameHelper.getFilename(job, locale, reportFormat);
+			fileName = filenameHelper.getFilename(job, locale, reportFormat, reportParamsMap);
 		}
 
 		logger.debug("fileName = '{}'", fileName);
@@ -2676,15 +2669,16 @@ public class ReportJob implements org.quartz.Job {
 	 * @param paramProcessorResult the parameter processor result
 	 * @throws SQLException
 	 * @throws IOException
+	 * @throws java.text.ParseException
 	 */
 	private void runBurstJob(ReportRunner reportRunner,
-			ParameterProcessorResult paramProcessorResult) throws SQLException, IOException {
+			ParameterProcessorResult paramProcessorResult)
+			throws SQLException, IOException, ParseException {
 
 		logger.debug("Entering runBurstJob");
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
-		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
 		if (!reportType.isTabular()) {
 			logger.warn("Invalid report type for burst job: {}. Job Id {}", reportType, jobId);
@@ -2693,16 +2687,18 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
-		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-
-		//generate output
-		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-
-		reportOutputGenerator.setIsJob(true);
-
 		ResultSet rs = null;
 		try {
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+
+			//generate output
+			ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+			reportOutputGenerator.setIsJob(true);
+
+			ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 			boolean isJob = true;
 			StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
 
@@ -2713,7 +2709,8 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job);
+			String username = job.getUser().getUsername();
+			standardOutput.generateBurstOutput(rs, reportFormat, job, reportParamsMap, username);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);
@@ -3016,10 +3013,13 @@ public class ReportJob implements org.quartz.Job {
 	private ReportRunner prepareReportRunner(User user, Report report) throws SQLException {
 		logger.debug("Entering prepareReportRunner: user={}, report={}", user, report);
 
+		String runId = ArtUtils.getUniqueId(jobId);
+
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUser(user);
 		reportRunner.setReport(report);
 		reportRunner.setJob(job);
+		reportRunner.setRunId(runId);
 
 		return reportRunner;
 	}

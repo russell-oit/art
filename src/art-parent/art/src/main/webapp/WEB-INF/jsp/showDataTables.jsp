@@ -357,7 +357,10 @@
 			</c:forEach>
 
 	var dataString = '${encode:forJavaScript(data)}';
-	var data = JSON.parse(dataString);
+	var data = [];
+    if (dataString) {
+        data = JSON.parse(dataString);
+    }
 
 	$.extend(options, {
 		data: data,

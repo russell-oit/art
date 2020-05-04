@@ -24,6 +24,7 @@ import art.enums.ConnectionPoolLibrary;
 import art.jobrunners.CleanJob;
 import art.logback.LevelAndLoggerFilter;
 import art.logback.OnLevelEvaluator;
+import art.runreport.ReportRunDetails;
 import art.saiku.SaikuConnectionManager;
 import art.saiku.SaikuConnectionProvider;
 import art.settings.CustomSettings;
@@ -126,6 +127,7 @@ public class Config extends HttpServlet {
 	private static String serverTimeZoneDescription;
 	private static final Map<String, String> timeZones = new LinkedHashMap<>();
 	private static final Map<String, Statement> runningStatements = new HashMap<>();
+	private static final List<ReportRunDetails> runningQueries = new ArrayList<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -147,6 +149,8 @@ public class Config extends HttpServlet {
 
 		logger.debug("runningStatements.size()={}", runningStatements.size());
 		runningStatements.clear();
+		logger.debug("runningQueries.size()={}", runningQueries.size());
+		runningQueries.clear();
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -1521,38 +1525,19 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns running statements
+	 * Returns the running queries
 	 *
-	 * @return running statements
+	 * @return the running queries
 	 */
-	public static Map<String, Statement> getRunningStatements() {
-		return runningStatements;
+	public static List<ReportRunDetails> getRunningQueries() {
+		return runningQueries;
 	}
 
 	/**
-	 * Adds a statement to the running statements map
-	 *
-	 * @param id the id for the statement
-	 * @param statement the statement to add
-	 */
-	public static void addRunningStatement(String id, Statement statement) {
-		runningStatements.put(id, statement);
-	}
-
-	/**
-	 * Removes a statement from the running statements map
-	 *
-	 * @param id the statement id
-	 */
-	public static void removeRunningStatement(String id) {
-		runningStatements.remove(id);
-	}
-
-	/**
-	 * Cancels a running statement
+	 * Cancels a running query
 	 *
 	 * @param runId the run id
-	 * @return <code>true</code> if the statement was cancelled
+	 * @return <code>true</code> if the query was cancelled
 	 * @throws SQLException
 	 */
 	public static boolean cancelQuery(String runId) throws SQLException {
@@ -1565,6 +1550,27 @@ public class Config extends HttpServlet {
 		}
 
 		return cancelled;
+	}
+
+	/**
+	 * Adds a running query
+	 *
+	 * @param reportRunDetails details of the query
+	 * @param statement the statement object for the query
+	 */
+	public static void addRunningQuery(ReportRunDetails reportRunDetails, Statement statement) {
+		runningQueries.add(reportRunDetails);
+		runningStatements.put(reportRunDetails.getRunId(), statement);
+	}
+
+	/**
+	 * Removes a running query
+	 *
+	 * @param runId the run id for the query
+	 */
+	public static void removeRunningQuery(String runId) {
+		runningStatements.remove(runId);
+		runningQueries.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
 	}
 
 }
