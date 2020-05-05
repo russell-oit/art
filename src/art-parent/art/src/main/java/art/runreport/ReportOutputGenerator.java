@@ -2413,8 +2413,6 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 
 				showDataTablesJsp();
-			} else {
-				writer.print(reportRunner.getQuerySql());
 			}
 		}
 	}
