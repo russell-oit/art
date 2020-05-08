@@ -1491,25 +1491,42 @@ public class ReportRunner {
 		} else if (reportType == ReportType.LovDynamic) {
 			//dynamic lov. values coming from sql query
 			ResultSet rs = getResultSet();
-			try {
-				int columnCount = rs.getMetaData().getColumnCount();
-				while (rs.next()) {
-					//use getObject(). for dates, using getString() will return
-					//different strings for different databases and drivers
-					//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
-					//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
-					Object dataValue = rs.getObject(1);
-					String displayValue;
-					if (columnCount > 1) {
-						displayValue = rs.getString(2);
-					} else {
-						displayValue = rs.getString(1);
-					}
+			if (rs != null) {
+				try {
+					int columnCount = rs.getMetaData().getColumnCount();
+					while (rs.next()) {
+						//use getObject(). for dates, using getString() will return
+						//different strings for different databases and drivers
+						//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
+						//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
+						Object dataValue = rs.getObject(1);
+						String displayValue;
+						if (columnCount > 1) {
+							displayValue = rs.getString(2);
+						} else {
+							displayValue = rs.getString(1);
+						}
 
-					lovValues.put(dataValue, displayValue);
+						lovValues.put(dataValue, displayValue);
+					}
+				} finally {
+					DatabaseUtils.close(rs);
 				}
-			} finally {
-				DatabaseUtils.close(rs);
+			} else if (groovyData != null) {
+				@SuppressWarnings("unchecked")
+				List<? extends Object> dataList = (List<? extends Object>) groovyData;
+				if (CollectionUtils.isNotEmpty(dataList)) {
+					for (Object row : dataList) {
+						if (row instanceof Map) {
+							@SuppressWarnings("unchecked")
+							Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
+							lovValues.putAll(rowMap);
+						} else {
+							String displayValue = String.valueOf(row);
+							lovValues.put(row, displayValue);
+						}
+					}
+				}
 			}
 		}
 
