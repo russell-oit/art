@@ -45,6 +45,7 @@ import com.itfsw.query.builder.SqlQueryBuilderFactory;
 import com.itfsw.query.builder.support.builder.SqlBuilder;
 import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import groovy.lang.GString;
+import groovy.sql.GroovyRowResult;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -67,6 +68,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -1517,7 +1520,32 @@ public class ReportRunner {
 				List<? extends Object> dataList = (List<? extends Object>) groovyData;
 				if (CollectionUtils.isNotEmpty(dataList)) {
 					for (Object row : dataList) {
-						if (row instanceof Map) {
+						if (row instanceof GroovyRowResult) {
+							GroovyRowResult rowResult = (GroovyRowResult) row;
+							int columnCount = rowResult.size();
+							Object dataValue = rowResult.getAt(0);
+							String displayValue;
+							if (columnCount > 1) {
+								displayValue = String.valueOf(rowResult.getAt(1));
+							} else {
+								displayValue = String.valueOf(dataValue);
+							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof DynaBean) {
+							DynaBean rowBean = (DynaBean) row;
+							DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+							int columnCount = columns.length;
+							String columnOneName = columns[0].getName();
+							Object dataValue = rowBean.get(columnOneName);
+							String displayValue;
+							if (columnCount > 1) {
+								String columnTwoName = columns[1].getName();
+								displayValue = String.valueOf(rowBean.get(columnTwoName));
+							} else {
+								displayValue = String.valueOf(dataValue);
+							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof Map) {
 							@SuppressWarnings("unchecked")
 							Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
 							lovValues.putAll(rowMap);

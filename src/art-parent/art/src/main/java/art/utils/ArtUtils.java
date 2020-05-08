@@ -527,6 +527,10 @@ public class ArtUtils {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) object;
 			return map;
+		} else if (object instanceof String) {
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put((String) object, object);
+			return map;
 		} else {
 			if (mapper == null) {
 				mapper = new ObjectMapper();
