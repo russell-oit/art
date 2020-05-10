@@ -834,6 +834,7 @@ public class RunReportHelper {
 			List<? extends Object> dataListTemp = (List<? extends Object>) data;
 			dataList = dataListTemp;
 		} else {
+			//https://stackoverflow.com/questions/2776975/how-can-i-add-to-list-extends-number-data-structures
 			List<Object> dataListTemp = new ArrayList<>();
 			dataListTemp.add(data);
 			dataList = dataListTemp;
