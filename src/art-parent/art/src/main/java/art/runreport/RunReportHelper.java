@@ -1020,44 +1020,50 @@ public class RunReportHelper {
 	public static List<Map<String, ?>> getMapListData(Object data) throws Exception {
 		List<Map<String, ?>> finalData = new ArrayList<>();
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
-		if (CollectionUtils.isNotEmpty(dataList)) {
-			Object sample = dataList.get(0);
-			if (sample instanceof GroovyRowResult) {
-				for (Object row : dataList) {
-					//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
-					GroovyRowResult rowResult = (GroovyRowResult) row;
-					Map<String, Object> rowMap = new LinkedHashMap<>();
-					for (Object columnName : rowResult.keySet()) {
-						rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
+		if (data instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<? extends Object> dataList = (List<? extends Object>) data;
+			if (CollectionUtils.isNotEmpty(dataList)) {
+				Object sample = dataList.get(0);
+				if (sample instanceof GroovyRowResult) {
+					for (Object row : dataList) {
+						//https://6by9.wordpress.com/2012/10/13/groovyrowresult-as-a-hashmap/
+						GroovyRowResult rowResult = (GroovyRowResult) row;
+						Map<String, Object> rowMap = new LinkedHashMap<>();
+						for (Object columnName : rowResult.keySet()) {
+							rowMap.put(String.valueOf(columnName), rowResult.get(columnName));
+						}
+						finalData.add(rowMap);
 					}
-					finalData.add(rowMap);
-				}
-			} else if (sample instanceof DynaBean) {
-				for (Object row : dataList) {
-					DynaBean rowBean = (DynaBean) row;
-					DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
-					Map<String, Object> rowMap = new LinkedHashMap<>();
-					for (DynaProperty column : columns) {
-						String columnName = column.getName();
-						rowMap.put(columnName, rowBean.get(columnName));
+				} else if (sample instanceof DynaBean) {
+					for (Object row : dataList) {
+						DynaBean rowBean = (DynaBean) row;
+						DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+						Map<String, Object> rowMap = new LinkedHashMap<>();
+						for (DynaProperty column : columns) {
+							String columnName = column.getName();
+							rowMap.put(columnName, rowBean.get(columnName));
+						}
+						finalData.add(rowMap);
 					}
-					finalData.add(rowMap);
-				}
-			} else if (sample instanceof Map) {
-				for (Object row : dataList) {
-					@SuppressWarnings("unchecked")
-					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
-					finalData.add(rowMap);
-				}
-			} else {
-				ObjectMapper mapper = new ObjectMapper();
-				for (Object row : dataList) {
-					Map<String, Object> rowMap = ArtUtils.objectToDefaultMap(row, mapper);
-					finalData.add(rowMap);
+				} else if (sample instanceof Map) {
+					for (Object row : dataList) {
+						@SuppressWarnings("unchecked")
+						Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
+						finalData.add(rowMap);
+					}
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					for (Object row : dataList) {
+						Map<String, Object> rowMap = ArtUtils.objectToDefaultMap(row, mapper);
+						finalData.add(rowMap);
+					}
 				}
 			}
+		} else if (data instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) data;
+			finalData.add(rowMap);
 		}
 
 		return finalData;

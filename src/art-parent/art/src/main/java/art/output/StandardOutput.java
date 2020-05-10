@@ -1723,6 +1723,8 @@ public abstract class StandardOutput {
 				@SuppressWarnings("unchecked")
 				Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
 				value = rowMap.get(columnName);
+			} else if (row instanceof String) {
+				value = row;
 			} else {
 				value = PropertyUtils.getProperty(row, columnName);
 			}

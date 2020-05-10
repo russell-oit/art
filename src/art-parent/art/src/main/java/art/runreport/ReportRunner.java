@@ -1516,6 +1516,7 @@ public class ReportRunner {
 					DatabaseUtils.close(rs);
 				}
 			} else if (groovyData != null) {
+				//https://stackoverflow.com/questions/22768663/how-to-know-if-a-java-object-is-a-list
 				if (groovyData instanceof List) {
 					@SuppressWarnings("unchecked")
 					List<? extends Object> dataList = (List<? extends Object>) groovyData;
@@ -1548,8 +1549,10 @@ public class ReportRunner {
 								lovValues.put(dataValue, displayValue);
 							} else if (row instanceof Map) {
 								@SuppressWarnings("unchecked")
-								Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
-								lovValues.putAll(rowMap);
+								Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
+								for (Entry<String, ? extends Object> entry : rowMap.entrySet()) {
+									lovValues.put(entry.getValue(), entry.getKey());
+								}
 							} else {
 								String displayValue = String.valueOf(row);
 								lovValues.put(row, displayValue);
@@ -1557,9 +1560,12 @@ public class ReportRunner {
 						}
 					}
 				} else if (groovyData instanceof Map) {
+					//https://stackoverflow.com/questions/20412354/reverse-hashmap-keys-and-values-in-java
 					@SuppressWarnings("unchecked")
-					Map<? extends Object, String> rowMap = (Map<? extends Object, String>) groovyData;
-					lovValues.putAll(rowMap);
+					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) groovyData;
+					for (Entry<String, ? extends Object> entry : rowMap.entrySet()) {
+						lovValues.put(entry.getValue(), entry.getKey());
+					}
 				}
 			}
 		}
