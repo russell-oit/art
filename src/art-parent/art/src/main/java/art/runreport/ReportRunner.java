@@ -1517,54 +1517,52 @@ public class ReportRunner {
 				}
 			} else if (groovyData != null) {
 				//https://stackoverflow.com/questions/22768663/how-to-know-if-a-java-object-is-a-list
+				List<? extends Object> dataList;
 				if (groovyData instanceof List) {
 					@SuppressWarnings("unchecked")
-					List<? extends Object> dataList = (List<? extends Object>) groovyData;
-					if (CollectionUtils.isNotEmpty(dataList)) {
-						for (Object row : dataList) {
-							if (row instanceof GroovyRowResult) {
-								GroovyRowResult rowResult = (GroovyRowResult) row;
-								int columnCount = rowResult.size();
-								Object dataValue = rowResult.getAt(0);
-								String displayValue;
-								if (columnCount > 1) {
-									displayValue = String.valueOf(rowResult.getAt(1));
-								} else {
-									displayValue = String.valueOf(dataValue);
-								}
-								lovValues.put(dataValue, displayValue);
-							} else if (row instanceof DynaBean) {
-								DynaBean rowBean = (DynaBean) row;
-								DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
-								int columnCount = columns.length;
-								String columnOneName = columns[0].getName();
-								Object dataValue = rowBean.get(columnOneName);
-								String displayValue;
-								if (columnCount > 1) {
-									String columnTwoName = columns[1].getName();
-									displayValue = String.valueOf(rowBean.get(columnTwoName));
-								} else {
-									displayValue = String.valueOf(dataValue);
-								}
-								lovValues.put(dataValue, displayValue);
-							} else if (row instanceof Map) {
-								@SuppressWarnings("unchecked")
-								Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
-								for (Entry<String, ? extends Object> entry : rowMap.entrySet()) {
-									lovValues.put(entry.getValue(), entry.getKey());
-								}
+					List<? extends Object> dataListTemp = (List<? extends Object>) groovyData;
+					dataList = dataListTemp;
+				} else {
+					List<Object> dataListTemp = new ArrayList<>();
+					dataListTemp.add(groovyData);
+					dataList = dataListTemp;
+				}
+
+				if (CollectionUtils.isNotEmpty(dataList)) {
+					for (Object row : dataList) {
+						if (row instanceof GroovyRowResult) {
+							GroovyRowResult rowResult = (GroovyRowResult) row;
+							int columnCount = rowResult.size();
+							Object dataValue = rowResult.getAt(0);
+							String displayValue;
+							if (columnCount > 1) {
+								displayValue = String.valueOf(rowResult.getAt(1));
 							} else {
-								String displayValue = String.valueOf(row);
-								lovValues.put(row, displayValue);
+								displayValue = String.valueOf(dataValue);
 							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof DynaBean) {
+							DynaBean rowBean = (DynaBean) row;
+							DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+							int columnCount = columns.length;
+							String columnOneName = columns[0].getName();
+							Object dataValue = rowBean.get(columnOneName);
+							String displayValue;
+							if (columnCount > 1) {
+								String columnTwoName = columns[1].getName();
+								displayValue = String.valueOf(rowBean.get(columnTwoName));
+							} else {
+								displayValue = String.valueOf(dataValue);
+							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof Map) {
+							@SuppressWarnings("unchecked")
+							Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
+							lovValues.putAll(rowMap);
+						} else {
+							String displayValue = String.valueOf(row);
+							lovValues.put(row, displayValue);
 						}
-					}
-				} else if (groovyData instanceof Map) {
-					//https://stackoverflow.com/questions/20412354/reverse-hashmap-keys-and-values-in-java
-					@SuppressWarnings("unchecked")
-					Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) groovyData;
-					for (Entry<String, ? extends Object> entry : rowMap.entrySet()) {
-						lovValues.put(entry.getValue(), entry.getKey());
 					}
 				}
 			}

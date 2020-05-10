@@ -321,9 +321,13 @@ public class ReportOutputGenerator {
 
 		groovyData = reportRunner.getGroovyData();
 		if (groovyData != null) {
-			@SuppressWarnings("unchecked")
-			List<? extends Object> dataList = (List<? extends Object>) groovyData;
-			groovyDataSize = dataList.size();
+			if (groovyData instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<? extends Object> dataList = (List<? extends Object>) groovyData;
+				groovyDataSize = dataList.size();
+			} else {
+				groovyDataSize = 1;
+			}
 		}
 
 		if (request != null) {
