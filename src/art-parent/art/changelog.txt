@@ -1,6 +1,7 @@
 ART 4.15
 * Allow dynamic lov to use groovy data
 * Apply max file upload setting to file parameter
+* Include report parameters in get report REST endpoint
 
 ART 4.14
 * Added directDownload url option

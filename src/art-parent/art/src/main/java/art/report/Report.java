@@ -1707,11 +1707,33 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Clears password fields
+	 * Sets the report password fields to null
 	 */
 	public void clearPasswords() {
 		openPassword = null;
 		modifyPassword = null;
+	}
+
+	/**
+	 * Sets all password fields to null, including for datasources etc
+	 */
+	public void clearAllPasswords() {
+		clearPasswords();
+
+		if (datasource != null) {
+			datasource.clearPassword();
+		}
+
+		if (encryptor != null) {
+			encryptor.clearPasswords();
+		}
+
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				Parameter parameter = reportParam.getParameter();
+				parameter.clearAllPasswords();
+			}
+		}
 	}
 
 	/**
@@ -1732,8 +1754,8 @@ public class Report implements Serializable {
 
 		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
-				Parameter reportParamParameter = reportParam.getParameter();
-				reportParamParameter.encryptAllPasswords();
+				Parameter parameter = reportParam.getParameter();
+				parameter.encryptAllPasswords();
 			}
 		}
 	}

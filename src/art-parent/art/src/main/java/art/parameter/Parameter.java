@@ -791,6 +791,18 @@ public class Parameter implements Serializable {
 	}
 
 	/**
+	 * Sets all password fields in the parameter members to null
+	 */
+	public void clearAllPasswords() {
+		if (defaultValueReport != null) {
+			defaultValueReport.clearAllPasswords();
+		}
+		if (lovReport != null) {
+			lovReport.clearAllPasswords();
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if this parameter is to be displayed in the
 	 * select parameters page
 	 *

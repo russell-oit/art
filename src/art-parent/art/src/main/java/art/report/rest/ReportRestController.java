@@ -17,6 +17,8 @@
  */
 package art.report.rest;
 
+import art.cache.CacheHelper;
+import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -25,6 +27,7 @@ import art.general.ApiResponse;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOutputGenerator;
@@ -90,6 +93,12 @@ public class ReportRestController {
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private CacheHelper cacheHelper;
+
+	@Autowired
+	private ReportParameterService reportParameterService;
+
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getReportById(@PathVariable("id") Integer id) {
 		logger.debug("Entering getReportById: id={}", id);
@@ -99,8 +108,21 @@ public class ReportRestController {
 			if (report == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				Report cleanReport = report.getCleanReport();
-				return ApiHelper.getOkResponseEntity(cleanReport);
+				List<ReportParameter> reportParams = reportParameterService.getReportParameters(id);
+				report.setReportParams(reportParams);
+
+				List<Drilldown> drilldowns = drilldownService.getDrilldowns(id);
+				report.setDrilldowns(drilldowns);
+				
+				report.clearAllPasswords();
+
+				//clear objects that could have had their passwords cleared, so as to have fresh start
+				cacheHelper.clearReports();
+				cacheHelper.clearDatasources();
+				cacheHelper.clearEncryptors();
+				cacheHelper.clearParameters();
+
+				return ApiHelper.getOkResponseEntity(report);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

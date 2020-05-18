@@ -425,6 +425,16 @@ public class Encryptor implements Serializable {
 	}
 
 	/**
+	 * Sets all passwords fields to null
+	 */
+	public void clearPasswords() {
+		aesCryptPassword = null;
+		openPgpSigningKeyPassphrase = null;
+		openPassword = null;
+		modifyPassword = null;
+	}
+
+	/**
 	 * Returns <code>true</code> if all the password fields are null
 	 *
 	 * @return <code>true</code> if all the password fields are null
