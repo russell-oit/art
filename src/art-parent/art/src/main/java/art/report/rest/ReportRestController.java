@@ -108,26 +108,54 @@ public class ReportRestController {
 			if (report == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				List<ReportParameter> reportParams = reportParameterService.getReportParameters(id);
-				report.setReportParams(reportParams);
-
-				List<Drilldown> drilldowns = drilldownService.getDrilldowns(id);
-				report.setDrilldowns(drilldowns);
-				
-				report.clearAllPasswords();
-
-				//clear objects that could have had their passwords cleared, so as to have fresh start
-				cacheHelper.clearReports();
-				cacheHelper.clearDatasources();
-				cacheHelper.clearEncryptors();
-				cacheHelper.clearParameters();
-
+				prepareReport(report);
 				return ApiHelper.getOkResponseEntity(report);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);
 		}
+	}
+
+	@GetMapping("/name/{name}")
+	public ResponseEntity<?> getReportByName(@PathVariable("name") String name) {
+		logger.debug("Entering getReportByName: name='{}'", name);
+
+		try {
+			Report report = reportService.getReport(name);
+			if (report == null) {
+				return ApiHelper.getNotFoundResponseEntity();
+			} else {
+				prepareReport(report);
+				return ApiHelper.getOkResponseEntity(report);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			return ApiHelper.getErrorResponseEntity(ex);
+		}
+	}
+
+	/**
+	 * Adds report parameters and clears password fields
+	 *
+	 * @param report the report object
+	 * @throws SQLException
+	 */
+	private void prepareReport(Report report) throws SQLException {
+		int reportId = report.getReportId();
+		List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
+		report.setReportParams(reportParams);
+
+		List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+		report.setDrilldowns(drilldowns);
+
+		report.clearAllPasswords();
+
+		//clear objects that could have had their passwords cleared, so as to have fresh start
+		cacheHelper.clearReports();
+		cacheHelper.clearDatasources();
+		cacheHelper.clearEncryptors();
+		cacheHelper.clearParameters();
 	}
 
 	@DeleteMapping("/{id}")
