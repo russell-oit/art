@@ -310,6 +310,15 @@ public class RunReportHelper {
 		}
 		request.setAttribute("hasFileParam", hasFileParam);
 
+		String maxFileSizeJasnyString;
+		int maxFileSizeMB = Config.getSettings().getMaxFileUploadSizeMB();
+		if (maxFileSizeMB < 0) {
+			maxFileSizeJasnyString = "";
+		} else {
+			maxFileSizeJasnyString = String.valueOf(maxFileSizeMB);
+		}
+		request.setAttribute("maxFileSizeJasnyString", maxFileSizeJasnyString);
+
 		request.setAttribute("runId", ArtUtils.getUniqueId(report.getReportId()));
 
 		boolean enableReportFormats;

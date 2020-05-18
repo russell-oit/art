@@ -1,5 +1,6 @@
 ART 4.15
 * Allow dynamic lov to use groovy data
+* Apply max file upload setting to file parameter
 
 ART 4.14
 * Added directDownload url option
