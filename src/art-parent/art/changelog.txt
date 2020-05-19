@@ -3,6 +3,7 @@ ART 4.15
 * Apply max file upload setting to file parameter
 * Include report parameters in get report REST endpoint
 * Add REST endpoint to get report details by name
+* Added max running option for individual reports
 
 ART 4.14
 * Added directDownload url option

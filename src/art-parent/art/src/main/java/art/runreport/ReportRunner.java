@@ -115,6 +115,7 @@ public class ReportRunner {
 	public static final int RETURN_ZERO_RECORDS = 0;
 	private String runId;
 	private MultiValueMap<String, MultipartFile> multiFileMap;
+	private String localRunId;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
@@ -1153,6 +1154,23 @@ public class ReportRunner {
 			throw new RuntimeException("report is null");
 		}
 
+		int reportId = report.getReportId();
+		long currentRunning = Config.getRunningReportCount(reportId);
+		int maxRunning = report.getEffectiveMaxRunning();
+		if ((maxRunning > 0) && (currentRunning >= maxRunning)) {
+			throw new RuntimeException("Maximum reports running for this report");
+		} else {
+			localRunId = ArtUtils.getUniqueId(reportId);
+
+			ReportRunDetails reportRunDetails = new ReportRunDetails();
+			reportRunDetails.setReport(report);
+			reportRunDetails.setJob(job);
+			reportRunDetails.setUser(user);
+			reportRunDetails.setRunId(localRunId);
+
+			Config.addRunningReport(reportRunDetails);
+		}
+
 		useRules = report.isUsesRules();
 
 		//override use rules setting if required, especially for lovs
@@ -1587,6 +1605,10 @@ public class ReportRunner {
 
 		if (StringUtils.isNotBlank(runId)) {
 			Config.removeRunningQuery(runId);
+		}
+
+		if (StringUtils.isNotBlank(localRunId)) {
+			Config.removeRunningReport(localRunId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);
