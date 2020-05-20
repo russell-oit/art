@@ -152,6 +152,7 @@ public class Report implements Serializable {
 	private String link;
 	private boolean openInNewWindow;
 	private int maxRunning;
+	private int maxRunningPerUser;
 	private Datasource datasource;
 	private Encryptor encryptor;
 	private List<ReportParameter> reportParams; //used in import/export
@@ -174,6 +175,20 @@ public class Report implements Serializable {
 	private boolean selfServicePreview;
 	@JsonIgnore
 	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
+
+	/**
+	 * @return the maxRunningPerUser
+	 */
+	public int getMaxRunningPerUser() {
+		return maxRunningPerUser;
+	}
+
+	/**
+	 * @param maxRunningPerUser the maxRunningPerUser to set
+	 */
+	public void setMaxRunningPerUser(int maxRunningPerUser) {
+		this.maxRunningPerUser = maxRunningPerUser;
+	}
 
 	/**
 	 * @return the maxRunning
@@ -1916,16 +1931,6 @@ public class Report implements Serializable {
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	 * Returns the effective maximum running reports for this report
-	 * 
-	 * @return the effective maximum running reports for this report
-	 */
-	@JsonIgnore
-	public int getEffectiveMaxRunning() {
-		return maxRunning;
 	}
 
 }

@@ -1183,8 +1183,8 @@ Edit report page
 					default:
 						$("#optionsDiv").show();
 				}
-				
-				//show/hide max running div
+
+				//show/hide max running fields
 				switch (reportTypeId) {
 					case 110: //dashboard
 					case 129: //gridstack dashboard
@@ -1195,10 +1195,10 @@ Edit report page
 					case 150: //saiku connection
 					case 149: //saiku report
 					case 163: //link
-						$("#maxRunningDiv").hide();
+						$("#maxRunningFields").hide();
 						break;
 					default:
-						$("#maxRunningDiv").show();
+						$("#maxRunningFields").show();
 				}
 			}
 		</script>
@@ -1977,15 +1977,28 @@ Edit report page
 						<form:errors path="viewReportId" cssClass="error"/>
 					</div>
 				</div>
-				<div id="maxRunningDiv" class="form-group">
-					<label class="control-label col-md-4" for="maxRunning">
-						<spring:message code="settings.label.maxRunningReports"/>
-					</label>
-					<div class="col-md-8">
-						<form:input type="number" path="maxRunning" maxlength="5" class="form-control"/>
-						<form:errors path="maxRunning" cssClass="error"/>
+
+				<fieldset id="maxRunningFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="maxRunning">
+							<spring:message code="settings.label.maxRunningReports"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="maxRunning" maxlength="5" class="form-control"/>
+							<form:errors path="maxRunning" cssClass="error"/>
+						</div>
 					</div>
-				</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="maxRunningPerUser">
+							<spring:message code="reports.label.maxRunningReportsPerUser"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="maxRunningPerUser" maxlength="5" class="form-control"/>
+							<form:errors path="maxRunningPerUser" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
 				<div id="useGroovyDiv" class="form-group">
 					<label class="control-label col-md-4" for="useGroovy">
 						<spring:message code="reports.label.useGroovy"/>

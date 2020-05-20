@@ -1156,16 +1156,31 @@ public class ReportRunner {
 
 		int reportId = report.getReportId();
 		long currentRunning = Config.getRunningReportCount(reportId);
-		int maxRunning = report.getEffectiveMaxRunning();
-		if ((maxRunning > 0) && (currentRunning >= maxRunning)) {
-			throw new RuntimeException("Maximum reports running for this report");
+		int maxRunning = report.getMaxRunning();
+		int maxRunningPerUser = report.getMaxRunningPerUser();
+		long currentRunningForUser;
+		if (user == null) {
+			currentRunningForUser = 0;
+		} else {
+			currentRunningForUser = Config.getRunningReportCount(reportId, user.getUserId());
+		}
+
+		if ((maxRunning > 0 && currentRunning >= maxRunning)
+				|| (maxRunningPerUser > 0 && currentRunningForUser >= maxRunningPerUser)) {
+			throw new RuntimeException("Maximum reports running for this report. Try again later.");
 		} else {
 			localRunId = ArtUtils.getUniqueId(reportId);
 
 			ReportRunDetails reportRunDetails = new ReportRunDetails();
 			reportRunDetails.setReport(report);
 			reportRunDetails.setJob(job);
-			reportRunDetails.setUser(user);
+			User runDetailsUser;
+			if (user == null) {
+				runDetailsUser = new User();
+			} else {
+				runDetailsUser = user;
+			}
+			reportRunDetails.setUser(runDetailsUser);
 			reportRunDetails.setRunId(localRunId);
 
 			Config.addRunningReport(reportRunDetails);

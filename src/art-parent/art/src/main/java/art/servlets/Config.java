@@ -1604,14 +1604,27 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Returns the number of running reports for a particular report id
-	 * 
+	 * Returns the number of running reports for a particular report
+	 *
 	 * @param reportId the report id
 	 * @return the number of running reports
 	 */
 	public static long getRunningReportCount(int reportId) {
 		//https://www.baeldung.com/java-stream-filter-count
 		return runningReports.stream().filter(r -> r.getReport().getReportId() == reportId).count();
+	}
+
+	/**
+	 * Returns the number of running reports for a particular report and user
+	 *
+	 * @param reportId the report id
+	 * @param userId the user id
+	 * @return the number of running reports
+	 */
+	public static long getRunningReportCount(int reportId, int userId) {
+		//https://www.baeldung.com/java-stream-filter-count
+		return runningReports.stream().filter(r -> r.getReport().getReportId() == reportId
+				&& r.getUser().getUserId() == userId).count();
 	}
 
 }

@@ -3,6 +3,7 @@
 -- CHANGES:
 -- update database version
 -- add max running column
+-- add max running per user column
 
 -- ------------------------------------------------
 
@@ -12,3 +13,6 @@ UPDATE ART_DATABASE_VERSION SET DATABASE_VERSION='4.15-snapshot';
 
 -- add max running column
 ALTER TABLE ART_QUERIES ADD MAX_RUNNING INTEGER;
+
+-- add max running per user column
+ALTER TABLE ART_QUERIES ADD MAX_RUNNING_PER_USER INTEGER;
