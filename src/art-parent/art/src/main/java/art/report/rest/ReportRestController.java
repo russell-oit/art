@@ -34,6 +34,7 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportOutputGeneratorResult;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
 import art.utils.ArtLogsHelper;
@@ -362,7 +363,9 @@ public class ReportRestController {
 				rowsUpdated = reportRunner.getUpdateCount();
 			} else {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
+				fileName = filenameHelper.getFilename(report, locale, reportFormat, reportParamsMap);
+				String exportPath = Config.getReportsExportPath();
+				String outputFileName = exportPath + fileName;
 
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
