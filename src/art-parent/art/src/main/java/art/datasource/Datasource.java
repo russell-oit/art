@@ -492,6 +492,13 @@ public class Datasource implements Serializable {
 	}
 
 	/**
+	 * Sets the password field to null
+	 */
+	public void clearPassword() {
+		password = null;
+	}
+
+	/**
 	 * Returns <code>true</code> if the password field is null
 	 *
 	 * @return <code>true</code> if the password field is null

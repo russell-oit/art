@@ -87,7 +87,6 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
-import art.utils.ExpressionHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -119,8 +118,6 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Generates report output
@@ -321,9 +318,13 @@ public class ReportOutputGenerator {
 
 		groovyData = reportRunner.getGroovyData();
 		if (groovyData != null) {
-			@SuppressWarnings("unchecked")
-			List<? extends Object> dataList = (List<? extends Object>) groovyData;
-			groovyDataSize = dataList.size();
+			if (groovyData instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<? extends Object> dataList = (List<? extends Object>) groovyData;
+				groovyDataSize = dataList.size();
+			} else {
+				groovyDataSize = 1;
+			}
 		}
 
 		if (request != null) {
@@ -2413,8 +2414,6 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 
 				showDataTablesJsp();
-			} else {
-				writer.print(reportRunner.getQuerySql());
 			}
 		}
 	}

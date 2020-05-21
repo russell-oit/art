@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.14"> 
+  <meta name="version" content="4.15"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -167,6 +167,11 @@
      <li><a href="#parameters">Parameters</a> 
       <ol> 
        <li><a href="#creating-a-new-parameter">Creating a new parameter</a></li> 
+       <li><a href="#parameter-in-sql-source">Parameter in SQL Source</a> 
+        <ol> 
+         <li><a href="#parameterized-value">Parameterized value</a></li> 
+         <li><a href="#direct-substitution">Direct substitution</a></li> 
+        </ol></li> 
        <li><a href="#single-value-parameters">Single-Value Parameters</a></li> 
        <li><a href="#multi-value-parameters">Multi-Value Parameters</a></li> 
        <li><a href="#x-parameter-definitions">X-Parameter Definitions</a> 
@@ -1605,6 +1610,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>For link reports, whether the link will open in a new window when clicked from the ART home page</td> 
        </tr> 
        <tr> 
+        <td><strong>Max Running Reports</strong></td> 
+        <td>The maximum number of concurrent runs allowed for this report. A value of 0 means no maximum.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Max Running Reports Per User</strong></td> 
+        <td>The maximum number of concurrent runs allowed for this report per user. A value of 0 means no maximum.</td> 
+       </tr> 
+       <tr> 
         <td><strong>Use Groovy</strong></td> 
         <td>Whether the report source is groovy rather than SQL</td> 
        </tr> 
@@ -2157,6 +2170,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
     <span class="k">FROM</span> <span class="n">cities</span>
 </pre> 
      </div> 
+     <p>If using groovy data, return a List of the values to be used, or if you require the value and display text to be different, return a Map whose keys are the values to be used and whose value is a String representing the display text.</p> 
      <h3 id="lov-static">LOV: Static</h3> 
      <p>Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
      <div class="codehilite"> 
@@ -3963,8 +3977,13 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
       </tbody> 
      </table> 
+     <h2 id="parameter-in-sql-source">Parameter in SQL Source</h2> 
+     <h3 id="parameterized-value">Parameterized value</h3> 
+     <p>To pass parameter values to an SQL query, in the report's sql source, surround the parameter name with the <code>#</code> character i.e. <code>#param_name#</code>. This will replace that parameter placeholder occurrence with <code>?</code> in the SQL query and the database will put the parameter value as appropriate when the query is run.</p> 
+     <h3 id="direct-substitution">Direct substitution</h3> 
+     <p>If you would like the parameter value to be directly applied to the SQL source before the query is run, use the syntax <code>!#param_name#</code>. This therefore means that the sql query will be prone to sql injection as opposed to using the parameterized syntax. For multi-value parameters, the parameter values will be separated by a comma.</p> 
      <h2 id="single-value-parameters">Single-Value Parameters</h2> 
-     <p>Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter in the SQL source. For example, the following query has two parameters.</p> 
+     <p>Single-value parameters are used to pass single values to the SQL query. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
       <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
     <span class="nv">FROM</span> <span class="nv">orders</span>
@@ -6723,549 +6742,555 @@ spnego-server {
      <h3 id="request">Request</h3> 
      <p>If using bearer authentication, you obtain an access token by performing the following request, passing <strong>username</strong> and <strong>password</strong> form parameters</p> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/login
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">login</span>
 </pre> 
      </div> 
      <h3 id="response">Response</h3> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "accessToken": "&lt;token&gt;"
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"accessToken"</span><span class="p">:</span> <span class="ss">"&lt;token&gt;"</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>In case the <strong>jwtSecret</strong> is not set, or the user provided doesn't exist or is disabled or doesn't have the <strong>use_api</strong> permission, a 401 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 401,
-        "artStatus": "UNAUTHORIZED",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">401</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"UNAUTHORIZED"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h2 id="users">Users</h2> 
      <h3 id="getting-all-users">Getting all users</h3> 
      <h4 id="request_1">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    GET /api/users
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span>
 </pre> 
      </div> 
      <h4 id="response_1">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": [
-            {
-                "userId": 24,
-                "username": "admin",
-                "accessLevel": "SuperAdmin",
-                "email": "admin@localhost.local",
-                "fullName": "",
-                "password": null,
-                "passwordAlgorithm": null,
-                "startReport": "",
-                "active": true,
-                "canChangePassword": true,
-                "creationDate": 1511116137000,
-                "updateDate": null,
-                "userGroups": [],
-                "effectiveStartReport": null,
-                "effectiveDefaultReportGroup": null,
-                "useBlankPassword": false,
-                "createdBy": "admin",
-                "updatedBy": null,
-                "generateAndSend": false,
-                "clearTextPassword": false,
-                "defaultReportGroup": null,
-                "adminUser": true,
-                "publicUser": false
-            }
-        ]
-    }
+      <pre><span></span><span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"httpStatus"</span><span class="err">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"artStatus"</span><span class="err">:</span><span class="w"> </span><span class="ss">"OK"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"message"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"data"</span><span class="err">:</span><span class="w"> </span><span class="o">[</span><span class="n"></span>
+<span class="n">            {</span>
+<span class="n">                "userId": 24,</span>
+<span class="n">                "username": "admin",</span>
+<span class="n">                "accessLevel": "SuperAdmin",</span>
+<span class="n">                "email": "admin@localhost.local",</span>
+<span class="n">                "fullName": "",</span>
+<span class="n">                "password": null,</span>
+<span class="n">                "passwordAlgorithm": null,</span>
+<span class="n">                "startReport": "",</span>
+<span class="n">                "active": true,</span>
+<span class="n">                "canChangePassword": true,</span>
+<span class="n">                "creationDate": 1511116137000,</span>
+<span class="n">                "updateDate": null,</span>
+<span class="n">                "userGroups": [</span><span class="o">]</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"effectiveStartReport"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"effectiveDefaultReportGroup"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"useBlankPassword"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"createdBy"</span><span class="err">:</span><span class="w"> </span><span class="ss">"admin"</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"updatedBy"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"generateAndSend"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"clearTextPassword"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"defaultReportGroup"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"adminUser"</span><span class="err">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="ss">"publicUser"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="w"></span>
+<span class="w">            </span><span class="err">}</span><span class="w"></span>
+<span class="w">        </span><span class="err">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="w"></span>
 </pre> 
      </div> 
      <h3 id="getting-a-particular-user">Getting a particular user</h3> 
      <h4 id="request_2">Request</h4> 
      <p>Get by user id</p> 
      <div class="codehilite"> 
-      <pre><span></span>    GET /api/users/{id}
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
 </pre> 
      </div> 
      <p>Get by username</p> 
      <div class="codehilite"> 
-      <pre><span></span>    GET /api/users/username/{username}
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="err">{</span><span class="n">username</span><span class="err">}</span>
 </pre> 
      </div> 
      <h4 id="response_2">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "userId": 1,
-            "username": "admin",
-            "accessLevel": "SuperAdmin",
-            "email": "admin@localhost.local",
-            "fullName": "",
-            "password": null,
-            "passwordAlgorithm": null,
-            "startReport": "",
-            "active": true,
-            "canChangePassword": true,
-            "creationDate": null,
-            "updateDate": 1514299510000,
-            "userGroups": [],
-            "effectiveStartReport": "",
-            "effectiveDefaultReportGroup": null,
-            "useBlankPassword": false,
-            "createdBy": null,
-            "updatedBy": "admin",
-            "generateAndSend": false,
-            "clearTextPassword": false,
-            "defaultReportGroup": null,
-            "adminUser": true,
-            "publicUser": false
-        }
-    }
+      <pre><span></span><span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"httpStatus"</span><span class="err">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"artStatus"</span><span class="err">:</span><span class="w"> </span><span class="ss">"OK"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"message"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="ss">"data"</span><span class="err">:</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"userId"</span><span class="err">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"username"</span><span class="err">:</span><span class="w"> </span><span class="ss">"admin"</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"accessLevel"</span><span class="err">:</span><span class="w"> </span><span class="ss">"SuperAdmin"</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"email"</span><span class="err">:</span><span class="w"> </span><span class="ss">"admin@localhost.local"</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"fullName"</span><span class="err">:</span><span class="w"> </span><span class="ss">""</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"password"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"passwordAlgorithm"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"startReport"</span><span class="err">:</span><span class="w"> </span><span class="ss">""</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"active"</span><span class="err">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"canChangePassword"</span><span class="err">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"creationDate"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"updateDate"</span><span class="err">:</span><span class="w"> </span><span class="mi">1514299510000</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"userGroups"</span><span class="err">:</span><span class="w"> </span><span class="err">[]</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"effectiveStartReport"</span><span class="err">:</span><span class="w"> </span><span class="ss">""</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"effectiveDefaultReportGroup"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"useBlankPassword"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"createdBy"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"updatedBy"</span><span class="err">:</span><span class="w"> </span><span class="ss">"admin"</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"generateAndSend"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"clearTextPassword"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"defaultReportGroup"</span><span class="err">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"adminUser"</span><span class="err">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="ss">"publicUser"</span><span class="err">:</span><span class="w"> </span><span class="k">false</span><span class="w"></span>
+<span class="w">        </span><span class="err">}</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="w"></span>
 </pre> 
      </div> 
      <p>In case the user doesn't exist, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 404,
-        "artStatus": "RECORD_NOT_FOUND",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="deleting-a-user">Deleting a user</h3> 
      <h4 id="request_3">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    DELETE /api/users/{id}
+      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
 </pre> 
      </div> 
      <h4 id="response_3">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the jobs that the user owns.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 409,
-        "artStatus": "LINKED_RECORDS_EXIST",
-        "message": "User not deleted because linked jobs exist",
-        "data": [
-            "A report (5)",
-            "Pie (8)",
-        ]
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"User not deleted because linked jobs exist"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="ss">"A report (5)"</span><span class="p">,</span>
+            <span class="ss">"Pie (8)"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="adding-a-user">Adding a user</h3> 
      <h4 id="request_4">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/users
-        {
-            "username": "test"
-            &lt;other fields&gt;
-        }
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span>
+        <span class="err">{</span>
+            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
 </pre> 
      </div> 
      <p>The request body should contain a user object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>User</strong> object, you can look at the <strong>WEB-INF\classes\art\user\User.java</strong> file. If using a clear text <strong>password</strong>, include the <strong>clearTextPassword</strong> field and set it to <strong>true</strong>.</p> 
      <h4 id="response_4">Response</h4> 
      <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created user. The created user is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 201,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "userId": 41,
-            &lt;other fields&gt;
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"userId"</span><span class="p">:</span> <span class="mi">41</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If the username is not provided or is blank, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 400,
-        "artStatus": "INVALID_VALUE",
-        "message": "username field not provided or blank",
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"username field not provided or blank"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If a user with the supplied username already exists, a 409 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 409,
-        "artStatus": "RECORD_EXISTS",
-        "message": "A user with the given username already exists",
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A user with the given username already exists"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="updating-a-user">Updating a user</h3> 
      <h4 id="request_5">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    PUT /api/users/{id}
-        {
-            "username": "test"
-            &lt;other fields&gt;
-        }
+      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+        <span class="err">{</span>
+            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
 </pre> 
      </div> 
      <p>The request body should contain a user object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>User</strong> object, you can look at the <strong>WEB-INF\classes\art\user\User.java</strong> file. If using a clear text <strong>password</strong>, include the <strong>clearTextPassword</strong> field and set it to <strong>true</strong>.</p> 
      <h4 id="response_5">Response</h4> 
      <p>If successful, a 200 response like the following would be returned. The updated user is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "userId": 12,
-            &lt;other fields&gt;
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"userId"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="disabling-a-user">Disabling a user</h3> 
      <h4 id="request_6">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/users/{id}/disable
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">disable</span>
 </pre> 
      </div> 
      <h4 id="response_6">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="enabling-a-user">Enabling a user</h3> 
      <h4 id="request_7">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/users/{id}/enable
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">enable</span>
 </pre> 
      </div> 
      <h4 id="response_7">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h2 id="reports">Reports</h2> 
      <h3 id="getting-a-particular-report">Getting a particular report</h3> 
      <h4 id="request_8">Request</h4> 
+     <p>Get by id</p> 
      <div class="codehilite"> 
-      <pre><span></span>    GET /api/reports/{id}
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+</pre> 
+     </div> 
+     <p>Get by name</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="err">{</span><span class="n">name</span><span class="err">}</span>
 </pre> 
      </div> 
      <h4 id="response_8">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "reportId": 1,
-            "name": "test",
-            "shortDescription": "short desc",
-            "description": "long desc",
-            "contactPerson": "contact",
-            "usesRules": false,
-            "parametersInOutput": false,
-            "xAxisLabel": "",
-            "yAxisLabel": "",
-            "chartOptionsSetting": null,
-            "template": "",
-            "displayResultset": 0,
-            "xmlaDatasource": "",
-            "xmlaCatalog": "",
-            "creationDate": null,
-            "updateDate": 1560255530000,
-            "reportSource": "select * from mytable",
-            "createdBy": null,
-            "createdById": 0,
-            "updatedBy": "admin",
-            "reportType": "Tabular",
-            "groupColumn": 0,
-            "active": true,
-            "hidden": false,
-            "defaultReportFormat": "default",
-            "secondaryCharts": "",
-            "hiddenColumns": "",
-            "totalColumns": "",
-            "dateFormat": "",
-            "numberFormat": "",
-            "columnFormats": "",
-            "locale": "",
-            "nullNumberDisplay": "",
-            "nullStringDisplay": "",
-            "fetchSize": 0,
-            "options": "",
-            "pageOrientation": "Portrait",
-            "omitTitleRow": false,
-            "lovUseDynamicDatasource": false,
-            "openPassword": null,
-            "modifyPassword": null,
-            "sourceReportId": 0,
-            "reportGroups": [
-                {
-                    "parentId": 0,
-                    "reportGroupId": 2,
-                    "name": "Test",
-                    "description": "test group",
-                    "creationDate": null,
-                    "updateDate": null,
-                    "createdBy": null,
-                    "updatedBy": null
-                }
-            ],
-            "clearTextPasswords": false,
-            "useGroovy": false,
-            "pivotTableJsSavedOptions": "",
-            "gridstackSavedOptions": "",
-            "name2": null,
-            "comment": "",
-            "viewReportId": 0,
-            "selfServiceOptions": "",
-            "datasource": null,
-            "encryptor": null,
-            "reportParams": null,
-            "userRuleValues": null,
-            "userGroupRuleValues": null,
-            "reportRules": null,
-            "userReportRights": null,
-            "userGroupReportRights": null,
-            "drilldowns": null,
-            "description2": null,
-            "dtActiveStatus": null,
-            "dtAction": null,
-            "reportGroupNames": "Test",
-            "reportGroupNamesHtml": "Test",
-            "dtId": 1,
-            "dtName": "test"
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
+            <span class="ss">"shortDescription"</span><span class="p">:</span> <span class="ss">"short desc"</span><span class="p">,</span>
+            <span class="ss">"description"</span><span class="p">:</span> <span class="ss">"long desc"</span><span class="p">,</span>
+            <span class="ss">"contactPerson"</span><span class="p">:</span> <span class="ss">"contact"</span><span class="p">,</span>
+            <span class="ss">"usesRules"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"parametersInOutput"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"xAxisLabel"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"yAxisLabel"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"chartOptionsSetting"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"template"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"displayResultset"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"xmlaDatasource"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"xmlaCatalog"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"creationDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"updateDate"</span><span class="p">:</span> <span class="mi">1560255530000</span><span class="p">,</span>
+            <span class="ss">"reportSource"</span><span class="p">:</span> <span class="ss">"select * from mytable"</span><span class="p">,</span>
+            <span class="ss">"createdBy"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"createdById"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"updatedBy"</span><span class="p">:</span> <span class="ss">"admin"</span><span class="p">,</span>
+            <span class="ss">"reportType"</span><span class="p">:</span> <span class="ss">"Tabular"</span><span class="p">,</span>
+            <span class="ss">"groupColumn"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"active"</span><span class="p">:</span> <span class="k">true</span><span class="p">,</span>
+            <span class="ss">"hidden"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"defaultReportFormat"</span><span class="p">:</span> <span class="ss">"default"</span><span class="p">,</span>
+            <span class="ss">"secondaryCharts"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"hiddenColumns"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"totalColumns"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"dateFormat"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"numberFormat"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"columnFormats"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"locale"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"nullNumberDisplay"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"nullStringDisplay"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"fetchSize"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"options"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"pageOrientation"</span><span class="p">:</span> <span class="ss">"Portrait"</span><span class="p">,</span>
+            <span class="ss">"omitTitleRow"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"lovUseDynamicDatasource"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"openPassword"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"modifyPassword"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"sourceReportId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"reportGroups"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="err">{</span>
+                    <span class="ss">"parentId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="ss">"reportGroupId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
+                    <span class="ss">"description"</span><span class="p">:</span> <span class="ss">"test group"</span><span class="p">,</span>
+                    <span class="ss">"creationDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+                    <span class="ss">"updateDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+                    <span class="ss">"createdBy"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+                    <span class="ss">"updatedBy"</span><span class="p">:</span> <span class="k">null</span>
+                <span class="err">}</span>
+            <span class="p">],</span>
+            <span class="ss">"clearTextPasswords"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"useGroovy"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+            <span class="ss">"pivotTableJsSavedOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"gridstackSavedOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"name2"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"comment"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"viewReportId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="ss">"selfServiceOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
+            <span class="ss">"datasource"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"encryptor"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"reportParams"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"userRuleValues"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"userGroupRuleValues"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"reportRules"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"userReportRights"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"userGroupReportRights"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"drilldowns"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"description2"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"dtActiveStatus"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"dtAction"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+            <span class="ss">"reportGroupNames"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
+            <span class="ss">"reportGroupNamesHtml"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
+            <span class="ss">"dtId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="ss">"dtName"</span><span class="p">:</span> <span class="ss">"test"</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>In case the report doesn't exist, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 404,
-        "artStatus": "RECORD_NOT_FOUND",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="deleting-a-report">Deleting a report</h3> 
      <h4 id="request_9">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    DELETE /api/reports/{id}
+      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
 </pre> 
      </div> 
      <h4 id="response_9">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the jobs that use the report.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 409,
-        "artStatus": "LINKED_RECORDS_EXIST",
-        "message": "Report not deleted because linked jobs exist",
-        "data": [
-            "A report (5)",
-            "Pie (8)",
-        ]
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"Report not deleted because linked jobs exist"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="ss">"A report (5)"</span><span class="p">,</span>
+            <span class="ss">"Pie (8)"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="adding-a-report">Adding a report</h3> 
      <h4 id="request_10">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/reports
-        {
-            "name": "test"
-            &lt;other fields&gt;
-        }
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span>
+        <span class="err">{</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
 </pre> 
      </div> 
      <p>The request body should contain a report object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>Report</strong> object, you can look at the <strong>WEB-INF\classes\art\report\Report.java</strong> file.</p> 
      <h4 id="response_10">Response</h4> 
      <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created report. The created report is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 201,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "reportId": 41,
-            &lt;other fields&gt;
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">41</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If the name is not provided or is blank, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 400,
-        "artStatus": "INVALID_VALUE",
-        "message": "name field not provided or blank",
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"name field not provided or blank"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If a report with the supplied name already exists, a 409 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 409,
-        "artStatus": "RECORD_EXISTS",
-        "message": "A report with the given name already exists",
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A report with the given name already exists"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="updating-a-report">Updating a report</h3> 
      <h4 id="request_11">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    PUT /api/reports/{id}
-        {
-            "name": "test"
-            &lt;other fields&gt;
-        }
+      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+        <span class="err">{</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
 </pre> 
      </div> 
      <p>The request body should contain a report object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>Report</strong> object, you can look at the <strong>WEB-INF\classes\art\report\Report.java</strong> file.</p> 
      <h4 id="response_11">Response</h4> 
      <p>If successful, a 200 response like the following would be returned. The updated report is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "reportId": 12,
-            &lt;other fields&gt;
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="disabling-a-report">Disabling a report</h3> 
      <h4 id="request_12">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/reports/{id}/disable
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">disable</span>
 </pre> 
      </div> 
      <h4 id="response_12">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="enabling-a-report">Enabling a report</h3> 
      <h4 id="request_13">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/reports/{id}/enable
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">enable</span>
 </pre> 
      </div> 
      <h4 id="response_13">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <h3 id="running-a-report">Running a report</h3> 
      <h4 id="request_14">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    POST /api/reports/run
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="n">run</span>
 </pre> 
      </div> 
      <p>As part of the request, form parameters need to be included to provide parameters to be used to run the report, similar to running a report via url in the browser. The <strong>reportId</strong> parameter is mandatory in order to specify which report to run e.g. <code>.../api/reports/run?reportId=1</code>. Html report formats are not supported when running a report via api.</p> 
      <h4 id="response_14">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 200,
-        "artStatus": "OK",
-        "message": null,
-        "data": {
-            "fileName": "report1-2019_06_20-10_50_52_700-WP985-1-0.pdf",
-            "url": "http://localhost:8080/art/export/reports/report1-2019_06_20-10_50_52_700-WP985-1-0.pdf",
-            "rowsRetrieved": 12,
-            "rowsUpdated": null
-        }
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"fileName"</span><span class="p">:</span> <span class="ss">"report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
+            <span class="ss">"url"</span><span class="p">:</span> <span class="ss">"http://localhost:8080/art/export/reports/report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
+            <span class="ss">"rowsRetrieved"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="ss">"rowsUpdated"</span><span class="p">:</span> <span class="k">null</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If the report is not found, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 404,
-        "artStatus": "RECORD_NOT_FOUND",
-        "message": null,
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
      <p>If a html report format is specified, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    {
-        "httpStatus": 400,
-        "artStatus": "INVALID_VALUE",
-        "message": "report format not allowed: html",
-        "data": null
-    }
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"report format not allowed: html"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
 </pre> 
      </div> 
     </div> 

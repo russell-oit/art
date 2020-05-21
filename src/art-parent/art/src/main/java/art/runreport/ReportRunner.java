@@ -45,6 +45,7 @@ import com.itfsw.query.builder.SqlQueryBuilderFactory;
 import com.itfsw.query.builder.support.builder.SqlBuilder;
 import com.itfsw.query.builder.support.model.result.SqlQueryResult;
 import groovy.lang.GString;
+import groovy.sql.GroovyRowResult;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -67,6 +68,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -112,6 +115,7 @@ public class ReportRunner {
 	public static final int RETURN_ZERO_RECORDS = 0;
 	private String runId;
 	private MultiValueMap<String, MultipartFile> multiFileMap;
+	private String localRunId;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
@@ -1150,6 +1154,38 @@ public class ReportRunner {
 			throw new RuntimeException("report is null");
 		}
 
+		int reportId = report.getReportId();
+		long currentRunning = Config.getRunningReportCount(reportId);
+		int maxRunning = report.getMaxRunning();
+		int maxRunningPerUser = report.getMaxRunningPerUser();
+		long currentRunningForUser;
+		if (user == null) {
+			currentRunningForUser = 0;
+		} else {
+			currentRunningForUser = Config.getRunningReportCount(reportId, user.getUserId());
+		}
+
+		if ((maxRunning > 0 && currentRunning >= maxRunning)
+				|| (maxRunningPerUser > 0 && currentRunningForUser >= maxRunningPerUser)) {
+			throw new RuntimeException("Maximum reports running for this report. Try again later.");
+		} else {
+			localRunId = ArtUtils.getUniqueId(reportId);
+
+			ReportRunDetails reportRunDetails = new ReportRunDetails();
+			reportRunDetails.setReport(report);
+			reportRunDetails.setJob(job);
+			User runDetailsUser;
+			if (user == null) {
+				runDetailsUser = new User();
+			} else {
+				runDetailsUser = user;
+			}
+			reportRunDetails.setUser(runDetailsUser);
+			reportRunDetails.setRunId(localRunId);
+
+			Config.addRunningReport(reportRunDetails);
+		}
+
 		useRules = report.isUsesRules();
 
 		//override use rules setting if required, especially for lovs
@@ -1491,25 +1527,77 @@ public class ReportRunner {
 		} else if (reportType == ReportType.LovDynamic) {
 			//dynamic lov. values coming from sql query
 			ResultSet rs = getResultSet();
-			try {
-				int columnCount = rs.getMetaData().getColumnCount();
-				while (rs.next()) {
-					//use getObject(). for dates, using getString() will return
-					//different strings for different databases and drivers
-					//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
-					//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
-					Object dataValue = rs.getObject(1);
-					String displayValue;
-					if (columnCount > 1) {
-						displayValue = rs.getString(2);
-					} else {
-						displayValue = rs.getString(1);
-					}
+			if (rs != null) {
+				try {
+					int columnCount = rs.getMetaData().getColumnCount();
+					while (rs.next()) {
+						//use getObject(). for dates, using getString() will return
+						//different strings for different databases and drivers
+						//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
+						//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
+						Object dataValue = rs.getObject(1);
+						String displayValue;
+						if (columnCount > 1) {
+							displayValue = rs.getString(2);
+						} else {
+							displayValue = rs.getString(1);
+						}
 
-					lovValues.put(dataValue, displayValue);
+						lovValues.put(dataValue, displayValue);
+					}
+				} finally {
+					DatabaseUtils.close(rs);
 				}
-			} finally {
-				DatabaseUtils.close(rs);
+			} else if (groovyData != null) {
+				//https://stackoverflow.com/questions/22768663/how-to-know-if-a-java-object-is-a-list
+				List<? extends Object> dataList;
+				if (groovyData instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<? extends Object> dataListTemp = (List<? extends Object>) groovyData;
+					dataList = dataListTemp;
+				} else {
+					List<Object> dataListTemp = new ArrayList<>();
+					dataListTemp.add(groovyData);
+					dataList = dataListTemp;
+				}
+
+				if (CollectionUtils.isNotEmpty(dataList)) {
+					for (Object row : dataList) {
+						if (row instanceof GroovyRowResult) {
+							GroovyRowResult rowResult = (GroovyRowResult) row;
+							int columnCount = rowResult.size();
+							Object dataValue = rowResult.getAt(0);
+							String displayValue;
+							if (columnCount > 1) {
+								displayValue = String.valueOf(rowResult.getAt(1));
+							} else {
+								displayValue = String.valueOf(dataValue);
+							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof DynaBean) {
+							DynaBean rowBean = (DynaBean) row;
+							DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
+							int columnCount = columns.length;
+							String columnOneName = columns[0].getName();
+							Object dataValue = rowBean.get(columnOneName);
+							String displayValue;
+							if (columnCount > 1) {
+								String columnTwoName = columns[1].getName();
+								displayValue = String.valueOf(rowBean.get(columnTwoName));
+							} else {
+								displayValue = String.valueOf(dataValue);
+							}
+							lovValues.put(dataValue, displayValue);
+						} else if (row instanceof Map) {
+							@SuppressWarnings("unchecked")
+							Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
+							lovValues.putAll(rowMap);
+						} else {
+							String displayValue = String.valueOf(row);
+							lovValues.put(row, displayValue);
+						}
+					}
+				}
 			}
 		}
 
@@ -1532,6 +1620,10 @@ public class ReportRunner {
 
 		if (StringUtils.isNotBlank(runId)) {
 			Config.removeRunningQuery(runId);
+		}
+
+		if (StringUtils.isNotBlank(localRunId)) {
+			Config.removeRunningReport(localRunId);
 		}
 
 		DatabaseUtils.close(psQuery, connQuery);

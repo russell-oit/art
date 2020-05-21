@@ -1,3 +1,10 @@
+ART 4.15
+* Allow dynamic lov to use groovy data
+* Apply max file upload setting to file parameter
+* Include report parameters in get report REST endpoint
+* Add REST endpoint to get report details by name
+* Added max running option for individual reports
+
 ART 4.14
 * Added directDownload url option
 * Added File parameter type
@@ -7,6 +14,7 @@ ART 4.14
 * Fix for error while importing users
 * Fix for MongoDB report error when data is empty
 * Fix for groovy code run twice for MongoDB report type
+* Fix for build from source error
 * Updated jasny-bootstrap
 
 ART 4.13

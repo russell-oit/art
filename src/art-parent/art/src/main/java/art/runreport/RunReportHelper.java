@@ -310,6 +310,15 @@ public class RunReportHelper {
 		}
 		request.setAttribute("hasFileParam", hasFileParam);
 
+		String maxFileSizeJasnyString;
+		int maxFileSizeMB = Config.getSettings().getMaxFileUploadSizeMB();
+		if (maxFileSizeMB < 0) {
+			maxFileSizeJasnyString = "";
+		} else {
+			maxFileSizeJasnyString = String.valueOf(maxFileSizeMB);
+		}
+		request.setAttribute("maxFileSizeJasnyString", maxFileSizeJasnyString);
+
 		request.setAttribute("runId", ArtUtils.getUniqueId(report.getReportId()));
 
 		boolean enableReportFormats;
@@ -828,8 +837,18 @@ public class RunReportHelper {
 	public static GroovyDataDetails getGroovyDataDetails(Object data, Report report) throws Exception {
 		Objects.requireNonNull(data, "data must not be null");
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
+		List<? extends Object> dataList;
+		if (data instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<? extends Object> dataListTemp = (List<? extends Object>) data;
+			dataList = dataListTemp;
+		} else {
+			//https://stackoverflow.com/questions/2776975/how-can-i-add-to-list-extends-number-data-structures
+			List<Object> dataListTemp = new ArrayList<>();
+			dataListTemp.add(data);
+			dataList = dataListTemp;
+		}
+
 		int rowCount = dataList.size();
 
 		List<String> optionsColumnNames = null;
@@ -1020,8 +1039,17 @@ public class RunReportHelper {
 	public static List<Map<String, ?>> getMapListData(Object data) throws Exception {
 		List<Map<String, ?>> finalData = new ArrayList<>();
 
-		@SuppressWarnings("unchecked")
-		List<? extends Object> dataList = (List<? extends Object>) data;
+		List<? extends Object> dataList;
+		if (data instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<? extends Object> dataListTemp = (List<? extends Object>) data;
+			dataList = dataListTemp;
+		} else {
+			List<Object> dataListTemp = new ArrayList<>();
+			dataListTemp.add(data);
+			dataList = dataListTemp;
+		}
+
 		if (CollectionUtils.isNotEmpty(dataList)) {
 			Object sample = dataList.get(0);
 			if (sample instanceof GroovyRowResult) {

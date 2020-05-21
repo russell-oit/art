@@ -128,6 +128,7 @@ public class Config extends HttpServlet {
 	private static final Map<String, String> timeZones = new LinkedHashMap<>();
 	private static final Map<String, Statement> runningStatements = new HashMap<>();
 	private static final List<ReportRunDetails> runningQueries = new ArrayList<>();
+	private static final List<ReportRunDetails> runningReports = new ArrayList<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -151,6 +152,8 @@ public class Config extends HttpServlet {
 		runningStatements.clear();
 		logger.debug("runningQueries.size()={}", runningQueries.size());
 		runningQueries.clear();
+		logger.debug("runningReports.size()={}", runningReports.size());
+		runningReports.clear();
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -1571,6 +1574,57 @@ public class Config extends HttpServlet {
 	public static void removeRunningQuery(String runId) {
 		runningStatements.remove(runId);
 		runningQueries.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
+	}
+
+	/**
+	 * Returns the running reports
+	 *
+	 * @return the running reports
+	 */
+	public static List<ReportRunDetails> getRunningReports() {
+		return runningReports;
+	}
+
+	/**
+	 * Adds a running report
+	 *
+	 * @param reportRunDetails details of the report
+	 */
+	public static void addRunningReport(ReportRunDetails reportRunDetails) {
+		runningReports.add(reportRunDetails);
+	}
+
+	/**
+	 * Removes a running report
+	 *
+	 * @param runId the run id for the report
+	 */
+	public static void removeRunningReport(String runId) {
+		runningReports.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
+	}
+
+	/**
+	 * Returns the number of running reports for a particular report
+	 *
+	 * @param reportId the report id
+	 * @return the number of running reports
+	 */
+	public static long getRunningReportCount(int reportId) {
+		//https://www.baeldung.com/java-stream-filter-count
+		return runningReports.stream().filter(r -> r.getReport().getReportId() == reportId).count();
+	}
+
+	/**
+	 * Returns the number of running reports for a particular report and user
+	 *
+	 * @param reportId the report id
+	 * @param userId the user id
+	 * @return the number of running reports
+	 */
+	public static long getRunningReportCount(int reportId, int userId) {
+		//https://www.baeldung.com/java-stream-filter-count
+		return runningReports.stream().filter(r -> r.getReport().getReportId() == reportId
+				&& r.getUser().getUserId() == userId).count();
 	}
 
 }

@@ -17,6 +17,8 @@
  */
 package art.report.rest;
 
+import art.cache.CacheHelper;
+import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -25,12 +27,14 @@ import art.general.ApiResponse;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportOutputGeneratorResult;
 import art.runreport.ReportRunner;
 import art.runreport.RunReportHelper;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ApiHelper;
 import art.utils.ArtLogsHelper;
@@ -90,6 +94,12 @@ public class ReportRestController {
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private CacheHelper cacheHelper;
+
+	@Autowired
+	private ReportParameterService reportParameterService;
+
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getReportById(@PathVariable("id") Integer id) {
 		logger.debug("Entering getReportById: id={}", id);
@@ -99,13 +109,54 @@ public class ReportRestController {
 			if (report == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				Report cleanReport = report.getCleanReport();
-				return ApiHelper.getOkResponseEntity(cleanReport);
+				prepareReport(report);
+				return ApiHelper.getOkResponseEntity(report);
 			}
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			return ApiHelper.getErrorResponseEntity(ex);
 		}
+	}
+
+	@GetMapping("/name/{name}")
+	public ResponseEntity<?> getReportByName(@PathVariable("name") String name) {
+		logger.debug("Entering getReportByName: name='{}'", name);
+
+		try {
+			Report report = reportService.getReport(name);
+			if (report == null) {
+				return ApiHelper.getNotFoundResponseEntity();
+			} else {
+				prepareReport(report);
+				return ApiHelper.getOkResponseEntity(report);
+			}
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			return ApiHelper.getErrorResponseEntity(ex);
+		}
+	}
+
+	/**
+	 * Adds report parameters and clears password fields
+	 *
+	 * @param report the report object
+	 * @throws SQLException
+	 */
+	private void prepareReport(Report report) throws SQLException {
+		int reportId = report.getReportId();
+		List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
+		report.setReportParams(reportParams);
+
+		List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+		report.setDrilldowns(drilldowns);
+
+		report.clearAllPasswords();
+
+		//clear objects that could have had their passwords cleared, so as to have fresh start
+		cacheHelper.clearReports();
+		cacheHelper.clearDatasources();
+		cacheHelper.clearEncryptors();
+		cacheHelper.clearParameters();
 	}
 
 	@DeleteMapping("/{id}")
@@ -312,7 +363,9 @@ public class ReportRestController {
 				rowsUpdated = reportRunner.getUpdateCount();
 			} else {
 				FilenameHelper filenameHelper = new FilenameHelper();
-				String outputFileName = filenameHelper.getFullFilename(report, locale, reportFormat, reportParamsMap);
+				fileName = filenameHelper.getFilename(report, locale, reportFormat, reportParamsMap);
+				String exportPath = Config.getReportsExportPath();
+				String outputFileName = exportPath + fileName;
 
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 

@@ -1183,6 +1183,23 @@ Edit report page
 					default:
 						$("#optionsDiv").show();
 				}
+
+				//show/hide max running fields
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 111: //text
+					case 112: //jpivot mondrian
+					case 113: //jpivot mondrian xmla
+					case 114: //jpivot sql server xmla
+					case 150: //saiku connection
+					case 149: //saiku report
+					case 163: //link
+						$("#maxRunningFields").hide();
+						break;
+					default:
+						$("#maxRunningFields").show();
+				}
 			}
 		</script>
 
@@ -1960,6 +1977,28 @@ Edit report page
 						<form:errors path="viewReportId" cssClass="error"/>
 					</div>
 				</div>
+
+				<fieldset id="maxRunningFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="maxRunning">
+							<spring:message code="settings.label.maxRunningReports"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="maxRunning" maxlength="5" class="form-control"/>
+							<form:errors path="maxRunning" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="maxRunningPerUser">
+							<spring:message code="reports.label.maxRunningReportsPerUser"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="maxRunningPerUser" maxlength="5" class="form-control"/>
+							<form:errors path="maxRunningPerUser" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
 				<div id="useGroovyDiv" class="form-group">
 					<label class="control-label col-md-4" for="useGroovy">
 						<spring:message code="reports.label.useGroovy"/>

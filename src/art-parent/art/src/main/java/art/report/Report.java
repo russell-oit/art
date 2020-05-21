@@ -151,6 +151,8 @@ public class Report implements Serializable {
 	private String selfServiceOptions;
 	private String link;
 	private boolean openInNewWindow;
+	private int maxRunning;
+	private int maxRunningPerUser;
 	private Datasource datasource;
 	private Encryptor encryptor;
 	private List<ReportParameter> reportParams; //used in import/export
@@ -173,6 +175,34 @@ public class Report implements Serializable {
 	private boolean selfServicePreview;
 	@JsonIgnore
 	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
+
+	/**
+	 * @return the maxRunningPerUser
+	 */
+	public int getMaxRunningPerUser() {
+		return maxRunningPerUser;
+	}
+
+	/**
+	 * @param maxRunningPerUser the maxRunningPerUser to set
+	 */
+	public void setMaxRunningPerUser(int maxRunningPerUser) {
+		this.maxRunningPerUser = maxRunningPerUser;
+	}
+
+	/**
+	 * @return the maxRunning
+	 */
+	public int getMaxRunning() {
+		return maxRunning;
+	}
+
+	/**
+	 * @param maxRunning the maxRunning to set
+	 */
+	public void setMaxRunning(int maxRunning) {
+		this.maxRunning = maxRunning;
+	}
 
 	/**
 	 * @return the openInNewWindow
@@ -1707,11 +1737,33 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * Clears password fields
+	 * Sets the report password fields to null
 	 */
 	public void clearPasswords() {
 		openPassword = null;
 		modifyPassword = null;
+	}
+
+	/**
+	 * Sets all password fields to null, including for datasources etc
+	 */
+	public void clearAllPasswords() {
+		clearPasswords();
+
+		if (datasource != null) {
+			datasource.clearPassword();
+		}
+
+		if (encryptor != null) {
+			encryptor.clearPasswords();
+		}
+
+		if (reportParams != null) {
+			for (ReportParameter reportParam : reportParams) {
+				Parameter parameter = reportParam.getParameter();
+				parameter.clearAllPasswords();
+			}
+		}
 	}
 
 	/**
@@ -1732,8 +1784,8 @@ public class Report implements Serializable {
 
 		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
-				Parameter reportParamParameter = reportParam.getParameter();
-				reportParamParameter.encryptAllPasswords();
+				Parameter parameter = reportParam.getParameter();
+				parameter.encryptAllPasswords();
 			}
 		}
 	}
