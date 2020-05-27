@@ -171,7 +171,7 @@ public class ReportGroupService {
 		logger.debug("Entering getReportGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -356,7 +356,7 @@ public class ReportGroupService {
 		Connection conn = null;
 		updateReportGroup(group, actionUser, conn);
 	}
-	
+
 	/**
 	 * Updates an existing report group
 	 *
@@ -368,7 +368,7 @@ public class ReportGroupService {
 	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true)
 	public void updateReportGroup(ReportGroup group, User actionUser, Connection conn)
 			throws SQLException {
-		
+
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
 		Integer newRecordId = null;
@@ -491,11 +491,7 @@ public class ReportGroupService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
@@ -509,11 +505,7 @@ public class ReportGroupService {
 				group.getReportGroupId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

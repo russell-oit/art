@@ -761,11 +761,7 @@ public class AccessRightService {
 						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							if (conn == null) {
-								affectedRows = dbService.update(sqlTestUserReport, userId, userId, reportId);
-							} else {
-								affectedRows = dbService.update(conn, sqlTestUserReport, userId, userId, reportId);
-							}
+							affectedRows = dbService.update(conn, sqlTestUserReport, userId, userId, reportId);
 
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
@@ -773,11 +769,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserReport, userId, reportId);
-							} else {
-								dbService.update(conn, sqlUserReport, userId, reportId);
-							}
+							dbService.update(conn, sqlUserReport, userId, reportId);
 						}
 					}
 				}
@@ -788,11 +780,7 @@ public class AccessRightService {
 						boolean updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							if (conn == null) {
-								affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, reportGroupId);
-							} else {
-								affectedRows = dbService.update(conn, sqlTestUserReportGroup, userId, userId, reportGroupId);
-							}
+							affectedRows = dbService.update(conn, sqlTestUserReportGroup, userId, userId, reportGroupId);
 
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
@@ -800,11 +788,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserReportGroup, userId, reportGroupId);
-							} else {
-								dbService.update(conn, sqlUserReportGroup, userId, reportGroupId);
-							}
+							dbService.update(conn, sqlUserReportGroup, userId, reportGroupId);
 						}
 					}
 				}
@@ -827,11 +811,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserJob, userId, jobId);
-							} else {
-								dbService.update(conn, sqlUserJob, userId, jobId);
-							}
+							dbService.update(conn, sqlUserJob, userId, jobId);
 						}
 					}
 				}
@@ -872,11 +852,7 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							if (conn == null) {
-								affectedRows = dbService.update(sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
-							} else {
-								affectedRows = dbService.update(conn, sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
-							}
+							affectedRows = dbService.update(conn, sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
 
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
@@ -884,11 +860,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserGroupReport, userGroupId, reportId);
-							} else {
-								dbService.update(conn, sqlUserGroupReport, userGroupId, reportId);
-							}
+							dbService.update(conn, sqlUserGroupReport, userGroupId, reportId);
 						}
 					}
 				}
@@ -899,11 +871,7 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							if (conn == null) {
-								affectedRows = dbService.update(sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
-							} else {
-								affectedRows = dbService.update(conn, sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
-							}
+							affectedRows = dbService.update(conn, sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
 
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
@@ -911,11 +879,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserGroupReportGroup, userGroupId, reportGroupId);
-							} else {
-								dbService.update(conn, sqlUserGroupReportGroup, userGroupId, reportGroupId);
-							}
+							dbService.update(conn, sqlUserGroupReportGroup, userGroupId, reportGroupId);
 						}
 					}
 				}
@@ -926,11 +890,7 @@ public class AccessRightService {
 						updateRight = true;
 						if (grant) {
 							//test if right exists. to avoid integrity constraint error
-							if (conn == null) {
-								affectedRows = dbService.update(sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
-							} else {
-								affectedRows = dbService.update(conn, sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
-							}
+							affectedRows = dbService.update(conn, sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
 
 							if (affectedRows > 0) {
 								//right exists. don't attempt a reinsert.
@@ -938,11 +898,7 @@ public class AccessRightService {
 							}
 						}
 						if (updateRight) {
-							if (conn == null) {
-								dbService.update(sqlUserGroupJob, userGroupId, jobId);
-							} else {
-								dbService.update(conn, sqlUserGroupJob, userGroupId, jobId);
-							}
+							dbService.update(conn, sqlUserGroupJob, userGroupId, jobId);
 						}
 					}
 				}

@@ -158,7 +158,7 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -584,11 +584,7 @@ public class UserGroupService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
 					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -604,11 +600,7 @@ public class UserGroupService {
 				group.getUserGroupId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

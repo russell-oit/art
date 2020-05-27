@@ -200,11 +200,7 @@ public class RolePermissionService {
 		logger.debug("Entering deleteAllPermissionsForRole: roleId={}", roleId);
 
 		String sql = "DELETE FROM ART_ROLE_PERMISSION_MAP WHERE ROLE_ID=?";
-		if (conn == null) {
-			dbService.update(sql, roleId);
-		} else {
-			dbService.update(conn, sql, roleId);
-		}
+		dbService.update(conn, sql, roleId);
 	}
 
 	/**
@@ -295,11 +291,7 @@ public class RolePermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, roleId, roleId, permissionId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, roleId, roleId, permissionId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, roleId, roleId, permissionId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -307,11 +299,7 @@ public class RolePermissionService {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, roleId, permissionId);
-					} else {
-						dbService.update(conn, sql, roleId, permissionId);
-					}
+					dbService.update(conn, sql, roleId, permissionId);
 				}
 			}
 		}

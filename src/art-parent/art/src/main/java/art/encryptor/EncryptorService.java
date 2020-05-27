@@ -428,11 +428,7 @@ public class EncryptorService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_ENCRYPTORS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, ENCRYPTOR_TYPE=?, AESCRYPT_PASSWORD=?,"
@@ -459,11 +455,7 @@ public class EncryptorService {
 				encryptor.getEncryptorId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {
@@ -495,11 +487,11 @@ public class EncryptorService {
 		String sql;
 
 		List<Object> idsList = ArtUtils.idsToObjectList(multipleEncryptorEdit.getIds());
-		
-		if(idsList.isEmpty()){
+
+		if (idsList.isEmpty()) {
 			return;
 		}
-		
+
 		if (!multipleEncryptorEdit.isActiveUnchanged()) {
 			sql = "UPDATE ART_ENCRYPTORS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
 					+ " WHERE ENCRYPTOR_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";

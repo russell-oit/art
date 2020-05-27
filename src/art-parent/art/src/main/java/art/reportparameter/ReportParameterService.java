@@ -288,11 +288,7 @@ public class ReportParameterService {
 		String sql;
 
 		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
-		if (conn == null) {
-			dbService.update(sql, reportId);
-		} else {
-			dbService.update(conn, sql, reportId);
-		}
+		dbService.update(conn, sql, reportId);
 	}
 
 	/**
@@ -452,11 +448,7 @@ public class ReportParameterService {
 				reportParam.getChainedDepends()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?,"
 					+ " PARAMETER_POSITION=?, CHAINED_PARENTS=?, CHAINED_DEPENDS=?"
@@ -470,11 +462,7 @@ public class ReportParameterService {
 				reportParam.getReportParameterId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

@@ -197,7 +197,7 @@ public class ParameterService {
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-	
+
 	/**
 	 * Returns all unused parameters with only basic properties filled
 	 *
@@ -206,7 +206,7 @@ public class ParameterService {
 	 */
 	public List<Parameter> getAllUnusedParametersBasic() throws SQLException {
 		logger.debug("Entering getAllUnusedParametersBasic");
-		
+
 		String sql = "SELECT * FROM ART_PARAMETERS AP"
 				+ " WHERE NOT EXISTS ("
 				+ " SELECT * FROM ART_REPORT_PARAMETERS WHERE PARAMETER_ID = AP.PARAMETER_ID"
@@ -227,7 +227,7 @@ public class ParameterService {
 		logger.debug("Entering getParameters: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -476,7 +476,7 @@ public class ParameterService {
 		try {
 			String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 			int id = dbService.getMaxRecordId(conn, sql);
-			
+
 			List<Parameter> currentParameters = new ArrayList<>();
 			if (overwrite) {
 				currentParameters = getAllParameters();
@@ -646,11 +646,7 @@ public class ParameterService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
@@ -693,11 +689,7 @@ public class ParameterService {
 				parameter.getParameterId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

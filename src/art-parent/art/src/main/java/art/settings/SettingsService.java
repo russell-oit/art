@@ -239,11 +239,7 @@ public class SettingsService {
 		String sql;
 
 		sql = "DELETE FROM ART_SETTINGS";
-		if (conn == null) {
-			dbService.update(sql);
-		} else {
-			dbService.update(conn, sql);
-		}
+		dbService.update(conn, sql);
 
 		setSettingsDefaults(settings);
 
@@ -344,11 +340,7 @@ public class SettingsService {
 		};
 
 		int affectedRows;
-		if (conn == null) {
-			affectedRows = dbService.update(sql, values);
-		} else {
-			affectedRows = dbService.update(conn, sql, values);
-		}
+		affectedRows = dbService.update(conn, sql, values);
 
 		logger.debug("affectedRows={}", affectedRows);
 

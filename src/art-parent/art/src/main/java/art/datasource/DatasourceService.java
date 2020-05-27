@@ -133,7 +133,7 @@ public class DatasourceService {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns unused datasources
 	 *
@@ -456,11 +456,7 @@ public class DatasourceService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?,"
 					+ " DATASOURCE_TYPE=?, JNDI=?, DATABASE_TYPE=?,"
@@ -491,11 +487,7 @@ public class DatasourceService {
 				datasource.getDatasourceId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		//if no exception, update datasource id in case of new or copy
