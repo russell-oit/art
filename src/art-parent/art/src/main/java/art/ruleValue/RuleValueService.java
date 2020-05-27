@@ -498,16 +498,9 @@ public class RuleValueService {
 				//username won't be needed once user id columns completely replace username in foreign keys
 				String username = StringUtils.substringAfter(user, "-");
 
-				if (conn == null) {
-					if (!userRuleValueExists(userId, ruleId, ruleValue)) {
-						dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userId, username,
-								ruleId, ruleName, ruleValue);
-					}
-				} else {
-					if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
-						dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userId, username,
-								ruleId, ruleName, ruleValue);
-					}
+				if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
+					dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userId, username,
+							ruleId, ruleName, ruleValue);
 				}
 			}
 		}
