@@ -828,9 +828,6 @@ public class UserService {
 					newRecordId = userId;
 				}
 				saveUser(user, newRecordId, actionUser, conn);
-				userGroupMembershipService2.recreateUserGroupMemberships(user, conn);
-				userPermissionService.recreateUserPermissions(user, conn);
-				userRoleService.recreateUserRoles(user, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -922,11 +919,7 @@ public class UserService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
@@ -954,11 +947,7 @@ public class UserService {
 				user.getUserId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {
@@ -971,6 +960,10 @@ public class UserService {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, user={}",
 					affectedRows, newRecord, user);
 		}
+
+		userGroupMembershipService2.recreateUserGroupMemberships(user, conn);
+		userPermissionService.recreateUserPermissions(user, conn);
+		userRoleService.recreateUserRoles(user, conn);
 	}
 
 	/**
