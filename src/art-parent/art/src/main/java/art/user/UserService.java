@@ -828,6 +828,7 @@ public class UserService {
 					newRecordId = userId;
 				}
 				saveUser(user, newRecordId, actionUser, conn);
+				userPermissionService.recreateUserPermissions(user, conn);
 			}
 			conn.commit();
 		} catch (SQLException ex) {
@@ -962,7 +963,6 @@ public class UserService {
 		}
 
 		userGroupMembershipService2.recreateUserGroupMemberships(user, conn);
-		userPermissionService.recreateUserPermissions(user, conn);
 		userRoleService.recreateUserRoles(user, conn);
 	}
 
