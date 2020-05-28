@@ -1,5 +1,6 @@
 ART 4.16
 * Allow setting a user's user groups via API
+* Added REST endpoints for user groups
 
 ART 4.15
 * Allow dynamic lov to use groovy data
