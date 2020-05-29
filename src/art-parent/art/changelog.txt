@@ -1,6 +1,7 @@
 ART 4.16
-* Allow setting a user's user groups via API
+* Allow setting a user's user groups via api
 * Added REST endpoints for user groups
+* Fix for error when retrieving report with parameter via api
 
 ART 4.15
 * Allow dynamic lov to use groovy data
