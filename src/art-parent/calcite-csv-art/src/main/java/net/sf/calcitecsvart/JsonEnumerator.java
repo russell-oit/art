@@ -46,6 +46,7 @@ public class JsonEnumerator implements Enumerator<Object[]> {
     for (Object obj : list) {
       if (obj instanceof Collection) {
         //noinspection unchecked
+		@SuppressWarnings("unchecked")
         List<Object> tmp = (List<Object>) obj;
         objs.add(tmp.toArray());
       } else if (obj instanceof Map) {
@@ -59,6 +60,7 @@ public class JsonEnumerator implements Enumerator<Object[]> {
 
   /** Deduces the names and types of a table's columns by reading the first line
    * of a JSON file. */
+  @SuppressWarnings("unchecked")
   static JsonDataConverter deduceRowType(RelDataTypeFactory typeFactory, Source source) {
     final ObjectMapper objectMapper = new ObjectMapper();
     List<Object> list;

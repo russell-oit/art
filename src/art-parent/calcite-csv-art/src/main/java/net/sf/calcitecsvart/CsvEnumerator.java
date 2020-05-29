@@ -65,6 +65,7 @@ class CsvEnumerator<E> implements Enumerator<E> {
     this(source, cancelFlag, fieldTypes, identityList(fieldTypes.size()));
   }
 
+  @SuppressWarnings("unchecked")
   CsvEnumerator(Source source, AtomicBoolean cancelFlag,
       List<CsvFieldType> fieldTypes, int[] fields) {
     //noinspection unchecked
