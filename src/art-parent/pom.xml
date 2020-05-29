@@ -21,6 +21,7 @@
 		<module>mondrian-art</module>
 		<module>jpivot-art</module>
 		<module>reportengine-art</module>
+		<module>calcite-csv-art</module>
 		<module>art</module>
 	</modules>
 
