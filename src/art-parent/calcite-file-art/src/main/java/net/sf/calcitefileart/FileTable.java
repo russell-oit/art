@@ -86,6 +86,7 @@ class FileTable extends AbstractQueryableTable
     return this.converter.getRowType((JavaTypeFactory) typeFactory);
   }
 
+  @SuppressWarnings("unchecked")
   public <T> Queryable<T> asQueryable(QueryProvider queryProvider,
       SchemaPlus schema, String tableName) {
     return new AbstractTableQueryable<T>(queryProvider, schema, this,
