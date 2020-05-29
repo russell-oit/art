@@ -54,7 +54,7 @@ public class ReportParameter implements Serializable {
 	@JsonIgnore
 	private Map<Object, String> lovValues; //store value and label for lov parameters
 	@JsonIgnore
-	private List<Object> actualParameterValues;
+	private List<Object> actualParameterValues = new ArrayList<>();
 	private String chainedParents;
 	private String chainedDepends;
 	@JsonIgnore
@@ -398,7 +398,7 @@ public class ReportParameter implements Serializable {
 	 */
 	public Object getEffectiveActualParameterValue() {
 		if (parameter.getParameterType() == ParameterType.SingleValue) {
-			if (actualParameterValues.contains(null)) {
+			if (actualParameterValues.contains(null) || actualParameterValues.isEmpty()) {
 				return null;
 			} else {
 				return actualParameterValues.get(0);

@@ -281,7 +281,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
-			<artifactId>calcite-csv-art</artifactId>
+			<artifactId>calcite-file-art</artifactId>
 			<version>4.16-SNAPSHOT</version>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
