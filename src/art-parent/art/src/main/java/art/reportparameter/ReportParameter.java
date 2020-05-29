@@ -616,6 +616,10 @@ public class ReportParameter implements Serializable {
 	@JsonIgnore
 	public Object getValue() {
 		//for use with jxls
+		//https://sourceforge.net/p/art/discussion/352129/thread/f8dc311dbe/?limit=25
+		//https://mostafa-asg.github.io/post/customize-json-xml-spring-mvc-output/
+		//https://stackoverflow.com/questions/6541757/when-using-spring-mvc-for-rest-how-do-you-enable-jackson-to-pretty-print-render
+		//https://stackoverflow.com/questions/37844101/can-you-configure-spring-controller-specific-jackson-deserialization
 		return getEffectiveActualParameterValue();
 	}
 
