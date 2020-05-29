@@ -22,6 +22,7 @@
 		<module>jpivot-art</module>
 		<module>reportengine-art</module>
 		<module>calcite-csv-art</module>
+		<module>calcite-file-art</module>
 		<module>art</module>
 	</modules>
 
