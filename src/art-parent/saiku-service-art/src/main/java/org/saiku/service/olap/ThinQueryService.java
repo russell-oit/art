@@ -118,7 +118,6 @@ public class ThinQueryService implements Serializable {
 
 	private final Map<String, QueryContext> context = new HashMap<>();
 
-
 	public ThinQueryService(OlapDiscoverService olapDiscoverService) {
 		this.olapDiscoverService = olapDiscoverService;
 	}
@@ -126,7 +125,7 @@ public class ThinQueryService implements Serializable {
 	public void destroy() {
 		context.clear();
 	}
-	
+
 	public void setCellSetFormatterFactory(CellSetFormatterFactory cff) {
 		this.cff = cff;
 	}
@@ -548,25 +547,35 @@ public class ThinQueryService implements Serializable {
 			cellHeaders = result.getCellSetHeaders();
 		} else {
 			List<ResultInfo> results = DrillthroughUtils.extractResultInfo(returns);
-			for (int i = 0; i < results.size(); i++) {
-				final ResultInfo ri = results.get(i);
-				if (ri instanceof MeasureResultInfo) {
-					simpleHeader[i] = DrillthroughUtils.findMeasure(measures, ((MeasureResultInfo) ri).getName()).getCaption();
-				} else if (ri instanceof DimensionResultInfo) {
-					final DimensionResultInfo dri = (DimensionResultInfo) ri;
-					List<SaikuHierarchy> hierarchies = olapDiscoverService
-							.getDimension(saikuCube, dri.getDimension()).getHierarchies();
-					SaikuHierarchy hierarchy;
-					try {
-						hierarchy = DrillthroughUtils
-								.findHierarchy(hierarchies, dri.getHierarchy());
-					} catch (Exception e) {
-						log.error("Error", e);
-						hierarchy = DrillthroughUtils
-								.findHierarchy(hierarchies, dri.getDimension() + "." + dri.getHierarchy());
+			if (results.size() == width) {
+				for (int i = 0; i < results.size(); i++) {
+					final ResultInfo ri = results.get(i);
+					if (ri instanceof MeasureResultInfo) {
+						simpleHeader[i] = DrillthroughUtils.findMeasure(measures, ((MeasureResultInfo) ri).getName()).getCaption();
+					} else if (ri instanceof DimensionResultInfo) {
+						final DimensionResultInfo dri = (DimensionResultInfo) ri;
+						List<SaikuHierarchy> hierarchies = olapDiscoverService
+								.getDimension(saikuCube, dri.getDimension()).getHierarchies();
+						SaikuHierarchy hierarchy;
+						try {
+							hierarchy = DrillthroughUtils
+									.findHierarchy(hierarchies, dri.getHierarchy());
+						} catch (Exception e) {
+							log.error("Error", e);
+							hierarchy = DrillthroughUtils
+									.findHierarchy(hierarchies, dri.getDimension() + "." + dri.getHierarchy());
+						}
+						SaikuLevel level = DrillthroughUtils.findLevel(hierarchy.getLevels(), dri.getLevel());
+						simpleHeader[i] = level.getCaption();
 					}
-					SaikuLevel level = DrillthroughUtils.findLevel(hierarchy.getLevels(), dri.getLevel());
-					simpleHeader[i] = level.getCaption();
+				}
+			} else {
+				for (int i = 0; i < width; i++) {
+					try {
+						simpleHeader[i] = drillthrough.getMetaData().getColumnName(i + 1);
+					} catch (SQLException e) {
+						throw new IllegalStateException(e);
+					}
 				}
 			}
 		}
