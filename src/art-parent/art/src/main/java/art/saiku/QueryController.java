@@ -301,6 +301,8 @@ public class QueryController {
 				DrillThroughResult drillthrough = thinQueryService.drillthroughWithCaptions(queryName, cellPosition, maxrows, returns);
 				rsc = RestUtil.convert(drillthrough);
 			}
+			ThinQuery tqAfter = thinQueryService.getContext(queryName).getOlapQuery();
+			rsc.setQuery(tqAfter);
 			Long runtime = (new Date()).getTime() - start;
 			rsc.setRuntime(runtime.intValue());
 		} finally {
