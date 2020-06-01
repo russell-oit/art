@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/saiku2/{username}/discover")
 public class DiscoverController {
+	//https://github.com/OSBI/saiku/blob/development/saiku-core/saiku-web/src/main/java/org/saiku/web/rest/resources/OlapDiscoverResource.java
 
 	@Autowired
 	private DiscoverHelper discoverHelper;

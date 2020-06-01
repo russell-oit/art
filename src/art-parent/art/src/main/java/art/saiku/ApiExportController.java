@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/saiku2/api/export")
 public class ApiExportController {
+	//https://github.com/OSBI/saiku/blob/development/saiku-core/saiku-web/src/main/java/org/saiku/web/rest/resources/ExporterResource.java
 	//can't have two controllers with the same name. there is already another ExportController for serving art/export/report and art/export/job
 
 	@PostMapping("/saiku/chart")
