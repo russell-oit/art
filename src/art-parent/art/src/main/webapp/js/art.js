@@ -406,6 +406,11 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "org.apache.calcite.jdbc.Driver";
 		urlElement.value = "jdbc:calcite:model=<C:\\\\path\\\\to\\\\model.json>;lex=MYSQL";
 		testSqlElement.value = "";
+	} else if (databaseType === "JsonCalciteArt") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "org.apache.calcite.jdbc.Driver";
+		urlElement.value = "jdbc:calcite:schemaFactory=net.sf.calcitefileart.FileSchemaFactory;schema.directory=<C:\\\\directory\\\\with\\\\json\\\\files>;lex=MYSQL";
+		testSqlElement.value = "";
 	}
 }
 
