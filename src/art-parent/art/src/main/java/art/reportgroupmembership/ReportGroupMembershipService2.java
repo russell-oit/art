@@ -113,11 +113,7 @@ public class ReportGroupMembershipService2 {
 		logger.debug("Entering deleteAllReportGroupMembershipsForReport: reportId={}", reportId);
 
 		String sql = "DELETE FROM ART_REPORT_REPORT_GROUPS WHERE REPORT_ID=?";
-		if (conn == null) {
-			dbService.update(sql, reportId);
-		} else {
-			dbService.update(conn, sql, reportId);
-		}
+		dbService.update(conn, sql, reportId);
 	}
 
 	/**
@@ -210,11 +206,7 @@ public class ReportGroupMembershipService2 {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, reportId, reportId, reportGroupId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, reportId, reportId, reportGroupId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, reportId, reportId, reportGroupId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -222,11 +214,7 @@ public class ReportGroupMembershipService2 {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, reportId, reportGroupId);
-					} else {
-						dbService.update(conn, sql, reportId, reportGroupId);
-					}
+					dbService.update(conn, sql, reportId, reportGroupId);
 				}
 			}
 		}

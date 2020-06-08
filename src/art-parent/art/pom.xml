@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>4.15</version>
+		<version>4.16</version>
 	</parent>
 
 	<artifactId>art</artifactId>
@@ -30,7 +30,7 @@
 		<jclouds.version>2.1.2</jclouds.version>
 		<spring.security.version>4.2.9.RELEASE</spring.security.version>
 		<morphia.version>1.5.8</morphia.version>
-		<calcite.version>1.21.0</calcite.version>
+		<calcite.version>1.23.0</calcite.version>
 	</properties>
 
 	<build>
@@ -216,22 +216,22 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-dbcp</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>saiku-service-art</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -246,7 +246,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
 				<exclusion>
@@ -266,7 +266,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>jpivot-art</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -277,7 +277,12 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>reportengine-art</artifactId>
-			<version>4.15</version>
+			<version>4.16</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>calcite-file-art</artifactId>
+			<version>4.16</version>
 		</dependency>
 		<!-- add jstl 1.2.1 -->
 		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->

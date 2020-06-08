@@ -109,7 +109,7 @@ public class ReportRestController {
 			if (report == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				prepareReport(report);
+				prepareReportForOutput(report);
 				return ApiHelper.getOkResponseEntity(report);
 			}
 		} catch (SQLException | RuntimeException ex) {
@@ -127,7 +127,7 @@ public class ReportRestController {
 			if (report == null) {
 				return ApiHelper.getNotFoundResponseEntity();
 			} else {
-				prepareReport(report);
+				prepareReportForOutput(report);
 				return ApiHelper.getOkResponseEntity(report);
 			}
 		} catch (SQLException | RuntimeException ex) {
@@ -142,7 +142,7 @@ public class ReportRestController {
 	 * @param report the report object
 	 * @throws SQLException
 	 */
-	private void prepareReport(Report report) throws SQLException {
+	private void prepareReportForOutput(Report report) throws SQLException {
 		int reportId = report.getReportId();
 		List<ReportParameter> reportParams = reportParameterService.getReportParameters(reportId);
 		report.setReportParams(reportParams);

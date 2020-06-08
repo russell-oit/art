@@ -121,7 +121,7 @@ public class RuleService {
 		logger.debug("Entering getRules: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -290,7 +290,7 @@ public class RuleService {
 		Connection conn = null;
 		updateRule(rule, actionUser, conn);
 	}
-	
+
 	/**
 	 * Updates an existing rule
 	 *
@@ -328,7 +328,7 @@ public class RuleService {
 		try {
 			String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
 			int id = dbService.getMaxRecordId(conn, sql);
-			
+
 			List<Rule> currentRules = new ArrayList<>();
 			if (overwrite) {
 				currentRules = getAllRules();
@@ -432,11 +432,7 @@ public class RuleService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_RULES SET RULE_NAME=?, DESCRIPTION=?,"
 					+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -451,11 +447,7 @@ public class RuleService {
 				rule.getRuleId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

@@ -46,22 +46,28 @@ public class DbService {
 	 * @throws SQLException
 	 */
 	public int update(String sql, Object... params) throws SQLException {
-		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
-		return run.update(sql, params);
+		Connection conn = null;
+		return update(conn, sql, params);
 	}
 
 	/**
 	 * Executes an INSERT, UPDATE or DELETE query against a database
 	 *
-	 * @param conn the connection to the database
+	 * @param conn the connection to the database. if null, the art database
+	 * will be used
 	 * @param sql the sql to execute
 	 * @param params the parameters to use
 	 * @return number of records affected
 	 * @throws SQLException
 	 */
 	public int update(Connection conn, String sql, Object... params) throws SQLException {
-		QueryRunner run = new QueryRunner();
-		return run.update(conn, sql, params);
+		if (conn == null) {
+			QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
+			return run.update(sql, params);
+		} else {
+			QueryRunner run = new QueryRunner();
+			return run.update(conn, sql, params);
+		}
 	}
 
 	/**
@@ -76,8 +82,8 @@ public class DbService {
 	 * @throws SQLException
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
-		return run.query(sql, rsh, params);
+		Connection conn = null;
+		return query(conn, sql, rsh, params);
 	}
 
 	/**
@@ -85,7 +91,8 @@ public class DbService {
 	 * populated object
 	 *
 	 * @param <T> the type of object that the handler returns
-	 * @param conn the connection to the database
+	 * @param conn the connection to the database. if null, the art database
+	 * will be used.
 	 * @param sql the sql to execute
 	 * @param rsh the handler that converts the results into an object
 	 * @param params the parameters to use
@@ -95,8 +102,13 @@ public class DbService {
 	public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh,
 			Object... params) throws SQLException {
 
-		QueryRunner run = new QueryRunner();
-		return run.query(conn, sql, rsh, params);
+		if (conn == null) {
+			QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
+			return run.query(sql, rsh, params);
+		} else {
+			QueryRunner run = new QueryRunner();
+			return run.query(conn, sql, rsh, params);
+		}
 	}
 
 	/**
@@ -141,12 +153,7 @@ public class DbService {
 		//use Number rather than Integer because oracle returns a java.math.BigDecimal object
 		//oracle doesn't have an "INTEGER" data type. When INTEGER is specified, it's stored as NUMBER(38,0)
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number maxIdNumber;
-		if (conn == null) {
-			maxIdNumber = query(sql, h, params);
-		} else {
-			maxIdNumber = query(conn, sql, h, params);
-		}
+		Number maxIdNumber = query(conn, sql, h, params);
 		logger.debug("maxIdNumber={}", maxIdNumber);
 
 		int maxIdInt;

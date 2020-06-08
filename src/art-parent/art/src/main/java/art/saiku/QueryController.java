@@ -71,6 +71,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/saiku2/api/query")
 public class QueryController {
+	//https://github.com/OSBI/saiku/blob/development/saiku-core/saiku-web/src/main/java/org/saiku/web/rest/resources/Query2Resource.java
 
 	private static final Logger logger = LoggerFactory.getLogger(QueryController.class);
 
@@ -301,6 +302,8 @@ public class QueryController {
 				DrillThroughResult drillthrough = thinQueryService.drillthroughWithCaptions(queryName, cellPosition, maxrows, returns);
 				rsc = RestUtil.convert(drillthrough);
 			}
+			ThinQuery tqAfter = thinQueryService.getContext(queryName).getOlapQuery();
+			rsc.setQuery(tqAfter);
 			Long runtime = (new Date()).getTime() - start;
 			rsc.setRuntime(runtime.intValue());
 		} finally {
@@ -451,7 +454,7 @@ public class QueryController {
 		ThinQueryService thinQueryService = discoverHelper.getThinQueryService(session);
 
 		ThinQuery tq = thinQueryService.getContext(queryname).getOlapQuery();
-		
+
 		return generateHtml(session, tq, format, css, tableonly, wrapcontent);
 	}
 

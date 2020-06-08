@@ -93,11 +93,7 @@ public class ScheduleHolidayService {
 		logger.debug("Entering deleteAllScheduleHolidaysForSchedule: scheduleId={}", scheduleId);
 
 		String sql = "DELETE FROM ART_SCHEDULE_HOLIDAY_MAP WHERE SCHEDULE_ID=?";
-		if (conn == null) {
-			dbService.update(sql, scheduleId);
-		} else {
-			dbService.update(conn, sql, scheduleId);
-		}
+		dbService.update(conn, sql, scheduleId);
 	}
 
 	/**
@@ -188,11 +184,7 @@ public class ScheduleHolidayService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, scheduleId, scheduleId, holidayId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, scheduleId, scheduleId, holidayId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, scheduleId, scheduleId, holidayId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -200,11 +192,7 @@ public class ScheduleHolidayService {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, scheduleId, holidayId);
-					} else {
-						dbService.update(conn, sql, scheduleId, holidayId);
-					}
+					dbService.update(conn, sql, scheduleId, holidayId);
 				}
 			}
 		}

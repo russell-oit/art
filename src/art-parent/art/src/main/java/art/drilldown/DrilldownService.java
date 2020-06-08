@@ -188,11 +188,7 @@ public class DrilldownService {
 
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES"
 				+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", reportIds.length) + ")";
-		if (conn == null) {
-			dbService.update(sql, (Object[]) reportIds);
-		} else {
-			dbService.update(conn, sql, (Object[]) reportIds);
-		}
+		dbService.update(conn, sql, (Object[]) reportIds);
 	}
 
 	/**
@@ -330,11 +326,7 @@ public class DrilldownService {
 				BooleanUtils.toInteger(drilldown.isRunImmediately())
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_QUERY_ID=?,"
 					+ " DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
@@ -353,11 +345,7 @@ public class DrilldownService {
 				drilldown.getDrilldownId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

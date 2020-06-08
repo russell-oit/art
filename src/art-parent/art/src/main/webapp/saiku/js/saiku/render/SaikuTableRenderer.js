@@ -37,6 +37,10 @@ function getAxisSize(data, axisName) {
 }
 
 function getDomColumnsLevelsName(htmlObject) {
+	if (htmlObject === null) {
+		return [];
+	}
+	
     var $htmlObject = $(htmlObject.closest('.workspace')
                            .find('.workspace_fields')
                            .find('.columns.axis_fields')

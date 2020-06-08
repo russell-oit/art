@@ -201,11 +201,7 @@ public class UserGroupRoleService {
 		logger.debug("Entering deleteAllRolesForUserGroup: userGroupId={}", userGroupId);
 
 		String sql = "DELETE FROM ART_USER_GROUP_ROLE_MAP WHERE USER_GROUP_ID=?";
-		if (conn == null) {
-			dbService.update(sql, userGroupId);
-		} else {
-			dbService.update(conn, sql, userGroupId);
-		}
+		dbService.update(conn, sql, userGroupId);
 	}
 
 	/**
@@ -296,11 +292,7 @@ public class UserGroupRoleService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, roleId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, roleId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, roleId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -308,11 +300,7 @@ public class UserGroupRoleService {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, userGroupId, roleId);
-					} else {
-						dbService.update(conn, sql, userGroupId, roleId);
-					}
+					dbService.update(conn, sql, userGroupId, roleId);
 				}
 			}
 		}

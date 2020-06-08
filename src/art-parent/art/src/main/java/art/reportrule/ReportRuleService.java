@@ -99,7 +99,7 @@ public class ReportRuleService {
 			return type.cast(reportRule);
 		}
 	}
-	
+
 	/**
 	 * Returns all report rules
 	 *
@@ -174,8 +174,8 @@ public class ReportRuleService {
 		ResultSetHandler<ReportRule> h = new BeanHandler<>(ReportRule.class, new ReportRuleMapper());
 		return dbService.query(sql, h, id);
 	}
-	
-		/**
+
+	/**
 	 * Returns a report rule
 	 *
 	 * @param reportId the report id
@@ -218,7 +218,7 @@ public class ReportRuleService {
 	@CacheEvict(value = "rules", allEntries = true)
 	public void deleteReportRules(Integer[] ids) throws SQLException {
 		logger.debug("Entering deleteReportRules: ids={}", (Object) ids);
-		
+
 		if (ids.length == 0) {
 			return;
 		}
@@ -262,7 +262,7 @@ public class ReportRuleService {
 		Connection conn = null;
 		updateReportRule(reportRule, conn);
 	}
-	
+
 	/**
 	 * Updates an existing report rule
 	 *
@@ -327,11 +327,7 @@ public class ReportRuleService {
 				reportRule.getReportColumn()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_QUERY_RULES SET QUERY_ID=?, RULE_ID=?,"
 					+ " RULE_NAME=?, FIELD_NAME=?"
@@ -345,11 +341,7 @@ public class ReportRuleService {
 				reportRule.getReportRuleId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

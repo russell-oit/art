@@ -5,7 +5,7 @@
 
 	<groupId>net.sf.art</groupId>
 	<artifactId>art-parent</artifactId>
-	<version>4.15</version>
+	<version>4.16</version>
 	<packaging>pom</packaging>
 
 	<name>art-parent</name>
@@ -21,6 +21,8 @@
 		<module>mondrian-art</module>
 		<module>jpivot-art</module>
 		<module>reportengine-art</module>
+		<module>calcite-csv-art</module>
+		<module>calcite-file-art</module>
 		<module>art</module>
 	</modules>
 

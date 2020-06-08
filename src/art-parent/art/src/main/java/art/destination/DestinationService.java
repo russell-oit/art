@@ -419,11 +419,7 @@ public class DestinationService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_DESTINATIONS SET NAME=?, DESCRIPTION=?,"
 					+ " ACTIVE=?, DESTINATION_TYPE=?, SERVER=?, PORT=?,"
@@ -454,11 +450,7 @@ public class DestinationService {
 				destination.getDestinationId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

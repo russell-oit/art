@@ -132,7 +132,7 @@ public class RoleService {
 		logger.debug("Entering getRoles: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -284,7 +284,7 @@ public class RoleService {
 		Connection conn = null;
 		updateRole(role, actionUser, conn);
 	}
-	
+
 	/**
 	 * Updates an existing role
 	 *
@@ -418,11 +418,7 @@ public class RoleService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_ROLES SET NAME=?, DESCRIPTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
@@ -436,11 +432,7 @@ public class RoleService {
 				role.getRoleId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {

@@ -133,7 +133,7 @@ public class DatasourceService {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns unused datasources
 	 *
@@ -145,11 +145,11 @@ public class DatasourceService {
 
 		String sql = "SELECT * FROM ART_DATABASES AD"
 				+ " WHERE NOT EXISTS ("
-				+ " SELECT * FROM ART_QUERIES WHERE DATASOURCE_ID = AD.DATABASE_ID"
+				+ " SELECT NULL FROM ART_QUERIES WHERE DATASOURCE_ID = AD.DATABASE_ID"
 				+ " UNION ALL"
-				+ " SELECT * FROM ART_JOBS WHERE CACHED_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " SELECT NULL FROM ART_JOBS WHERE CACHED_DATASOURCE_ID = AD.DATABASE_ID"
 				+ " UNION ALL"
-				+ " SELECT * FROM ART_SETTINGS WHERE LOGS_DATASOURCE_ID = AD.DATABASE_ID"
+				+ " SELECT NULL FROM ART_SETTINGS WHERE LOGS_DATASOURCE_ID = AD.DATABASE_ID"
 				+ " )";
 
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
@@ -456,11 +456,7 @@ public class DatasourceService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?,"
 					+ " DATASOURCE_TYPE=?, JNDI=?, DATABASE_TYPE=?,"
@@ -491,11 +487,7 @@ public class DatasourceService {
 				datasource.getDatasourceId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		//if no exception, update datasource id in case of new or copy

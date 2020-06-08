@@ -225,12 +225,7 @@ public class RuleValueService {
 				+ " WHERE USER_ID=? AND RULE_ID=? AND RULE_VALUE=?";
 
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCount;
-		if (conn == null) {
-			recordCount = dbService.query(sql, h, userId, ruleId, ruleValue);
-		} else {
-			recordCount = dbService.query(conn, sql, h, userId, ruleId, ruleValue);
-		}
+		Number recordCount = dbService.query(conn, sql, h, userId, ruleId, ruleValue);
 
 		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
@@ -337,12 +332,7 @@ public class RuleValueService {
 				+ " WHERE USER_GROUP_ID=? AND RULE_ID=? AND RULE_VALUE=?";
 
 		ResultSetHandler<Number> h = new ScalarHandler<>();
-		Number recordCount;
-		if (conn == null) {
-			recordCount = dbService.query(sql, h, userGroupId, ruleId, ruleValue);
-		} else {
-			recordCount = dbService.query(conn, sql, h, userGroupId, ruleId, ruleValue);
-		}
+		Number recordCount = dbService.query(conn, sql, h, userGroupId, ruleId, ruleValue);
 
 		if (recordCount == null || recordCount.longValue() == 0) {
 			return false;
@@ -508,16 +498,9 @@ public class RuleValueService {
 				//username won't be needed once user id columns completely replace username in foreign keys
 				String username = StringUtils.substringAfter(user, "-");
 
-				if (conn == null) {
-					if (!userRuleValueExists(userId, ruleId, ruleValue)) {
-						dbService.update(sql, ArtUtils.getDatabaseUniqueId(), userId, username,
-								ruleId, ruleName, ruleValue);
-					}
-				} else {
-					if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
-						dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userId, username,
-								ruleId, ruleName, ruleValue);
-					}
+				if (!userRuleValueExists(userId, ruleId, ruleValue, conn)) {
+					dbService.update(conn, sql, ArtUtils.getDatabaseUniqueId(), userId, username,
+							ruleId, ruleName, ruleValue);
 				}
 			}
 		}

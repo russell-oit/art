@@ -203,11 +203,7 @@ public class UserGroupPermissionService {
 				+ " userGroupId={}", userGroupId);
 
 		String sql = "DELETE FROM ART_USER_GROUP_PERM_MAP WHERE USER_GROUP_ID=?";
-		if (conn == null) {
-			dbService.update(sql, userGroupId);
-		} else {
-			dbService.update(conn, sql, userGroupId);
-		}
+		dbService.update(conn, sql, userGroupId);
 	}
 
 	/**
@@ -298,11 +294,7 @@ public class UserGroupPermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, userGroupId, userGroupId, permissionId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, permissionId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, userGroupId, userGroupId, permissionId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -310,11 +302,7 @@ public class UserGroupPermissionService {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, userGroupId, permissionId);
-					} else {
-						dbService.update(conn, sql, userGroupId, permissionId);
-					}
+					dbService.update(conn, sql, userGroupId, permissionId);
 				}
 			}
 		}

@@ -496,6 +496,7 @@ public class Datasource implements Serializable {
 	 */
 	public void clearPassword() {
 		password = null;
+		username = null;
 	}
 
 	/**

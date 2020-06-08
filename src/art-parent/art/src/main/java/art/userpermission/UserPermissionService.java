@@ -199,11 +199,7 @@ public class UserPermissionService {
 		logger.debug("Entering deleteAllUserPermissionsForUser: userId={}", userId);
 
 		String sql = "DELETE FROM ART_USER_PERMISSION_MAP WHERE USER_ID=?";
-		if (conn == null) {
-			dbService.update(sql, userId);
-		} else {
-			dbService.update(conn, sql, userId);
-		}
+		dbService.update(conn, sql, userId);
 	}
 
 	/**
@@ -294,11 +290,7 @@ public class UserPermissionService {
 				updateRecord = true;
 				if (add) {
 					//test if record exists. to avoid integrity constraint error
-					if (conn == null) {
-						affectedRows = dbService.update(sqlTest, userId, userId, permissionId);
-					} else {
-						affectedRows = dbService.update(conn, sqlTest, userId, userId, permissionId);
-					}
+					affectedRows = dbService.update(conn, sqlTest, userId, userId, permissionId);
 
 					if (affectedRows > 0) {
 						//record exists. don't attempt a reinsert.
@@ -306,11 +298,7 @@ public class UserPermissionService {
 					}
 				}
 				if (updateRecord) {
-					if (conn == null) {
-						dbService.update(sql, userId, permissionId);
-					} else {
-						dbService.update(conn, sql, userId, permissionId);
-					}
+					dbService.update(conn, sql, userId, permissionId);
 				}
 			}
 		}

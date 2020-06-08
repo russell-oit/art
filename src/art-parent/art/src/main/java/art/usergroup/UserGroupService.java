@@ -43,6 +43,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +159,7 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroups: ids='{}'", ids);
 
 		Object[] idsArray = ArtUtils.idsToObjectArray(ids);
-		
+
 		if (idsArray.length == 0) {
 			return new ArrayList<>();
 		}
@@ -584,11 +585,7 @@ public class UserGroupService {
 				actionUser.getUsername()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
 					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -604,11 +601,7 @@ public class UserGroupService {
 				group.getUserGroupId()
 			};
 
-			if (conn == null) {
-				affectedRows = dbService.update(sql, values);
-			} else {
-				affectedRows = dbService.update(conn, sql, values);
-			}
+			affectedRows = dbService.update(conn, sql, values);
 		}
 
 		if (newRecordId != null) {
@@ -641,5 +634,28 @@ public class UserGroupService {
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("USERNAME");
 		return dbService.query(sql, h, userGroupId);
+	}
+	
+	/**
+	 * Returns <code>true</code> if a user group with the given name exists
+	 *
+	 * @param name the user group name
+	 * @return <code>true</code> if a user group with the given name exists
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "userGroups")
+	public boolean userGroupExists(String name) throws SQLException {
+		logger.debug("Entering userGroupExists: name='{}'", name);
+
+		String sql = "SELECT COUNT(*) FROM ART_USER_GROUPS"
+				+ " WHERE NAME=?";
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCount = dbService.query(sql, h, name);
+
+		if (recordCount == null || recordCount.longValue() == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }
