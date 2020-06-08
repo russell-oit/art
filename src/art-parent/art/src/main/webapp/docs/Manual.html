@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.15"> 
+  <meta name="version" content="4.16"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -448,6 +448,34 @@
           <ol> 
            <li><a href="#request_14">Request</a></li> 
            <li><a href="#response_14">Response</a></li> 
+          </ol></li> 
+        </ol></li> 
+       <li><a href="#user-groups">User Groups</a> 
+        <ol> 
+         <li><a href="#getting-all-user-groups">Getting all user groups</a> 
+          <ol> 
+           <li><a href="#request_15">Request</a></li> 
+           <li><a href="#response_15">Response</a></li> 
+          </ol></li> 
+         <li><a href="#getting-a-particular-user-group">Getting a particular user group</a> 
+          <ol> 
+           <li><a href="#request_16">Request</a></li> 
+           <li><a href="#response_16">Response</a></li> 
+          </ol></li> 
+         <li><a href="#deleting-a-user-group">Deleting a user group</a> 
+          <ol> 
+           <li><a href="#request_17">Request</a></li> 
+           <li><a href="#response_17">Response</a></li> 
+          </ol></li> 
+         <li><a href="#adding-a-user-group">Adding a user group</a> 
+          <ol> 
+           <li><a href="#request_18">Request</a></li> 
+           <li><a href="#response_18">Response</a></li> 
+          </ol></li> 
+         <li><a href="#updating-a-user-group">Updating a user group</a> 
+          <ol> 
+           <li><a href="#request_19">Request</a></li> 
+           <li><a href="#response_19">Response</a></li> 
           </ol></li> 
         </ol></li> 
       </ol></li> 
@@ -1507,7 +1535,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Column Formats</strong></td> 
-        <td>For tabular reports, the formats that should be used for specific date or numeric columns. Each column specification comes in a new line. The specification is in the format <code>{column index or column name}:{format}</code>. Examples <code>1:dd/MM/yyyy</code> or <code>due_date:dd MMM yyyy</code> or <code>amount:#,##0.00</code>. For xls and xlsx report formats, one cannot use individual column formats so the formats specified in the Date Format and Number Format fields would be used for all respective columns.</td> 
+        <td>For tabular reports, the formats that should be used for specific date or numeric columns. Each column specification comes in a new line. The specification is in the format <code>&lt;column index or column name&gt;:&lt;format&gt;</code>. Examples <code>1:dd/MM/yyyy</code> or <code>due_date:dd MMM yyyy</code> or <code>amount:#,##0.00</code>. For xls and xlsx report formats, one cannot use individual column formats so the formats specified in the Date Format and Number Format fields would be used for all respective columns.</td> 
        </tr> 
        <tr> 
         <td><strong>Null Number Display</strong></td> 
@@ -6904,7 +6932,7 @@ spnego-server {
      <div class="codehilite"> 
       <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span>
         <span class="err">{</span>
-            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
             <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
         <span class="err">}</span>
 </pre> 
@@ -7151,7 +7179,7 @@ spnego-server {
      <div class="codehilite"> 
       <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span>
         <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
             <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
         <span class="err">}</span>
 </pre> 
@@ -7196,7 +7224,7 @@ spnego-server {
      <div class="codehilite"> 
       <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
         <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
             <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
         <span class="err">}</span>
 </pre> 
@@ -7290,6 +7318,165 @@ spnego-server {
         <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
         <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"report format not allowed: html"</span><span class="p">,</span>
         <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <h2 id="user-groups">User Groups</h2> 
+     <h3 id="getting-all-user-groups">Getting all user groups</h3> 
+     <h4 id="request_15">Request</h4> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span>
+</pre> 
+     </div> 
+     <h4 id="response_15">Response</h4> 
+     <p>If successful, a 200 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="err">{</span>
+                <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+            <span class="err">}</span>
+        <span class="p">]</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <h3 id="getting-a-particular-user-group">Getting a particular user group</h3> 
+     <h4 id="request_16">Request</h4> 
+     <p>Get by id</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+</pre> 
+     </div> 
+     <p>Get by name</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="err">{</span><span class="n">name</span><span class="err">}</span>
+</pre> 
+     </div> 
+     <h4 id="response_16">Response</h4> 
+     <p>If successful, a 200 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>In case the user group doesn't exist, a 404 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <h3 id="deleting-a-user-group">Deleting a user group</h3> 
+     <h4 id="request_17">Request</h4> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+</pre> 
+     </div> 
+     <h4 id="response_17">Response</h4> 
+     <p>If successful, a 200 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the users that the user group contains.</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"User Group not deleted because linked users exist"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="ss">"user1"</span><span class="p">,</span>
+            <span class="ss">"test"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <h3 id="adding-a-user-group">Adding a user group</h3> 
+     <h4 id="request_18">Request</h4> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span>
+        <span class="err">{</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>The request body should contain a user group object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>UserGroup</strong> object, you can look at the <strong>WEB-INF\classes\art\usergroup\UserGroup.java</strong> file.</p> 
+     <h4 id="response_18">Response</h4> 
+     <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created user group. The created user group is included in the response.</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>If the name is not provided or is blank, a 400 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"name field not provided or blank"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>If a user group with the supplied name already exists, a 409 response like the following would be returned</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A user group with the given name already exists"</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
+    <span class="err">}</span>
+</pre> 
+     </div> 
+     <h3 id="updating-a-user-group">Updating a user group</h3> 
+     <h4 id="request_19">Request</h4> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+        <span class="err">{</span>
+            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
+</pre> 
+     </div> 
+     <p>The request body should contain a user group object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>UserGroup</strong> object, you can look at the <strong>WEB-INF\classes\art\usergroup\UserGroup.java</strong> file.</p> 
+     <h4 id="response_19">Response</h4> 
+     <p>If successful, a 200 response like the following would be returned. The updated user group is included in the response.</p> 
+     <div class="codehilite"> 
+      <pre><span></span>    <span class="err">{</span>
+        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
+        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
+        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
+        <span class="err">}</span>
     <span class="err">}</span>
 </pre> 
      </div> 
