@@ -224,6 +224,7 @@ public class JobService {
 		job.setErrorNotificationTo(rs.getString("ERROR_EMAIL_TO"));
 		job.setPreRunReport(rs.getString("PRE_RUN_REPORT"));
 		job.setPostRunReport(rs.getString("POST_RUN_REPORT"));
+		job.setManual(rs.getBoolean("MANUAL"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -561,9 +562,9 @@ public class JobService {
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
-					+ " PRE_RUN_REPORT, POST_RUN_REPORT,"
+					+ " PRE_RUN_REPORT, POST_RUN_REPORT, MANUAL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 48) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -612,6 +613,7 @@ public class JobService {
 				job.getErrorNotificationTo(),
 				job.getPreRunReport(),
 				job.getPostRunReport(),
+				BooleanUtils.toInteger(job.isManual()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -632,7 +634,7 @@ public class JobService {
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
 					+ " JOB_OPTIONS=?, ERROR_EMAIL_TO=?,"
-					+ " PRE_RUN_REPORT=?, POST_RUN_REPORT=?,"
+					+ " PRE_RUN_REPORT=?, POST_RUN_REPORT=?, MANUAL=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -682,6 +684,7 @@ public class JobService {
 				job.getErrorNotificationTo(),
 				job.getPreRunReport(),
 				job.getPostRunReport(),
+				BooleanUtils.toInteger(job.isManual()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -930,6 +933,10 @@ public class JobService {
 
 		//delete job while it has old calendar names, before updating the calendar names field
 		deleteQuartzJob(job, scheduler);
+
+		if (job.isManual()) {
+			return;
+		}
 
 		//job must have been saved in order to use job id for job, trigger and calendar names
 		int jobId = job.getJobId();

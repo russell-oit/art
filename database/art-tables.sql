@@ -529,6 +529,7 @@ CREATE TABLE ART_USER_GROUP_RULES
 -- MIGRATED_TO_QUARTZ is present to allow seamless migration of jobs when
 -- upgrading from ART versions before 1.11 (before quartz was used as the scheduling engine)
 -- ACTIVE: boolean
+-- MANUAL: boolean
 
 CREATE TABLE ART_JOBS
 (
@@ -584,6 +585,7 @@ CREATE TABLE ART_JOBS
 	ERROR_EMAIL_TO VARCHAR(500),
 	PRE_RUN_REPORT VARCHAR(50),
 	POST_RUN_REPORT VARCHAR(50),
+	MANUAL INTEGER,
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,
