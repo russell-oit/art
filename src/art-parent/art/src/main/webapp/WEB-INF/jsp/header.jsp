@@ -276,6 +276,13 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_jobs')}">
+										<li>
+											<a href="${pageContext.request.contextPath}/pipelines">
+												<spring:message code="page.title.pipelines"/>
+											</a>
+										</li>
+									</c:if>
 									<li class="divider"></li>
 										<c:if test="${sessionUser.hasPermission('configure_caches')}">
 										<li>
