@@ -1,3 +1,6 @@
+ART 4.17
+* Added job pipeline feature
+
 ART 4.16
 * Allow setting a user's user groups via api
 * Added REST endpoints for user groups

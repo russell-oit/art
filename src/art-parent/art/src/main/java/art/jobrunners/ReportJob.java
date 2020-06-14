@@ -61,6 +61,7 @@ import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import art.utils.MailService;
+import art.utils.SchedulerUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -149,6 +150,7 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -156,6 +158,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -222,6 +225,7 @@ public class ReportJob implements org.quartz.Job {
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		jobId = dataMap.getInt("jobId");
 		String runUsername = dataMap.getString("username");
+		String serial = dataMap.getString("serial");
 
 		initializeProgressLogger();
 
@@ -352,6 +356,74 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.info("Completed. Time taken - {}", formattedDuration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
+
+		if (serial != null) {
+			try {
+				scheduleNextJob(jobId, serial);
+			} catch (Exception ex) {
+				logger.error("Error", ex);
+			}
+		}
+	}
+
+	/**
+	 * Schedules a run job or run later job
+	 *
+	 * @param currentJobId the current job id
+	 * @param serial the serial jobs to run
+	 * @throws SchedulerException
+	 */
+	private void scheduleNextJob(Integer currentJobId, String serial)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleTempJob: currentJobId={},"
+				+ " serial='{}'", currentJobId, serial);
+
+		Integer nextJobId = getNextJobId(currentJobId, serial);
+		if (nextJobId == null) {
+			return;
+		}
+
+		String runId = nextJobId + "-" + ArtUtils.getUniqueId();
+
+		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.usingJobData("jobId", nextJobId)
+				.usingJobData("serial", serial)
+				.usingJobData("tempJob", Boolean.TRUE)
+				.build();
+
+		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
+
+		//create SimpleTrigger that will fire once, immediately
+		triggerBuilder.startNow();
+
+		Trigger tempTrigger = triggerBuilder.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempJob, tempTrigger);
+	}
+
+	private Integer getNextJobId(int currentJobId, String serial) {
+		Integer nextJobId = null;
+
+		String[] serialArray = StringUtils.split(serial, ",");
+		if (serialArray != null && serialArray.length > 0) {
+			for (int i = 0; i < serialArray.length; i++) {
+				String jobIdString = serialArray[i];
+				int tempJobId = Integer.parseInt(jobIdString.trim());
+				if (tempJobId == currentJobId) {
+					if (i < serialArray.length - 1) {
+						String nextJobIdString = serialArray[i + 1];
+						nextJobId = Integer.parseInt(nextJobIdString);
+					}
+					break;
+				}
+			}
+		}
+
+		return nextJobId;
 	}
 
 	/**

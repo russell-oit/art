@@ -18,12 +18,21 @@
 package art.pipeline;
 
 import art.general.AjaxResponse;
+import art.jobrunners.PipelineJob;
 import art.user.User;
 import art.user.UserService;
+import art.utils.ArtUtils;
+import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,6 +201,58 @@ public class PipelineController {
 		model.addAttribute("action", action);
 
 		return "editPipeline";
+	}
+
+	@RequestMapping(value = "/runPipeline", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse runPipeline(@RequestParam("id") Integer id, HttpSession session) {
+		logger.debug("Entering runPipeline: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			scheduleTempPipeline(id, sessionUser);
+			response.setSuccess(true);
+		} catch (SchedulerException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	/**
+	 * Schedules a pipeline
+	 *
+	 * @param pipelineId the pipeline id
+	 * @param sessionUser the session user
+	 * @throws SchedulerException
+	 */
+	private void scheduleTempPipeline(Integer pipelineId, User sessionUser)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleTempPipeline: pipelineId={},"
+				+ " sessionUser={}", pipelineId, sessionUser);
+
+		String runId = pipelineId + "-" + ArtUtils.getUniqueId();
+
+		String username = sessionUser.getUsername();
+
+		JobDetail tempPipeline = JobBuilder.newJob(PipelineJob.class)
+				.withIdentity("tempPipeline-" + runId, "tempPipelineGroup")
+				.usingJobData("pipelineId", pipelineId)
+				.usingJobData("username", username)
+				.usingJobData("tempPipeline", Boolean.TRUE)
+				.build();
+
+		Trigger tempTrigger = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.startNow()
+				.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempPipeline, tempTrigger);
 	}
 
 }

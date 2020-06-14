@@ -21,6 +21,7 @@
 <spring:message code="page.message.recordDeleted" var="recordDeletedText" javaScriptEscape="true"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.running" var="runningText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -69,7 +70,28 @@
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
-						
+
+				tbl.find('tbody').on('click', '.run', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/runPipeline',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) {
+							if (response.success) {
+								notifyActionSuccessReusable("${runningText}", recordName);
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
 				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
 					$(this).parent().hide();
 				});
@@ -152,6 +174,10 @@
 									<i class="fa fa-copy"></i>
 									<spring:message code="page.action.copy"/>
 								</a>
+								<button type="button" class="btn btn-default run">
+									<i class="fa fa-bolt"></i>
+									<spring:message code="jobs.action.run"/>
+								</button>
 							</div>
 						</td>
 					</tr>
