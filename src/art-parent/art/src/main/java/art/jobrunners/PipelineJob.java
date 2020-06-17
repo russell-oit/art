@@ -17,13 +17,16 @@
  */
 package art.jobrunners;
 
-import art.job.JobService;
 import art.pipeline.Pipeline;
 import art.pipeline.PipelineService;
-import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
-import java.util.Date;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -51,9 +54,6 @@ public class PipelineJob implements org.quartz.Job {
 	private static final Logger logger = LoggerFactory.getLogger(PipelineJob.class);
 
 	@Autowired
-	private JobService jobService;
-
-	@Autowired
 	private PipelineService pipelineService;
 
 	@Override
@@ -71,16 +71,53 @@ public class PipelineJob implements org.quartz.Job {
 				logger.warn("Pipeline not found. Pipeline Id {}", pipelineId);
 			} else {
 				String serial = pipeline.getSerial();
-				String[] serialArray = StringUtils.split(serial, ",");
+				String finalSerial = processSerial(serial);
+				String[] serialArray = StringUtils.split(finalSerial, ",");
 				if (serialArray != null && serialArray.length > 0) {
 					String firstJobIdString = serialArray[0].trim();
 					int firstJobId = Integer.parseInt(firstJobIdString);
-					scheduleTempJob(firstJobId, serial);
+					scheduleTempJob(firstJobId, finalSerial);
 				}
 			}
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
+	}
+
+	/**
+	 * Returns a serial definition with ranges flattened
+	 * 
+	 * @param serial the initial serial definition
+	 * @return serial definition with ranges flattened
+	 */
+	private String processSerial(String serial) {
+		if (StringUtils.isBlank(serial)) {
+			return null;
+		}
+
+		String[] serialArray = StringUtils.split(serial, ",");
+		List<String> serialList = new ArrayList<>();
+		for (String part : serialArray) {
+			if (StringUtils.contains(part, "-")) {
+				String start = StringUtils.substringBefore(part, "-").trim();
+				String end = StringUtils.substringAfter(part, "-").trim();
+				int startInt = Integer.parseInt(start);
+				int endInt = Integer.parseInt(end);
+				//https://stackoverflow.com/questions/42990614/how-to-get-a-range-of-values-in-java
+				//https://alvinalexander.com/source-code/how-to-populate-initialize-java-int-array-range/
+				//https://stackoverflow.com/questions/3619850/converting-an-int-array-to-a-string-array
+				//int[] rangeArray = IntStream.rangeClosed(startInt, endInt).toArray();
+				String[] rangeStringArray = IntStream.rangeClosed(startInt, endInt).mapToObj(String::valueOf).toArray(String[]::new);
+				Collections.addAll(serialList, rangeStringArray);
+				//serialList.addAll(Arrays.asList(rangeStringArray));
+			} else {
+				serialList.add(part);
+			}
+		}
+
+		String finalSerial = StringUtils.join(serialList, ",");
+
+		return finalSerial;
 	}
 
 	/**

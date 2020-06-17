@@ -132,6 +132,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -379,17 +380,20 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering scheduleTempJob: currentJobId={},"
 				+ " serial='{}'", currentJobId, serial);
 
-		Integer nextJobId = getNextJobId(currentJobId, serial);
-		if (nextJobId == null) {
+		Map<String, Object> nextJobData = getNextJobData(currentJobId, serial);
+		if (nextJobData == null) {
 			return;
 		}
+
+		Integer nextJobId = (Integer) nextJobData.get("jobId");
+		String nextSerial = (String) nextJobData.get("serial");
 
 		String runId = nextJobId + "-" + ArtUtils.getUniqueId();
 
 		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
 				.withIdentity("tempJob-" + runId, "tempJobGroup")
 				.usingJobData("jobId", nextJobId)
-				.usingJobData("serial", serial)
+				.usingJobData("serial", nextSerial)
 				.usingJobData("tempJob", Boolean.TRUE)
 				.build();
 
@@ -405,8 +409,9 @@ public class ReportJob implements org.quartz.Job {
 		scheduler.scheduleJob(tempJob, tempTrigger);
 	}
 
-	private Integer getNextJobId(int currentJobId, String serial) {
-		Integer nextJobId = null;
+	private Map<String, Object> getNextJobData(int currentJobId, String serial) {
+		//https://stackoverflow.com/questions/1270760/passing-a-string-by-reference-in-java
+		Map<String, Object> nextJobData = null;
 
 		String[] serialArray = StringUtils.split(serial, ",");
 		if (serialArray != null && serialArray.length > 0) {
@@ -416,14 +421,19 @@ public class ReportJob implements org.quartz.Job {
 				if (tempJobId == currentJobId) {
 					if (i < serialArray.length - 1) {
 						String nextJobIdString = serialArray[i + 1];
-						nextJobId = Integer.parseInt(nextJobIdString);
+						int nextJobId = Integer.parseInt(nextJobIdString);
+						String[] newSerialArray = ArrayUtils.subarray(serialArray, i + 1, serialArray.length);
+						String newSerial = StringUtils.join(newSerialArray, ",");
+						nextJobData = new HashMap<>();
+						nextJobData.put("jobId", nextJobId);
+						nextJobData.put("serial", newSerial);
 					}
 					break;
 				}
 			}
 		}
 
-		return nextJobId;
+		return nextJobData;
 	}
 
 	/**
