@@ -1,4 +1,4 @@
-#ART
+# ART
 ART stands for A Reporting Tool.
 
 ART is a lightweight, multi-platform, web application that enables quick deployment of SQL query results. It has features that make it a simple yet effective reporting and business intelligence solution.
@@ -19,7 +19,7 @@ A bigger list of features can be found in the [Features](https://sourceforge.net
 
 ART is a Java web application. You can run it on any operating system that has Java, and use any modern browser to view and manage reports.
 
-##Online Demo
+## Online Demo
 
 * URL - https://art-demo.lon-1.paas.massivegrid.net/art/
 * Username - auser
