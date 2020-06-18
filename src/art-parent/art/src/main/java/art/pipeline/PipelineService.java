@@ -30,6 +30,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -390,6 +391,55 @@ public class PipelineService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, pipeline={}",
 					affectedRows, newRecord, pipeline);
+		}
+	}
+
+	/**
+	 * Marks a pipeline as cancelled
+	 *
+	 * @param pipelineId the pipeline id
+	 * @throws SQLException
+	 */
+	public void cancelPipeline(int pipelineId) throws SQLException {
+		logger.debug("Entering cancelPipeline");
+
+		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1 WHERE PIPELINE_ID=?";
+		dbService.update(sql, pipelineId);
+	}
+	
+	/**
+	 * Marks a pipeline as uncancelled
+	 *
+	 * @param pipelineId the pipeline id
+	 * @throws SQLException
+	 */
+	public void uncancelPipeline(int pipelineId) throws SQLException {
+		logger.debug("Entering uncancelPipeline");
+
+		String sql = "UPDATE ART_PIPELINES SET CANCELLED=0 WHERE PIPELINE_ID=?";
+		dbService.update(sql, pipelineId);
+	}
+
+	/**
+	 * Returns <code>true</code> if the pipeline has been cancelled
+	 *
+	 * @param pipelineId the pipeline id
+	 * @return <code>true</code> if the pipeline has been cancelled
+	 * @throws SQLException
+	 */
+	public boolean isPipelineCancelled(int pipelineId) throws SQLException {
+		logger.debug("Entering isPipelineCancelled");
+
+		String sql = "SELECT CANCELLED"
+				+ " FROM ART_PIPELINES"
+				+ " WHERE PIPELINE_ID=?";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>("CANCELLED");
+		Number value = dbService.query(sql, h, pipelineId);
+		if (value == null) {
+			return false;
+		} else {
+			return BooleanUtils.toBoolean(value.intValue());
 		}
 	}
 

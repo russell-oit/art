@@ -56,6 +56,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
@@ -64,6 +65,7 @@ import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
 import org.quartz.impl.triggers.AbstractTrigger;
@@ -1333,5 +1335,62 @@ public class JobService {
 
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, holidayId);
+	}
+
+	/**
+	 * Returns ids of all jobs
+	 *
+	 * @return ids of all jobs
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getAllJobIds() throws SQLException {
+		logger.debug("Entering getAllJobIds");
+
+		String sql = "SELECT JOB_ID"
+				+ " FROM ART_JOBS";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Schedules a serial pipeline job
+	 * 
+	 * @param jobId the job id
+	 * @param serial the serial setting
+	 * @param pipelineId the pipeline id
+	 * @throws SchedulerException 
+	 */
+	public void scheduleSerialPipelineJob(int jobId, String serial, int pipelineId)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleSerialPipelineJob: jobId={}, serial='{}',"
+				+ " pipelineId={}", jobId, serial, pipelineId);
+
+		String runId = jobId + "-" + ArtUtils.getUniqueId();
+
+		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.usingJobData("jobId", jobId)
+				.usingJobData("serial", serial)
+				.usingJobData("pipelineId", pipelineId)
+				.usingJobData("tempJob", Boolean.TRUE)
+				.build();
+
+		Trigger tempTrigger = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.startNow()
+				.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempJob, tempTrigger);
 	}
 }

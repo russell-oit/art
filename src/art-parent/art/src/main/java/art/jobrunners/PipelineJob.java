@@ -17,24 +17,19 @@
  */
 package art.jobrunners;
 
+import art.job.JobService;
 import art.pipeline.Pipeline;
 import art.pipeline.PipelineService;
-import art.utils.ArtUtils;
-import art.utils.SchedulerUtils;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +48,9 @@ public class PipelineJob implements org.quartz.Job {
 
 	@Autowired
 	private PipelineService pipelineService;
+
+	@Autowired
+	private JobService jobService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -74,7 +72,7 @@ public class PipelineJob implements org.quartz.Job {
 				if (serialArray != null && serialArray.length > 0) {
 					String firstJobIdString = serialArray[0].trim();
 					int firstJobId = Integer.parseInt(firstJobIdString);
-					scheduleTempJob(firstJobId, finalSerial);
+					startSerialPipeline(firstJobId, finalSerial, pipeline.getPipelineId());
 				}
 			}
 		} catch (Exception ex) {
@@ -84,13 +82,20 @@ public class PipelineJob implements org.quartz.Job {
 
 	/**
 	 * Returns a serial definition with ranges flattened
-	 * 
+	 *
 	 * @param serial the initial serial definition
 	 * @return serial definition with ranges flattened
+	 * @throws java.sql.SQLException
 	 */
-	private String processSerial(String serial) {
+	private String processSerial(String serial) throws SQLException {
 		if (StringUtils.isBlank(serial)) {
 			return null;
+		}
+
+		if (StringUtils.containsIgnoreCase(serial, "all")) {
+			List<Integer> allJobIds = jobService.getAllJobIds();
+			Collections.sort(allJobIds);
+			return StringUtils.join(allJobIds, ",");
 		}
 
 		String[] serialArray = StringUtils.split(serial, ",");
@@ -117,36 +122,21 @@ public class PipelineJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Schedules a run job or run later job
+	 * Starts a serial pipeline
 	 *
 	 * @param jobId the job id
 	 * @param serial the serial jobs to run
+	 * @param pipelineId the pipeline id
 	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
 	 */
-	private void scheduleTempJob(Integer jobId, String serial)
-			throws SchedulerException {
+	private void startSerialPipeline(int jobId, String serial, int pipelineId)
+			throws SchedulerException, SQLException {
 
-		logger.debug("Entering scheduleTempJob: jobId={},"
-				+ " serial='{}'", jobId, serial);
+		logger.debug("Entering startSerialPipeline: jobId={},"
+				+ " serial='{}', pipelineId={}", jobId, serial, pipelineId);
 
-		String runId = jobId + "-" + ArtUtils.getUniqueId();
-
-		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
-				.withIdentity("tempJob-" + runId, "tempJobGroup")
-				.usingJobData("jobId", jobId)
-				.usingJobData("serial", serial)
-				.usingJobData("tempJob", Boolean.TRUE)
-				.build();
-
-		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
-
-		//create SimpleTrigger that will fire once, immediately
-		triggerBuilder.startNow();
-
-		Trigger tempTrigger = triggerBuilder.build();
-
-		Scheduler scheduler = SchedulerUtils.getScheduler();
-		scheduler.scheduleJob(tempJob, tempTrigger);
+		pipelineService.uncancelPipeline(pipelineId);
+		jobService.scheduleSerialPipelineJob(jobId, serial, pipelineId);
 	}
 }

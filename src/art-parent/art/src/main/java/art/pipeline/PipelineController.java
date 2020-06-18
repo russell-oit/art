@@ -40,6 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -253,6 +254,24 @@ public class PipelineController {
 
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		scheduler.scheduleJob(tempPipeline, tempTrigger);
+	}
+	
+	@PostMapping("cancelPipeline")
+	public @ResponseBody
+	AjaxResponse cancelPipeline(@RequestParam("id") Integer id) {
+		logger.debug("Entering cancelPipeline: id={}", id);
+		
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			pipelineService.cancelPipeline(id);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
 	}
 
 }

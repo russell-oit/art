@@ -43,6 +43,7 @@ import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
 import art.output.VelocityOutput;
+import art.pipeline.PipelineService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -61,7 +62,6 @@ import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import art.utils.MailService;
-import art.utils.SchedulerUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -151,7 +151,6 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -159,7 +158,6 @@ import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,6 +214,9 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private MailService mailService;
 
+	@Autowired
+	private PipelineService pipelineService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
@@ -227,6 +228,11 @@ public class ReportJob implements org.quartz.Job {
 		jobId = dataMap.getInt("jobId");
 		String runUsername = dataMap.getString("username");
 		String serial = dataMap.getString("serial");
+
+		Integer pipelineId = null;
+		if (dataMap.containsKey("pipelineId")) {
+			pipelineId = dataMap.getInt("pipelineId");
+		}
 
 		initializeProgressLogger();
 
@@ -324,11 +330,11 @@ public class ReportJob implements org.quartz.Job {
 						//job doesn't have dynamic recipients
 						runNormalJob();
 					}
-				}
 
-				sendFileToDestinations();
-				runBatchFile();
-				runPostRunReports();
+					sendFileToDestinations();
+					runBatchFile();
+					runPostRunReports();
+				}
 			}
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
@@ -358,9 +364,9 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
 
-		if (serial != null) {
+		if (pipelineId != null) {
 			try {
-				scheduleNextJob(jobId, serial);
+				scheduleNextJob(jobId, serial, pipelineId);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
 			}
@@ -372,13 +378,19 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param currentJobId the current job id
 	 * @param serial the serial jobs to run
+	 * @param pipelineId the pipeline id
 	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
 	 */
-	private void scheduleNextJob(Integer currentJobId, String serial)
-			throws SchedulerException {
+	private void scheduleNextJob(Integer currentJobId, String serial,
+			Integer pipelineId) throws SchedulerException, SQLException {
 
 		logger.debug("Entering scheduleTempJob: currentJobId={},"
-				+ " serial='{}'", currentJobId, serial);
+				+ " serial='{}', pipelineId", currentJobId, serial, pipelineId);
+
+		if (pipelineService.isPipelineCancelled(pipelineId)) {
+			return;
+		}
 
 		Map<String, Object> nextJobData = getNextJobData(currentJobId, serial);
 		if (nextJobData == null) {
@@ -388,25 +400,7 @@ public class ReportJob implements org.quartz.Job {
 		Integer nextJobId = (Integer) nextJobData.get("jobId");
 		String nextSerial = (String) nextJobData.get("serial");
 
-		String runId = nextJobId + "-" + ArtUtils.getUniqueId();
-
-		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
-				.withIdentity("tempJob-" + runId, "tempJobGroup")
-				.usingJobData("jobId", nextJobId)
-				.usingJobData("serial", nextSerial)
-				.usingJobData("tempJob", Boolean.TRUE)
-				.build();
-
-		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
-
-		//create SimpleTrigger that will fire once, immediately
-		triggerBuilder.startNow();
-
-		Trigger tempTrigger = triggerBuilder.build();
-
-		Scheduler scheduler = SchedulerUtils.getScheduler();
-		scheduler.scheduleJob(tempJob, tempTrigger);
+		jobService.scheduleSerialPipelineJob(nextJobId, nextSerial, pipelineId);
 	}
 
 	private Map<String, Object> getNextJobData(int currentJobId, String serial) {

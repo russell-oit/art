@@ -22,6 +22,7 @@
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText" javaScriptEscape="true"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="jobs.message.running" var="runningText" javaScriptEscape="true"/>
+<spring:message code="pipelines.message.cancelled" var="cancelledText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -84,6 +85,27 @@
 						success: function (response) {
 							if (response.success) {
 								notifyActionSuccessReusable("${runningText}", recordName);
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+				
+				tbl.find('tbody').on('click', '.cancel', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/cancelPipeline',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) {
+							if (response.success) {
+								notifyActionSuccessReusable("${cancelledText}", recordName);
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
@@ -177,6 +199,9 @@
 								<button type="button" class="btn btn-default run">
 									<i class="fa fa-bolt"></i>
 									<spring:message code="jobs.action.run"/>
+								</button>
+								<button type="button" class="btn btn-default cancel">
+									<spring:message code="dialog.button.cancel"/>
 								</button>
 							</div>
 						</td>
