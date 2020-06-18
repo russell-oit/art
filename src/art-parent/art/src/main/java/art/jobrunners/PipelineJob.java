@@ -21,11 +21,9 @@ import art.pipeline.Pipeline;
 import art.pipeline.PipelineService;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
@@ -106,10 +104,8 @@ public class PipelineJob implements org.quartz.Job {
 				//https://stackoverflow.com/questions/42990614/how-to-get-a-range-of-values-in-java
 				//https://alvinalexander.com/source-code/how-to-populate-initialize-java-int-array-range/
 				//https://stackoverflow.com/questions/3619850/converting-an-int-array-to-a-string-array
-				//int[] rangeArray = IntStream.rangeClosed(startInt, endInt).toArray();
 				String[] rangeStringArray = IntStream.rangeClosed(startInt, endInt).mapToObj(String::valueOf).toArray(String[]::new);
 				Collections.addAll(serialList, rangeStringArray);
-				//serialList.addAll(Arrays.asList(rangeStringArray));
 			} else {
 				serialList.add(part);
 			}
