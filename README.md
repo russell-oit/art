@@ -15,8 +15,6 @@ Some of the features of ART include
 
 A bigger list of features can be found in the [Features](https://sourceforge.net/p/art/wiki/Features/) page.
 
-ART is a Java web application. You can run it on any operating system that has Java, and use any modern browser to view and manage reports.
-
 ## Online Demo
 
 * [Demo](https://art-demo.lon-1.paas.massivegrid.net/art/)
