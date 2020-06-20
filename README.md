@@ -23,6 +23,4 @@ A bigger list of features can be found in the [Features](https://sourceforge.net
 
 ## Commercial Support
 
-* Next Business Day - $8,000 per year
-* 8 Working Hours - $15,000 per year
 * Email timothy.anyona ( a t ) halogen.co.ke
