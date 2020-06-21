@@ -43,6 +43,7 @@ import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
 import art.output.VelocityOutput;
+import art.pipeline.PipelineJobData;
 import art.pipeline.PipelineService;
 import art.report.Report;
 import art.report.ReportService;
@@ -392,20 +393,20 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
-		Map<String, Object> nextJobData = getNextJobData(currentJobId, serial);
+		PipelineJobData nextJobData = getNextJobData(currentJobId, serial);
 		if (nextJobData == null) {
 			return;
 		}
 
-		Integer nextJobId = (Integer) nextJobData.get("jobId");
-		String nextSerial = (String) nextJobData.get("serial");
+		int nextJobId = nextJobData.getJobId();
+		String nextSerial = nextJobData.getSerial();
 
 		jobService.scheduleSerialPipelineJob(nextJobId, nextSerial, pipelineId);
 	}
 
-	private Map<String, Object> getNextJobData(int currentJobId, String serial) {
+	private PipelineJobData getNextJobData(int currentJobId, String serial) {
 		//https://stackoverflow.com/questions/1270760/passing-a-string-by-reference-in-java
-		Map<String, Object> nextJobData = null;
+		PipelineJobData nextJobData = null;
 
 		String[] serialArray = StringUtils.split(serial, ",");
 		if (serialArray != null && serialArray.length > 0) {
@@ -418,9 +419,9 @@ public class ReportJob implements org.quartz.Job {
 						int nextJobId = Integer.parseInt(nextJobIdString);
 						String[] newSerialArray = ArrayUtils.subarray(serialArray, i + 1, serialArray.length);
 						String newSerial = StringUtils.join(newSerialArray, ",");
-						nextJobData = new HashMap<>();
-						nextJobData.put("jobId", nextJobId);
-						nextJobData.put("serial", newSerial);
+						nextJobData = new PipelineJobData();
+						nextJobData.setJobId(nextJobId);
+						nextJobData.setSerial(newSerial);
 					}
 					break;
 				}
