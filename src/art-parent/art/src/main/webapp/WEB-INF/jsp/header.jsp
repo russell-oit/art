@@ -276,7 +276,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_jobs')}">
+									<c:if test="${sessionUser.hasPermission('configure_pipelines')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/pipelines">
 												<spring:message code="page.title.pipelines"/>

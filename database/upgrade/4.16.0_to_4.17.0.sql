@@ -4,6 +4,7 @@
 -- update database version
 -- add manual column
 -- create pipelines table
+-- add configure_pipelines permission
 
 
 -- NOTES:
@@ -35,3 +36,6 @@ CREATE TABLE ART_PIPELINES
 	CONSTRAINT art_ppln_pk PRIMARY KEY(PIPELINE_ID),
 	CONSTRAINT art_ppln_uq_nm UNIQUE(NAME)
 );
+
+-- add configure_pipelines permission
+INSERT INTO ART_PERMISSIONS VALUES(32, 'configure_pipelines');
