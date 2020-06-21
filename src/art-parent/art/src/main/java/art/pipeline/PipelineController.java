@@ -255,16 +255,36 @@ public class PipelineController {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		scheduler.scheduleJob(tempPipeline, tempTrigger);
 	}
-	
+
 	@PostMapping("cancelPipeline")
 	public @ResponseBody
 	AjaxResponse cancelPipeline(@RequestParam("id") Integer id) {
 		logger.debug("Entering cancelPipeline: id={}", id);
-		
+
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			pipelineService.cancelPipeline(id);
+			response.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@PostMapping("refreshPipeline")
+	public @ResponseBody
+	AjaxResponse refreshPipeline(@RequestParam("id") Integer id) {
+		logger.debug("Entering refreshPipeline: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Pipeline pipeline = pipelineService.getPipeline(id);
+
+			response.setData(pipeline);
 			response.setSuccess(true);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

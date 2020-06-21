@@ -19,16 +19,18 @@ package art.pipeline;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a pipeline
- * 
+ *
  * @author Timothy Anyona
  */
 public class Pipeline implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private int pipelineId;
 	private String name;
 	private String description;
@@ -38,6 +40,21 @@ public class Pipeline implements Serializable {
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+	private List<Integer> runningJobs;
+
+	/**
+	 * @return the runningJobs
+	 */
+	public List<Integer> getRunningJobs() {
+		return runningJobs;
+	}
+
+	/**
+	 * @param runningJobs the runningJobs to set
+	 */
+	public void setRunningJobs(List<Integer> runningJobs) {
+		this.runningJobs = runningJobs;
+	}
 
 	/**
 	 * @return the continueOnError
@@ -194,5 +211,14 @@ public class Pipeline implements Serializable {
 	public String toString() {
 		return "Pipeline{" + "name=" + name + '}';
 	}
-	
+
+	/**
+	 * Returns a comma separated string of running jobs for this pipeline
+	 * 
+	 * @return a comma separated string of running jobs for this pipeline
+	 */
+	public String getRunningJobsString() {
+		return StringUtils.join(runningJobs, ",");
+	}
+
 }

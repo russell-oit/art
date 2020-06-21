@@ -19,6 +19,7 @@ package art.pipeline;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.pipelinerunningjob.PipelineRunningJobService;
 import art.user.User;
 import art.utils.ArtUtils;
 import java.sql.Connection;
@@ -51,14 +52,19 @@ public class PipelineService {
 	private static final Logger logger = LoggerFactory.getLogger(PipelineService.class);
 
 	private final DbService dbService;
+	private final PipelineRunningJobService pipelineRunningJobService;
 
 	@Autowired
-	public PipelineService(DbService dbService) {
+	public PipelineService(DbService dbService,
+			PipelineRunningJobService pipelineRunningJobService) {
+
 		this.dbService = dbService;
+		this.pipelineRunningJobService = pipelineRunningJobService;
 	}
 
 	public PipelineService() {
 		dbService = new DbService();
+		pipelineRunningJobService = new PipelineRunningJobService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES";
@@ -90,6 +96,9 @@ public class PipelineService {
 			pipeline.setCreatedBy(rs.getString("CREATED_BY"));
 			pipeline.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			pipeline.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			List<Integer> runningJobs = pipelineRunningJobService.getPipelineRunningJobs(pipeline.getPipelineId());
+			pipeline.setRunningJobs(runningJobs);
 
 			return type.cast(pipeline);
 		}
@@ -406,7 +415,7 @@ public class PipelineService {
 		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1 WHERE PIPELINE_ID=?";
 		dbService.update(sql, pipelineId);
 	}
-	
+
 	/**
 	 * Marks a pipeline as uncancelled
 	 *

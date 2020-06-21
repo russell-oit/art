@@ -46,6 +46,7 @@ import art.output.VelocityOutput;
 import art.pipeline.Pipeline;
 import art.pipeline.PipelineJobData;
 import art.pipeline.PipelineService;
+import art.pipelinerunningjob.PipelineRunningJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -219,6 +220,9 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private PipelineService pipelineService;
 
+	@Autowired
+	private PipelineRunningJobService pipelineRunningJobService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
@@ -239,6 +243,7 @@ public class ReportJob implements org.quartz.Job {
 
 			if (dataMap.containsKey("pipelineId")) {
 				pipelineId = dataMap.getInt("pipelineId");
+				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId);
 			}
 
 			initializeProgressLogger();
@@ -383,7 +388,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Schedules a run job or run later job
+	 * Schedules the next job
 	 *
 	 * @param currentJobId the current job id
 	 * @param serial the serial jobs to run
@@ -399,6 +404,8 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering scheduleTempJob: currentJobId={},"
 				+ " serial='{}', pipelineId={}, erroroccurred={}",
 				currentJobId, serial, pipelineId, errorOccurred);
+
+		pipelineRunningJobService.removePipelineRunningJob(pipelineId, currentJobId);
 
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
 			return;
@@ -422,7 +429,17 @@ public class ReportJob implements org.quartz.Job {
 		jobService.scheduleSerialPipelineJob(nextJobId, nextSerial, pipelineId);
 	}
 
+	/**
+	 * Returns details of the next job to run in the pipeline
+	 *
+	 * @param currentJobId the current job id
+	 * @param serial the current serial definition
+	 * @return details of the next job to run in the pipeline
+	 */
 	private PipelineJobData getNextJobData(int currentJobId, String serial) {
+		logger.debug("Entering getNextJobData: currentJobId={}, serial='{}'",
+				currentJobId, serial);
+
 		//https://stackoverflow.com/questions/1270760/passing-a-string-by-reference-in-java
 		PipelineJobData nextJobData = null;
 

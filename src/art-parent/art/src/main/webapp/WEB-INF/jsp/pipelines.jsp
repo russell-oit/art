@@ -23,6 +23,8 @@
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="jobs.message.running" var="runningText" javaScriptEscape="true"/>
 <spring:message code="pipelines.message.cancelled" var="cancelledText" javaScriptEscape="true"/>
+<spring:message code="reports.text.status" var="statusText" javaScriptEscape="true"/>
+<spring:message code="pipelines.message.refreshed" var="refreshedText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -53,7 +55,16 @@
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = undefined;
 				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Pipelines";
-				var columnDefs = undefined;
+				var columnDefs = [
+					{
+						targets: "idCol",
+						width: "50px"
+					},
+					{
+						targets: "actionCol",
+						width: "220px"
+					}
+				];
 
 				//initialize datatable
 				var oTable = initConfigTable(tbl, pageLength,
@@ -92,7 +103,7 @@
 						error: ajaxErrorHandler
 					});
 				});
-				
+
 				tbl.find('tbody').on('click', '.cancel', function () {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.attr("data-name"));
@@ -106,6 +117,37 @@
 						success: function (response) {
 							if (response.success) {
 								notifyActionSuccessReusable("${cancelledText}", recordName);
+							} else {
+								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
+				tbl.find('tbody').on('click', '.refresh', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.attr("data-name"));
+					var recordId = row.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/refreshPipeline',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) {
+							if (response.success) {
+								var pipeline = response.data;
+
+								var result = '';
+								var runningJobsString = pipeline.runningJobsString;
+								if (runningJobsString) {
+									result = "${runningText}: " + runningJobsString;
+								}
+
+								table.cell(row, 4).data(result);
+
+								notifyActionSuccessReusable("${refreshedText}", recordName);
 							} else {
 								notifyActionErrorReusable("${errorOccurredText}", response.errorMessage, ${showErrors});
 							}
@@ -161,9 +203,10 @@
 			<thead>
 				<tr>
 					<th class="noFilter selectCol"></th>
-					<th><spring:message code="page.text.id"/></th>
+					<th class="idCol"><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
+					<th><spring:message code="reports.text.status"/></th>
 					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -180,6 +223,16 @@
 											   updateDate="${pipeline.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(pipeline.description)}</td>
+						<c:choose>
+							<c:when test="${empty pipeline.runningJobs}">
+								<td></td>
+							</c:when>
+							<c:otherwise>
+								<td><spring:message code="jobs.message.running"/>: 
+									${pipeline.runningJobsString}
+								</td>
+							</c:otherwise>
+						</c:choose>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
@@ -202,6 +255,10 @@
 								</button>
 								<button type="button" class="btn btn-default cancel">
 									<spring:message code="dialog.button.cancel"/>
+								</button>
+								<button type="button" class="btn btn-default refresh">
+									<i class="fa fa-refresh"></i>
+									<spring:message code="page.action.refresh"/>
 								</button>
 							</div>
 						</td>

@@ -5,6 +5,7 @@
 -- add manual column
 -- create pipelines table
 -- add configure_pipelines permission
+-- create pipelines_running_jobs table
 
 
 -- NOTES:
@@ -39,3 +40,10 @@ CREATE TABLE ART_PIPELINES
 
 -- add configure_pipelines permission
 INSERT INTO ART_PERMISSIONS VALUES(32, 'configure_pipelines');
+
+-- create pipelines_running_jobs table
+CREATE TABLE ART_PIPELINE_RUNNING_JOBS
+(
+	PIPELINE_ID INTEGER NOT NULL,
+	JOB_ID INTEGER NOT NULL
+);

@@ -1364,11 +1364,11 @@ public class JobService {
 
 	/**
 	 * Schedules a serial pipeline job
-	 * 
+	 *
 	 * @param jobId the job id
 	 * @param serial the serial setting
 	 * @param pipelineId the pipeline id
-	 * @throws SchedulerException 
+	 * @throws SchedulerException
 	 */
 	public void scheduleSerialPipelineJob(int jobId, String serial, int pipelineId)
 			throws SchedulerException {
