@@ -94,7 +94,6 @@ public class PipelineJob implements org.quartz.Job {
 
 		if (StringUtils.containsIgnoreCase(serial, "all")) {
 			List<Integer> allJobIds = jobService.getAllJobIds();
-			Collections.sort(allJobIds);
 			return StringUtils.join(allJobIds, ",");
 		}
 

@@ -1348,7 +1348,8 @@ public class JobService {
 		logger.debug("Entering getAllJobIds");
 
 		String sql = "SELECT JOB_ID"
-				+ " FROM ART_JOBS";
+				+ " FROM ART_JOBS"
+				+ " ORDER BY JOB_ID";
 
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
 		List<Number> numberIds = dbService.query(sql, h);
