@@ -33,7 +33,8 @@ public enum CacheType {
 	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters"),
 	Encryptors("Encryptors"), Holidays("Holidays"), Destinations("Destinations"),
 	SmtpServers("SmtpServers"), Settings("Settings"), CustomSettings("CustomSettings"),
-	Roles("Roles"), Permissions("Permissions"), Drilldowns("Drilldowns");
+	Roles("Roles"), Permissions("Permissions"), Drilldowns("Drilldowns"),
+	Pipelines("Pipelines");
 	
 	private final String value;
 

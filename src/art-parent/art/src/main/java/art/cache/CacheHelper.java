@@ -234,6 +234,14 @@ public class CacheHelper {
 	public void clearDrilldowns() {
 		logger.debug("Entering clearDrilldowns");
 	}
+	
+	/**
+	 * Clears the pipelines cache
+	 */
+	@CacheEvict(value = "pipelines", allEntries = true)
+	public void clearPipelines() {
+		logger.debug("Entering clearPipelines");
+	}
 
 	/**
 	 * Clears all caches
@@ -243,7 +251,7 @@ public class CacheHelper {
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers", "roles",
-		"permissions", "drilldowns"}, allEntries = true)
+		"permissions", "drilldowns", "pipelines"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 
