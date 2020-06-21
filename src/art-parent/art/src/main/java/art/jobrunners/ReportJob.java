@@ -43,6 +43,7 @@ import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
 import art.output.VelocityOutput;
+import art.pipeline.Pipeline;
 import art.pipeline.PipelineJobData;
 import art.pipeline.PipelineService;
 import art.report.Report;
@@ -225,21 +226,25 @@ public class ReportJob implements org.quartz.Job {
 
 		Instant start = Instant.now();
 
-		JobDataMap dataMap = context.getMergedJobDataMap();
-		jobId = dataMap.getInt("jobId");
-		String runUsername = dataMap.getString("username");
-		String serial = dataMap.getString("serial");
-
+		String runUsername = null;
+		String serial = null;
 		Integer pipelineId = null;
-		if (dataMap.containsKey("pipelineId")) {
-			pipelineId = dataMap.getInt("pipelineId");
-		}
-
-		initializeProgressLogger();
-
-		progressLogger.info("Started");
+		boolean errorOccurred = false;
 
 		try {
+			JobDataMap dataMap = context.getMergedJobDataMap();
+			jobId = dataMap.getInt("jobId");
+			runUsername = dataMap.getString("username");
+			serial = dataMap.getString("serial");
+
+			if (dataMap.containsKey("pipelineId")) {
+				pipelineId = dataMap.getInt("pipelineId");
+			}
+
+			initializeProgressLogger();
+
+			progressLogger.info("Started");
+
 			boolean runJob = true;
 
 			try {
@@ -339,6 +344,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
+			errorOccurred = true;
 		}
 
 		afterCompletion();
@@ -367,10 +373,12 @@ public class ReportJob implements org.quartz.Job {
 
 		if (pipelineId != null) {
 			try {
-				scheduleNextJob(jobId, serial, pipelineId);
+				scheduleNextJob(jobId, serial, pipelineId, errorOccurred);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
 			}
+
+			cacheHelper.clearPipelines();
 		}
 	}
 
@@ -380,17 +388,27 @@ public class ReportJob implements org.quartz.Job {
 	 * @param currentJobId the current job id
 	 * @param serial the serial jobs to run
 	 * @param pipelineId the pipeline id
+	 * @param errorOccurred whether an error occurred while running the current
+	 * job
 	 * @throws SchedulerException
 	 * @throws java.sql.SQLException
 	 */
-	private void scheduleNextJob(Integer currentJobId, String serial,
-			Integer pipelineId) throws SchedulerException, SQLException {
+	private void scheduleNextJob(int currentJobId, String serial,
+			int pipelineId, boolean errorOccurred) throws SchedulerException, SQLException {
 
 		logger.debug("Entering scheduleTempJob: currentJobId={},"
-				+ " serial='{}', pipelineId", currentJobId, serial, pipelineId);
+				+ " serial='{}', pipelineId={}, erroroccurred={}",
+				currentJobId, serial, pipelineId, errorOccurred);
 
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
 			return;
+		}
+
+		if (errorOccurred) {
+			Pipeline pipeline = pipelineService.getPipeline(pipelineId);
+			if (pipeline != null && !pipeline.isContinueOnError()) {
+				return;
+			}
 		}
 
 		PipelineJobData nextJobData = getNextJobData(currentJobId, serial);
