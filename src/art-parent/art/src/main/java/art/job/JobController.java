@@ -321,7 +321,7 @@ public class JobController {
 				.withIdentity("tempJob-" + runId, "tempJobGroup")
 				.usingJobData("jobId", jobId)
 				.usingJobData("username", username)
-				.usingJobData("tempJob", Boolean.TRUE)
+				.usingJobData("tempJob", true)
 				.build();
 
 		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()

@@ -244,7 +244,7 @@ public class PipelineController {
 				.withIdentity("tempPipeline-" + runId, "tempPipelineGroup")
 				.usingJobData("pipelineId", pipelineId)
 				.usingJobData("username", username)
-				.usingJobData("tempPipeline", Boolean.TRUE)
+				.usingJobData("tempPipeline", true)
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()

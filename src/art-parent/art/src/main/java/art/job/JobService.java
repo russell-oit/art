@@ -1384,7 +1384,7 @@ public class JobService {
 				.usingJobData("jobId", jobId)
 				.usingJobData("serial", serial)
 				.usingJobData("pipelineId", pipelineId)
-				.usingJobData("tempJob", Boolean.TRUE)
+				.usingJobData("tempJob", true)
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
