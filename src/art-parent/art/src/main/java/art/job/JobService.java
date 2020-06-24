@@ -57,6 +57,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
@@ -1393,5 +1394,27 @@ public class JobService {
 
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		scheduler.scheduleJob(tempJob, tempTrigger);
+	}
+
+	/**
+	 * Returns the last job id
+	 * 
+	 * @return the last job id
+	 * @throws SQLException 
+	 */
+	@Cacheable("jobs")
+	public int getLastJobId() throws SQLException {
+		logger.debug("Entering getLastJobId");
+
+		String sql = "SELECT MAX(JOB_ID)"
+				+ " FROM ART_JOBS";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number id = dbService.query(sql, h);
+		if (id == null) {
+			return 0;
+		} else {
+			return id.intValue();
+		}
 	}
 }

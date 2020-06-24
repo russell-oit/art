@@ -110,6 +110,16 @@ public class PipelineJob implements org.quartz.Job {
 				//https://stackoverflow.com/questions/3619850/converting-an-int-array-to-a-string-array
 				String[] rangeStringArray = IntStream.rangeClosed(startInt, endInt).mapToObj(String::valueOf).toArray(String[]::new);
 				Collections.addAll(serialList, rangeStringArray);
+			} else if (StringUtils.contains(part, "+")) {
+				String id = StringUtils.substringBefore(part, "+").trim();
+				int idInt = Integer.parseInt(id);
+				int lastId = jobService.getLastJobId();
+				if (lastId <= idInt) {
+					serialList.add(id);
+				} else {
+					String[] rangeStringArray = IntStream.rangeClosed(idInt, lastId).mapToObj(String::valueOf).toArray(String[]::new);
+					Collections.addAll(serialList, rangeStringArray);
+				}
 			} else {
 				serialList.add(part);
 			}
