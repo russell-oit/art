@@ -873,21 +873,6 @@ public class JobService {
 	}
 
 	/**
-	 * Returns jobs that use a given schedule as a fixed schedule
-	 *
-	 * @param scheduleId the schedule id
-	 * @return jobs that use the schedule as a fixed schedule
-	 * @throws SQLException
-	 */
-	public List<Job> getScheduleJobs(int scheduleId) throws SQLException {
-		logger.debug("Entering getScheduleJobs");
-
-		String sql = SQL_SELECT_ALL + " WHERE SCHEDULE_ID=?";
-		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
-		return dbService.query(sql, h, scheduleId);
-	}
-
-	/**
 	 * Returns jobs that use a given holiday, either directly as shared holiday
 	 * or as part of a fixed holiday
 	 *
@@ -1273,6 +1258,7 @@ public class JobService {
 	 * @return jobs that use the schedule
 	 * @throws SQLException
 	 */
+	@Cacheable("jobs")
 	public List<Job> getJobsWithSchedule(int scheduleId) throws SQLException {
 		logger.debug("Entering getJobsWithSchedule: scheduleId={}", scheduleId);
 
@@ -1290,6 +1276,7 @@ public class JobService {
 	 * @return jobs that use the smtp server
 	 * @throws SQLException
 	 */
+	@Cacheable("jobs")
 	public List<Job> getJobsWithSmtpServer(int smtpServerId) throws SQLException {
 		logger.debug("Entering getJobsWithSmtpServer: smtpServerId={}", smtpServerId);
 
@@ -1398,9 +1385,9 @@ public class JobService {
 
 	/**
 	 * Returns the last job id
-	 * 
+	 *
 	 * @return the last job id
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@Cacheable("jobs")
 	public int getLastJobId() throws SQLException {
@@ -1416,5 +1403,34 @@ public class JobService {
 		} else {
 			return id.intValue();
 		}
+	}
+
+	/**
+	 * Returns ids for jobs that use a given schedule
+	 * 
+	 * @param scheduleName the schedule name
+	 * @return ids for jobs that use a given schedule
+	 * @throws SQLException 
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getJobIdsWithSchedule(String scheduleName) throws SQLException {
+		logger.debug("Entering getJobIdsWithSchedule: scheduleName='{}'",
+				scheduleName);
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ INNER JOIN ART_JOB_SCHEDULES AJS"
+				+ " ON AJ.SCHEDULE_ID=AJS.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_NAME=?"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, scheduleName);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
 	}
 }

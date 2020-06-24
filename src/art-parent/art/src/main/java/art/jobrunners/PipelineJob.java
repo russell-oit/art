@@ -22,8 +22,9 @@ import art.pipeline.Pipeline;
 import art.pipeline.PipelineService;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
@@ -92,15 +93,27 @@ public class PipelineJob implements org.quartz.Job {
 			return null;
 		}
 
-		if (StringUtils.containsIgnoreCase(serial, "all")) {
+		String[] serialArray = StringUtils.split(serial, ",");
+		//https://stackoverflow.com/questions/1128723/how-do-i-determine-whether-an-array-contains-a-particular-value-in-java
+		if (Arrays.stream(serialArray).anyMatch(s -> StringUtils.equalsIgnoreCase(s.trim(), "all"))) {
 			List<Integer> allJobIds = jobService.getAllJobIds();
 			return StringUtils.join(allJobIds, ",");
 		}
 
-		String[] serialArray = StringUtils.split(serial, ",");
-		List<String> serialList = new ArrayList<>();
+		List<String> finalList = new ArrayList<>();
 		for (String part : serialArray) {
-			if (StringUtils.contains(part, "-")) {
+			part = StringUtils.trimToEmpty(part);
+			if (StringUtils.isBlank(part)) {
+				continue;
+			}
+
+			if (StringUtils.startsWith(part, "schedule:")) {
+				String scheduleName = StringUtils.substringAfter(part, "schedule:").trim();
+				List<Integer> ids = jobService.getJobIdsWithSchedule(scheduleName);
+				//https://www.techiedelight.com/convert-list-integer-list-string-java/
+				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
+				finalList.addAll(stringList);
+			} else if (StringUtils.contains(part, "-")) {
 				String start = StringUtils.substringBefore(part, "-").trim();
 				String end = StringUtils.substringAfter(part, "-").trim();
 				int startInt = Integer.parseInt(start);
@@ -108,24 +121,24 @@ public class PipelineJob implements org.quartz.Job {
 				//https://stackoverflow.com/questions/42990614/how-to-get-a-range-of-values-in-java
 				//https://alvinalexander.com/source-code/how-to-populate-initialize-java-int-array-range/
 				//https://stackoverflow.com/questions/3619850/converting-an-int-array-to-a-string-array
-				String[] rangeStringArray = IntStream.rangeClosed(startInt, endInt).mapToObj(String::valueOf).toArray(String[]::new);
-				Collections.addAll(serialList, rangeStringArray);
-			} else if (StringUtils.contains(part, "+")) {
+				List<String> rangeList = IntStream.rangeClosed(startInt, endInt).mapToObj(String::valueOf).collect(Collectors.toList());
+				finalList.addAll(rangeList);
+			} else if (StringUtils.endsWith(part, "+")) {
 				String id = StringUtils.substringBefore(part, "+").trim();
 				int idInt = Integer.parseInt(id);
 				int lastId = jobService.getLastJobId();
 				if (lastId <= idInt) {
-					serialList.add(id);
+					finalList.add(id);
 				} else {
-					String[] rangeStringArray = IntStream.rangeClosed(idInt, lastId).mapToObj(String::valueOf).toArray(String[]::new);
-					Collections.addAll(serialList, rangeStringArray);
+					List<String> rangeList = IntStream.rangeClosed(idInt, lastId).mapToObj(String::valueOf).collect(Collectors.toList());
+					finalList.addAll(rangeList);
 				}
 			} else {
-				serialList.add(part);
+				finalList.add(part);
 			}
 		}
 
-		String finalSerial = StringUtils.join(serialList, ",");
+		String finalSerial = StringUtils.join(finalList, ",");
 
 		return finalSerial;
 	}

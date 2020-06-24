@@ -71,7 +71,7 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 			int userId = dataMap.getInt("userId");
 
 			if (scheduleId > 0) {
-				List<Job> jobs = jobService.getScheduleJobs(scheduleId);
+				List<Job> jobs = jobService.getJobsWithSchedule(scheduleId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
 					User user = userService.getUser(userId);
 					for (Job job : jobs) {
