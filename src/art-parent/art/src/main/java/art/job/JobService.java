@@ -1407,10 +1407,10 @@ public class JobService {
 
 	/**
 	 * Returns ids for jobs that use a given schedule
-	 * 
+	 *
 	 * @param scheduleName the schedule name
 	 * @return ids for jobs that use a given schedule
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@Cacheable("jobs")
 	public List<Integer> getJobIdsWithSchedule(String scheduleName) throws SQLException {
@@ -1425,6 +1425,39 @@ public class JobService {
 
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
 		List<Number> numberIds = dbService.query(sql, h, scheduleName);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Returns ids for jobs whose report is in certain report groups
+	 *
+	 * @param reportGroupNames the report group names
+	 * @return ids for jobs whose report is in certain report groups
+	 * @throws SQLException
+	 */
+	public List<Integer> getJobIdsWithReportGroups(String[] reportGroupNames) throws SQLException {
+		logger.debug("Entering getJobIdsWithReportGroups");
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ"
+				+ " WHERE EXISTS("
+				+ " SELECT NULL"
+				+ " FROM ART_QUERY_GROUPS AQG"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE AJ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND AQG.NAME IN(" + StringUtils.repeat("?", ",", reportGroupNames.length) + ")"
+				+ " )"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, (Object[]) reportGroupNames);
 
 		List<Integer> integerIds = new ArrayList<>();
 		for (Number number : numberIds) {

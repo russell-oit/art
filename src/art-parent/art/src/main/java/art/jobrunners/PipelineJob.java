@@ -113,6 +113,13 @@ public class PipelineJob implements org.quartz.Job {
 				//https://www.techiedelight.com/convert-list-integer-list-string-java/
 				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);
+			} else if (StringUtils.startsWith(part, "reportGroup:")) {
+				String reportGroupNames = StringUtils.substringAfter(part, "reportGroup:");
+				String[] reportGroupNamesArray = StringUtils.split(reportGroupNames, ";");
+				String[] trimmedReportGroupNamesArray = Arrays.stream(reportGroupNamesArray).map(String::trim).toArray(String[]::new);
+				List<Integer> ids = jobService.getJobIdsWithReportGroups(trimmedReportGroupNamesArray);
+				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
+				finalList.addAll(stringList);
 			} else if (StringUtils.contains(part, "-")) {
 				String start = StringUtils.substringBefore(part, "-").trim();
 				String end = StringUtils.substringAfter(part, "-").trim();
