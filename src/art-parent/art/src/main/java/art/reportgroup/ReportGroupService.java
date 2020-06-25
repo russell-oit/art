@@ -33,6 +33,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,7 @@ public class ReportGroupService {
 			group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
 			group.setName(rs.getString("NAME"));
 			group.setDescription(rs.getString("DESCRIPTION"));
+			group.setHidden(rs.getBoolean("HIDDEN"));
 			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			group.setCreatedBy(rs.getString("CREATED_BY"));
@@ -480,13 +482,15 @@ public class ReportGroupService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERY_GROUPS"
-					+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+					+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, HIDDEN,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 			Object[] values = {
 				newRecordId,
 				group.getName(),
 				group.getDescription(),
+				BooleanUtils.toInteger(group.isHidden()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -494,12 +498,14 @@ public class ReportGroupService {
 			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
+					+ " HIDDEN=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_GROUP_ID=?";
 
 			Object[] values = {
 				group.getName(),
 				group.getDescription(),
+				BooleanUtils.toInteger(group.isHidden()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				group.getReportGroupId()

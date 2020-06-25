@@ -6,6 +6,7 @@
 -- create pipelines table
 -- add configure_pipelines permission
 -- create pipelines_running_jobs table
+-- add report groups hidden column
 
 
 -- NOTES:
@@ -47,3 +48,8 @@ CREATE TABLE ART_PIPELINE_RUNNING_JOBS
 	PIPELINE_ID INTEGER NOT NULL,
 	JOB_ID INTEGER NOT NULL
 );
+
+-- add report groups hidden column
+ALTER TABLE ART_QUERY_GROUPS ADD HIDDEN INTEGER;
+-- GO
+UPDATE ART_QUERY_GROUPS SET HIDDEN=0;

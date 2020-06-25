@@ -28,14 +28,29 @@ Edit report group page
 	</c:when>
 </c:choose>
 
+<spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
+<spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
+
 <t:mainPageWithPanel title="${pageTitle}" panelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="reportGroups"]').parent().addClass('active');
+
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
+				});
 
 				$('#name').trigger("focus");
 
@@ -98,6 +113,16 @@ Edit report group page
 					<div class="col-md-8">
 						<form:textarea path="description" rows="2" cols="40" class="form-control" maxlength="200"/>
 						<form:errors path="description" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="hidden">
+						<spring:message code="parameters.label.hidden"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="hidden" id="hidden" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">
