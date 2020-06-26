@@ -1,7 +1,7 @@
 # ART
 ART stands for A Reporting Tool.
 
-ART is a simple yet effective reporting and business intelligence solution.
+ART is a reporting and business intelligence solution.
 
 Once an SQL query is ready, it can be published through ART in a few minutes. Authorised users can then log in and view the results in the browser.
 
