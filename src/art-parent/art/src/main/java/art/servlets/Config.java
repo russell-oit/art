@@ -1561,7 +1561,10 @@ public class Config extends HttpServlet {
 	 * @param reportRunDetails details of the query
 	 * @param statement the statement object for the query
 	 */
-	public static void addRunningQuery(ReportRunDetails reportRunDetails, Statement statement) {
+	public static synchronized void addRunningQuery(ReportRunDetails reportRunDetails, Statement statement) {
+		//https://sourceforge.net/p/art/discussion/352129/thread/369fc55742/
+		//https://howtodoinjava.com/java/collections/arraylist/synchronize-arraylist/
+		//https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html
 		runningQueries.add(reportRunDetails);
 		runningStatements.put(reportRunDetails.getRunId(), statement);
 	}
@@ -1571,7 +1574,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @param runId the run id for the query
 	 */
-	public static void removeRunningQuery(String runId) {
+	public static synchronized void removeRunningQuery(String runId) {
 		runningStatements.remove(runId);
 		runningQueries.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
 	}
@@ -1590,7 +1593,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @param reportRunDetails details of the report
 	 */
-	public static void addRunningReport(ReportRunDetails reportRunDetails) {
+	public static synchronized void addRunningReport(ReportRunDetails reportRunDetails) {
 		runningReports.add(reportRunDetails);
 	}
 
@@ -1599,7 +1602,7 @@ public class Config extends HttpServlet {
 	 *
 	 * @param runId the run id for the report
 	 */
-	public static void removeRunningReport(String runId) {
+	public static synchronized void removeRunningReport(String runId) {
 		runningReports.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
 	}
 
