@@ -8,7 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <p>
-	Welcome to the ART Reporting Tool. You need to configure the
+	Welcome to the ART reporting tool. You need to configure the
 	<b>ART Database</b> before being able to use ART. The ART Database
 	stores data used by the application e.g. users, report definitions etc.
 </p>
