@@ -65,6 +65,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		//https://fralef.me/tomcat-disable-jsessionid-in-url.html
 		StrictHttpFirewall firewall = new StrictHttpFirewall();
 		firewall.setAllowSemicolon(true);
+		//https://sourceforge.net/p/art/discussion/352129/thread/c7387c3221/
+		//https://stackoverflow.com/questions/53300497/encoded-precent25-with-spring-requestmapping-path-param-gives-http-400
+		firewall.setAllowUrlEncodedPercent(true);
 		return firewall;
 	}
 
