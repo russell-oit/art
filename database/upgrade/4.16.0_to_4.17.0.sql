@@ -11,6 +11,8 @@
 
 -- NOTES:
 -- for sql server, if using SSMS, replace -- GO with GO
+
+-- for sql server, mysql replace TIMESTAMP with DATETIME
 -- ------------------------------------------------
 
 
