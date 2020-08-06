@@ -42,6 +42,8 @@ public class BasicReport implements Serializable {
 	private String dtAction;
 	private String reportGroupNames2;
 	private String reportGroupNamesFilter;
+	private String userReportGroupNames2;
+	private String userReportGroupNamesFilter;
 
 	public BasicReport(Report report) {
 		if (report == null) {
@@ -52,6 +54,20 @@ public class BasicReport implements Serializable {
 		name = report.getName();
 
 		initializeReportGroupNames(report.getReportGroups());
+	}
+
+	/**
+	 * @return the userReportGroupNamesFilter
+	 */
+	public String getUserReportGroupNamesFilter() {
+		return userReportGroupNamesFilter;
+	}
+
+	/**
+	 * @return the userReportGroupNames2
+	 */
+	public String getUserReportGroupNames2() {
+		return userReportGroupNames2;
 	}
 
 	/**
@@ -176,20 +192,32 @@ public class BasicReport implements Serializable {
 	 * @param reportGroups the report groups list
 	 */
 	private void initializeReportGroupNames(List<ReportGroup> reportGroups) {
-		if (CollectionUtils.isEmpty(reportGroups)) {
-			reportGroupNames2 = "";
-			reportGroupNamesFilter = "~";
-		} else {
-			List<String> names = new ArrayList<>();
+		reportGroupNames2 = "";
+		reportGroupNamesFilter = "~";
+		userReportGroupNames2 = "";
+		userReportGroupNamesFilter = "~";
+
+		if (CollectionUtils.isNotEmpty(reportGroups)) {
+			List<String> allGroupNames = new ArrayList<>();
+			List<String> visibleGroupNames = new ArrayList<>();
 			for (ReportGroup reportGroup : reportGroups) {
 				String groupName = reportGroup.getName();
-				names.add(groupName);
+				allGroupNames.add(groupName);
+				if (!reportGroup.isHidden()) {
+					visibleGroupNames.add(groupName);
+				}
 			}
 
 			final String DATA_SEPARATOR = ", ";
-			String reportGroupNames = StringUtils.join(names, DATA_SEPARATOR);
-			reportGroupNames2 = Encode.forHtml(reportGroupNames);
+			String allReportGroupNames = StringUtils.join(allGroupNames, DATA_SEPARATOR);
+			reportGroupNames2 = Encode.forHtml(allReportGroupNames);
 			reportGroupNamesFilter = reportGroupNames2;
+
+			if (!visibleGroupNames.isEmpty()) {
+				String visibleReportGroupNames = StringUtils.join(visibleGroupNames, DATA_SEPARATOR);
+				userReportGroupNames2 = Encode.forHtml(visibleReportGroupNames);
+				userReportGroupNamesFilter = userReportGroupNames2;
+			}
 		}
 	}
 

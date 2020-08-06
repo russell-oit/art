@@ -159,8 +159,13 @@
 					populateOutputFormatField();
 				});
 
+				$('#manual').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleScheduleFieldsEnabled();
+				});
+
 				toggleVisibleFields(); //show/hide on page load
 				populateOutputFormatField();
+				toggleScheduleFieldsEnabled();
 
 				$('#name').trigger("focus");
 
@@ -394,6 +399,14 @@
 				}
 
 				$("#outputFormat").selectpicker('refresh');
+			}
+
+			function toggleScheduleFieldsEnabled() {
+				if ($('#manual').is(':checked')) {
+					$("#scheduleFields").hide();
+				} else {
+					$("#scheduleFields").show();
+				}
 			}
 
 			function toggleVisibleFields() {
@@ -915,193 +928,205 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.schedule"/></legend>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="schedule">
-							<spring:message code="jobs.text.fixedSchedule"/>
+						<label class="control-label col-md-4" for="manual">
+							<spring:message code="jobs.label.manual"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="schedule" class="form-control selectpicker">
-								<form:option value="0">--</form:option>
-									<option data-divider="true"></option>
-								<form:options items="${schedules}" itemLabel="name" itemValue="scheduleId"/>
-							</form:select>
-							<form:errors path="schedule" cssClass="error"/>
+							<div class="checkbox">
+								<form:checkbox path="manual" id="manual" class="switch-yes-no"/>
+							</div>
 						</div>
 					</div>
+					<fieldset id="scheduleFields">
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="schedule">
+								<spring:message code="jobs.text.fixedSchedule"/>
+							</label>
+							<div class="col-md-8">
+								<form:select path="schedule" class="form-control selectpicker">
+									<form:option value="0">--</form:option>
+										<option data-divider="true"></option>
+									<form:options items="${schedules}" itemLabel="name" itemValue="scheduleId"/>
+								</form:select>
+								<form:errors path="schedule" cssClass="error"/>
+							</div>
+						</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="schedules">
-							<spring:message code="jobs.label.schedules"/>
-						</label>
-						<div class="col-md-8">
-							<p>
-								<select name="schedules" id="schedules" class="form-control selectpicker">
-									<option value="0">--</option>
-									<option data-divider="true"></option>
-									<c:forEach var="schedule" items="${schedules}">
-										<option value="${schedule.scheduleId}">${encode:forHtmlContent(schedule.name)}</option>
-									</c:forEach>
-								</select>
-							</p>
-							<input type="text" id="clock" readonly class="form-control"/>
-						</div>
-					</div>
-
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleSecond">
-							<spring:message code="schedules.label.second"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleSecond" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleSecond" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleMinute">
-							<spring:message code="schedules.label.minute"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleMinute" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleMinute" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleHour">
-							<spring:message code="schedules.label.hour"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleHour" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleHour" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleDay">
-							<spring:message code="schedules.label.day"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleDay" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleDay" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleMonth">
-							<spring:message code="schedules.label.month"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleMonth" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleWeekday">
-							<spring:message code="schedules.label.weekday"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleWeekday" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleWeekday" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleYear">
-							<spring:message code="schedules.label.year"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleYear" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleYear" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleTimeZone">
-							<spring:message code="page.label.timeZone"/>
-						</label>
-						<div class="col-md-8">
-							<form:select path="scheduleTimeZone" class="form-control selectpicker">
-								<form:option value="${serverTimeZone}">${serverTimeZoneDescription}</form:option>
-									<option data-divider="true"></option>
-								<form:options items="${timeZones}"/>
-							</form:select>
-							<form:errors path="scheduleTimeZone" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-md-8 col-md-offset-4">
-							<button type="button" id="describeSchedule" class="btn btn-default">
-								<spring:message code="schedules.button.describe"/>
-							</button>
-							<div id="mainScheduleDescriptionDiv">
+						<hr>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="schedules">
+								<spring:message code="jobs.label.schedules"/>
+							</label>
+							<div class="col-md-8">
 								<p>
-								<pre id="mainDescription">${encode:forHtmlContent(mainScheduleDescription)}</pre>
-								<b><spring:message code="jobs.text.nextRunDate"/>:</b> 
-								<pre id="mainNextRunDate"><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+									<select name="schedules" id="schedules" class="form-control selectpicker">
+										<option value="0">--</option>
+										<option data-divider="true"></option>
+										<c:forEach var="schedule" items="${schedules}">
+											<option value="${schedule.scheduleId}">${encode:forHtmlContent(schedule.name)}</option>
+										</c:forEach>
+									</select>
 								</p>
+								<input type="text" id="clock" readonly class="form-control"/>
 							</div>
 						</div>
-					</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="startDateString">
-							<spring:message code="jobs.label.startDate"/>
-						</label>
-						<div class="col-md-8">
-							<div id="startDatePicker" class='input-group date datetimepicker'>
-								<form:input path="startDateString" class="form-control"/>
-								<span class="input-group-addon">
-									<span class="glyphicon glyphicon-calendar"></span>
-								</span>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleSecond">
+								<spring:message code="schedules.label.second"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleSecond" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleSecond" cssClass="error"/>
 							</div>
-							<form:errors path="startDateString" cssClass="error"/>
 						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="endDate">
-							<spring:message code="jobs.label.endDate"/>
-						</label>
-						<div class="col-md-8">
-							<div id="endDatePicker" class='input-group date datetimepicker'>
-								<form:input path="endDateString" class="form-control"/>
-								<span class="input-group-addon">
-									<span class="glyphicon glyphicon-calendar"></span>
-								</span>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleMinute">
+								<spring:message code="schedules.label.minute"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleMinute" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleMinute" cssClass="error"/>
 							</div>
-							<form:errors path="endDateString" cssClass="error"/>
 						</div>
-					</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleHour">
+								<spring:message code="schedules.label.hour"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleHour" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleHour" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleDay">
+								<spring:message code="schedules.label.day"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleDay" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleDay" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleMonth">
+								<spring:message code="schedules.label.month"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleMonth" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleWeekday">
+								<spring:message code="schedules.label.weekday"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleWeekday" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleWeekday" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleYear">
+								<spring:message code="schedules.label.year"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="scheduleYear" maxlength="100" class="form-control"/>
+								<form:errors path="scheduleYear" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="scheduleTimeZone">
+								<spring:message code="page.label.timeZone"/>
+							</label>
+							<div class="col-md-8">
+								<form:select path="scheduleTimeZone" class="form-control selectpicker">
+									<form:option value="${serverTimeZone}">${serverTimeZoneDescription}</form:option>
+										<option data-divider="true"></option>
+									<form:options items="${timeZones}"/>
+								</form:select>
+								<form:errors path="scheduleTimeZone" cssClass="error"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-md-8 col-md-offset-4">
+								<button type="button" id="describeSchedule" class="btn btn-default">
+									<spring:message code="schedules.button.describe"/>
+								</button>
+								<div id="mainScheduleDescriptionDiv">
+									<p>
+									<pre id="mainDescription">${encode:forHtmlContent(mainScheduleDescription)}</pre>
+									<b><spring:message code="jobs.text.nextRunDate"/>:</b> 
+									<pre id="mainNextRunDate"><fmt:formatDate value="${nextRunDate}" pattern="${dateDisplayPattern}"/></pre>
+									</p>
+								</div>
+							</div>
+						</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="extraSchedules">
-							<spring:message code="jobs.label.extraSchedules"/>
-						</label>
-						<div class="col-md-8">
-							<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
-							<form:errors path="extraSchedules" cssClass="error"/>
+						<hr>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="startDateString">
+								<spring:message code="jobs.label.startDate"/>
+							</label>
+							<div class="col-md-8">
+								<div id="startDatePicker" class='input-group date datetimepicker'>
+									<form:input path="startDateString" class="form-control"/>
+									<span class="input-group-addon">
+										<span class="glyphicon glyphicon-calendar"></span>
+									</span>
+								</div>
+								<form:errors path="startDateString" cssClass="error"/>
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="holidays">
-							<spring:message code="schedules.label.holidays"/>
-						</label>
-						<div class="col-md-8">
-							<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
-							<form:errors path="holidays" cssClass="error"/>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="endDate">
+								<spring:message code="jobs.label.endDate"/>
+							</label>
+							<div class="col-md-8">
+								<div id="endDatePicker" class='input-group date datetimepicker'>
+									<form:input path="endDateString" class="form-control"/>
+									<span class="input-group-addon">
+										<span class="glyphicon glyphicon-calendar"></span>
+									</span>
+								</div>
+								<form:errors path="endDateString" cssClass="error"/>
+							</div>
 						</div>
-					</div>
 
-					<hr>
-					<div class="form-group">
-						<label class="col-md-4 control-label " for="sharedHolidays">
-							<spring:message code="schedules.label.sharedHolidays"/>
-						</label>
-						<div class="col-md-8">
-							<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
-										 itemLabel="name" itemValue="holidayId" 
-										 class="form-control selectpicker"
-										 data-actions-box="true"
-										 />
-							<form:errors path="sharedHolidays" cssClass="error"/>
+						<hr>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="extraSchedules">
+								<spring:message code="jobs.label.extraSchedules"/>
+							</label>
+							<div class="col-md-8">
+								<form:textarea path="extraSchedules" rows="3" cols="40" class="form-control"/>
+								<form:errors path="extraSchedules" cssClass="error"/>
+							</div>
 						</div>
-					</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="holidays">
+								<spring:message code="schedules.label.holidays"/>
+							</label>
+							<div class="col-md-8">
+								<form:textarea path="holidays" rows="3" cols="40" class="form-control"/>
+								<form:errors path="holidays" cssClass="error"/>
+							</div>
+						</div>
+
+						<hr>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="sharedHolidays">
+								<spring:message code="schedules.label.sharedHolidays"/>
+							</label>
+							<div class="col-md-8">
+								<form:select path="sharedHolidays" items="${holidays}" multiple="true" 
+											 itemLabel="name" itemValue="holidayId" 
+											 class="form-control selectpicker"
+											 data-actions-box="true"
+											 />
+								<form:errors path="sharedHolidays" cssClass="error"/>
+							</div>
+						</div>
+					</fieldset>
 				</fieldset>
 
 				<hr>

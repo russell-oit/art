@@ -693,8 +693,13 @@ public class RunReportController {
 		//can use jquery, e.g. $('reportProgress').html(), but need to ensure jquery library 
 		//has been included in the page before calling this method
 		elementId += "-" + runId;
-		out.println("<script type='text/javascript'>"
-				+ "document.getElementById('" + elementId + "').innerHTML='" + Encode.forJavaScript(message) + "';"
+		//https://stackoverflow.com/questions/17207873/how-to-check-document-getelementbyid-contains-null-or-undefined-value-in-it/17207924
+		//https://stackoverflow.com/questions/3247251/is-ifdocument-getelementbyidsomething-null-identical-to-ifdocument-getel
+		out.println("<script>"
+				+ "var el = document.getElementById('" + elementId + "');"
+				+ "if(el){"
+				+ "el.innerHTML='" + Encode.forJavaScript(message) + "';"
+				+ "}"
 				+ "</script>");
 	}
 

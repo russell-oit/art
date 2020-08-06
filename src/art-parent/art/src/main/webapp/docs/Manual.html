@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.16"> 
+  <meta name="version" content="4.17"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -343,6 +343,7 @@
        <li><a href="#dynamic-recipients-personalization">Dynamic Recipients + Personalization</a></li> 
        <li><a href="#dynamic-recipients-filtering">Dynamic Recipients + Filtering</a></li> 
       </ol></li> 
+     <li><a href="#pipelines">Pipelines</a></li> 
      <li><a href="#integrated-windows-authentication">Integrated Windows Authentication</a> 
       <ol> 
        <li><a href="#prerequisites">Prerequisites</a></li> 
@@ -524,7 +525,10 @@
          <li><a href="#offline">Offline</a></li> 
         </ol></li> 
       </ol></li> 
-     <li><a href="#support">Support</a></li> 
+     <li><a href="#support">Support</a> 
+      <ol> 
+       <li><a href="#commercial-support">Commercial Support</a></li> 
+      </ol></li> 
     </ol> 
    </div> 
    <p></p> 
@@ -1428,14 +1432,12 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td><strong>Description</strong></td> 
         <td>A description for the report group</td> 
        </tr> 
+       <tr> 
+        <td><strong>Hidden</strong></td> 
+        <td>Whether the report group will be displayed in the reports page</td> 
+       </tr> 
       </tbody> 
      </table> 
-     <p><strong>Note:</strong></p> 
-     <ul> 
-      <li>In a standard organization, you may want to define several groups to match the different business areas of the company e.g. INVENTORY, PURCHASING, FINANCE etc.</li> 
-      <li>In order to create Development, QA and Production environments, you can create several groups e.g. INVENTORY_PROD, INVENTORY_QA, and INVENTORY_DEV, and have a newly developed report created in the INVENTORY_DEV group, moved to the INVENTORY_QA group for user tests and finally to INVENTORY_PROD once testing is complete.</li> 
-      <li>It is possible to limit the report groups that an administrator can deal with. You can therefore have administrators who deal only with a development environment and others who deal with the production environment.</li> 
-     </ul> 
     </div> 
    </div> 
    <div> 
@@ -4991,8 +4993,8 @@ where #rules#
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="dashboards">Dashboards</h1> 
-     <p>Dashboards are used to display multiple reports on a single page.</p> 
-     <p>Any ART report can be considered a portlet i.e. a small embeddable frame within a web page. Each portlet uses AJAX to dynamically load itself within the page. Users can refresh or minimize each portlet independently by clicking on the buttons at the top of the portlet frame. When a user runs a dashboard, he can choose to modify the default parameters used by the reports in the dashboard. All the embedded reports are parsed and their parameters, if any, are displayed. If several reports use the same parameter, the parameter is displayed only once.</p> 
+     <p>Dashboards are used to display multiple reports on a single page. Most report types can be included in a dashboard with exceptions including Saiku, JPivot and Link reports.</p> 
+     <p>Each dashboard component or portlet uses AJAX to dynamically load itself within the page. Users can refresh or minimize each portlet independently by clicking on the buttons at the top of the portlet frame. When a user runs a dashboard, he can choose to modify the default parameters used by the reports in the dashboard. All the embedded reports are parsed and their parameters, if any, are displayed. If several reports use the same parameter, the parameter is displayed only once.</p> 
      <p><img alt="dashboard-example" src="dashboard-example.png"></p> 
      <h2 id="regular-dashboards">Regular Dashboards</h2> 
      <p>You define a dashboard by creating a report of type <strong>Dashboard</strong> and specifying the details of the dashboard using XML syntax in the <strong>Source</strong> field.</p> 
@@ -5754,6 +5756,10 @@ WHERE {#!saleTypes#}
         <td>The body contents of the email</td> 
        </tr> 
        <tr> 
+        <td><strong>Manual</strong></td> 
+        <td>Whether the job will run on an automatic schedule or not</td> 
+       </tr> 
+       <tr> 
         <td><strong>Fixed Schedule</strong></td> 
         <td>The schedule with which the job should run. If the fixed schedule is updated, the job's run schedule is also updated. If a fixed schedule is selected, the individual schedule fields are not considered.</td> 
        </tr> 
@@ -6418,6 +6424,43 @@ WHERE {#!saleTypes#}
       <li>With the personalization and filtering options, you can include columns with the name <strong>email_cc</strong> or <strong>email_bcc</strong> to specify email addresses that should be included in the cc or bcc fields of the email sent.</li> 
       <li>Email address columns can have multiple email addresses separated by <code>,</code></li> 
      </ul> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="pipelines">Pipelines</h1> 
+     <p>A pipeline is a definition of jobs that should be run in a particular order. Use the <strong>Configure | Pipelines</strong> menu to configure pipelines.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>An auto-generate ID used to identify the pipeline</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>A name for the pipeline</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the pipeline</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Serial</strong></td> 
+        <td>A comma separated list of job ids that should be run in the order given. You can use <strong>all</strong> to specify that all jobs should be run. You can also specify jobs that use a given schedule by using the syntax <strong>schedule:</strong><code>&lt;schedule name&gt;</code> e.g. <code>schedule: daily</code>. You can also use <strong>+</strong> after a job id to indicate running of all jobs from that id to the last e.g. <code>13+</code>. You can also use <strong>-</strong> to specify job ranges e.g. <code>1-5</code>. You can specify jobs whose report belongs to a certain report group by using the syntax <strong>reportGroup:</strong><code>&lt;report group name&gt;</code> e.g. <code>reportGroup: test</code>. You can specify multiple report groups by separating them with <strong>;</strong> e.g. <code>reportGroup: test;admin</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Continue On Error</strong></td> 
+        <td>For serial jobs, whether the next jobs should be run if the current one encounters an error</td> 
+       </tr> 
+      </tbody> 
+     </table> 
     </div> 
    </div> 
    <div> 
@@ -7743,9 +7786,9 @@ a2enmod proxy_http
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="support">Support</h1> 
-     <ul> 
-      <li>If you have any questions or comments, post these on the ART Help Discussion forum, <a href="http://sourceforge.net/p/art/discussion/352129/">http://sourceforge.net/p/art/discussion/352129/</a></li> 
-     </ul> 
+     <p>If you have any questions or comments, post these on the ART Help Discussion forum, <a href="http://sourceforge.net/p/art/discussion/352129/">http://sourceforge.net/p/art/discussion/352129/</a></p> 
+     <h2 id="commercial-support">Commercial Support</h2> 
+     <p>For commercial support, email timothy.anyona ( a t ) halogen.co.ke</p> 
     </div> 
    </div> 
    <p></p> 

@@ -56,8 +56,8 @@ Reports page. Also main/home page
 				var columns = [
 					{"data": null, defaultContent: "", className: "details-control"},
 					{"data": {
-							_: "reportGroupNames2",
-							filter: "reportGroupNamesFilter"
+							_: "userReportGroupNames2",
+							filter: "userReportGroupNamesFilter"
 						}
 					},
 					{"data": "description2"},

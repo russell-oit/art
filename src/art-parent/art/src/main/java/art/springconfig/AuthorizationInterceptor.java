@@ -315,7 +315,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				"showDashboard", "getLovValues", "runReport", "emailReport",
 				"showJPivot", "jpivotBusy", "jpivotError", "saiku3",
 				"saveParameterSelection", "clearSavedParameterSelection",
-				"getAvailableReports", "cancelQuery")) {
+				"getAvailableReports")) {
 			if (user.hasPermission("view_reports")) {
 				authorised = true;
 			}
@@ -328,8 +328,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("schedule_jobs")) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "describeSchedule")) {
+			if (user.hasAnyPermission("schedule_jobs", "configure_schedules")) {
+				authorised = true;
+			}
 		} else if (StringUtils.equalsAny(page, "jobs", "archives")) {
-			if (user.hasPermission("view_jobs")) {
+			if (user.hasAnyPermission("view_jobs", "schedule_jobs", "configure_jobs")) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "saveGridstack", "deleteGridstack")) {
@@ -357,7 +361,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			//all can access
 			authorised = true;
 		} else if (StringUtils.endsWith(page, "Job")) {
-			if (user.hasPermission("schedule_jobs")) {
+			if (user.hasAnyPermission("schedule_jobs", "configure_jobs")) {
 				authorised = true;
 			}
 		} else if (StringUtils.endsWith(page, "Jobs") || StringUtils.equals(page, "jobsConfig")) {
@@ -404,8 +408,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_datasources")) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "cancelQuery")) {
+			if (user.hasAnyPermission("view_reports", "configure_reports")) {
+				authorised = true;
+			}
 		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources",
-				"reportConfig", "cancelQuery")
+				"reportConfig")
 				|| StringUtils.endsWithAny(page, "Report", "Reports", "Queries")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;
@@ -517,6 +525,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 				"permissionUsage")
 				|| StringUtils.endsWithAny(page, "Permission", "Permissions")) {
 			if (user.hasPermission("configure_permissions")) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "pipelines")
+				|| StringUtils.endsWithAny(page, "Pipeline", "Pipelines")) {
+			if (user.hasPermission("configure_pipelines")) {
 				authorised = true;
 			}
 		}

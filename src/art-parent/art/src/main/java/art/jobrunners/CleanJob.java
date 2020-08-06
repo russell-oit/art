@@ -21,9 +21,7 @@ import art.cache.CacheHelper;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
@@ -32,6 +30,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 /**
  * Deletes old report files and clears the mondrian cache
@@ -42,9 +42,12 @@ public class CleanJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(CleanJob.class);
 
+	@Autowired
+	private CacheHelper cacheHelper;
+
 	@Override
 	public void execute(JobExecutionContext jec) throws JobExecutionException {
-		logger.debug("Entering execute");
+		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
 		//Delete old files in export directories
 		cleanDirectory(Config.getReportsExportPath());
@@ -112,27 +115,17 @@ public class CleanJob implements org.quartz.Job {
 		long mondrianCacheExpiryMillis = TimeUnit.HOURS.toMillis(mondrianCacheExpiryHours);
 
 		if (mondrianCacheExpiryMillis > 0) {
-			boolean clearCache = false;
-			String cacheFilePath = Config.getArtTempPath() + "mondrian-cache-cleared.txt";
-			File cacheFile = new File(cacheFilePath);
+			String jpivotCacheFilePath = Config.getArtTempPath() + CacheHelper.JPIVOT_CACHE_FILE_NAME;
+			File jpivotCacheFile = new File(jpivotCacheFilePath);
 			long limit = System.currentTimeMillis() - mondrianCacheExpiryMillis;
-			if (!cacheFile.exists() || FileUtils.isFileOlder(cacheFile, limit)) {
-				clearCache = true;
+			if (!jpivotCacheFile.exists() || FileUtils.isFileOlder(jpivotCacheFile, limit)) {
+				cacheHelper.clearJPivot();
 			}
 
-			if (clearCache) {
-				logger.debug("Actually clearing mondrian cache");
-
-				CacheHelper cacheHelper = new CacheHelper();
-				cacheHelper.clearJPivot();
+			String saikuCacheFilePath = Config.getArtTempPath() + CacheHelper.SAIKU_CACHE_FILE_NAME;
+			File saikuCacheFile = new File(saikuCacheFilePath);
+			if (!saikuCacheFile.exists() || FileUtils.isFileOlder(saikuCacheFile, limit)) {
 				cacheHelper.clearSaiku();
-
-				try {
-					//create/update file that indicates when the cache was last cleared
-					FileUtils.writeStringToFile(cacheFile, new Date().toString());
-				} catch (IOException ex) {
-					logger.error("Error", ex);
-				}
 			}
 		}
 	}

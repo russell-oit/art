@@ -43,6 +43,10 @@ import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.ThymeleafOutput;
 import art.output.VelocityOutput;
+import art.pipeline.Pipeline;
+import art.pipeline.PipelineJobData;
+import art.pipeline.PipelineService;
+import art.pipelinerunningjob.PipelineRunningJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -131,6 +135,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -212,6 +217,12 @@ public class ReportJob implements org.quartz.Job {
 	@Autowired
 	private MailService mailService;
 
+	@Autowired
+	private PipelineService pipelineService;
+
+	@Autowired
+	private PipelineRunningJobService pipelineRunningJobService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
@@ -219,15 +230,26 @@ public class ReportJob implements org.quartz.Job {
 
 		Instant start = Instant.now();
 
-		JobDataMap dataMap = context.getMergedJobDataMap();
-		jobId = dataMap.getInt("jobId");
-		String runUsername = dataMap.getString("username");
-
-		initializeProgressLogger();
-
-		progressLogger.info("Started");
+		String runUsername = null;
+		String serial = null;
+		Integer pipelineId = null;
+		boolean errorOccurred = false;
 
 		try {
+			JobDataMap dataMap = context.getMergedJobDataMap();
+			jobId = dataMap.getInt("jobId");
+			runUsername = dataMap.getString("username");
+			serial = dataMap.getString("serial");
+
+			if (dataMap.containsKey("pipelineId")) {
+				pipelineId = dataMap.getInt("pipelineId");
+				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId);
+			}
+
+			initializeProgressLogger();
+
+			progressLogger.info("Started");
+
 			boolean runJob = true;
 
 			try {
@@ -319,14 +341,15 @@ public class ReportJob implements org.quartz.Job {
 						//job doesn't have dynamic recipients
 						runNormalJob();
 					}
-				}
 
-				sendFileToDestinations();
-				runBatchFile();
-				runPostRunReports();
+					sendFileToDestinations();
+					runBatchFile();
+					runPostRunReports();
+				}
 			}
 		} catch (Exception ex) {
 			logErrorAndSetDetails(ex);
+			errorOccurred = true;
 		}
 
 		afterCompletion();
@@ -352,6 +375,95 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.info("Completed. Time taken - {}", formattedDuration);
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
+
+		if (pipelineId != null) {
+			try {
+				scheduleNextJob(jobId, serial, pipelineId, errorOccurred);
+			} catch (Exception ex) {
+				logger.error("Error", ex);
+			}
+
+			cacheHelper.clearPipelines();
+		}
+	}
+
+	/**
+	 * Schedules the next job
+	 *
+	 * @param currentJobId the current job id
+	 * @param serial the serial jobs to run
+	 * @param pipelineId the pipeline id
+	 * @param errorOccurred whether an error occurred while running the current
+	 * job
+	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	private void scheduleNextJob(int currentJobId, String serial,
+			int pipelineId, boolean errorOccurred) throws SchedulerException, SQLException {
+
+		logger.debug("Entering scheduleTempJob: currentJobId={},"
+				+ " serial='{}', pipelineId={}, erroroccurred={}",
+				currentJobId, serial, pipelineId, errorOccurred);
+
+		pipelineRunningJobService.removePipelineRunningJob(pipelineId, currentJobId);
+
+		if (pipelineService.isPipelineCancelled(pipelineId)) {
+			return;
+		}
+
+		if (errorOccurred) {
+			Pipeline pipeline = pipelineService.getPipeline(pipelineId);
+			if (pipeline != null && !pipeline.isContinueOnError()) {
+				return;
+			}
+		}
+
+		PipelineJobData nextJobData = getNextJobData(currentJobId, serial);
+		if (nextJobData == null) {
+			return;
+		}
+
+		int nextJobId = nextJobData.getJobId();
+		String nextSerial = nextJobData.getSerial();
+
+		jobService.scheduleSerialPipelineJob(nextJobId, nextSerial, pipelineId);
+	}
+
+	/**
+	 * Returns details of the next job to run in the pipeline
+	 *
+	 * @param currentJobId the current job id
+	 * @param serial the current serial definition
+	 * @return details of the next job to run in the pipeline
+	 */
+	private PipelineJobData getNextJobData(int currentJobId, String serial) {
+		logger.debug("Entering getNextJobData: currentJobId={}, serial='{}'",
+				currentJobId, serial);
+
+		//https://stackoverflow.com/questions/1270760/passing-a-string-by-reference-in-java
+		PipelineJobData nextJobData = null;
+
+		String[] serialArray = StringUtils.split(serial, ",");
+		if (serialArray != null && serialArray.length > 0) {
+			for (int i = 0; i < serialArray.length; i++) {
+				String jobIdString = serialArray[i];
+				int tempJobId = Integer.parseInt(jobIdString.trim());
+				if (tempJobId == currentJobId) {
+					if (i < serialArray.length - 1) {
+						String nextJobIdString = serialArray[i + 1];
+						int nextJobId = Integer.parseInt(nextJobIdString);
+						String[] newSerialArray = ArrayUtils.subarray(serialArray, i + 1, serialArray.length);
+						String newSerial = StringUtils.join(newSerialArray, ",");
+						nextJobData = new PipelineJobData();
+						nextJobData.setJobId(nextJobId);
+						nextJobData.setSerial(newSerial);
+					}
+					break;
+				}
+			}
+		}
+
+		return nextJobData;
 	}
 
 	/**

@@ -17,6 +17,7 @@
  */
 package art.general;
 
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,8 +31,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class GeneralController {
 
 	@RequestMapping(value = "/accessDenied", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showAccessDenied() {
-		return "accessDenied";
+	public String showAccessDenied(HttpServletRequest request) {
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//ajax
+			return "accessDeniedInline";
+		} else {
+			return "accessDenied";
+		}
 	}
 
 	@RequestMapping(value = "/success", method = RequestMethod.GET)
@@ -43,5 +49,5 @@ public class GeneralController {
 	public String showReportError() {
 		return "reportError";
 	}
-	
+
 }

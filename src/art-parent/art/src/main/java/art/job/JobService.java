@@ -56,6 +56,8 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
@@ -64,6 +66,7 @@ import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
 import org.quartz.impl.triggers.AbstractTrigger;
@@ -224,6 +227,7 @@ public class JobService {
 		job.setErrorNotificationTo(rs.getString("ERROR_EMAIL_TO"));
 		job.setPreRunReport(rs.getString("PRE_RUN_REPORT"));
 		job.setPostRunReport(rs.getString("POST_RUN_REPORT"));
+		job.setManual(rs.getBoolean("MANUAL"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -561,9 +565,9 @@ public class JobService {
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
-					+ " PRE_RUN_REPORT, POST_RUN_REPORT,"
+					+ " PRE_RUN_REPORT, POST_RUN_REPORT, MANUAL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 48) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -612,6 +616,7 @@ public class JobService {
 				job.getErrorNotificationTo(),
 				job.getPreRunReport(),
 				job.getPostRunReport(),
+				BooleanUtils.toInteger(job.isManual()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -632,7 +637,7 @@ public class JobService {
 					+ " EMAIL_TEMPLATE=?, EXTRA_SCHEDULES=?, HOLIDAYS=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
 					+ " JOB_OPTIONS=?, ERROR_EMAIL_TO=?,"
-					+ " PRE_RUN_REPORT=?, POST_RUN_REPORT=?,"
+					+ " PRE_RUN_REPORT=?, POST_RUN_REPORT=?, MANUAL=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -682,6 +687,7 @@ public class JobService {
 				job.getErrorNotificationTo(),
 				job.getPreRunReport(),
 				job.getPostRunReport(),
+				BooleanUtils.toInteger(job.isManual()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -867,21 +873,6 @@ public class JobService {
 	}
 
 	/**
-	 * Returns jobs that use a given schedule as a fixed schedule
-	 *
-	 * @param scheduleId the schedule id
-	 * @return jobs that use the schedule as a fixed schedule
-	 * @throws SQLException
-	 */
-	public List<Job> getScheduleJobs(int scheduleId) throws SQLException {
-		logger.debug("Entering getScheduleJobs");
-
-		String sql = SQL_SELECT_ALL + " WHERE SCHEDULE_ID=?";
-		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
-		return dbService.query(sql, h, scheduleId);
-	}
-
-	/**
 	 * Returns jobs that use a given holiday, either directly as shared holiday
 	 * or as part of a fixed holiday
 	 *
@@ -930,6 +921,10 @@ public class JobService {
 
 		//delete job while it has old calendar names, before updating the calendar names field
 		deleteQuartzJob(job, scheduler);
+
+		if (job.isManual()) {
+			return;
+		}
 
 		//job must have been saved in order to use job id for job, trigger and calendar names
 		int jobId = job.getJobId();
@@ -1263,6 +1258,7 @@ public class JobService {
 	 * @return jobs that use the schedule
 	 * @throws SQLException
 	 */
+	@Cacheable("jobs")
 	public List<Job> getJobsWithSchedule(int scheduleId) throws SQLException {
 		logger.debug("Entering getJobsWithSchedule: scheduleId={}", scheduleId);
 
@@ -1280,6 +1276,7 @@ public class JobService {
 	 * @return jobs that use the smtp server
 	 * @throws SQLException
 	 */
+	@Cacheable("jobs")
 	public List<Job> getJobsWithSmtpServer(int smtpServerId) throws SQLException {
 		logger.debug("Entering getJobsWithSmtpServer: smtpServerId={}", smtpServerId);
 
@@ -1326,5 +1323,147 @@ public class JobService {
 
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, holidayId);
+	}
+
+	/**
+	 * Returns ids of all jobs
+	 *
+	 * @return ids of all jobs
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getAllJobIds() throws SQLException {
+		logger.debug("Entering getAllJobIds");
+
+		String sql = "SELECT JOB_ID"
+				+ " FROM ART_JOBS"
+				+ " ORDER BY JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Schedules a serial pipeline job
+	 *
+	 * @param jobId the job id
+	 * @param serial the serial setting
+	 * @param pipelineId the pipeline id
+	 * @throws SchedulerException
+	 */
+	public void scheduleSerialPipelineJob(int jobId, String serial, int pipelineId)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleSerialPipelineJob: jobId={}, serial='{}',"
+				+ " pipelineId={}", jobId, serial, pipelineId);
+
+		String runId = jobId + "-" + ArtUtils.getUniqueId();
+
+		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.usingJobData("jobId", jobId)
+				.usingJobData("serial", serial)
+				.usingJobData("pipelineId", pipelineId)
+				.usingJobData("tempJob", true)
+				.build();
+
+		Trigger tempTrigger = TriggerBuilder.newTrigger()
+				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.startNow()
+				.build();
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		scheduler.scheduleJob(tempJob, tempTrigger);
+	}
+
+	/**
+	 * Returns the last job id
+	 *
+	 * @return the last job id
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public int getLastJobId() throws SQLException {
+		logger.debug("Entering getLastJobId");
+
+		String sql = "SELECT MAX(JOB_ID)"
+				+ " FROM ART_JOBS";
+
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number id = dbService.query(sql, h);
+		if (id == null) {
+			return 0;
+		} else {
+			return id.intValue();
+		}
+	}
+
+	/**
+	 * Returns ids for jobs that use a given schedule
+	 *
+	 * @param scheduleName the schedule name
+	 * @return ids for jobs that use a given schedule
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getJobIdsWithSchedule(String scheduleName) throws SQLException {
+		logger.debug("Entering getJobIdsWithSchedule: scheduleName='{}'",
+				scheduleName);
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ INNER JOIN ART_JOB_SCHEDULES AJS"
+				+ " ON AJ.SCHEDULE_ID=AJS.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_NAME=?"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, scheduleName);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Returns ids for jobs whose report is in certain report groups
+	 *
+	 * @param reportGroupNames the report group names
+	 * @return ids for jobs whose report is in certain report groups
+	 * @throws SQLException
+	 */
+	public List<Integer> getJobIdsWithReportGroups(String[] reportGroupNames) throws SQLException {
+		logger.debug("Entering getJobIdsWithReportGroups");
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ"
+				+ " WHERE EXISTS("
+				+ " SELECT NULL"
+				+ " FROM ART_QUERY_GROUPS AQG"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE AJ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND AQG.NAME IN(" + StringUtils.repeat("?", ",", reportGroupNames.length) + ")"
+				+ " )"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, (Object[]) reportGroupNames);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
 	}
 }

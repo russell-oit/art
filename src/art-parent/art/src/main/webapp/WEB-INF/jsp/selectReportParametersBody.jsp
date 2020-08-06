@@ -441,6 +441,8 @@ Display section to allow selecting of report parameters and initiate running of 
 										</div>
 								</c:if>
 							</div>
+							
+							<input type="hidden" name="dummyIEField"> <!-- this dummy hidden field resolves the stream ended unexpectedly issue -->
 
 							<c:if test="${showSaveParameterSelection}">
 								<hr>

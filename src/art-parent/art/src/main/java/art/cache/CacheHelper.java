@@ -19,8 +19,7 @@ package art.cache;
 
 import art.servlets.Config;
 import art.settings.SettingsHelper;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import net.sf.mondrianart.mondrian.olap.CacheControl;
 import net.sf.mondrianart.mondrian.rolap.RolapSchema;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,9 @@ public class CacheHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(CacheHelper.class);
 
+	public static final String JPIVOT_CACHE_FILE_NAME = "jpivot-cache-cleared.txt";
+	public static final String SAIKU_CACHE_FILE_NAME = "saiku-cache-cleared.txt";
+
 	@Autowired
 	private ServletContext servletContext;
 
@@ -59,25 +62,7 @@ public class CacheHelper {
 			cacheControl.flushSchemaCache();
 		}
 
-		BufferedWriter out = null;
-		try {
-			//create file that indicates when the cache was last cleared
-			String cacheFilePath = Config.getArtTempPath() + "mondrian-cache-cleared.txt";
-			out = new BufferedWriter(new FileWriter(cacheFilePath));
-			Date now = new Date();
-			out.write(now.toString());
-		} catch (IOException ex) {
-			logger.error("Error", ex);
-		} finally {
-			try {
-				if (out != null) {
-					out.flush();
-					out.close();
-				}
-			} catch (IOException ex) {
-				logger.error("Error while closing writer", ex);
-			}
-		}
+		updateCacheFile(JPIVOT_CACHE_FILE_NAME);
 	}
 
 	/**
@@ -85,7 +70,40 @@ public class CacheHelper {
 	 */
 	public void clearSaiku() {
 		logger.debug("Entering clearSaiku");
+
 		Config.refreshSaikuConnections();
+
+		//https://sourceforge.net/p/art/discussion/352129/thread/4a74b4175f
+		//https://forum.reportserver.net/viewtopic.php?id=376
+		//https://forum.reportserver.net/viewtopic.php?id=1298
+		//https://forum.reportserver.net/viewtopic.php?pid=4048
+		//http://www2.datenwerke.net/files/forum/t376/flushMondrianCache.groovy
+		List<mondrian.rolap.RolapSchema> schemas = mondrian.rolap.RolapSchema.getRolapSchemas();
+		for (mondrian.rolap.RolapSchema schema : schemas) {
+			mondrian.olap.CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
+			cacheControl.flushSchemaCache();
+		}
+
+		updateCacheFile(SAIKU_CACHE_FILE_NAME);
+	}
+
+	/**
+	 * Updates a file to indicate that the mondrian cache has been cleared
+	 *
+	 * @param fileName the file name
+	 */
+	private void updateCacheFile(String fileName) {
+		logger.debug("Entering updateCacheFile: fileName='{}'", fileName);
+
+		String cacheFilePath = Config.getArtTempPath() + fileName;
+		File cacheFile = new File(cacheFilePath);
+
+		try {
+			//create/update file that indicates when the cache was last cleared
+			FileUtils.writeStringToFile(cacheFile, new Date().toString());
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
@@ -236,6 +254,14 @@ public class CacheHelper {
 	}
 
 	/**
+	 * Clears the pipelines cache
+	 */
+	@CacheEvict(value = "pipelines", allEntries = true)
+	public void clearPipelines() {
+		logger.debug("Entering clearPipelines");
+	}
+
+	/**
 	 * Clears all caches
 	 *
 	 * @param session the http session
@@ -243,7 +269,7 @@ public class CacheHelper {
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers", "roles",
-		"permissions", "drilldowns"}, allEntries = true)
+		"permissions", "drilldowns", "pipelines"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 

@@ -96,12 +96,27 @@ public class Job implements Serializable {
 	private String errorNotificationTo;
 	private String preRunReport;
 	private String postRunReport;
+	private boolean manual;
 	private Report report;
 	private User user;
 	private Schedule schedule;
 	private SmtpServer smtpServer;
 	private boolean overwriteFiles;
 	private Datasource cachedDatasource;
+
+	/**
+	 * @return the manual
+	 */
+	public boolean isManual() {
+		return manual;
+	}
+
+	/**
+	 * @param manual the manual to set
+	 */
+	public void setManual(boolean manual) {
+		this.manual = manual;
+	}
 
 	/**
 	 * @return the cachedDatasource

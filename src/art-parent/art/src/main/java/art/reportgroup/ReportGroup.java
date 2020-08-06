@@ -39,6 +39,21 @@ public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+	private boolean hidden;
+
+	/**
+	 * @return the hidden
+	 */
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	/**
+	 * @param hidden the hidden to set
+	 */
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
 
 	/**
 	 * @return the parentId
