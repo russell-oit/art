@@ -662,23 +662,26 @@ public class ReportServiceHelper {
 		}
 
 		int reportId = report.getReportId();
-		List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
-		report.setDrilldowns(drilldowns);
-		allReports.add(report);
-		for (Drilldown drilldown : drilldowns) {
-			Report drilldownReport = drilldown.getDrilldownReport();
-			getAllReports(allReports, drilldownReport, recursionCount);
-		}
-
-		List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
-		for (Parameter parameter : parameters) {
-			Report defaultValueReport = parameter.getDefaultValueReport();
-			if (defaultValueReport != null) {
-				getAllReports(allReports, defaultValueReport, recursionCount);
+		boolean reportExists = allReports.stream().anyMatch(r -> r.getReportId() == reportId);
+		if (!reportExists) {
+			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+			report.setDrilldowns(drilldowns);
+			allReports.add(report);
+			for (Drilldown drilldown : drilldowns) {
+				Report drilldownReport = drilldown.getDrilldownReport();
+				getAllReports(allReports, drilldownReport, recursionCount);
 			}
-			Report lovReport = parameter.getLovReport();
-			if (lovReport != null) {
-				getAllReports(allReports, lovReport, recursionCount);
+
+			List<Parameter> parameters = parameterService.getReportParameters(report.getReportId());
+			for (Parameter parameter : parameters) {
+				Report defaultValueReport = parameter.getDefaultValueReport();
+				if (defaultValueReport != null) {
+					getAllReports(allReports, defaultValueReport, recursionCount);
+				}
+				Report lovReport = parameter.getLovReport();
+				if (lovReport != null) {
+					getAllReports(allReports, lovReport, recursionCount);
+				}
 			}
 		}
 	}
