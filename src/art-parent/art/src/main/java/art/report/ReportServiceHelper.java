@@ -292,6 +292,36 @@ public class ReportServiceHelper {
 				}
 			}
 
+			List<ReportParameter> allReportParams = new ArrayList<>();
+			for (Report report : reports) {
+				allReportParams.addAll(report.getReportParams());
+			}
+
+			for (ReportParameter reportParam : allReportParams) {
+				Parameter parameter = reportParam.getParameter();
+				Report defaultValueReport = parameter.getDefaultValueReport();
+				if (defaultValueReport != null) {
+					Report existingReport = reports.stream()
+							.filter(r -> StringUtils.equals(defaultValueReport.getName(), r.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingReport != null) {
+						defaultValueReport.setReportId(existingReport.getReportId());
+					}
+				}
+
+				Report lovReport = parameter.getLovReport();
+				if (lovReport != null) {
+					Report existingReport = reports.stream()
+							.filter(r -> StringUtils.equals(lovReport.getName(), r.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingReport != null) {
+						lovReport.setReportId(existingReport.getReportId());
+					}
+				}
+			}
+
 			reportParameterService.importReportParameters(reports, actionUser, conn);
 
 			List<Drilldown> allDrilldowns = new ArrayList<>();
@@ -303,6 +333,19 @@ public class ReportServiceHelper {
 						drilldown.setParentReportId(tempReportId);
 					}
 					allDrilldowns.addAll(drilldowns);
+				}
+			}
+
+			for (Drilldown drilldown : allDrilldowns) {
+				Report drilldownReport = drilldown.getDrilldownReport();
+				if (drilldownReport != null) {
+					Report existingReport = reports.stream()
+							.filter(r -> StringUtils.equals(drilldownReport.getName(), r.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingReport != null) {
+						drilldownReport.setReportId(existingReport.getReportId());
+					}
 				}
 			}
 			drilldownService.importDrilldowns(allDrilldowns, conn);
