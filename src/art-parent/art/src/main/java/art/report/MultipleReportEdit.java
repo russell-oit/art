@@ -17,6 +17,7 @@
  */
 package art.report;
 
+import art.datasource.Datasource;
 import art.reportgroup.ReportGroup;
 import java.io.Serializable;
 import java.util.List;
@@ -40,6 +41,36 @@ public class MultipleReportEdit implements Serializable {
 	private boolean reportGroupsUnchanged = true;
 	private boolean omitTitleRow;
 	private boolean omitTitleRowUnchanged = true;
+	private Datasource datasource;
+	private boolean datasourceUnchanged = true;
+
+	/**
+	 * @return the datasource
+	 */
+	public Datasource getDatasource() {
+		return datasource;
+	}
+
+	/**
+	 * @param datasource the datasource to set
+	 */
+	public void setDatasource(Datasource datasource) {
+		this.datasource = datasource;
+	}
+
+	/**
+	 * @return the datasourceUnchanged
+	 */
+	public boolean isDatasourceUnchanged() {
+		return datasourceUnchanged;
+	}
+
+	/**
+	 * @param datasourceUnchanged the datasourceUnchanged to set
+	 */
+	public void setDatasourceUnchanged(boolean datasourceUnchanged) {
+		this.datasourceUnchanged = datasourceUnchanged;
+	}
 
 	/**
 	 * @return the hidden

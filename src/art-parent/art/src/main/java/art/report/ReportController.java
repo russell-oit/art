@@ -431,16 +431,7 @@ public class ReportController {
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
 
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-
-			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return "editReports";
+		return showEditReports(model, session);
 	}
 
 	@RequestMapping(value = "/saveReport", method = RequestMethod.POST)
@@ -516,7 +507,7 @@ public class ReportController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditReports();
+			return showEditReports(model, session);
 		}
 
 		try {
@@ -546,7 +537,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReports();
+		return showEditReports(model, session);
 	}
 
 	@RequestMapping(value = "/emailReport", method = RequestMethod.POST)
@@ -804,10 +795,23 @@ public class ReportController {
 	/**
 	 * Prepares model data and returns the jsp file to display
 	 *
+	 * @param model the model to use
+	 * @param session the http session
 	 * @return returns the jsp file to display
 	 */
-	private String showEditReports() {
+	private String showEditReports(Model model, HttpSession session) {
 		logger.debug("Entering showEditReports");
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
+			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		return "editReports";
 	}
 
