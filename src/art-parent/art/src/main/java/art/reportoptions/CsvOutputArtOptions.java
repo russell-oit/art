@@ -31,6 +31,21 @@ public class CsvOutputArtOptions implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String delimiter = ",";
 	private String quote = "\"";
+	private String extension = "csv";
+
+	/**
+	 * @return the extension
+	 */
+	public String getExtension() {
+		return extension;
+	}
+
+	/**
+	 * @param extension the extension to set
+	 */
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
 
 	/**
 	 * @return the delimiter
