@@ -321,7 +321,7 @@ public class FilenameHelper {
 
 		extension = csvOptions.getExtension();
 		if (StringUtils.isBlank(extension)) {
-			extension = "txt";
+			extension = "csv";
 		}
 
 		return extension;
