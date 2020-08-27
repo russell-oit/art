@@ -447,8 +447,18 @@ public class ParameterProcessor {
 				logger.debug("actualValueString = '{}'", actualValueString);
 
 				//convert string value to appropriate object
-				Object actualValue = convertParameterStringValueToObject(actualValueString, param);
-				actualValues.add(actualValue);
+				try {
+					Object actualValue = convertParameterStringValueToObject(actualValueString, param);
+					actualValues.add(actualValue);
+				} catch (ParseException | RuntimeException ex) {
+					//https://sourceforge.net/p/art/discussion/352129/thread/8ffc6ceb1a/
+					if (parameterSelection) {
+						reportParam.setPassedParameterValues(null);
+						logger.error("Error", ex);
+					} else {
+						throw ex;
+					}
+				}
 				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();
