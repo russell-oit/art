@@ -117,6 +117,27 @@ public class SavedParameterService {
 	}
 
 	/**
+	 * Deletes a saved parameter
+	 *
+	 * @param userId the user id
+	 * @param reportId the report id
+	 * @param paramName the parameter name
+	 * @param paramValue the parameter value
+	 * @throws SQLException
+	 */
+	public void deleteSavedParameter(int userId, int reportId, String paramName,
+			String paramValue) throws SQLException {
+
+		logger.debug("Entering deleteSavedParameters: userId={}, reportId={},"
+				+ " paramName='{}', paramValue='{}'", userId, reportId, paramName, paramValue);
+
+		String sql = "DELETE FROM ART_SAVED_PARAMETERS WHERE USER_ID=? AND REPORT_ID=?"
+				+ " AND PARAM_NAME=? AND PARAM_VALUE=?";
+
+		dbService.update(sql, userId, reportId, paramName, paramValue);
+	}
+
+	/**
 	 * Adds a saved parameter
 	 *
 	 * @param savedParam the saved parameter to add
