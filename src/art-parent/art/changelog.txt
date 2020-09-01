@@ -1,6 +1,7 @@
 ART 4.18
 * Allow editing of datasource in multiple report edit
 * Added extension option for csv report format
+* Updated sql server jdbc driver
 
 ART 4.17
 * Added job pipeline feature
