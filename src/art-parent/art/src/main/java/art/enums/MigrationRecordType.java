@@ -32,7 +32,7 @@ public enum MigrationRecordType {
 	Encryptors("Encryptors"), Holidays("Holidays"), ReportGroups("ReportGroups"),
 	SmtpServers("SmtpServers"), UserGroups("UserGroups"), Schedules("Schedules"),
 	Users("Users"), Rules("Rules"), Parameters("Parameters"), Reports("Reports"),
-	Roles("Roles");
+	Roles("Roles"), Pipelines("Pipelines");
 	
 	private final String value;
 

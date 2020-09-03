@@ -43,6 +43,8 @@ import art.parameter.Parameter;
 import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
+import art.pipeline.Pipeline;
+import art.pipeline.PipelineService;
 import art.report.Report;
 import art.report.ReportCsvExportMixIn;
 import art.report.ReportServiceHelper;
@@ -171,6 +173,9 @@ public class ImportRecordsController {
 	@Autowired
 	private RoleService roleService;
 
+	@Autowired
+	private PipelineService pipelineService;
+
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
 		logger.debug("Entering showImportRecords: type='{}'", type);
@@ -256,6 +261,9 @@ public class ImportRecordsController {
 						break;
 					case Roles:
 						importRoles(tempFile, sessionUser, conn, importRecords);
+						break;
+					case Pipelines:
+						importPipelines(tempFile, sessionUser, conn, importRecords);
 						break;
 					default:
 						break;
@@ -1272,7 +1280,7 @@ public class ImportRecordsController {
 		boolean local = true;
 		boolean overwrite = importRecords.isOverwrite();
 		reportServiceHelper.importReports(reports, sessionUser, conn, local, overwrite);
-		
+
 		cacheHelper.clearReports();
 		cacheHelper.clearReportGroups();
 		cacheHelper.clearDatasources();
@@ -1657,6 +1665,38 @@ public class ImportRecordsController {
 		CsvMapper csvMapper = ArtUtils.getMigrationCsvMapper();
 		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
 		return csvMapper.readerFor(type).with(schema).readValue(file);
+	}
+
+	/**
+	 * Imports pipeline records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param importRecords the import records object
+	 * @throws SQLException
+	 */
+	private void importPipelines(File file, User sessionUser, Connection conn,
+			ImportRecords importRecords) throws SQLException, IOException {
+
+		logger.debug("Entering importPipelines");
+
+		List<Pipeline> pipelines;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				pipelines = importFromJson(file, new TypeReference<List<Pipeline>>() {
+				});
+				break;
+			case csv:
+				pipelines = importValuesFromCsv(file, Pipeline.class);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
+		boolean overwrite = importRecords.isOverwrite();
+		pipelineService.importPipelines(pipelines, sessionUser, conn, overwrite);
 	}
 
 }

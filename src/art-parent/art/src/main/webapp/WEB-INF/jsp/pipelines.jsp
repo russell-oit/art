@@ -82,6 +82,8 @@
 						cancelText, deleteRecordsUrl, recordsDeletedText,
 						errorOccurredText, showErrors, selectRecordsText,
 						someRecordsNotDeletedText);
+						
+				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
 
 				tbl.find('tbody').on('click', '.run', function () {
 					var row = $(this).closest("tr"); //jquery object
@@ -197,6 +199,16 @@
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
+			<c:if test="${sessionUser.hasPermission('migrate_records')}">
+				<div class="btn-group">
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Pipelines">
+						<spring:message code="page.text.import"/>
+					</a>
+					<button type="button" id="exportRecords" class="btn btn-default">
+						<spring:message code="page.text.export"/>
+					</button>
+				</div>
+			</c:if>
 		</div>
 
 		<table id="pipelines" class="table table-bordered table-striped table-condensed">

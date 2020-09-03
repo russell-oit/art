@@ -43,6 +43,8 @@ import art.parameter.Parameter;
 import art.parameter.ParameterCsvExportMixIn;
 import art.parameter.ParameterService;
 import art.permission.Permission;
+import art.pipeline.Pipeline;
+import art.pipeline.PipelineService;
 import art.report.Report;
 import art.report.ReportCsvExportMixIn;
 import art.report.ReportService;
@@ -162,6 +164,9 @@ public class ExportRecordsController {
 
 	@Autowired
 	private CacheHelper cacheHelper;
+	
+	@Autowired
+	private PipelineService pipelineService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -264,6 +269,9 @@ public class ExportRecordsController {
 						break;
 					case Roles:
 						exportFilePath = exportRoles(exportRecords, file, sessionUser, conn);
+						break;
+					case Pipelines:
+						exportPipelines(exportRecords, file, sessionUser, conn);
 						break;
 					default:
 						break;
@@ -1559,6 +1567,48 @@ public class ExportRecordsController {
 		}
 		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
 		csvMapper.writer(schema).writeValue(file, value);
+	}
+	
+		/**
+	 * Exports pipeline records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportPipelines(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
+
+		logger.debug("Entering exportPipelines");
+
+		String ids = exportRecords.getIds();
+		List<Pipeline> pipelines = pipelineService.getPipelines(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						exportToJson(file, pipelines);
+						break;
+					case csv:
+						exportToCsv(file, pipelines, Pipeline.class);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
+				break;
+			case Datasource:
+				boolean overwrite = exportRecords.isOverwrite();
+				pipelineService.importPipelines(pipelines, sessionUser, conn, overwrite);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
 	}
 
 }
