@@ -36,6 +36,7 @@ Display user jobs and jobs configuration
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="jobs.message.scheduled" var="scheduledText" javaScriptEscape="true"/>
 <spring:message code="reports.text.selectValue" var="selectValueText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.running" var="runningText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -298,6 +299,10 @@ Display user jobs and jobs configuration
 									result = result + '<p>' + job.lastRunDetails;
 									result = result + '</p>';
 								}
+								if (job.running) {
+									result = result + '<p>' + "${runningText}";
+									result = result + '</p>';
+								}
 
 								var hasConfigureJobsPermission = ${sessionUser.hasPermission('configure_jobs')};
 								if (hasConfigureJobsPermission) {
@@ -379,6 +384,9 @@ Display user jobs and jobs configuration
 						<i class="fa fa-trash-o"></i>
 						<spring:message code="page.action.delete"/>
 					</button>
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/runningJobs">
+						<spring:message code="page.title.runningJobs"/>
+					</a>
 				</div>
 			</c:when>
 		</c:choose>
@@ -429,6 +437,11 @@ Display user jobs and jobs configuration
 							<c:if test="${not empty job.lastRunDetails}">
 								<p>
 									${job.lastRunDetails}
+								</p>
+							</c:if>
+							<c:if test="${job.running}">
+								<p>
+									<spring:message code="jobs.message.running"/>
 								</p>
 							</c:if>
 							<c:if test="${sessionUser.hasPermission('configure_jobs')}">

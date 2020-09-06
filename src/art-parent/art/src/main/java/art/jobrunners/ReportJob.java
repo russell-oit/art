@@ -35,6 +35,7 @@ import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.job.JobOptions;
+import art.job.JobRunDetails;
 import art.job.JobService;
 import art.job.JobUtils;
 import art.jobparameter.JobParameterService;
@@ -234,6 +235,7 @@ public class ReportJob implements org.quartz.Job {
 		String serial = null;
 		Integer pipelineId = null;
 		boolean errorOccurred = false;
+		String runId = null;
 
 		try {
 			JobDataMap dataMap = context.getMergedJobDataMap();
@@ -333,6 +335,15 @@ public class ReportJob implements org.quartz.Job {
 				} else if (!job.getUser().isActive()) {
 					runMessage = "jobs.message.ownerDisabled";
 				} else {
+					runId = ArtUtils.getUniqueId(jobId);
+					
+					JobRunDetails jobRunDetails = new JobRunDetails();
+					jobRunDetails.setJob(job);
+					jobRunDetails.setRunId(runId);
+					jobRunDetails.setStartTime(new Date());
+
+					Config.addRunningJob(jobRunDetails);
+
 					runPreRunReports();
 					if (job.getRecipientsReportId() > 0) {
 						//job has dynamic recipients
@@ -356,6 +367,10 @@ public class ReportJob implements org.quartz.Job {
 		cacheHelper.clearJobs();
 
 		sendErrorNotification();
+
+		if (runId != null) {
+			Config.removeRunningJob(runId);
+		}
 
 		Instant end = Instant.now();
 		Duration duration = Duration.between(start, end);

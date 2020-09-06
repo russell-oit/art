@@ -72,6 +72,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -141,7 +142,7 @@ public class JobController {
 
 		String action = "jobs";
 		String nextPage = "jobs";
-		
+
 		return showJobsPage(action, model, nextPage, jobs);
 	}
 
@@ -159,7 +160,7 @@ public class JobController {
 
 		String action = "config";
 		String nextPage = "jobsConfig";
-		
+
 		return showJobsPage(action, model, nextPage, jobs);
 	}
 
@@ -174,6 +175,17 @@ public class JobController {
 	 */
 	private String showJobsPage(String action, Model model, String nextPage, List<Job> jobs) {
 		logger.debug("Entering showJobsPage: action='{}', nextPage='{}'", action, nextPage);
+
+		List<JobRunDetails> runningJobs = Config.getRunningJobs();
+
+		for (JobRunDetails runningJob : runningJobs) {
+			for (Job job : jobs) {
+				if (runningJob.getJob().getJobId() == job.getJobId()) {
+					job.setRunning(true);
+					break;
+				}
+			}
+		}
 
 		model.addAttribute("action", action);
 		model.addAttribute("nextPage", nextPage);
@@ -239,6 +251,15 @@ public class JobController {
 			job.setLastEndDateString(lastEndDateString);
 			String nextRunDateString = Config.getDateDisplayString(job.getNextRunDate());
 			job.setNextRunDateString(nextRunDateString);
+
+			List<JobRunDetails> runningJobs = Config.getRunningJobs();
+
+			for (JobRunDetails runningJob : runningJobs) {
+				if (runningJob.getJob().getJobId() == job.getJobId()) {
+					job.setRunning(true);
+					break;
+				}
+			}
 
 			response.setData(job);
 
@@ -802,6 +823,28 @@ public class JobController {
 		job.setEmailTemplate(filename);
 
 		return null;
+	}
+
+	@GetMapping("/runningJobs")
+	public String showRunningJobs(Model model) {
+		logger.debug("Entering showRunningJobs");
+
+		return "runningJobs";
+	}
+
+	@GetMapping("/getRunningJobs")
+	@ResponseBody
+	public AjaxResponse getRunningJobs() {
+		logger.debug("Entering getRunningJobs");
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
+		List<JobRunDetails> runningJobs = Config.getRunningJobs();
+
+		ajaxResponse.setData(runningJobs);
+		ajaxResponse.setSuccess(true);
+
+		return ajaxResponse;
 	}
 
 }
