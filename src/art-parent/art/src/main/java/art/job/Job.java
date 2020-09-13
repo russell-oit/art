@@ -103,6 +103,21 @@ public class Job implements Serializable {
 	private SmtpServer smtpServer;
 	private boolean overwriteFiles;
 	private Datasource cachedDatasource;
+	private boolean running;
+
+	/**
+	 * @return the running
+	 */
+	public boolean isRunning() {
+		return running;
+	}
+
+	/**
+	 * @param running the running to set
+	 */
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
 
 	/**
 	 * @return the manual

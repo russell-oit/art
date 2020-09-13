@@ -80,6 +80,12 @@
 
 				toggleOmitTitleRowEnabled();
 
+				$('#datasourceUnchanged').on("change", function () {
+					toggleDatasourceEnabled();
+				});
+
+				toggleDatasourceEnabled();
+
 			});
 		</script>
 
@@ -119,6 +125,14 @@
 				} else {
 //					$('#active').prop('disabled', false);
 					$('#omitTitleRow').bootstrapSwitch('disabled', false);
+				}
+			}
+
+			function toggleDatasourceEnabled() {
+				if ($('#datasourceUnchanged').is(':checked')) {
+					$('#datasource').prop('disabled', true);
+				} else {
+					$('#datasource').prop('disabled', false);
 				}
 			}
 		</script>
@@ -224,6 +238,33 @@
 							</label>
 						</div>
 						<form:errors path="omitTitleRow" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="datasource">
+						<spring:message code="page.text.datasource"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="datasource" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<c:forEach var="datasource" items="${datasources}">
+								<c:set var="datasourceStatus">
+									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
+								</c:set>
+								<option value="${datasource.datasourceId}" 
+										data-content="${encode:forHtmlAttribute(datasource.name)}&nbsp;${encode:forHtmlAttribute(datasourceStatus)}">
+									${encode:forHtmlContent(datasource.name)}
+								</option>
+							</c:forEach>
+						</form:select>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="datasourceUnchanged" id="datasourceUnchanged"/>
+								<spring:message code="page.checkbox.unchanged"/>
+							</label>
+						</div>
+						<form:errors path="datasource" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

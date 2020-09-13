@@ -270,7 +270,7 @@ public class ParameterProcessor {
 
 		setPassedParameterValues(passedValuesMap, reportParamsMap, user, report);
 
-		setActualParameterValues(reportParamsList);
+		setActualParameterValues(reportParamsList, user, report);
 
 		handleAllValues(reportParamsMap);
 
@@ -415,10 +415,13 @@ public class ParameterProcessor {
 	 * Populates actual parameter values to be used for the report parameters
 	 *
 	 * @param reportParamsList the report parameters
+	 * @param user the user who is running the report
+	 * @param report the report being run
 	 * @throws NumberFormatException
 	 * @throws ParseException
 	 */
-	private void setActualParameterValues(List<ReportParameter> reportParamsList)
+	private void setActualParameterValues(List<ReportParameter> reportParamsList,
+			User user, Report report)
 			throws NumberFormatException, ParseException, IOException {
 
 		logger.debug("Entering setActualParameterValues");
@@ -447,8 +450,26 @@ public class ParameterProcessor {
 				logger.debug("actualValueString = '{}'", actualValueString);
 
 				//convert string value to appropriate object
-				Object actualValue = convertParameterStringValueToObject(actualValueString, param);
-				actualValues.add(actualValue);
+				try {
+					Object actualValue = convertParameterStringValueToObject(actualValueString, param);
+					actualValues.add(actualValue);
+				} catch (ParseException | RuntimeException ex) {
+					//https://sourceforge.net/p/art/discussion/352129/thread/8ffc6ceb1a/
+					if (parameterSelection) {
+						reportParam.setPassedParameterValues(null);
+						logger.error("Error", ex);
+
+						try {
+							SavedParameterService savedParameterService = new SavedParameterService();
+							String htmlParamName = ArtUtils.PARAM_PREFIX + param.getName();
+							savedParameterService.deleteSavedParameter(user.getUserId(), report.getReportId(), htmlParamName, actualValueString);
+						} catch (SQLException ex2) {
+							logger.error("Error", ex2);
+						}
+					} else {
+						throw ex;
+					}
+				}
 				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();

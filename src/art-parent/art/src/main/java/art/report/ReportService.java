@@ -1177,6 +1177,27 @@ public class ReportService {
 
 			dbService.update(sql, valuesArray);
 		}
+		if (!multipleReportEdit.isDatasourceUnchanged()) {
+			Integer datasourceId = null;
+			if (multipleReportEdit.getDatasource() != null) {
+				datasourceId = multipleReportEdit.getDatasource().getDatasourceId();
+				if (datasourceId == 0) {
+					datasourceId = null;
+				}
+			}
+			sql = "UPDATE ART_QUERIES SET DATASOURCE_ID=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(datasourceId);
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(idsList);
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
 	}
 
 	/**

@@ -319,11 +319,9 @@ public class FilenameHelper {
 			csvOptions = mapper.readValue(options, CsvOutputArtOptions.class);
 		}
 
-		String delimiter = csvOptions.getDelimiter();
-		if (StringUtils.equals(delimiter, ",")) {
+		extension = csvOptions.getExtension();
+		if (StringUtils.isBlank(extension)) {
 			extension = "csv";
-		} else {
-			extension = "txt";
 		}
 
 		return extension;

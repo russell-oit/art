@@ -21,6 +21,7 @@ import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
+import art.job.JobRunDetails;
 import art.jobrunners.CleanJob;
 import art.logback.LevelAndLoggerFilter;
 import art.logback.OnLevelEvaluator;
@@ -129,6 +130,7 @@ public class Config extends HttpServlet {
 	private static final Map<String, Statement> runningStatements = new HashMap<>();
 	private static final List<ReportRunDetails> runningQueries = new ArrayList<>();
 	private static final List<ReportRunDetails> runningReports = new ArrayList<>();
+	private static final List<JobRunDetails> runningJobs = new ArrayList<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -154,6 +156,7 @@ public class Config extends HttpServlet {
 		runningQueries.clear();
 		logger.debug("runningReports.size()={}", runningReports.size());
 		runningReports.clear();
+		runningJobs.clear();
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -1628,6 +1631,33 @@ public class Config extends HttpServlet {
 		//https://www.baeldung.com/java-stream-filter-count
 		return runningReports.stream().filter(r -> r.getReport().getReportId() == reportId
 				&& r.getUser().getUserId() == userId).count();
+	}
+
+	/**
+	 * Adds a running job
+	 *
+	 * @param jobRunDetails the run details for the job
+	 */
+	public static synchronized void addRunningJob(JobRunDetails jobRunDetails) {
+		runningJobs.add(jobRunDetails);
+	}
+
+	/**
+	 * Removes a running job
+	 *
+	 * @param runId the run id for the job
+	 */
+	public static synchronized void removeRunningJob(String runId) {
+		runningJobs.removeIf(r -> StringUtils.equals(r.getRunId(), runId));
+	}
+
+	/**
+	 * Returns the running jobs
+	 *
+	 * @return the running jobs
+	 */
+	public static List<JobRunDetails> getRunningJobs() {
+		return runningJobs;
 	}
 
 }

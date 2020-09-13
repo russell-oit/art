@@ -21,13 +21,13 @@ import java.io.Serializable;
 
 /**
  * Represents options for file report type
- * 
+ *
  * @author Timothy Anyona
  */
 public class FileOptions implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	private String extension="txt";
+	private String extension = "txt";
 
 	/**
 	 * @return the extension
@@ -42,5 +42,5 @@ public class FileOptions implements Serializable {
 	public void setExtension(String extension) {
 		this.extension = extension;
 	}
-	
+
 }

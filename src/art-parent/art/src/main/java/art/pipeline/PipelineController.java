@@ -20,7 +20,6 @@ package art.pipeline;
 import art.general.AjaxResponse;
 import art.jobrunners.PipelineJob;
 import art.user.User;
-import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
@@ -59,9 +58,6 @@ public class PipelineController {
 
 	@Autowired
 	private PipelineService pipelineService;
-
-	@Autowired
-	private UserService userService;
 
 	@RequestMapping(value = "/pipelines", method = RequestMethod.GET)
 	public String showPipelines(Model model) {
