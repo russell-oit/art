@@ -1,3 +1,6 @@
+ART 5.0
+* Added Greek translation (thanks to Manos Pappas)
+
 ART 4.18
 * Allow editing of datasource in multiple report edit
 * Added extension option for csv report format
