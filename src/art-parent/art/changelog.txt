@@ -1,5 +1,6 @@
 ART 5.0
 * Added Greek translation (thanks to Manos Pappas)
+* Fix for pivottable error with pt_BR localization
 
 ART 4.18
 * Allow editing of datasource in multiple report edit
