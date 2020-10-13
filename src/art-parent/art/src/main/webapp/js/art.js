@@ -411,6 +411,11 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "org.apache.calcite.jdbc.Driver";
 		urlElement.value = "jdbc:calcite:schemaFactory=net.sf.calcitefileart.FileSchemaFactory;schema.directory=<C:\\\\directory\\\\with\\\\json\\\\files>;lex=MYSQL";
 		testSqlElement.value = "";
+	} else if (databaseType === "BigQueryStarschema") {
+		$(databaseProtocolSelector).val('');
+		driverElement.value = "net.starschema.clouddb.jdbc.BQDriver";
+		urlElement.value = "jdbc:BQDriver:<project_id>?withServiceAccount=true";
+		testSqlElement.value = "select 1";
 	}
 }
 
