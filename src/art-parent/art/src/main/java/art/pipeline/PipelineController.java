@@ -19,10 +19,12 @@ package art.pipeline;
 
 import art.general.AjaxResponse;
 import art.jobrunners.PipelineJob;
+import art.schedule.ScheduleService;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
+import java.text.ParseException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,9 @@ public class PipelineController {
 	@Autowired
 	private PipelineService pipelineService;
 
+	@Autowired
+	private ScheduleService scheduleService;
+
 	@RequestMapping(value = "/pipelines", method = RequestMethod.GET)
 	public String showPipelines(Model model) {
 		logger.debug("Entering showPipelines");
@@ -83,7 +88,7 @@ public class PipelineController {
 		try {
 			pipelineService.deletePipeline(id);
 			response.setSuccess(true);
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -101,7 +106,7 @@ public class PipelineController {
 		try {
 			pipelineService.deletePipelines(ids);
 			response.setSuccess(true);
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -173,6 +178,13 @@ public class PipelineController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
+			try {
+				pipelineService.processSchedules(pipeline, sessionUser);
+			} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
+				logger.error("Error", ex);
+				redirectAttributes.addFlashAttribute("error", ex);
+			}
+
 			String recordName = pipeline.getName() + " (" + pipeline.getPipelineId() + ")";
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
@@ -197,19 +209,24 @@ public class PipelineController {
 
 		model.addAttribute("action", action);
 
+		try {
+			model.addAttribute("schedules", scheduleService.getAllSchedules());
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+		}
+
 		return "editPipeline";
 	}
 
 	@RequestMapping(value = "/runPipeline", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse runPipeline(@RequestParam("id") Integer id, HttpSession session) {
+	AjaxResponse runPipeline(@RequestParam("id") Integer id) {
 		logger.debug("Entering runPipeline: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			scheduleTempPipeline(id, sessionUser);
+			scheduleTempPipeline(id);
 			response.setSuccess(true);
 		} catch (SchedulerException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -223,28 +240,21 @@ public class PipelineController {
 	 * Schedules a pipeline
 	 *
 	 * @param pipelineId the pipeline id
-	 * @param sessionUser the session user
 	 * @throws SchedulerException
 	 */
-	private void scheduleTempPipeline(Integer pipelineId, User sessionUser)
-			throws SchedulerException {
+	private void scheduleTempPipeline(Integer pipelineId) throws SchedulerException {
 
-		logger.debug("Entering scheduleTempPipeline: pipelineId={},"
-				+ " sessionUser={}", pipelineId, sessionUser);
+		logger.debug("Entering scheduleTempPipeline: pipelineId={}", pipelineId);
 
 		String runId = pipelineId + "-" + ArtUtils.getUniqueId();
 
-		String username = sessionUser.getUsername();
-
 		JobDetail tempPipeline = JobBuilder.newJob(PipelineJob.class)
-				.withIdentity("tempPipeline-" + runId, "tempPipelineGroup")
+				.withIdentity("tempPipeline-" + runId, "tempGroup")
 				.usingJobData("pipelineId", pipelineId)
-				.usingJobData("username", username)
-				.usingJobData("tempPipeline", true)
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.withIdentity("tempPipelineTrigger-" + runId, "tempTriggerGroup")
 				.startNow()
 				.build();
 

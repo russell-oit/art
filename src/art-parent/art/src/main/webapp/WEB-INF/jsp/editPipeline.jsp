@@ -28,7 +28,7 @@
 		</c:set>
 	</c:when>
 </c:choose>
-			
+
 <spring:message code="switch.text.yes" var="yesText" javaScriptEscape="true"/>
 <spring:message code="switch.text.no" var="noText" javaScriptEscape="true"/>
 
@@ -49,6 +49,16 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
+				
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				initializeSelectHover();
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
@@ -91,6 +101,8 @@
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
+				
+				<form:hidden path="quartzCalendarNames" />
 
 				<div class="form-group">
 					<label class="control-label col-md-4">
@@ -142,6 +154,19 @@
 						<div class="checkbox">
 							<form:checkbox path="continueOnError" id="continueOnError" class="switch-yes-no"/>
 						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="schedule">
+						<spring:message code="jobs.text.schedule"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="schedule" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${schedules}" itemLabel="name" itemValue="scheduleId"/>
+						</form:select>
+						<form:errors path="schedule" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
