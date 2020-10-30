@@ -327,7 +327,7 @@ public class LdapLogin {
 
 				String baseDn = Config.getSettings().getLdapBaseDn();
 				logger.debug("baseDn='{}'", baseDn);
-				results = ctx.search(escapeDN(baseDn), searchFilter, controls);
+				results = ctx.search(baseDn, searchFilter, controls);
 
 				if (results.hasMoreElements()) {
 					logger.debug("results.hasMoreElements()=true");
