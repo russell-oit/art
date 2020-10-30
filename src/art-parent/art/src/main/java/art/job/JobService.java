@@ -40,6 +40,7 @@ import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.QuartzScheduleHelper;
 import art.utils.SchedulerUtils;
+import art.utils.TriggersResult;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -925,26 +926,9 @@ public class JobService {
 
 		QuartzScheduleHelper quartzScheduleHelper = new QuartzScheduleHelper();
 
-		//get applicable holidays
-		List<org.quartz.Calendar> calendars = quartzScheduleHelper.processHolidays(job, timeZone);
-		String globalCalendarName = "jobCalendar" + jobId;
-		org.quartz.Calendar globalCalendar = null;
-		List<String> calendarNames = new ArrayList<>();
-		for (org.quartz.Calendar calendar : calendars) {
-			String calendarName = calendar.getDescription();
-			if (StringUtils.isBlank(calendarName)) {
-				globalCalendar = calendar;
-				globalCalendar.setDescription(globalCalendarName);
-				calendarName = globalCalendarName;
-			}
-			calendarNames.add(calendarName);
-
-			boolean replace = true;
-			boolean updateTriggers = true;
-			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
-		}
-
-		Set<Trigger> triggers = quartzScheduleHelper.processTriggers(job, globalCalendar, timeZone);
+		TriggersResult triggersResult = quartzScheduleHelper.processTriggers(job, timeZone, scheduler);
+		Set<Trigger> triggers = triggersResult.getTriggers();
+		List<String> calendarNames = triggersResult.getCalendarNames();
 
 		//get earliest next run date from all available triggers
 		Date nextRunDate = JobUtils.getNextFireTime(triggers, scheduler);

@@ -31,6 +31,8 @@ import java.util.TimeZone;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Calendar;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
@@ -56,7 +58,7 @@ public class QuartzScheduleHelper {
 	 * @return the list of calendars representing configured holidays
 	 * @throws ParseException
 	 */
-	public List<Calendar> processHolidays(Job job, TimeZone timeZone)
+	private List<Calendar> processHolidays(Job job, TimeZone timeZone)
 			throws ParseException {
 
 		String holidays;
@@ -85,7 +87,7 @@ public class QuartzScheduleHelper {
 	 * @return the list of calendars representing configured holidays
 	 * @throws ParseException
 	 */
-	public List<Calendar> processHolidays(Pipeline pipeline, TimeZone timeZone)
+	private List<Calendar> processHolidays(Pipeline pipeline, TimeZone timeZone)
 			throws ParseException {
 
 		String holidays = null;
@@ -111,7 +113,7 @@ public class QuartzScheduleHelper {
 	 * @return the list of calendars representing configured holidays
 	 * @throws ParseException
 	 */
-	public List<Calendar> processHolidays(String holidays,
+	private List<Calendar> processHolidays(String holidays,
 			List<Holiday> sharedHolidays, TimeZone timeZone) throws ParseException {
 
 		List<Calendar> calendars = new ArrayList<>();
@@ -232,12 +234,106 @@ public class QuartzScheduleHelper {
 	 * Processes schedule definitions in the main fields and extra section
 	 *
 	 * @param job the art job
+	 * @param timeZone the time zone to use for the triggers
+	 * @param scheduler the scheduler to use
+	 * @return details of the triggers to use for the job
+	 * @throws ParseException
+	 * @throws org.quartz.SchedulerException
+	 */
+	public TriggersResult processTriggers(Job job, TimeZone timeZone,
+			Scheduler scheduler) throws ParseException, SchedulerException {
+
+		List<Calendar> calendars = processHolidays(job, timeZone);
+
+		int jobId = job.getJobId();
+		String globalCalendarName = "jobCalendar" + jobId;
+
+		CalendarsResult calendarsResult = processCalendars(calendars, globalCalendarName, scheduler);
+
+		Set<Trigger> triggers = processTriggers(job, calendarsResult.getGlobalCalendar(), timeZone);
+
+		TriggersResult triggersResult = new TriggersResult();
+		triggersResult.setCalendarNames(calendarsResult.getCalendarNames());
+		triggersResult.setTriggers(triggers);
+
+		return triggersResult;
+	}
+
+	/**
+	 * Processes schedule definitions in the main fields and extra section
+	 *
+	 * @param pipeline the pipeline object
+	 * @param timeZone the time zone to use for the triggers
+	 * @param scheduler the scheduler to use
+	 * @return details of the triggers to use for the job
+	 * @throws ParseException
+	 * @throws org.quartz.SchedulerException
+	 */
+	public TriggersResult processTriggers(Pipeline pipeline, TimeZone timeZone,
+			Scheduler scheduler) throws ParseException, SchedulerException {
+
+		List<Calendar> calendars = processHolidays(pipeline, timeZone);
+
+		int pipelineId = pipeline.getPipelineId();
+		String globalCalendarName = "pipelineCalendar" + pipelineId;
+
+		CalendarsResult calendarsResult = processCalendars(calendars, globalCalendarName, scheduler);
+
+		Set<Trigger> triggers = processTriggers(pipeline, calendarsResult.getGlobalCalendar(), timeZone);
+
+		TriggersResult triggersResult = new TriggersResult();
+		triggersResult.setCalendarNames(calendarsResult.getCalendarNames());
+		triggersResult.setTriggers(triggers);
+
+		return triggersResult;
+	}
+
+	/**
+	 * Processes calendars, adding them to the quartz scheduler
+	 *
+	 * @param calendars the quartz calendars
+	 * @param globalCalendarName the global calendar name
+	 * @param scheduler the quartz scheduler
+	 * @return details of the calendar names
+	 * @throws SchedulerException
+	 */
+	private CalendarsResult processCalendars(List<Calendar> calendars,
+			String globalCalendarName, Scheduler scheduler) throws SchedulerException {
+
+		CalendarsResult result = new CalendarsResult();
+
+		Calendar globalCalendar = null;
+		List<String> calendarNames = new ArrayList<>();
+		for (Calendar calendar : calendars) {
+			String calendarName = calendar.getDescription();
+			if (StringUtils.isBlank(calendarName)) {
+				globalCalendar = calendar;
+				globalCalendar.setDescription(globalCalendarName);
+				calendarName = globalCalendarName;
+			}
+			calendarNames.add(calendarName);
+
+			boolean replace = true;
+			boolean updateTriggers = true;
+			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
+		}
+
+		result.setGlobalCalendar(globalCalendar);
+		result.setCalendarNames(calendarNames);
+
+		return result;
+	}
+
+	/**
+	 * Processes schedule definitions in the main fields and extra section
+	 *
+	 * @param job the art job
 	 * @param globalCalendar the global calendar to apply to triggers
 	 * @param timeZone the time zone to use for the triggers
 	 * @return the list of triggers to use for the job
 	 * @throws ParseException
 	 */
-	public Set<Trigger> processTriggers(Job job, Calendar globalCalendar,
+	private Set<Trigger> processTriggers(Job job, Calendar globalCalendar,
 			TimeZone timeZone) throws ParseException {
 
 		int jobId = job.getJobId();
@@ -280,7 +376,7 @@ public class QuartzScheduleHelper {
 	 * @return the list of triggers to use for the job
 	 * @throws ParseException
 	 */
-	public Set<Trigger> processTriggers(Pipeline pipeline, Calendar globalCalendar,
+	private Set<Trigger> processTriggers(Pipeline pipeline, Calendar globalCalendar,
 			TimeZone timeZone) throws ParseException {
 
 		int pipelineId = pipeline.getPipelineId();

@@ -27,6 +27,7 @@ import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.QuartzScheduleHelper;
 import art.utils.SchedulerUtils;
+import art.utils.TriggersResult;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -537,10 +538,7 @@ public class PipelineService {
 		//job must have been saved in order to use job id for job, trigger and calendar names
 		int pipelineId = pipeline.getPipelineId();
 
-		String timeZoneId = null;
-		if (schedule != null) {
-			timeZoneId = schedule.getTimeZone();
-		}
+		String timeZoneId = schedule.getTimeZone();
 
 		TimeZone timeZone;
 		if (StringUtils.isBlank(timeZoneId)) {
@@ -554,26 +552,9 @@ public class PipelineService {
 
 		QuartzScheduleHelper quartzScheduleHelper = new QuartzScheduleHelper();
 
-		//get applicable holidays
-		List<org.quartz.Calendar> calendars = quartzScheduleHelper.processHolidays(pipeline, timeZone);
-		String globalCalendarName = "pipelineCalendar" + pipelineId;
-		org.quartz.Calendar globalCalendar = null;
-		List<String> calendarNames = new ArrayList<>();
-		for (org.quartz.Calendar calendar : calendars) {
-			String calendarName = calendar.getDescription();
-			if (StringUtils.isBlank(calendarName)) {
-				globalCalendar = calendar;
-				globalCalendar.setDescription(globalCalendarName);
-				calendarName = globalCalendarName;
-			}
-			calendarNames.add(calendarName);
-
-			boolean replace = true;
-			boolean updateTriggers = true;
-			scheduler.addCalendar(calendarName, calendar, replace, updateTriggers);
-		}
-
-		Set<Trigger> triggers = quartzScheduleHelper.processTriggers(pipeline, globalCalendar, timeZone);
+		TriggersResult triggersResult = quartzScheduleHelper.processTriggers(pipeline, timeZone, scheduler);
+		Set<Trigger> triggers = triggersResult.getTriggers();
+		List<String> calendarNames = triggersResult.getCalendarNames();
 
 		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
 		pipeline.setQuartzCalendarNames(quartzCalendarNames);
