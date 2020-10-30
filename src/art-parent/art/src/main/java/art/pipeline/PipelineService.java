@@ -85,7 +85,7 @@ public class PipelineService {
 		scheduleService = new ScheduleService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES AP";
 
 	/**
 	 * Maps a resultset to an object
@@ -572,6 +572,46 @@ public class PipelineService {
 		//add job and triggers to scheduler
 		boolean replace = true;
 		scheduler.scheduleJob(quartzJob, triggers, replace);
+	}
+
+	/**
+	 * Returns pipelines that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return pipelines that use the schedule
+	 * @throws SQLException
+	 */
+	@Cacheable("pipelines")
+	public List<Pipeline> getPipelinesWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getPipelinesWithSchedule: scheduleId={}", scheduleId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineMapper());
+		return dbService.query(sql, h, scheduleId);
+	}
+
+	/**
+	 * Returns pipelines that use a given holiday as part of the schedule
+	 *
+	 * @param holidayId the holiday id
+	 * @return pipelines that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Pipeline> getHolidayPipelines(int holidayId) throws SQLException {
+		logger.debug("Entering getHolidayPipelines");
+
+		String sql = SQL_SELECT_ALL
+				//where holidays are part of the pipeline schedule
+				+ " WHERE EXISTS (SELECT *"
+				+ " FROM ART_JOB_SCHEDULES AJS"
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_ID=AP.SCHEDULE_ID AND ASHM.HOLIDAY_ID=?)";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineService.PipelineMapper());
+		return dbService.query(sql, h, holidayId, holidayId);
 	}
 
 }

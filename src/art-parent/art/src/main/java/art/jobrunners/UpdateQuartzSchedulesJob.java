@@ -20,6 +20,8 @@ package art.jobrunners;
 import art.cache.CacheHelper;
 import art.job.Job;
 import art.job.JobService;
+import art.pipeline.Pipeline;
+import art.pipeline.PipelineService;
 import art.user.User;
 import art.user.UserService;
 import java.util.List;
@@ -52,6 +54,9 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 	@Autowired
 	private CacheHelper cacheHelper;
 
+	@Autowired
+	private PipelineService pipelineService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
@@ -59,33 +64,49 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 
 		try {
 			JobDataMap dataMap = context.getMergedJobDataMap();
+
 			//must use containsKey() where key may not be there, otherwise getInt() will throw an exception
 			int scheduleId = 0;
 			if (dataMap.containsKey("scheduleId")) {
 				scheduleId = dataMap.getInt("scheduleId");
 			}
+
 			int holidayId = 0;
 			if (dataMap.containsKey("holidayId")) {
 				holidayId = dataMap.getInt("holidayId");
 			}
+
 			int userId = dataMap.getInt("userId");
+			User user = userService.getUser(userId);
 
 			if (scheduleId > 0) {
 				List<Job> jobs = jobService.getJobsWithSchedule(scheduleId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
-					User user = userService.getUser(userId);
 					for (Job job : jobs) {
 						jobService.processSchedules(job, user);
 					}
 				}
+
+				List<Pipeline> pipelines = pipelineService.getPipelinesWithSchedule(scheduleId);
+				if (CollectionUtils.isNotEmpty(pipelines)) {
+					for (Pipeline pipeline : pipelines) {
+						pipelineService.processSchedules(pipeline, user);
+					}
+				}
 			}
-			
+
 			if (holidayId > 0) {
 				List<Job> jobs = jobService.getHolidayJobs(holidayId);
 				if (CollectionUtils.isNotEmpty(jobs)) {
-					User user = userService.getUser(userId);
 					for (Job job : jobs) {
 						jobService.processSchedules(job, user);
+					}
+				}
+
+				List<Pipeline> pipelines = pipelineService.getHolidayPipelines(holidayId);
+				if (CollectionUtils.isNotEmpty(pipelines)) {
+					for (Pipeline pipeline : pipelines) {
+						pipelineService.processSchedules(pipeline, user);
 					}
 				}
 			}
@@ -94,6 +115,7 @@ public class UpdateQuartzSchedulesJob implements org.quartz.Job {
 		}
 
 		cacheHelper.clearJobs();
+		cacheHelper.clearPipelines();
 	}
 
 }

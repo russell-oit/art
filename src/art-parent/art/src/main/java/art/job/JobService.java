@@ -851,7 +851,7 @@ public class JobService {
 
 	/**
 	 * Returns jobs that use a given holiday, either directly as shared holiday
-	 * or as part of a fixed holiday
+	 * or as part of a fixed schedule
 	 *
 	 * @param holidayId the holiday id
 	 * @return jobs that use the holiday
