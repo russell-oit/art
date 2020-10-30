@@ -406,7 +406,7 @@ Edit datasource page
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" maxlength="50" class="form-control"/>
+						<form:input path="username" maxlength="100" class="form-control"/>
 						<form:errors path="username" cssClass="error"/>
 					</div>
 				</div>

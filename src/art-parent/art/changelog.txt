@@ -1,6 +1,7 @@
 ART 5.0
 * Fix for pivottable error with pt_BR localization
 * Added schedule field for pipelines
+* Increase size of username column in datasources
 * Added BigQuery JDBC driver
 
 ART 4.18
