@@ -614,4 +614,22 @@ public class PipelineService {
 		return dbService.query(sql, h, holidayId, holidayId);
 	}
 
+	/**
+	 * Returns pipelines that use a given start condition
+	 *
+	 * @param startConditionId the start condition id
+	 * @return pipelines that use the start condition
+	 * @throws SQLException
+	 */
+	@Cacheable("pipelines")
+	public List<Pipeline> getPipelinesWithStartCondition(int startConditionId) throws SQLException {
+		logger.debug("Entering getPipelinesWithStartCondition: startConditionId={}", startConditionId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE START_CONDITION_ID=?";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineMapper());
+		return dbService.query(sql, h, startConditionId);
+	}
+
 }

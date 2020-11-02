@@ -260,6 +260,14 @@ public class CacheHelper {
 	public void clearPipelines() {
 		logger.debug("Entering clearPipelines");
 	}
+	
+	/**
+	 * Clears the start conditions cache
+	 */
+	@CacheEvict(value = "startConditions", allEntries = true)
+	public void clearStartConditions() {
+		logger.debug("Entering clearStartConditions");
+	}
 
 	/**
 	 * Clears all caches
@@ -269,7 +277,7 @@ public class CacheHelper {
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters",
 		"encryptors", "holidays", "destinations", "smtpServers", "roles",
-		"permissions", "drilldowns", "pipelines"}, allEntries = true)
+		"permissions", "drilldowns", "pipelines", "startConditions"}, allEntries = true)
 	public void clearAll(HttpSession session) {
 		logger.debug("Entering clearAll");
 

@@ -1167,4 +1167,22 @@ public class JobService {
 
 		return integerIds;
 	}
+	
+	/**
+	 * Returns jobs that use a given start condition
+	 *
+	 * @param startConditionId the start condition id
+	 * @return jobs that use the start condition
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Job> getJobsWithStartCondition(int startConditionId) throws SQLException {
+		logger.debug("Entering getJobsWithStartCondition: startConditionId={}", startConditionId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE START_CONDITION_ID=?";
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, startConditionId);
+	}
 }

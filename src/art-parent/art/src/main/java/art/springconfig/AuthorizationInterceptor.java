@@ -532,6 +532,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_pipelines")) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "startConditions")
+				|| StringUtils.endsWithAny(page, "StartCondition", "StartConditions")) {
+			if (user.hasPermission("configure_start_conditions")) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

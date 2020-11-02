@@ -38,8 +38,6 @@ import static org.quartz.TriggerKey.triggerKey;
 import org.quartz.impl.calendar.CronCalendar;
 import org.quartz.impl.triggers.AbstractTrigger;
 import org.quartz.impl.triggers.CronTriggerImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides methods for assisting with quartz schedules
@@ -47,8 +45,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class QuartzScheduleHelper {
-
-	private static final Logger logger = LoggerFactory.getLogger(QuartzScheduleHelper.class);
 
 	/**
 	 * Process holiday definitions
