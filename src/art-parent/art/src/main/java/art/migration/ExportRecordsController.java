@@ -78,6 +78,8 @@ import art.settings.Settings;
 import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.user.UserCsvExportMixIn;
 import art.user.UserService;
@@ -164,9 +166,12 @@ public class ExportRecordsController {
 
 	@Autowired
 	private CacheHelper cacheHelper;
-	
+
 	@Autowired
 	private PipelineService pipelineService;
+	
+	@Autowired
+	private StartConditionService startConditionService;
 
 	@GetMapping("/exportRecords")
 	public String showExportRecords(Model model, @RequestParam("type") String type,
@@ -272,6 +277,9 @@ public class ExportRecordsController {
 						break;
 					case Pipelines:
 						exportPipelines(exportRecords, file, sessionUser, conn);
+						break;
+					case StartConditions:
+						exportStartConditions(exportRecords, file, sessionUser, conn);
 						break;
 					default:
 						break;
@@ -1568,8 +1576,8 @@ public class ExportRecordsController {
 		CsvSchema schema = ExportRecords.getCsvSchema(csvMapper, type);
 		csvMapper.writer(schema).writeValue(file, value);
 	}
-	
-		/**
+
+	/**
 	 * Exports pipeline records
 	 *
 	 * @param exportRecords the export records object
@@ -1605,6 +1613,48 @@ public class ExportRecordsController {
 			case Datasource:
 				boolean overwrite = exportRecords.isOverwrite();
 				pipelineService.importPipelines(pipelines, sessionUser, conn, overwrite);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected location: " + location);
+		}
+	}
+
+	/**
+	 * Exports start condition records
+	 *
+	 * @param exportRecords the export records object
+	 * @param file the export file to use
+	 * @param sessionUser the session user
+	 * @param conn the connection to use for datasource export
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void exportStartConditions(ExportRecords exportRecords, File file,
+			User sessionUser, Connection conn) throws SQLException, IOException {
+
+		logger.debug("Entering exportStartConditions");
+
+		String ids = exportRecords.getIds();
+		List<StartCondition> startConditions = startConditionService.getStartConditions(ids);
+
+		MigrationLocation location = exportRecords.getLocation();
+		switch (location) {
+			case File:
+				MigrationFileFormat fileFormat = exportRecords.getFileFormat();
+				switch (fileFormat) {
+					case json:
+						exportToJson(file, startConditions);
+						break;
+					case csv:
+						exportToCsv(file, startConditions, StartCondition.class);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+				}
+				break;
+			case Datasource:
+				boolean overwrite = exportRecords.isOverwrite();
+				startConditionService.importStartConditions(startConditions, sessionUser, conn, overwrite);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected location: " + location);
