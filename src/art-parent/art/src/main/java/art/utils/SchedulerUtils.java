@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
+import org.apache.commons.lang3.StringUtils;
+import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -210,4 +212,35 @@ public class SchedulerUtils {
 
 		return properties;
 	}
+
+	/**
+	 * Deletes the quartz job associated with the given art job, also deleting
+	 * any associated triggers and calendars
+	 *
+	 * @param jobName the quartz job name
+	 * @param quartzCalendarNames comma separated string with the quartz
+	 * calendar names
+	 * @throws org.quartz.SchedulerException
+	 */
+	public static void deleteQuartzJob(String jobName, String quartzCalendarNames)
+			throws SchedulerException {
+		
+		if (scheduler == null) {
+			return;
+		}
+
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+
+		if (StringUtils.isNotBlank(quartzCalendarNames)) {
+			String[] calendarNames = StringUtils.split(quartzCalendarNames, ",");
+			for (String calendarName : calendarNames) {
+				try {
+					scheduler.deleteCalendar(calendarName);
+				} catch (SchedulerException ex) {
+					logger.error("Error", ex);
+				}
+			}
+		}
+	}
+
 }

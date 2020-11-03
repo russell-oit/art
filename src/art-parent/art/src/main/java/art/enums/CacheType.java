@@ -34,7 +34,7 @@ public enum CacheType {
 	Encryptors("Encryptors"), Holidays("Holidays"), Destinations("Destinations"),
 	SmtpServers("SmtpServers"), Settings("Settings"), CustomSettings("CustomSettings"),
 	Roles("Roles"), Permissions("Permissions"), Drilldowns("Drilldowns"),
-	Pipelines("Pipelines");
+	Pipelines("Pipelines"), StartConditions("StartConditions");
 	
 	private final String value;
 

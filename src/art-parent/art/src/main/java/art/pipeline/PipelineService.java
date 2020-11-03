@@ -19,14 +19,25 @@ package art.pipeline;
 
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
+import art.jobrunners.PipelineJob;
 import art.pipelinerunningjob.PipelineRunningJobService;
+import art.schedule.Schedule;
+import art.schedule.ScheduleService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.utils.ArtUtils;
+import art.utils.QuartzScheduleHelper;
+import art.utils.SchedulerUtils;
+import art.utils.TriggersResult;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -34,6 +45,11 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,21 +69,28 @@ public class PipelineService {
 
 	private final DbService dbService;
 	private final PipelineRunningJobService pipelineRunningJobService;
+	private final ScheduleService scheduleService;
+	private final StartConditionService startConditionService;
 
 	@Autowired
 	public PipelineService(DbService dbService,
-			PipelineRunningJobService pipelineRunningJobService) {
+			PipelineRunningJobService pipelineRunningJobService,
+			ScheduleService scheduleService, StartConditionService startConditionService) {
 
 		this.dbService = dbService;
 		this.pipelineRunningJobService = pipelineRunningJobService;
+		this.scheduleService = scheduleService;
+		this.startConditionService = startConditionService;
 	}
 
 	public PipelineService() {
 		dbService = new DbService();
 		pipelineRunningJobService = new PipelineRunningJobService();
+		scheduleService = new ScheduleService();
+		startConditionService = new StartConditionService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES AP";
 
 	/**
 	 * Maps a resultset to an object
@@ -92,6 +115,7 @@ public class PipelineService {
 			pipeline.setDescription(rs.getString("DESCRIPTION"));
 			pipeline.setSerial(rs.getString("SERIAL"));
 			pipeline.setContinueOnError(rs.getBoolean("CONTINUE_ON_ERROR"));
+			pipeline.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 			pipeline.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			pipeline.setCreatedBy(rs.getString("CREATED_BY"));
 			pipeline.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -99,6 +123,12 @@ public class PipelineService {
 
 			List<Integer> runningJobs = pipelineRunningJobService.getPipelineRunningJobs(pipeline.getPipelineId());
 			pipeline.setRunningJobs(runningJobs);
+
+			Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
+			pipeline.setSchedule(schedule);
+			
+			StartCondition startCondition = startConditionService.getStartCondition(rs.getInt("START_CONDITION_ID"));
+			pipeline.setStartCondition(startCondition);
 
 			return type.cast(pipeline);
 		}
@@ -178,10 +208,15 @@ public class PipelineService {
 	 *
 	 * @param id the pipeline id
 	 * @throws SQLException
+	 * @throws org.quartz.SchedulerException
 	 */
 	@CacheEvict(value = "pipelines", allEntries = true)
-	public void deletePipeline(int id) throws SQLException {
+	public void deletePipeline(int id) throws SQLException, SchedulerException {
 		logger.debug("Entering deletePipeline: id={}", id);
+
+		Pipeline pipeline = getPipeline(id);
+
+		deleteQuartzJob(pipeline);
 
 		String sql = "DELETE FROM ART_PIPELINES WHERE PIPELINE_ID=?";
 		dbService.update(sql, id);
@@ -192,9 +227,10 @@ public class PipelineService {
 	 *
 	 * @param ids the ids of the pipelines to delete
 	 * @throws SQLException
+	 * @throws org.quartz.SchedulerException
 	 */
 	@CacheEvict(value = "pipelines", allEntries = true)
-	public void deletePipelines(Integer[] ids) throws SQLException {
+	public void deletePipelines(Integer[] ids) throws SQLException, SchedulerException {
 		logger.debug("Entering deletePipelines: ids={}", (Object) ids);
 
 		for (Integer id : ids) {
@@ -354,12 +390,29 @@ public class PipelineService {
 			newRecord = true;
 		}
 
+		Integer scheduleId = null;
+		if (pipeline.getSchedule() != null) {
+			scheduleId = pipeline.getSchedule().getScheduleId();
+			if (scheduleId == 0) {
+				scheduleId = null;
+			}
+		}
+		
+		Integer startConditionId = null;
+		if (pipeline.getStartCondition() != null) {
+			startConditionId = pipeline.getStartCondition().getStartConditionId();
+			if (startConditionId == 0) {
+				startConditionId = null;
+			}
+		}
+
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PIPELINES"
 					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL,"
-					+ " CONTINUE_ON_ERROR,"
+					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
+					+ " START_CONDITION_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -367,6 +420,9 @@ public class PipelineService {
 				pipeline.getDescription(),
 				pipeline.getSerial(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
+				scheduleId,
+				pipeline.getQuartzCalendarNames(),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -374,7 +430,8 @@ public class PipelineService {
 			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_PIPELINES SET NAME=?, DESCRIPTION=?,"
-					+ "	SERIAL=?, CONTINUE_ON_ERROR=?,"
+					+ "	SERIAL=?, CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PIPELINE_ID=?";
 
@@ -383,6 +440,9 @@ public class PipelineService {
 				pipeline.getDescription(),
 				pipeline.getSerial(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
+				scheduleId,
+				pipeline.getQuartzCalendarNames(),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				pipeline.getPipelineId()
@@ -450,6 +510,145 @@ public class PipelineService {
 		} else {
 			return BooleanUtils.toBoolean(value.intValue());
 		}
+	}
+
+	/**
+	 * Deletes the quartz job associated with the given pipeline, also deleting
+	 * any associated triggers
+	 *
+	 * @param pipeline the pipeline object
+	 * @param scheduler the quartz scheduler
+	 * @throws org.quartz.SchedulerException
+	 */
+	private void deleteQuartzJob(Pipeline pipeline) throws SchedulerException {
+		int pipelineId = pipeline.getPipelineId();
+		String jobName = "pipeline" + pipelineId;
+		String quartzCalendarNames = pipeline.getQuartzCalendarNames();
+
+		SchedulerUtils.deleteQuartzJob(jobName, quartzCalendarNames);
+	}
+
+	/**
+	 * Processes schedule and creates quartz schedules for the job
+	 *
+	 * @param pipeline the pipeline object
+	 * @param actionUser the user who initiated the action
+	 * @throws java.text.ParseException
+	 * @throws org.quartz.SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	public void processSchedules(Pipeline pipeline, User actionUser)
+			throws ParseException, SchedulerException, SQLException {
+
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		if (scheduler == null) {
+			logger.warn("Scheduler not available");
+			return;
+		}
+
+		//delete job while it has old calendar names, before updating the calendar names field
+		deleteQuartzJob(pipeline);
+
+		Schedule schedule = pipeline.getSchedule();
+		if (schedule == null) {
+			return;
+		}
+
+		//job must have been saved in order to use job id for job, trigger and calendar names
+		int pipelineId = pipeline.getPipelineId();
+
+		String timeZoneId = schedule.getTimeZone();
+
+		TimeZone timeZone;
+		if (StringUtils.isBlank(timeZoneId)) {
+			timeZone = TimeZone.getDefault();
+		} else {
+			timeZone = TimeZone.getTimeZone(timeZoneId);
+		}
+
+		logger.debug("timeZoneId='{}'", timeZoneId);
+		logger.debug("timeZone={}", timeZone);
+
+		QuartzScheduleHelper quartzScheduleHelper = new QuartzScheduleHelper();
+
+		TriggersResult triggersResult = quartzScheduleHelper.processTriggers(pipeline, timeZone, scheduler);
+		Set<Trigger> triggers = triggersResult.getTriggers();
+		List<String> calendarNames = triggersResult.getCalendarNames();
+
+		String quartzCalendarNames = StringUtils.join(calendarNames, ",");
+		pipeline.setQuartzCalendarNames(quartzCalendarNames);
+
+		//update calendar names fields
+		updatePipeline(pipeline, actionUser);
+
+		String jobName = "pipeline" + pipelineId;
+
+		JobDetail quartzJob = JobBuilder.newJob(PipelineJob.class)
+				.withIdentity(jobName, ArtUtils.JOB_GROUP)
+				.usingJobData("pipelineId", pipelineId)
+				.build();
+
+		//add job and triggers to scheduler
+		boolean replace = true;
+		scheduler.scheduleJob(quartzJob, triggers, replace);
+	}
+
+	/**
+	 * Returns pipelines that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return pipelines that use the schedule
+	 * @throws SQLException
+	 */
+	@Cacheable("pipelines")
+	public List<Pipeline> getPipelinesWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getPipelinesWithSchedule: scheduleId={}", scheduleId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE SCHEDULE_ID=?";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineMapper());
+		return dbService.query(sql, h, scheduleId);
+	}
+
+	/**
+	 * Returns pipelines that use a given holiday as part of the schedule
+	 *
+	 * @param holidayId the holiday id
+	 * @return pipelines that use the holiday
+	 * @throws SQLException
+	 */
+	public List<Pipeline> getHolidayPipelines(int holidayId) throws SQLException {
+		logger.debug("Entering getHolidayPipelines");
+
+		String sql = SQL_SELECT_ALL
+				//where holidays are part of the pipeline schedule
+				+ " WHERE EXISTS (SELECT *"
+				+ " FROM ART_JOB_SCHEDULES AJS"
+				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
+				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
+				+ " WHERE AJS.SCHEDULE_ID=AP.SCHEDULE_ID AND ASHM.HOLIDAY_ID=?)";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineService.PipelineMapper());
+		return dbService.query(sql, h, holidayId, holidayId);
+	}
+
+	/**
+	 * Returns pipelines that use a given start condition
+	 *
+	 * @param startConditionId the start condition id
+	 * @return pipelines that use the start condition
+	 * @throws SQLException
+	 */
+	@Cacheable("pipelines")
+	public List<Pipeline> getPipelinesWithStartCondition(int startConditionId) throws SQLException {
+		logger.debug("Entering getPipelinesWithStartCondition: startConditionId={}", startConditionId);
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE START_CONDITION_ID=?";
+
+		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineMapper());
+		return dbService.query(sql, h, startConditionId);
 	}
 
 }

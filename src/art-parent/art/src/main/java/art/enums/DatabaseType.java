@@ -53,7 +53,8 @@ public enum DatabaseType {
 	TimescaleDBPostgresql("timescaledb-postgresql"), kdb("kdb+"),
 	CsvCalcite("csv-calcite"), JsonCalcite("json-calcite"),
 	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite"),
-	ElasticsearchCalcite("elasticsearch-calcite"), JsonCalciteArt("json-calcite-art");
+	ElasticsearchCalcite("elasticsearch-calcite"), JsonCalciteArt("json-calcite-art"),
+	BigQueryStarschema("bigquery-starschema");
 
 	private final String value;
 
@@ -222,6 +223,8 @@ public enum DatabaseType {
 				return "kdb+";
 			case JsonCalciteArt:
 				return "JSON (Calcite - ART driver)";
+			case BigQueryStarschema:
+				return "BigQuery (Starschema driver)";
 			default:
 				return toString();
 		}

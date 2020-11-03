@@ -304,7 +304,7 @@ public class LdapLogin {
 		logger.debug("useAnonymousBind={}", useAnonymousBind);
 
 		if (!useAnonymousBind) {
-			env.put(Context.SECURITY_PRINCIPAL, escapeDN(bindDn));
+			env.put(Context.SECURITY_PRINCIPAL, bindDn);
 			env.put(Context.SECURITY_CREDENTIALS, Config.getSettings().getLdapBindPassword());
 		}
 
@@ -327,7 +327,7 @@ public class LdapLogin {
 
 				String baseDn = Config.getSettings().getLdapBaseDn();
 				logger.debug("baseDn='{}'", baseDn);
-				results = ctx.search(escapeDN(baseDn), searchFilter, controls);
+				results = ctx.search(baseDn, searchFilter, controls);
 
 				if (results.hasMoreElements()) {
 					logger.debug("results.hasMoreElements()=true");
@@ -444,13 +444,14 @@ public class LdapLogin {
 	}
 
 	/**
-	 * Escapes an ldap dn
+	 * Escapes an ldap rdn component
 	 *
-	 * @param name the dn to escape
-	 * @return the escaped dn
+	 * @param name the rdn to escape
+	 * @return the escaped rdn
 	 */
-	public static String escapeDN(String name) {
+	public static String escapeRDN(String name) {
 		//https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+		//https://ldap.com/ldap-dns-and-rdns/
 
 		if (name == null) {
 			return null;

@@ -92,7 +92,7 @@ public class ReportRunner {
 
 	private final StringBuilder querySb;
 	private boolean useRules = false;
-	private PreparedStatement psQuery; // this is the ps object produced by this query
+	private Statement psQuery; // this is the ps object produced by this query
 	private Connection connQuery; // this is the connection to the datasource for this query
 	private String finalSql; //final sql statement with parameters substituted
 	private boolean recipientFilterPresent; //dynamic recipient filter label present
@@ -1225,18 +1225,19 @@ public class ReportRunner {
 		int fetchSize = report.getFetchSize();
 		boolean applyFetchSize = false;
 
+		Datasource datasource = report.getDatasource();
+		String jdbcUrl = null;
+		if (datasource != null) {
+			jdbcUrl = datasource.getUrl();
+		}
+
 		if (fetchSize > 0) {
 			applyFetchSize = true;
-			String jdbcUrl;
-			Datasource datasource = report.getDatasource();
-			if (datasource != null) {
-				jdbcUrl = datasource.getUrl();
-				if (StringUtils.startsWith(jdbcUrl, "jdbc:postgresql")) {
-					postgreSqlFetchSizeApplied = true;
-					connQuery.setAutoCommit(false);
-				} else if (StringUtils.startsWith(jdbcUrl, "jdbc:mysql")) {
-					fetchSize = Integer.MIN_VALUE;
-				}
+			if (StringUtils.startsWith(jdbcUrl, "jdbc:postgresql")) {
+				postgreSqlFetchSizeApplied = true;
+				connQuery.setAutoCommit(false);
+			} else if (StringUtils.startsWith(jdbcUrl, "jdbc:mysql")) {
+				fetchSize = Integer.MIN_VALUE;
 			}
 		}
 
@@ -1253,17 +1254,33 @@ public class ReportRunner {
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
+		
+		boolean bigQueryStarschema = false;
+		if (StringUtils.startsWith(jdbcUrl, "jdbc:BQDriver:")) {
+			bigQueryStarschema = true;
+		}
 
-		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
-
+		//https://github.com/jonathanswenson/bqjdbc/issues/61
+		//https://stackoverflow.com/questions/3271249/difference-between-statement-and-preparedstatement
+		//https://stackoverflow.com/questions/45972001/when-is-it-better-to-use-a-statement-over-a-preparedstatement
+		boolean usingPlainStatement = false;
+		if (bigQueryStarschema && jdbcParams.isEmpty()) {
+			usingPlainStatement = true;
+			psQuery = connQuery.createStatement(resultSetType, ResultSet.CONCUR_READ_ONLY);
+		} else {
+			psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
+		}
+		
 		if (applyFetchSize) {
 			psQuery.setFetchSize(fetchSize);
 		}
 
-		Object[] paramValues = jdbcParams.toArray(new Object[0]);
+		if (!usingPlainStatement) {
+			Object[] paramValues = jdbcParams.toArray(new Object[0]);
 
-		DatabaseUtils.setValues(psQuery, paramValues);
-
+			DatabaseUtils.setValues((PreparedStatement) psQuery, paramValues);
+		}
+		
 		//https://www.programcreek.com/java-api-examples/?class=java.sql.Statement&method=setQueryTimeout
 		//https://docs.oracle.com/javase/7/docs/api/java/sql/Statement.html#setQueryTimeout(int)
 		Integer queryTimeoutSeconds = report.getGeneralOptions().getQueryTimeoutSeconds();
@@ -1286,7 +1303,11 @@ public class ReportRunner {
 			Config.addRunningQuery(reportRunDetails, psQuery);
 		}
 
-		psQuery.execute();
+		if (usingPlainStatement) {
+			psQuery.execute(querySql);
+		} else {
+			((PreparedStatement) psQuery).execute();
+		}
 	}
 
 	/**

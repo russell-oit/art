@@ -17,7 +17,7 @@ A bigger list of features can be found in the [Features](https://sourceforge.net
 
 ## Online Demo
 
-* [Demo](https://art-demo.lon-1.paas.massivegrid.net/art/)
+* [Demo](https://art-demo.lon-2.paas.massivegrid.net/art/)
 * Username - auser
 * Password - auser
 

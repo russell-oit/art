@@ -94,6 +94,12 @@ Edit parameter definition
 
 				toggleVisibleFields(); //show/hide on page load
 
+				$("#lovReport").on("change", function () {
+					toggleEditLovReport();
+				});
+				
+				toggleEditLovReport();
+
 				$('#name').trigger("focus");
 
 			});
@@ -174,6 +180,17 @@ Edit parameter definition
 						break;
 					default:
 						$("#otherFields").show();
+				}
+			}
+
+			function toggleEditLovReport() {
+				var lovReportId = parseInt($('#lovReport option:selected').val(), 10);
+				if (lovReportId === 0) {
+					$("#editLovReport").hide();
+				} else {
+					var newUrl = "${pageContext.request.contextPath}/reportConfig?reportId=" + lovReportId;
+					$('#editLovReport').attr('href', newUrl);
+					$("#editLovReport").show();
 				}
 			}
 		</script>
@@ -479,6 +496,11 @@ Edit parameter definition
 									<option data-divider="true"></option>
 								<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 							</form:select>
+							<div class="text-right">
+								<a id="editLovReport" href="">
+									<spring:message code="page.text.report"/>
+								</a>
+							</div>
 							<form:errors path="lovReport" cssClass="error"/>
 						</div>
 					</div>

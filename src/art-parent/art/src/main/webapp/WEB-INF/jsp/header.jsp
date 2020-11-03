@@ -283,6 +283,13 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_start_conditions')}">
+										<li>
+											<a href="${pageContext.request.contextPath}/startConditions">
+												<spring:message code="page.title.startConditions"/>
+											</a>
+										</li>
+									</c:if>
 									<li class="divider"></li>
 										<c:if test="${sessionUser.hasPermission('configure_caches')}">
 										<li>

@@ -78,6 +78,8 @@ import art.settings.SettingsHelper;
 import art.settings.SettingsService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.user.UserCsvExportMixIn;
 import art.user.UserService;
@@ -175,6 +177,9 @@ public class ImportRecordsController {
 
 	@Autowired
 	private PipelineService pipelineService;
+	
+	@Autowired
+	private StartConditionService startConditionService;
 
 	@GetMapping("/importRecords")
 	public String showImportRecords(Model model, @RequestParam("type") String type) {
@@ -264,6 +269,9 @@ public class ImportRecordsController {
 						break;
 					case Pipelines:
 						importPipelines(tempFile, sessionUser, conn, importRecords);
+						break;
+					case StartConditions:
+						importStartConditions(tempFile, sessionUser, conn, importRecords);
 						break;
 					default:
 						break;
@@ -1697,6 +1705,38 @@ public class ImportRecordsController {
 
 		boolean overwrite = importRecords.isOverwrite();
 		pipelineService.importPipelines(pipelines, sessionUser, conn, overwrite);
+	}
+	
+	/**
+	 * Imports start condition records
+	 *
+	 * @param file the file that contains the records to import
+	 * @param sessionUser the session user
+	 * @param conn the connection to use
+	 * @param importRecords the import records object
+	 * @throws SQLException
+	 */
+	private void importStartConditions(File file, User sessionUser, Connection conn,
+			ImportRecords importRecords) throws SQLException, IOException {
+
+		logger.debug("Entering importStartConditions");
+
+		List<StartCondition> startConditions;
+		MigrationFileFormat fileFormat = importRecords.getFileFormat();
+		switch (fileFormat) {
+			case json:
+				startConditions = importFromJson(file, new TypeReference<List<StartCondition>>() {
+				});
+				break;
+			case csv:
+				startConditions = importValuesFromCsv(file, StartCondition.class);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected file format: " + fileFormat);
+		}
+
+		boolean overwrite = importRecords.isOverwrite();
+		startConditionService.importStartConditions(startConditions, sessionUser, conn, overwrite);
 	}
 
 }

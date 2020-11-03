@@ -140,6 +140,12 @@ public class CacheController {
 				case Drilldowns:
 					cacheHelper.clearDrilldowns();
 					break;
+				case Pipelines:
+					cacheHelper.clearPipelines();
+					break;
+				case StartConditions:
+					cacheHelper.clearStartConditions();
+					break;
 				default:
 					message = "Clear cache not available: " + id;
 			}

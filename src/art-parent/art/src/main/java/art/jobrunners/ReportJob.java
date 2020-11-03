@@ -58,6 +58,8 @@ import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionHelper;
 import art.user.User;
 import art.utils.ArtLogsHelper;
 import art.utils.ArtUtils;
@@ -66,6 +68,7 @@ import art.utils.ExpressionHelper;
 import art.utils.FilenameHelper;
 import art.utils.FinalFilenameValidator;
 import art.utils.MailService;
+import art.utils.SchedulerUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -155,6 +158,9 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.quartz.DateBuilder.IntervalUnit;
+import static org.quartz.DateBuilder.futureDate;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -162,6 +168,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,6 +243,9 @@ public class ReportJob implements org.quartz.Job {
 		Integer pipelineId = null;
 		boolean errorOccurred = false;
 		String runId = null;
+		Boolean startConditionOk = null;
+		StartCondition startCondition = null;
+		Integer retryAttemptsLeft = null;
 
 		try {
 			JobDataMap dataMap = context.getMergedJobDataMap();
@@ -262,8 +272,9 @@ public class ReportJob implements org.quartz.Job {
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			boolean tempJob = dataMap.getBooleanValue("tempJob");
+			boolean retryJob = dataMap.getBooleanValue("retryJob");
 			Date nextRunDate = null;
-			if (tempJob) {
+			if (tempJob || retryJob) {
 				//temp job. use existing next run date
 				if (job != null) {
 					nextRunDate = job.getNextRunDate();
@@ -282,6 +293,10 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 
+			if (retryJob) {
+				retryAttemptsLeft = dataMap.getInt("retryAttemptsLeft");
+			}
+
 			//set overall job start time and next run date in the jobs table
 			beforeExecution(nextRunDate);
 
@@ -291,24 +306,34 @@ public class ReportJob implements org.quartz.Job {
 				progressLogger.info("Job not found");
 				runJob = false;
 			} else {
+				Report report = job.getReport();
+				User user = job.getUser();
+
 				if (!Config.getSettings().isSchedulingEnabled()) {
 					logger.info("Scheduling disabled. Job Id {}", jobId);
 					runMessage = "jobs.message.schedulingDisabled";
 					progressLogger.info("Scheduling disabled");
 					runJob = false;
-				} else {
-					Report report = job.getReport();
-					User user = job.getUser();
-					if (report == null) {
-						logger.warn("Job report not found. Job Id {}", jobId);
-						runMessage = "jobs.message.reportNotFound";
-						progressLogger.info("Job report not found");
-						runJob = false;
-					} else if (user == null) {
-						logger.warn("Job user not found. Job Id {}", jobId);
-						runMessage = "jobs.message.userNotFound";
-						progressLogger.info("Job user not found");
-						runJob = false;
+				} else if (report == null) {
+					logger.warn("Job report not found. Job Id {}", jobId);
+					runMessage = "jobs.message.reportNotFound";
+					progressLogger.info("Job report not found");
+					runJob = false;
+				} else if (user == null) {
+					logger.warn("Job user not found. Job Id {}", jobId);
+					runMessage = "jobs.message.userNotFound";
+					progressLogger.info("Job user not found");
+					runJob = false;
+				} else if (!tempJob) {
+					startCondition = job.getStartCondition();
+					if (startCondition != null) {
+						StartConditionHelper startConditionHelper = new StartConditionHelper();
+						startConditionOk = startConditionHelper.evaluate(startCondition.getCondition());
+						if (!startConditionOk) {
+							runMessage = "jobs.message.startConditionNotFulfilled";
+							progressLogger.info("Start condition not fulfilled");
+							runJob = false;
+						}
 					}
 				}
 			}
@@ -336,7 +361,7 @@ public class ReportJob implements org.quartz.Job {
 					runMessage = "jobs.message.ownerDisabled";
 				} else {
 					runId = ArtUtils.getUniqueId(jobId);
-					
+
 					JobRunDetails jobRunDetails = new JobRunDetails();
 					jobRunDetails.setJob(job);
 					jobRunDetails.setRunId(runId);
@@ -391,7 +416,40 @@ public class ReportJob implements org.quartz.Job {
 		progressLogger.detachAndStopAllAppenders();
 		progressLogger.setLevel(Level.OFF);
 
-		if (pipelineId != null) {
+		boolean retried = false;
+		if (startConditionOk != null && !startConditionOk && startCondition != null) {
+			try {
+				int retryDelayMins = startCondition.getRetryDelayMins();
+				int retryAttempts = startCondition.getRetryAttempts();
+				if (retryAttemptsLeft == null) {
+					retryAttemptsLeft = retryAttempts;
+				}
+				if (retryAttemptsLeft > 0) {
+					retried = true;
+					retryAttemptsLeft--;
+					String retryId = jobId + "-" + ArtUtils.getUniqueId();
+					JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+							.withIdentity("retryJob-" + retryId, "retryJobGroup")
+							.usingJobData("jobId", jobId)
+							.usingJobData("retryJob", true)
+							.usingJobData("retryAttemptsLeft", retryAttemptsLeft)
+							.build();
+
+					//http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-05.html
+					Trigger tempTrigger = TriggerBuilder.newTrigger()
+							.withIdentity("retryTrigger-" + retryId, "retryTriggerGroup")
+							.startAt(futureDate(retryDelayMins, IntervalUnit.MINUTE))
+							.build();
+
+					Scheduler scheduler = SchedulerUtils.getScheduler();
+					scheduler.scheduleJob(tempJob, tempTrigger);
+				}
+			} catch (Exception ex) {
+				logger.error("Error", ex);
+			}
+		}
+
+		if (!retried && pipelineId != null) {
 			try {
 				scheduleNextJob(jobId, serial, pipelineId, errorOccurred);
 			} catch (Exception ex) {

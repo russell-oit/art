@@ -1,3 +1,11 @@
+ART 5.0
+* Fix for pivottable error with pt_BR localization
+* Added schedule field for pipelines
+* Increase size of username column in datasources
+* Added start condition for jobs and pipelines
+* Added configure_start_conditions permission
+* Added BigQuery JDBC driver
+
 ART 4.18
 * Allow editing of datasource in multiple report edit
 * Added extension option for csv report format
