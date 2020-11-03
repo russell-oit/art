@@ -18,6 +18,7 @@
 package art.pipeline;
 
 import art.schedule.Schedule;
+import art.startcondition.StartCondition;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,21 @@ public class Pipeline implements Serializable {
 	private List<Integer> runningJobs;
 	private Schedule schedule;
 	private String quartzCalendarNames;
+	private StartCondition startCondition;
+
+	/**
+	 * @return the startCondition
+	 */
+	public StartCondition getStartCondition() {
+		return startCondition;
+	}
+
+	/**
+	 * @param startCondition the startCondition to set
+	 */
+	public void setStartCondition(StartCondition startCondition) {
+		this.startCondition = startCondition;
+	}
 
 	/**
 	 * @return the quartzCalendarNames

@@ -38,6 +38,7 @@ import art.servlets.Config;
 import art.smtpserver.SmtpServerService;
 import art.user.User;
 import art.general.AjaxResponse;
+import art.startcondition.StartConditionService;
 import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
@@ -126,6 +127,9 @@ public class JobController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private StartConditionService startConditionService;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -732,6 +736,7 @@ public class JobController {
 			model.addAttribute("holidays", holidayService.getAllHolidays());
 			model.addAttribute("destinations", destinationService.getAllDestinations());
 			model.addAttribute("smtpServers", smtpServerService.getAllSmtpServers());
+			model.addAttribute("startConditions", startConditionService.getAllStartConditions());
 
 			if (job != null && !StringUtils.equals(action, "add")) {
 				String cronString = CronStringHelper.getCronString(job);

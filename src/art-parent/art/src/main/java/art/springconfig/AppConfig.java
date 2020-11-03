@@ -30,6 +30,7 @@ import art.general.StringToDouble;
 import art.permission.StringToPermission;
 import art.role.StringToRole;
 import art.smtpserver.StringToSmtpServer;
+import art.startcondition.StringToStartCondition;
 import art.user.StringToUser;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
@@ -115,6 +116,9 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUser stringToUser;
+	
+	@Autowired
+	private StringToStartCondition stringToStartCondition;
 
 	@Autowired
 	private MdcInterceptor mdcInterceptor;
@@ -268,6 +272,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addConverter(stringToRole);
 		registry.addConverter(stringToPermission);
 		registry.addConverter(stringToUser);
+		registry.addConverter(stringToStartCondition);
 	}
 
 	@Bean

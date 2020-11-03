@@ -20,6 +20,7 @@ package art.pipeline;
 import art.general.AjaxResponse;
 import art.jobrunners.PipelineJob;
 import art.schedule.ScheduleService;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
@@ -63,6 +64,9 @@ public class PipelineController {
 
 	@Autowired
 	private ScheduleService scheduleService;
+	
+	@Autowired
+	private StartConditionService startConditionService;
 
 	@RequestMapping(value = "/pipelines", method = RequestMethod.GET)
 	public String showPipelines(Model model) {
@@ -211,6 +215,7 @@ public class PipelineController {
 
 		try {
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
+			model.addAttribute("startConditions", startConditionService.getAllStartConditions());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}

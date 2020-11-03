@@ -34,6 +34,8 @@ import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.smtpserver.SmtpServer;
 import art.smtpserver.SmtpServerService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
@@ -89,12 +91,14 @@ public class JobService {
 	private final DestinationService destinationService;
 	private final SmtpServerService smtpServerService;
 	private final DatasourceService datasourceService;
+	private final StartConditionService startConditionService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, ScheduleService scheduleService,
 			HolidayService holidayService, DestinationService destinationService,
-			SmtpServerService smtpServerService, DatasourceService datasourceService) {
+			SmtpServerService smtpServerService, DatasourceService datasourceService,
+			StartConditionService startConditionService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -104,6 +108,7 @@ public class JobService {
 		this.destinationService = destinationService;
 		this.smtpServerService = smtpServerService;
 		this.datasourceService = datasourceService;
+		this.startConditionService = startConditionService;
 	}
 
 	public JobService() {
@@ -115,6 +120,7 @@ public class JobService {
 		destinationService = new DestinationService();
 		smtpServerService = new SmtpServerService();
 		datasourceService = new DatasourceService();
+		startConditionService = new StartConditionService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -246,6 +252,9 @@ public class JobService {
 
 		List<Destination> destinations = destinationService.getJobDestinations(job.getJobId());
 		job.setDestinations(destinations);
+
+		StartCondition startCondition = startConditionService.getStartCondition(rs.getInt("START_CONDITION_ID"));
+		job.setStartCondition(startCondition);
 	}
 
 	/**
@@ -536,6 +545,14 @@ public class JobService {
 				cachedDatasourceId = null;
 			}
 		}
+		
+		Integer startConditionId = null;
+		if (job.getStartCondition() != null) {
+			startConditionId = job.getStartCondition().getStartConditionId();
+			if (startConditionId == 0) {
+				startConditionId = null;
+			}
+		}
 
 		int affectedRows;
 
@@ -558,9 +575,9 @@ public class JobService {
 					+ " FTP_SERVER_ID, EMAIL_TEMPLATE,"
 					+ " EXTRA_SCHEDULES, HOLIDAYS, QUARTZ_CALENDAR_NAMES,"
 					+ " SCHEDULE_ID, SMTP_SERVER_ID, JOB_OPTIONS, ERROR_EMAIL_TO,"
-					+ " PRE_RUN_REPORT, POST_RUN_REPORT, MANUAL,"
+					+ " PRE_RUN_REPORT, POST_RUN_REPORT, MANUAL, START_CONDITION_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 49) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 50) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -610,6 +627,7 @@ public class JobService {
 				job.getPreRunReport(),
 				job.getPostRunReport(),
 				BooleanUtils.toInteger(job.isManual()),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -631,6 +649,7 @@ public class JobService {
 					+ " QUARTZ_CALENDAR_NAMES=?, SCHEDULE_ID=?, SMTP_SERVER_ID=?,"
 					+ " JOB_OPTIONS=?, ERROR_EMAIL_TO=?,"
 					+ " PRE_RUN_REPORT=?, POST_RUN_REPORT=?, MANUAL=?,"
+					+ " START_CONDITION_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -681,6 +700,7 @@ public class JobService {
 				job.getPreRunReport(),
 				job.getPostRunReport(),
 				BooleanUtils.toInteger(job.isManual()),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()
@@ -1167,7 +1187,7 @@ public class JobService {
 
 		return integerIds;
 	}
-	
+
 	/**
 	 * Returns jobs that use a given start condition
 	 *

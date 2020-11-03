@@ -24,6 +24,7 @@ import art.holiday.Holiday;
 import art.report.Report;
 import art.schedule.Schedule;
 import art.smtpserver.SmtpServer;
+import art.startcondition.StartCondition;
 import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
@@ -104,6 +105,21 @@ public class Job implements Serializable {
 	private boolean overwriteFiles;
 	private Datasource cachedDatasource;
 	private boolean running;
+	private StartCondition startCondition;
+
+	/**
+	 * @return the startCondition
+	 */
+	public StartCondition getStartCondition() {
+		return startCondition;
+	}
+
+	/**
+	 * @param startCondition the startCondition to set
+	 */
+	public void setStartCondition(StartCondition startCondition) {
+		this.startCondition = startCondition;
+	}
 
 	/**
 	 * @return the running

@@ -23,6 +23,8 @@ import art.jobrunners.PipelineJob;
 import art.pipelinerunningjob.PipelineRunningJobService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionService;
 import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.QuartzScheduleHelper;
@@ -68,21 +70,24 @@ public class PipelineService {
 	private final DbService dbService;
 	private final PipelineRunningJobService pipelineRunningJobService;
 	private final ScheduleService scheduleService;
+	private final StartConditionService startConditionService;
 
 	@Autowired
 	public PipelineService(DbService dbService,
 			PipelineRunningJobService pipelineRunningJobService,
-			ScheduleService scheduleService) {
+			ScheduleService scheduleService, StartConditionService startConditionService) {
 
 		this.dbService = dbService;
 		this.pipelineRunningJobService = pipelineRunningJobService;
 		this.scheduleService = scheduleService;
+		this.startConditionService = startConditionService;
 	}
 
 	public PipelineService() {
 		dbService = new DbService();
 		pipelineRunningJobService = new PipelineRunningJobService();
 		scheduleService = new ScheduleService();
+		startConditionService = new StartConditionService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES AP";
@@ -121,6 +126,9 @@ public class PipelineService {
 
 			Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 			pipeline.setSchedule(schedule);
+			
+			StartCondition startCondition = startConditionService.getStartCondition(rs.getInt("START_CONDITION_ID"));
+			pipeline.setStartCondition(startCondition);
 
 			return type.cast(pipeline);
 		}
@@ -389,13 +397,22 @@ public class PipelineService {
 				scheduleId = null;
 			}
 		}
+		
+		Integer startConditionId = null;
+		if (pipeline.getStartCondition() != null) {
+			startConditionId = pipeline.getStartCondition().getStartConditionId();
+			if (startConditionId == 0) {
+				startConditionId = null;
+			}
+		}
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PIPELINES"
 					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL,"
 					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
+					+ " START_CONDITION_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 9) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -405,6 +422,7 @@ public class PipelineService {
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -413,7 +431,7 @@ public class PipelineService {
 		} else {
 			String sql = "UPDATE ART_PIPELINES SET NAME=?, DESCRIPTION=?,"
 					+ "	SERIAL=?, CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
-					+ " QUARTZ_CALENDAR_NAMES=?,"
+					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PIPELINE_ID=?";
 
@@ -424,6 +442,7 @@ public class PipelineService {
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
+				startConditionId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				pipeline.getPipelineId()

@@ -170,6 +170,19 @@
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="col-md-4 control-label " for="startCondition">
+						<spring:message code="page.text.startCondition"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="startCondition" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+								<option data-divider="true"></option>
+							<form:options items="${startConditions}" itemLabel="name" itemValue="startConditionId"/>
+						</form:select>
+						<form:errors path="startCondition" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>

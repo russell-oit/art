@@ -450,7 +450,7 @@ public class StartConditionService {
 
 		//union removes duplicate records, union all does not
 		//use union all in case a job and a pipeline have the same name?
-		String sql = "SELECT NAME AS RECORD_NAME"
+		String sql = "SELECT JOB_NAME AS RECORD_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE START_CONDITION_ID=?"
 				+ " UNION ALL"

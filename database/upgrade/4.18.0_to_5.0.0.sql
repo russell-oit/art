@@ -7,6 +7,7 @@
 -- increase size of username column in datasources
 -- add start conditions table
 -- add start conditions permission
+-- add start condition id columns
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -52,3 +53,7 @@ CREATE TABLE ART_START_CONDITIONS
 
 -- add start conditions permission
 INSERT INTO ART_PERMISSIONS VALUES(33, 'configure_start_conditions');
+
+-- add start condition id columns
+ALTER TABLE ART_JOBS ADD START_CONDITION_ID INTEGER;
+ALTER TABLE ART_PIPELINES ADD START_CONDITION_ID INTEGER;
