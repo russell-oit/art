@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="4.18"> 
+  <meta name="version" content="5.0"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -42,6 +42,10 @@
       <ol> 
        <li><a href="#creating-a-new-datasource">Creating a new datasource</a></li> 
        <li><a href="#options">Options</a></li> 
+       <li><a href="#notes">Notes</a> 
+        <ol> 
+         <li><a href="#bigquery-starschema-driver">BigQuery (Starschema driver)</a></li> 
+        </ol></li> 
        <li><a href="#some-jdbc-drivers-and-urls">Some JDBC Drivers and URLs</a></li> 
       </ol></li> 
      <li><a href="#users">Users</a> 
@@ -344,6 +348,7 @@
        <li><a href="#dynamic-recipients-filtering">Dynamic Recipients + Filtering</a></li> 
       </ol></li> 
      <li><a href="#pipelines">Pipelines</a></li> 
+     <li><a href="#start-conditions">Start Conditions</a></li> 
      <li><a href="#integrated-windows-authentication">Integrated Windows Authentication</a> 
       <ol> 
        <li><a href="#prerequisites">Prerequisites</a></li> 
@@ -1087,6 +1092,10 @@
        </tr> 
       </tbody> 
      </table> 
+     <p><strong>Note:</strong></p> 
+     <ul> 
+      <li>Connections do not always close gracefully - for example if a network outage occurs a broken connection might stay in the pool and would throw an error when used. The <strong>Test SQL</strong> query is used every <strong>Timeout</strong> minutes to validate the connection. If it does not run successfully, the connection is closed and removed from the pool.</li> 
+     </ul> 
      <h2 id="options">Options</h2> 
      <p>A number of options can be specified in the <strong>Options</strong> field. These are defined in JSON format with the following possibilities.</p> 
      <table border="1"> 
@@ -1115,9 +1124,12 @@
        </tr> 
       </tbody> 
      </table> 
-     <p><strong>Note:</strong></p> 
+     <h2 id="notes">Notes</h2> 
+     <h3 id="bigquery-starschema-driver">BigQuery (Starschema driver)</h3> 
+     <p>For the <a class="" href="https://github.com/jonathanswenson/starschema-bigquery-jdbc" rel="nofollow">BigQuery (Starschema driver)</a> database type, note the following.</p> 
      <ul> 
-      <li>Connections do not always close gracefully - for example if a network outage occurs a broken connection might stay in the pool and would throw an error when used. The <strong>Test SQL</strong> query is used every <strong>Timeout</strong> minutes to validate the connection. If it does not run successfully, the connection is closed and removed from the pool.</li> 
+      <li>For the <strong>Username</strong> field, put in the google cloud service account email</li> 
+      <li>For the <strong>Password</strong> field, put in the path to the service account key file e.g. C:\sample\Test Project.json</li> 
      </ul> 
      <h2 id="some-jdbc-drivers-and-urls">Some JDBC Drivers and URLs</h2> 
      <p>Database: <strong>CUBRID</strong></p> 
@@ -5816,6 +5828,10 @@ WHERE {#!saleTypes#}
         <td>Shared holidays configured from the <strong>Configure | Holidays</strong> menu that should be applied for this job.</td> 
        </tr> 
        <tr> 
+        <td><strong>Start Condition</strong></td> 
+        <td>A condition to be satisfied before a scheduled job is run</td> 
+       </tr> 
+       <tr> 
         <td><strong>Error Notification Email</strong></td> 
         <td>An email address that should be notified if an error occurrs while running the job. Multiple email addresses can be specified separated by commas. The "From" email address will be that which is set in the <strong>Settings</strong> page under the <strong>Error Notification</strong> section. The SMTP server used is that configured in the Settings page.</td> 
        </tr> 
@@ -6458,6 +6474,55 @@ WHERE {#!saleTypes#}
        <tr> 
         <td><strong>Continue On Error</strong></td> 
         <td>For serial jobs, whether the next jobs should be run if the current one encounters an error</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Schedule</strong></td> 
+        <td>A schedule on which the pipeline will run</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Start Condition</strong></td> 
+        <td>A condition to be satisfied before a scheduled pipeline is run</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="start-conditions">Start Conditions</h1> 
+     <p>A start condition is a definition of a condition to be checked before a scheduled job or pipeline runs. Use the <strong>Configure | Start Conditions</strong> menu to configure start conditions.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>An auto-generate ID used to identify the start condition</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>A name for the start condition</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the start condition</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Retry Delay (Mins)</strong></td> 
+        <td>The amount of time to wait in minutes if the condition is not fulfilled, before making the next try</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Retry Attempts</strong></td> 
+        <td>The number of times to retry the condition</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Condition</strong></td> 
+        <td>The condition to check for before running the job or pipeline. This could either be an integer representing a report id, or groovy code which would return true or false. For a report id, the first column of the result needs to be an integer and if it's greater than 0, then the condition will be considered as fulfilled and the job will run. For groovy code, if the return result is <strong>true</strong>, then the condition will be considered as fulfilled and the job will run. If the condition is not fulfilled, it will be tried again after the delay interval. After the retry attempts are exhausted and the condition is still false, the job or pipeline will not be run.</td> 
        </tr> 
       </tbody> 
      </table> 
