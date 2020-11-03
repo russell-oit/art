@@ -20,6 +20,10 @@ package art.jobrunners;
 import art.job.JobService;
 import art.pipeline.Pipeline;
 import art.pipeline.PipelineService;
+import art.startcondition.StartCondition;
+import art.startcondition.StartConditionHelper;
+import art.utils.ArtUtils;
+import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,10 +31,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.DateBuilder;
+import static org.quartz.DateBuilder.futureDate;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,20 +71,68 @@ public class PipelineJob implements org.quartz.Job {
 
 		JobDataMap dataMap = context.getMergedJobDataMap();
 
-		int pipelineId = dataMap.getInt("pipelineId");
-
 		try {
+			int pipelineId = dataMap.getInt("pipelineId");
+
 			Pipeline pipeline = pipelineService.getPipeline(pipelineId);
 			if (pipeline == null) {
 				logger.warn("Pipeline not found. Pipeline Id {}", pipelineId);
 			} else {
-				String serial = pipeline.getSerial();
-				String finalSerial = processSerial(serial);
-				String[] serialArray = StringUtils.split(finalSerial, ",");
-				if (serialArray != null && serialArray.length > 0) {
-					String firstJobIdString = serialArray[0].trim();
-					int firstJobId = Integer.parseInt(firstJobIdString);
-					startSerialPipeline(firstJobId, finalSerial, pipeline.getPipelineId());
+				boolean tempJob = dataMap.getBooleanValue("tempJob");
+				boolean retryJob = dataMap.getBooleanValue("retryJob");
+
+				Integer retryAttemptsLeft = null;
+				if (retryJob) {
+					retryAttemptsLeft = dataMap.getInt("retryAttemptsLeft");
+				}
+
+				boolean runPipeline = true;
+
+				if (!tempJob) {
+					StartCondition startCondition = pipeline.getStartCondition();
+					if (startCondition != null) {
+						StartConditionHelper startConditionHelper = new StartConditionHelper();
+						boolean startConditionOk = startConditionHelper.evaluate(startCondition.getCondition());
+						if (!startConditionOk) {
+							runPipeline = false;
+
+							int retryDelayMins = startCondition.getRetryDelayMins();
+							int retryAttempts = startCondition.getRetryAttempts();
+							if (retryAttemptsLeft == null) {
+								retryAttemptsLeft = retryAttempts;
+							}
+							if (retryAttemptsLeft > 0) {
+								retryAttemptsLeft--;
+								String retryId = pipelineId + "-" + ArtUtils.getUniqueId();
+								JobDetail quartzJob = JobBuilder.newJob(ReportJob.class)
+										.withIdentity("retryJob-" + retryId, "retryJobGroup")
+										.usingJobData("pipelineId", pipelineId)
+										.usingJobData("retryJob", true)
+										.usingJobData("retryAttemptsLeft", retryAttemptsLeft)
+										.build();
+
+								//http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-05.html
+								Trigger tempTrigger = TriggerBuilder.newTrigger()
+										.withIdentity("retryTrigger-" + retryId, "retryTriggerGroup")
+										.startAt(futureDate(retryDelayMins, DateBuilder.IntervalUnit.MINUTE))
+										.build();
+
+								Scheduler scheduler = SchedulerUtils.getScheduler();
+								scheduler.scheduleJob(quartzJob, tempTrigger);
+							}
+						}
+					}
+				}
+
+				if (runPipeline) {
+					String serial = pipeline.getSerial();
+					String finalSerial = processSerial(serial);
+					String[] serialArray = StringUtils.split(finalSerial, ",");
+					if (serialArray != null && serialArray.length > 0) {
+						String firstJobIdString = serialArray[0].trim();
+						int firstJobId = Integer.parseInt(firstJobIdString);
+						startSerialPipeline(firstJobId, finalSerial, pipeline.getPipelineId());
+					}
 				}
 			}
 		} catch (Exception ex) {

@@ -256,6 +256,7 @@ public class PipelineController {
 		JobDetail tempPipeline = JobBuilder.newJob(PipelineJob.class)
 				.withIdentity("tempPipeline-" + runId, "tempGroup")
 				.usingJobData("pipelineId", pipelineId)
+				.usingJobData("tempJob", true)
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
