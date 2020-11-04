@@ -158,6 +158,26 @@ public class ScheduleService {
 	}
 
 	/**
+	 * Returns unused schedules
+	 *
+	 * @return unused schedules
+	 * @throws SQLException
+	 */
+	public List<Schedule> getUnusedSchedules() throws SQLException {
+		logger.debug("Entering getUnusedSchedules");
+
+		String sql = "SELECT * FROM ART_JOB_SCHEDULES AJS"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT 1 FROM ART_JOBS WHERE SCHEDULE_ID = AJS.SCHEDULE_ID"
+				+ " UNION ALL"
+				+ " SELECT 1 FROM ART_PIPELINES WHERE SCHEDULE_ID = AJS.SCHEDULE_ID"
+				+ " )";
+
+		ResultSetHandler<List<Schedule>> h = new BeanListHandler<>(Schedule.class, new ScheduleMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
 	 * Returns a schedule
 	 *
 	 * @param id the schedule id

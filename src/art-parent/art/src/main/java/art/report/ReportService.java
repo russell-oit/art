@@ -1340,7 +1340,7 @@ public class ReportService {
 		//candidate drilldown report is a report with at least one inline parameter where drill down column > 0
 		String sql = SQL_SELECT_ALL
 				+ " WHERE EXISTS "
-				+ " (SELECT * FROM ART_REPORT_PARAMETERS ARP, ART_PARAMETERS AP"
+				+ " (SELECT 1 FROM ART_REPORT_PARAMETERS ARP, ART_PARAMETERS AP"
 				+ " WHERE AQ.QUERY_ID = ARP.REPORT_ID AND ARP.PARAMETER_ID = AP.PARAMETER_ID"
 				+ " AND AP.PARAMETER_TYPE = ? AND AP.DRILLDOWN_COLUMN_INDEX > 0)";
 

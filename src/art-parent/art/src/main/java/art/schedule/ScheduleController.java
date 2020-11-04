@@ -26,20 +26,25 @@ import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
 import art.pipeline.PipelineService;
+import art.utils.AjaxTableHelper;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -49,9 +54,11 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,6 +66,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
 /**
  * Controller for schedule configuration
@@ -81,25 +90,97 @@ public class ScheduleController {
 
 	@Autowired
 	private JobService jobService;
-	
+
 	@Autowired
 	private PipelineService pipelineService;
 
 	@Autowired
 	private ServletContext servletContext;
 
+	@Autowired
+	private TemplateEngine defaultTemplateEngine;
+
+	@Autowired
+	private MessageSource messageSource;
+
 	@RequestMapping(value = "/schedules", method = RequestMethod.GET)
 	public String showSchedules(Model model) {
 		logger.debug("Entering showSchedules");
 
-		try {
-			model.addAttribute("schedules", scheduleService.getAllSchedules());
-		} catch (SQLException | RuntimeException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
+		return showSchedulesPage("all", model);
+	}
+
+	@RequestMapping(value = "/unusedSchedules", method = RequestMethod.GET)
+	public String showUnusedSchedules(Model model) {
+		logger.debug("Entering showUnusedSchedules");
+
+		return showSchedulesPage("unused", model);
+	}
+
+	/**
+	 * Prepares model data and returns the jsp file to display
+	 *
+	 * @param action "all" or "unused"
+	 * @param model the spring model
+	 * @return the jsp file to display
+	 */
+	private String showSchedulesPage(String action, Model model) {
+		logger.debug("Entering showSchedulesPage: action='{}'", action);
+
+		model.addAttribute("action", action);
 
 		return "schedules";
+	}
+
+	@GetMapping("/getSchedules")
+	public @ResponseBody
+	AjaxResponse getSchedules(Locale locale, HttpServletRequest request,
+			HttpServletResponse httpResponse,
+			@RequestParam(value = "action", required = false) String action) {
+
+		logger.debug("Entering getSchedules: action='{}'", action);
+
+		AjaxResponse ajaxResponse = new AjaxResponse();
+
+		try {
+			List<Schedule> schedules;
+			if (StringUtils.equals(action, "unused")) {
+				schedules = scheduleService.getUnusedSchedules();
+			} else {
+				schedules = scheduleService.getAllSchedules();
+			}
+
+			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
+			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);
+
+			List<Schedule> finalSchedules = new ArrayList<>();
+
+			for (Schedule schedule : schedules) {
+				String enhancedName = ajaxTableHelper.processName(schedule.getName(), schedule.getCreationDate(), schedule.getUpdateDate());
+				schedule.setName2(enhancedName);
+
+				ctx.setVariable("schedule", schedule);
+				String templateName = "schedulesAction";
+				String dtAction = defaultTemplateEngine.process(templateName, ctx);
+				schedule.setDtAction(dtAction);
+
+				String description = schedule.getDescription();
+				if (StringUtils.isNotBlank(description)) {
+					description = Encode.forHtml(description);
+				}
+				schedule.setDescription2(description);
+
+				finalSchedules.add(schedule);
+			}
+
+			ajaxResponse.setData(finalSchedules);
+			ajaxResponse.setSuccess(true);
+		} catch (SQLException | RuntimeException ex) {
+			logger.error("Error", ex);
+			ajaxResponse.setErrorMessage(ex.toString());
+		}
+
+		return ajaxResponse;
 	}
 
 	@RequestMapping(value = "/deleteSchedule", method = RequestMethod.POST)
@@ -372,8 +453,8 @@ public class ScheduleController {
 	}
 
 	@RequestMapping(value = "/scheduleUsage", method = RequestMethod.GET)
-	public String scheduleUsage(@RequestParam("scheduleId") Integer scheduleId, Model model) {
-		logger.debug("Entering scheduleUsage: scheduleId={}", scheduleId);
+	public String showScheduleUsage(@RequestParam("scheduleId") Integer scheduleId, Model model) {
+		logger.debug("Entering showScheduleUsage: scheduleId={}", scheduleId);
 
 		try {
 			model.addAttribute("jobs", jobService.getJobsWithSchedule(scheduleId));

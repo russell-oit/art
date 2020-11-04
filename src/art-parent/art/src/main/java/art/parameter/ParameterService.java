@@ -209,7 +209,7 @@ public class ParameterService {
 
 		String sql = "SELECT * FROM ART_PARAMETERS AP"
 				+ " WHERE NOT EXISTS ("
-				+ " SELECT * FROM ART_REPORT_PARAMETERS WHERE PARAMETER_ID = AP.PARAMETER_ID"
+				+ " SELECT 1 FROM ART_REPORT_PARAMETERS WHERE PARAMETER_ID = AP.PARAMETER_ID"
 				+ " )";
 
 		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new BasicParameterMapper());

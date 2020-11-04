@@ -16,12 +16,12 @@ Display parameters
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:choose>
-	<c:when test="${action == 'all'}">
-		<spring:message code="page.title.parameters" var="pageTitle"/>
-	</c:when>
 	<c:when test="${action == 'unused'}">
 		<spring:message code="page.title.unusedParameters" var="pageTitle"/>
 	</c:when>
+	<c:otherwise>
+		<spring:message code="page.title.parameters" var="pageTitle"/>
+	</c:otherwise>
 </c:choose>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
@@ -59,91 +59,91 @@ Display parameters
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
 				var dataUrl = "${pageContext.request.contextPath}/getParameters?action=${action}";
-				var deleteRecordText = "${deleteRecordText}";
-				var okText = "${okText}";
-				var cancelText = "${cancelText}";
-				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteParameter";
-				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteParameters";
-				var recordDeletedText = "${recordDeletedText}";
-				var recordsDeletedText = "${recordsDeletedText}";
-				var errorOccurredText = "${errorOccurredText}";
-				var showErrors = ${showErrors};
-				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
-				var linkedRecordsExistText = "${linkedReportsExistText}";
-				var selectRecordsText = "${selectRecordsText}";
-				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
-				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Parameters";
-				var columnDefs = undefined;
+						var deleteRecordText = "${deleteRecordText}";
+						var okText = "${okText}";
+						var cancelText = "${cancelText}";
+						var deleteRecordUrl = "${pageContext.request.contextPath}/deleteParameter";
+						var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteParameters";
+						var recordDeletedText = "${recordDeletedText}";
+						var recordsDeletedText = "${recordsDeletedText}";
+						var errorOccurredText = "${errorOccurredText}";
+						var showErrors = ${showErrors};
+						var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+						var linkedRecordsExistText = "${linkedReportsExistText}";
+						var selectRecordsText = "${selectRecordsText}";
+						var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+						var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Parameters";
+						var columnDefs = undefined;
 
-				var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
-				var columns = [
-					{"data": null, defaultContent: ""},
-					{"data": "parameterId"},
-					{"data": "name2"},
-					{"data": function (row, type, val, meta) {
-							//https://datatables.net/reference/option/columns.data
-							var description = escapeHtmlContent(row.description);
-							if (row.shared) {
-								if (description === null) {
-									description = "";
+						var sharedSpan = "<span class='label label-success'>${sharedText}</span>";
+						var columns = [
+							{"data": null, defaultContent: ""},
+							{"data": "parameterId"},
+							{"data": "name2"},
+							{"data": function (row, type, val, meta) {
+									//https://datatables.net/reference/option/columns.data
+									var description = escapeHtmlContent(row.description);
+									if (row.shared) {
+										if (description === null) {
+											description = "";
+										}
+										description += " " + sharedSpan;
+									}
+									return description;
 								}
-								description += " " + sharedSpan;
-							}
-							return description;
-						}
-					},
-					{"data": "dtAction", width: '370px'}
-				];
-
-				//initialize datatable
-				var oTable = initAjaxConfigTable(tbl, pageLength, showAllRowsText,
-						contextPath, localeCode, dataUrl, errorOccurredText,
-						showErrors, columnDefs, columns);
-
-				var table = oTable.api();
-				
-				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
-						cancelText, deleteRecordUrl, recordDeletedText,
-						errorOccurredText, showErrors, cannotDeleteRecordText,
-						linkedRecordsExistText);
-
-				addDeleteRecordsHandler(table, deleteRecordText, okText,
-						cancelText, deleteRecordsUrl, recordsDeletedText,
-						errorOccurredText, showErrors, selectRecordsText,
-						someRecordsNotDeletedText);
-						
-				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
-
-				yadcf.init(table,
-						[
-							{
-								column_number: 1,
-								filter_type: 'text',
-								filter_default_label: "",
-								style_class: "yadcf-id-filter"
 							},
-							{
-								column_number: 2,
-								filter_type: 'text',
-								filter_default_label: ""
-							},
-							{
-								column_number: 3,
-								filter_type: 'text',
-								filter_default_label: ""
-							}
-						]
-						);
+							{"data": "dtAction", width: '370px'}
+						];
 
-				$("#refreshRecords").on("click", function () {
-					table.ajax.reload();
-				});
+						//initialize datatable
+						var oTable = initAjaxConfigTable(tbl, pageLength, showAllRowsText,
+								contextPath, localeCode, dataUrl, errorOccurredText,
+								showErrors, columnDefs, columns);
 
-				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
-					$(this).parent().hide();
-				});
+						var table = oTable.api();
 
-			}); //end document ready
+						addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+								cancelText, deleteRecordUrl, recordDeletedText,
+								errorOccurredText, showErrors, cannotDeleteRecordText,
+								linkedRecordsExistText);
+
+						addDeleteRecordsHandler(table, deleteRecordText, okText,
+								cancelText, deleteRecordsUrl, recordsDeletedText,
+								errorOccurredText, showErrors, selectRecordsText,
+								someRecordsNotDeletedText);
+
+						addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
+
+						yadcf.init(table,
+								[
+									{
+										column_number: 1,
+										filter_type: 'text',
+										filter_default_label: "",
+										style_class: "yadcf-id-filter"
+									},
+									{
+										column_number: 2,
+										filter_type: 'text',
+										filter_default_label: ""
+									},
+									{
+										column_number: 3,
+										filter_type: 'text',
+										filter_default_label: ""
+									}
+								]
+								);
+
+						$("#refreshRecords").on("click", function () {
+							table.ajax.reload();
+						});
+
+						$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+							$(this).parent().hide();
+						});
+
+					}); //end document ready
 		</script>
 	</jsp:attribute>
 
@@ -184,18 +184,20 @@ Display parameters
 					<spring:message code="page.action.refresh"/>
 				</button>
 			</div>
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedParameters">
-				<spring:message code="page.text.unused"/>
-			</a>
-			<c:if test="${sessionUser.hasPermission('migrate_records')}">
-				<div class="btn-group">
-					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">
-						<spring:message code="page.text.import"/>
-					</a>
-					<button type="button" id="exportRecords" class="btn btn-default">
-						<spring:message code="page.text.export"/>
-					</button>
-				</div>
+			<c:if test="${action == 'all'}">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedParameters">
+					<spring:message code="page.text.unused"/>
+				</a>
+				<c:if test="${sessionUser.hasPermission('migrate_records')}">
+					<div class="btn-group">
+						<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Parameters">
+							<spring:message code="page.text.import"/>
+						</a>
+						<button type="button" id="exportRecords" class="btn btn-default">
+							<spring:message code="page.text.export"/>
+						</button>
+					</div>
+				</c:if>
 			</c:if>
 		</div>
 

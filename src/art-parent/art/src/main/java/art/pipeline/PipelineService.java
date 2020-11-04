@@ -623,7 +623,7 @@ public class PipelineService {
 
 		String sql = SQL_SELECT_ALL
 				//where holidays are part of the pipeline schedule
-				+ " WHERE EXISTS (SELECT *"
+				+ " WHERE EXISTS (SELECT 1"
 				+ " FROM ART_JOB_SCHEDULES AJS"
 				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
 				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"

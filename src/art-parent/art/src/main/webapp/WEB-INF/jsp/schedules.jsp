@@ -15,7 +15,14 @@ Display schedules
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<spring:message code="page.title.schedules" var="pageTitle"/>
+<c:choose>
+	<c:when test="${action == 'unused'}">
+		<spring:message code="page.title.unusedSchedules" var="pageTitle"/>
+	</c:when>
+	<c:otherwise>
+		<spring:message code="page.title.schedules" var="pageTitle"/>
+	</c:otherwise>
+</c:choose>
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText" javaScriptEscape="true"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText" javaScriptEscape="true"/>
@@ -31,7 +38,14 @@ Display schedules
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yadcf.css"/>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.3/jquery.dataTables.yadcf.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -43,47 +57,80 @@ Display schedules
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
 				var localeCode = "${pageContext.response.locale}";
-				var addColumnFilters = undefined; //pass undefined to use the default
-				var deleteRecordText = "${deleteRecordText}";
-				var okText = "${okText}";
-				var cancelText = "${cancelText}";
-				var deleteRecordUrl = "${pageContext.request.contextPath}/deleteSchedule";
-				var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteSchedules";
-				var recordDeletedText = "${recordDeletedText}";
-				var recordsDeletedText = "${recordsDeletedText}";
-				var errorOccurredText = "${errorOccurredText}";
-				var showErrors = ${showErrors};
-				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
-				var linkedRecordsExistText = "${linkedRecordsExistText}";
-				var selectRecordsText = "${selectRecordsText}";
-				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
-				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Schedules";
-				var columnDefs = undefined
+				var dataUrl = "${pageContext.request.contextPath}/getSchedules?action=${action}";
+						var deleteRecordText = "${deleteRecordText}";
+						var okText = "${okText}";
+						var cancelText = "${cancelText}";
+						var deleteRecordUrl = "${pageContext.request.contextPath}/deleteSchedule";
+						var deleteRecordsUrl = "${pageContext.request.contextPath}/deleteSchedules";
+						var recordDeletedText = "${recordDeletedText}";
+						var recordsDeletedText = "${recordsDeletedText}";
+						var errorOccurredText = "${errorOccurredText}";
+						var showErrors = ${showErrors};
+						var cannotDeleteRecordText = "${cannotDeleteRecordText}";
+						var linkedRecordsExistText = "${linkedRecordsExistText}";
+						var selectRecordsText = "${selectRecordsText}";
+						var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
+						var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Schedules";
+						var columnDefs = undefined
 
-				//initialize datatable
-				var oTable = initConfigTable(tbl, pageLength,
-						showAllRowsText, contextPath, localeCode,
-						addColumnFilters, columnDefs);
+						var columns = [
+							{"data": null, defaultContent: ""},
+							{"data": "scheduleId"},
+							{"data": "name2"},
+							{"data": "description2"},
+							{"data": "dtAction", width: '370px'}
+						];
 
-				var table = oTable.api();
+						//initialize datatable
+						var oTable = initAjaxConfigTable(tbl, pageLength, showAllRowsText,
+								contextPath, localeCode, dataUrl, errorOccurredText,
+								showErrors, columnDefs, columns);
 
-				addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
-						cancelText, deleteRecordUrl, recordDeletedText,
-						errorOccurredText, showErrors, cannotDeleteRecordText,
-						linkedRecordsExistText);
+						var table = oTable.api();
 
-				addDeleteRecordsHandler(table, deleteRecordText, okText,
-						cancelText, deleteRecordsUrl, recordsDeletedText,
-						errorOccurredText, showErrors, selectRecordsText,
-						someRecordsNotDeletedText);
-						
-				addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
+						addDeleteRecordHandler(tbl, table, deleteRecordText, okText,
+								cancelText, deleteRecordUrl, recordDeletedText,
+								errorOccurredText, showErrors, cannotDeleteRecordText,
+								linkedRecordsExistText);
 
-				$('#ajaxResponseContainer').on("click", ".alert .close", function () {
-					$(this).parent().hide();
-				});
+						addDeleteRecordsHandler(table, deleteRecordText, okText,
+								cancelText, deleteRecordsUrl, recordsDeletedText,
+								errorOccurredText, showErrors, selectRecordsText,
+								someRecordsNotDeletedText);
 
-			}); //end document ready
+						addExportRecordsHandler(table, exportRecordsUrl, selectRecordsText);
+
+						yadcf.init(table,
+								[
+									{
+										column_number: 1,
+										filter_type: 'text',
+										filter_default_label: "",
+										style_class: "yadcf-id-filter"
+									},
+									{
+										column_number: 2,
+										filter_type: 'text',
+										filter_default_label: ""
+									},
+									{
+										column_number: 3,
+										filter_type: 'text',
+										filter_default_label: ""
+									}
+								]
+								);
+
+						$("#refreshRecords").on("click", function () {
+							table.ajax.reload();
+						});
+
+						$('#ajaxResponseContainer').on("click", ".alert .close", function () {
+							$(this).parent().hide();
+						});
+
+					}); //end document ready
 		</script>
 	</jsp:attribute>
 
@@ -119,16 +166,25 @@ Display schedules
 					<i class="fa fa-trash-o"></i>
 					<spring:message code="page.action.delete"/>
 				</button>
+				<button type="button" id="refreshRecords" class="btn btn-default">
+					<i class="fa fa-refresh"></i>
+					<spring:message code="page.action.refresh"/>
+				</button>
 			</div>
-			<c:if test="${sessionUser.hasPermission('migrate_records')}">
-				<div class="btn-group">
-					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Schedules">
-						<spring:message code="page.text.import"/>
-					</a>
-					<button type="button" id="exportRecords" class="btn btn-default">
-						<spring:message code="page.text.export"/>
-					</button>
-				</div>
+			<c:if test="${action == 'all'}">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedSchedules">
+					<spring:message code="page.text.unused"/>
+				</a>
+				<c:if test="${sessionUser.hasPermission('migrate_records')}">
+					<div class="btn-group">
+						<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Schedules">
+							<spring:message code="page.text.import"/>
+						</a>
+						<button type="button" id="exportRecords" class="btn btn-default">
+							<spring:message code="page.text.export"/>
+						</button>
+					</div>
+				</c:if>
 			</c:if>
 		</div>
 
@@ -136,62 +192,12 @@ Display schedules
 			<thead>
 				<tr>
 					<th class="noFilter selectCol"></th>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="page.text.name"/></th>
-					<th><spring:message code="page.text.description"/></th>
-					<th class="noFilter actionCol"><spring:message code="page.text.action"/></th>
+					<th><spring:message code="page.text.id"/><p></p></th>
+					<th><spring:message code="page.text.name"/><p></p></th>
+					<th><spring:message code="page.text.description"/><p></p></th>
+					<th class="noFilter actionCol"><spring:message code="page.text.action"/><p></p></th>
 				</tr>
 			</thead>
-			<tbody>
-				<c:forEach var="schedule" items="${schedules}">
-					<tr id="row_${schedule.scheduleId}"
-						data-id="${schedule.scheduleId}"
-						data-name="${encode:forHtmlAttribute(schedule.name)}">
-
-						<td></td>
-						<td>${schedule.scheduleId}</td>
-						<td>${encode:forHtmlContent(schedule.name)} &nbsp;
-							<t:displayNewLabel creationDate="${schedule.creationDate}"
-											   updateDate="${schedule.updateDate}"/>
-						</td>
-						<td>${encode:forHtmlContent(schedule.description)}</td>
-						<td>
-							<div class="btn-group">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/editSchedule?id=${schedule.scheduleId}">
-									<i class="fa fa-pencil-square-o"></i>
-									<spring:message code="page.action.edit"/>
-								</a>
-								<button type="button" class="btn btn-default deleteRecord">
-									<i class="fa fa-trash-o"></i>
-									<spring:message code="page.action.delete"/>
-								</button>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/copySchedule?id=${schedule.scheduleId}">
-									<i class="fa fa-copy"></i>
-									<spring:message code="page.action.copy"/>
-								</a>
-							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown" data-hover="dropdown"
-										data-delay="100">
-									<spring:message code="reports.action.more"/>
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/scheduleUsage?scheduleId=${schedule.scheduleId}">
-											<spring:message code="page.text.usage"/>
-										</a>
-									</li>
-								</ul>
-							</div>
-						</td>
-					</tr>
-				</c:forEach>
-			</tbody>
 		</table>
 	</jsp:body>
 </t:mainPageWithPanel>

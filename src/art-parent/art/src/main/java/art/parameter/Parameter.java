@@ -905,7 +905,7 @@ public class Parameter implements Serializable {
 	/**
 	 * Returns the id of the parameter for use with table actions
 	 *
-	 * @return the report id
+	 * @return the parameter id
 	 */
 	public int getDtId() {
 		return parameterId;
@@ -914,7 +914,7 @@ public class Parameter implements Serializable {
 	/**
 	 * Returns the name of the parameter for use with table actions
 	 *
-	 * @return the report name
+	 * @return the parameter name
 	 */
 	public String getDtName() {
 		return name + " (" + parameterId + ")";
