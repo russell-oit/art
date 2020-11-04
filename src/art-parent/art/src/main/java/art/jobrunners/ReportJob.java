@@ -424,7 +424,7 @@ public class ReportJob implements org.quartz.Job {
 				if (retryAttemptsLeft == null) {
 					retryAttemptsLeft = retryAttempts;
 				}
-				if (retryAttemptsLeft > 0) {
+				if (retryAttemptsLeft > 0 && retryDelayMins > 0) {
 					retried = true;
 					retryAttemptsLeft--;
 					String retryId = jobId + "-" + ArtUtils.getUniqueId();
