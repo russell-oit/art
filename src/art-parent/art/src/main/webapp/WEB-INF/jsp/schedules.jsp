@@ -27,7 +27,7 @@ Display schedules
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText" javaScriptEscape="true"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText" javaScriptEscape="true"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText" javaScriptEscape="true"/>
-<spring:message code="schedules.message.linkedJobsExist" var="linkedJobsExistText" javaScriptEscape="true"/>
+<spring:message code="page.message.linkedRecordsExist" var="linkedRecordsExistText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -54,7 +54,7 @@ Display schedules
 				var errorOccurredText = "${errorOccurredText}";
 				var showErrors = ${showErrors};
 				var cannotDeleteRecordText = "${cannotDeleteRecordText}";
-				var linkedRecordsExistText = "${linkedJobsExistText}";
+				var linkedRecordsExistText = "${linkedRecordsExistText}";
 				var selectRecordsText = "${selectRecordsText}";
 				var someRecordsNotDeletedText = "${someRecordsNotDeletedText}";
 				var exportRecordsUrl = "${pageContext.request.contextPath}/exportRecords?type=Schedules";
@@ -182,7 +182,7 @@ Display schedules
 								<ul class="dropdown-menu">
 									<li>
 										<a 
-											href="${pageContext.request.contextPath}/jobsWithSchedule?scheduleId=${schedule.scheduleId}">
+											href="${pageContext.request.contextPath}/scheduleUsage?scheduleId=${schedule.scheduleId}">
 											<spring:message code="page.text.usage"/>
 										</a>
 									</li>

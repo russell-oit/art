@@ -25,6 +25,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.general.ActionResult;
 import art.general.AjaxResponse;
+import art.pipeline.PipelineService;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.SchedulerUtils;
@@ -80,6 +81,9 @@ public class ScheduleController {
 
 	@Autowired
 	private JobService jobService;
+	
+	@Autowired
+	private PipelineService pipelineService;
 
 	@Autowired
 	private ServletContext servletContext;
@@ -367,18 +371,19 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/jobsWithSchedule", method = RequestMethod.GET)
-	public String showJobsWithSchedule(@RequestParam("scheduleId") Integer scheduleId, Model model) {
-		logger.debug("Entering showJobsWithSchedule: scheduleId={}", scheduleId);
+	@RequestMapping(value = "/scheduleUsage", method = RequestMethod.GET)
+	public String scheduleUsage(@RequestParam("scheduleId") Integer scheduleId, Model model) {
+		logger.debug("Entering scheduleUsage: scheduleId={}", scheduleId);
 
 		try {
 			model.addAttribute("jobs", jobService.getJobsWithSchedule(scheduleId));
+			model.addAttribute("pipelines", pipelineService.getPipelinesWithSchedule(scheduleId));
 			model.addAttribute("schedule", scheduleService.getSchedule(scheduleId));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "jobsWithSchedule";
+		return "scheduleUsage";
 	}
 }
