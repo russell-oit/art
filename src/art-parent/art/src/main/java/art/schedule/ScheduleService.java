@@ -290,6 +290,23 @@ public class ScheduleService {
 	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
 		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
+		Connection conn = null;
+		updateSchedule(schedule, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing schedule
+	 *
+	 * @param schedule the updated schedule
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void updateSchedule(Schedule schedule, User actionUser,
+			Connection conn) throws SQLException {
+
+		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
+
 		Integer newRecordId = null;
 		saveSchedule(schedule, newRecordId, actionUser);
 	}
@@ -427,7 +444,8 @@ public class ScheduleService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveSchedule(Schedule schedule, Integer newRecordId,
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void saveSchedule(Schedule schedule, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveSchedule: schedule={}, newRecordId={},"

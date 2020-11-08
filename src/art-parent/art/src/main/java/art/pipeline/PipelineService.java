@@ -35,7 +35,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -126,7 +128,7 @@ public class PipelineService {
 
 			Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
 			pipeline.setSchedule(schedule);
-			
+
 			StartCondition startCondition = startConditionService.getStartCondition(rs.getInt("START_CONDITION_ID"));
 			pipeline.setStartCondition(startCondition);
 
@@ -308,17 +310,91 @@ public class PipelineService {
 
 		try {
 			String sql = "SELECT MAX(PIPELINE_ID) FROM ART_PIPELINES";
-			int id = dbService.getMaxRecordId(conn, sql);
+			int pipelineId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
+			int scheduleId = dbService.getMaxRecordId(conn, sql);
+
+			sql = "SELECT MAX(START_CONDITION_ID) FROM ART_START_CONDITIONS";
+			int startConditionId = dbService.getMaxRecordId(conn, sql);
 
 			List<Pipeline> currentPipelines = new ArrayList<>();
 			if (overwrite) {
 				currentPipelines = getAllPipelines();
 			}
 
+			List<Schedule> currentSchedules = scheduleService.getAllSchedules();
+			List<StartCondition> currentStartConditions = startConditionService.getAllStartConditions();
+
 			originalAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
+			Map<String, Schedule> addedSchedules = new HashMap<>();
+			Map<String, StartCondition> addedStartConditions = new HashMap<>();
+			List<Integer> updatedScheduleIds = new ArrayList<>();
+			List<Integer> updatedStartConditionIds = new ArrayList<>();
+
 			for (Pipeline pipeline : pipelines) {
+				Schedule schedule = pipeline.getSchedule();
+				if (schedule != null) {
+					String scheduleName = schedule.getName();
+					Schedule existingSchedule = currentSchedules.stream()
+							.filter(d -> StringUtils.equals(scheduleName, d.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingSchedule == null) {
+						Schedule addedSchedule = addedSchedules.get(scheduleName);
+						if (addedSchedule == null) {
+							scheduleId++;
+							scheduleService.saveSchedule(schedule, scheduleId, actionUser, conn);
+							addedSchedules.put(scheduleName, schedule);
+						} else {
+							pipeline.setSchedule(addedSchedule);
+						}
+					} else {
+						if (overwrite) {
+							int existingScheduleId = existingSchedule.getScheduleId();
+							if (!updatedScheduleIds.contains(existingScheduleId)) {
+								schedule.setScheduleId(existingScheduleId);
+								scheduleService.updateSchedule(schedule, actionUser, conn);
+								updatedScheduleIds.add(existingScheduleId);
+							}
+						} else {
+							pipeline.setSchedule(existingSchedule);
+						}
+					}
+				}
+
+				StartCondition startCondition = pipeline.getStartCondition();
+				if (startCondition != null) {
+					String startConditionName = startCondition.getName();
+					StartCondition existingStartCondition = currentStartConditions.stream()
+							.filter(e -> StringUtils.equals(startConditionName, e.getName()))
+							.findFirst()
+							.orElse(null);
+					if (existingStartCondition == null) {
+						StartCondition addedStartCondition = addedStartConditions.get(startConditionName);
+						if (addedStartCondition == null) {
+							startConditionId++;
+							startConditionService.saveStartCondition(startCondition, startConditionId, actionUser, conn);
+							addedStartConditions.put(startConditionName, startCondition);
+						} else {
+							pipeline.setStartCondition(addedStartCondition);
+						}
+					} else {
+						if (overwrite) {
+							int existingStartConditionId = existingStartCondition.getStartConditionId();
+							if (!updatedStartConditionIds.contains(existingStartConditionId)) {
+								startCondition.setStartConditionId(existingStartConditionId);
+								startConditionService.updateStartCondition(startCondition, actionUser, conn);
+								updatedStartConditionIds.add(existingStartConditionId);
+							}
+						} else {
+							pipeline.setStartCondition(existingStartCondition);
+						}
+					}
+				}
+
 				String pipelineName = pipeline.getName();
 				boolean update = false;
 				if (overwrite) {
@@ -336,8 +412,8 @@ public class PipelineService {
 				if (update) {
 					newRecordId = null;
 				} else {
-					id++;
-					newRecordId = id;
+					pipelineId++;
+					newRecordId = pipelineId;
 				}
 				savePipeline(pipeline, newRecordId, actionUser, conn);
 			}
@@ -397,7 +473,7 @@ public class PipelineService {
 				scheduleId = null;
 			}
 		}
-		
+
 		Integer startConditionId = null;
 		if (pipeline.getStartCondition() != null) {
 			startConditionId = pipeline.getStartCondition().getStartConditionId();
