@@ -1684,7 +1684,7 @@ public class Config extends HttpServlet {
 			try {
 				conn = DbConnections.getArtDbConnection();
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
-				Liquibase liquibase = new Liquibase("liquibase/changelog-master.xml", new ClassLoaderResourceAccessor(), database);
+				Liquibase liquibase = new Liquibase("liquibase/changelogs/changelog-master.xml", new ClassLoaderResourceAccessor(), database);
 				liquibase.update(new Contexts());
 			} finally {
 				DatabaseUtils.close(conn);
