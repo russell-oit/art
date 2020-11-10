@@ -416,6 +416,11 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 		driverElement.value = "net.starschema.clouddb.jdbc.BQDriver";
 		urlElement.value = "jdbc:BQDriver:<project_id>?withServiceAccount=true";
 		testSqlElement.value = "select 1";
+	} else if (databaseType === "CockroachDBPostgresql") {
+		$(databaseProtocolSelector).val('PostgreSQL');
+		driverElement.value = "org.postgresql.Driver";
+		urlElement.value = "jdbc:postgresql://<server>/<database>";
+		testSqlElement.value = "select 1";
 	}
 }
 

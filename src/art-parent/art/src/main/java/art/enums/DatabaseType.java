@@ -54,7 +54,7 @@ public enum DatabaseType {
 	CsvCalcite("csv-calcite"), JsonCalcite("json-calcite"),
 	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite"),
 	ElasticsearchCalcite("elasticsearch-calcite"), JsonCalciteArt("json-calcite-art"),
-	BigQueryStarschema("bigquery-starschema");
+	BigQueryStarschema("bigquery-starschema"), CockroachDBPostgresql("cockroachdb-postgresql");
 
 	private final String value;
 
@@ -225,6 +225,8 @@ public enum DatabaseType {
 				return "JSON (Calcite - ART driver)";
 			case BigQueryStarschema:
 				return "BigQuery (Starschema driver)";
+			case CockroachDBPostgresql:
+				return "CockroachDB (PostgreSQL driver)";
 			default:
 				return toString();
 		}
