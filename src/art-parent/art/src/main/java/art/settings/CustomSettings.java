@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 /**
- * Represents settings that aren't set from the user interface (for
- * enhanced security)
+ * Represents settings that aren't set from the user interface (for enhanced
+ * security)
  *
  * @author Timothy Anyona
  */
@@ -42,6 +42,21 @@ public class CustomSettings implements Serializable {
 	private String encryptionKey; //key for symmetric encryption within the application
 	private EncryptionPassword encryptionPassword;
 	private boolean allowRepositoryLogin = true;
+	private boolean liquibaseDbUpgrade = false;
+
+	/**
+	 * @return the liquibaseDbUpgrade
+	 */
+	public boolean isLiquibaseDbUpgrade() {
+		return liquibaseDbUpgrade;
+	}
+
+	/**
+	 * @param liquibaseDbUpgrade the liquibaseDbUpgrade to set
+	 */
+	public void setLiquibaseDbUpgrade(boolean liquibaseDbUpgrade) {
+		this.liquibaseDbUpgrade = liquibaseDbUpgrade;
+	}
 
 	/**
 	 * @return the showErrorsApi

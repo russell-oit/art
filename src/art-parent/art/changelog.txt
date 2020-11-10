@@ -1,3 +1,6 @@
+ART 5.1
+* Added liquibaseDbUpgrade custom setting
+
 ART 5.0
 * Fix for pivottable error with pt_BR localization
 * Added schedule field for pipelines
