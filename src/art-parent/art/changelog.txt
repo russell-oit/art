@@ -1,5 +1,5 @@
 ART 5.1
-* Added liquibaseDbUpgrade custom setting
+* Perform automatic database upgrades
 
 ART 5.0
 * Fix for pivottable error with pt_BR localization

@@ -16,8 +16,9 @@
 
 
 -- UPGRADING:
--- if you are upgrading, don't use this script. run the scripts in the
--- upgrade directory. run the scripts one at a time to upgrade to newer versions.
+-- for ART 5.1 and above, database upgrades are done automatically.
+-- otherwise, run the scripts in the upgrade directory.
+-- run the scripts one at a time to upgrade to newer versions.
 -- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
 -- sql reserved words checker - https://www.petefreitag.com/tools/sql_reserved_words_checker/

@@ -13,6 +13,5 @@
 		"password": "",
 		"keyLength": 128
 	},
-	"allowRepositoryLogin": true,
-	"liquibaseDbUpgrade": false
+	"allowRepositoryLogin": true
 }

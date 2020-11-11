@@ -553,11 +553,11 @@ public class Config extends HttpServlet {
 			createQuartzScheduler();
 
 			//upgrade art database
+			performLiquibaseUpgrade();
+			
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
-			
-			performLiquibaseUpgrade();
 		} finally {
 			//load settings
 			//put in finally block so that a settings object is always available
@@ -1674,21 +1674,19 @@ public class Config extends HttpServlet {
 	/**
 	 * Performs an auto upgrade of the art database using liquibase
 	 *
-	 * @throws SQLException
-	 * @throws LiquibaseException
+	 * @throws Exception
 	 */
-	private static void performLiquibaseUpgrade() throws SQLException, LiquibaseException {
-		if (customSettings.isLiquibaseDbUpgrade()) {
-			Connection conn = null;
+	private static void performLiquibaseUpgrade() throws Exception {
+		Connection conn = null;
 
-			try {
-				conn = DbConnections.getArtDbConnection();
-				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
-				Liquibase liquibase = new Liquibase("liquibase/changelogs/changelog-master.xml", new ClassLoaderResourceAccessor(), database);
+		try {
+			conn = DbConnections.getArtDbConnection();
+			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
+			try (Liquibase liquibase = new Liquibase("liquibase/changelogs/changelog-master.xml", new ClassLoaderResourceAccessor(), database);) {
 				liquibase.update(new Contexts());
-			} finally {
-				DatabaseUtils.close(conn);
 			}
+		} finally {
+			DatabaseUtils.close(conn);
 		}
 	}
 
