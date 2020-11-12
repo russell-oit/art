@@ -100,9 +100,9 @@ public enum DatabaseType {
 	 * @return enum options that can be used for the art database
 	 */
 	public static List<DatabaseType> listForArtDatabase() {
-		List<DatabaseType> items = Arrays.asList(Demo, CUBRID, Oracle, MySQL,
+		List<DatabaseType> items = Arrays.asList(Demo, Oracle, MySQL,
 				MariaDB, PostgreSQL, SqlServerMicrosoft, SqlServerJtds,
-				HsqldbStandAlone, HsqldbServer, Db2, SqlLogging,
+				HsqldbStandAlone, HsqldbServer, Db2, 
 				H2Server, H2Embedded, Firebird, Informix);
 
 		return sortByValue(items);
