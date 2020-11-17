@@ -20,7 +20,3 @@ A bigger list of features can be found in the [Features](https://sourceforge.net
 * [Demo](https://art-demo.lon-2.paas.massivegrid.net/art/)
 * Username - auser
 * Password - auser
-
-## Commercial Support
-
-* Email timothy.anyona ( a t ) halogen.co.ke
