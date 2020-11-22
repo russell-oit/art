@@ -288,6 +288,7 @@ public class ReportService {
 		report.setOpenInNewWindow(rs.getBoolean("OPEN_IN_NEW_WINDOW"));
 		report.setMaxRunning(rs.getInt("MAX_RUNNING"));
 		report.setMaxRunningPerUser(rs.getInt("MAX_RUNNING_PER_USER"));
+		report.setReportFormats(rs.getString("REPORT_FORMATS"));
 		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -947,9 +948,9 @@ public class ReportService {
 					+ " OPEN_PASSWORD, MODIFY_PASSWORD, ENCRYPTOR_ID, SOURCE_REPORT_ID,"
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS, LINK, OPEN_IN_NEW_WINDOW,"
-					+ " MAX_RUNNING, MAX_RUNNING_PER_USER,"
+					+ " MAX_RUNNING, MAX_RUNNING_PER_USER, REPORT_FORMATS,"
 					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 53) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 54) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1002,6 +1003,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				report.getMaxRunning(),
 				report.getMaxRunningPerUser(),
+				report.getReportFormats(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				actionUser.getUserId()
@@ -1025,7 +1027,7 @@ public class ReportService {
 					+ " SOURCE_REPORT_ID=?, USE_GROOVY=?, PIVOTTABLEJS_SAVED_OPTIONS=?,"
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
 					+ " SELF_SERVICE_OPTIONS=?, LINK=?, OPEN_IN_NEW_WINDOW=?,"
-					+ " MAX_RUNNING=?, MAX_RUNNING_PER_USER=?,"
+					+ " MAX_RUNNING=?, MAX_RUNNING_PER_USER=?, REPORT_FORMATS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1079,6 +1081,7 @@ public class ReportService {
 				BooleanUtils.toInteger(report.isOpenInNewWindow()),
 				report.getMaxRunning(),
 				report.getMaxRunningPerUser(),
+				report.getReportFormats(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

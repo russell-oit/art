@@ -1,5 +1,6 @@
 ART 5.1
 * Perform automatic database upgrades
+* Added report formats field to reports
 
 ART 5.0
 * Fix for pivottable error with pt_BR localization

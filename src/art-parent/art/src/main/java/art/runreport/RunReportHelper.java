@@ -48,6 +48,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -362,7 +363,7 @@ public class RunReportHelper {
 				break;
 			default:
 				enableReportFormats = true;
-				List<String> reportFormats = getAvailableReportFormats(reportType);
+				List<String> reportFormats = getAvailableReportFormats(report, reportType);
 				request.setAttribute("reportFormats", reportFormats);
 		}
 		request.setAttribute("enableReportFormats", enableReportFormats);
@@ -575,15 +576,26 @@ public class RunReportHelper {
 	}
 
 	/**
-	 * Returns the available report formats for the given report type
+	 * Returns the available report formats for the given report and report type
 	 *
+	 * @param report the report
 	 * @param reportType the report type
 	 * @return the available report formats
 	 */
-	private List<String> getAvailableReportFormats(ReportType reportType) {
+	private List<String> getAvailableReportFormats(Report report, ReportType reportType) {
 		logger.debug("Entering getAvailableReportFormats: reportType={}", reportType);
 
 		List<String> formats = new ArrayList<>();
+
+		String reportFormatsString = report.getReportFormats();
+		if (StringUtils.isNotBlank(reportFormatsString)) {
+			String[] tempReportFormatsArray = StringUtils.split(reportFormatsString, ",");
+			String[] reportFormatsArray = StringUtils.stripAll(tempReportFormatsArray);
+			if (reportFormatsArray != null && reportFormatsArray.length > 0) {
+				formats.addAll(Arrays.asList(reportFormatsArray));
+				return formats;
+			}
+		}
 
 		if (reportType.isChart()) {
 			formats.add("html");
