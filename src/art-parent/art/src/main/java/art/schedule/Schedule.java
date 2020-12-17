@@ -50,6 +50,51 @@ public class Schedule implements Serializable {
 	private String extraSchedules;
 	private String holidays;
 	private List<Holiday> sharedHolidays;
+	private String name2; //used for holding a processed name
+	private String dtAction;
+	private String description2;
+
+	/**
+	 * @return the description2
+	 */
+	public String getDescription2() {
+		return description2;
+	}
+
+	/**
+	 * @param description2 the description2 to set
+	 */
+	public void setDescription2(String description2) {
+		this.description2 = description2;
+	}
+
+	/**
+	 * @return the name2
+	 */
+	public String getName2() {
+		return name2;
+	}
+
+	/**
+	 * @param name2 the name2 to set
+	 */
+	public void setName2(String name2) {
+		this.name2 = name2;
+	}
+
+	/**
+	 * @return the dtAction
+	 */
+	public String getDtAction() {
+		return dtAction;
+	}
+
+	/**
+	 * @param dtAction the dtAction to set
+	 */
+	public void setDtAction(String dtAction) {
+		this.dtAction = dtAction;
+	}
 
 	/**
 	 * @return the timeZone
@@ -353,6 +398,24 @@ public class Schedule implements Serializable {
 					+ " " + year;
 		
 		return cronString;
+	}
+	
+	/**
+	 * Returns the id of the schedule for use with table actions
+	 *
+	 * @return the schedule id
+	 */
+	public int getDtId() {
+		return scheduleId;
+	}
+
+	/**
+	 * Returns the name of the schedule for use with table actions
+	 *
+	 * @return the schedule name
+	 */
+	public String getDtName() {
+		return name;
 	}
 	
 }

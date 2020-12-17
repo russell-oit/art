@@ -152,18 +152,20 @@ Display datasources
 					<spring:message code="page.action.delete"/>
 				</button>
 			</div>
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedDatasources">
-				<spring:message code="page.text.unused"/>
-			</a>
-			<c:if test="${sessionUser.hasPermission('migrate_records')}">
-				<div class="btn-group">
-					<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Datasources">
-						<spring:message code="page.text.import"/>
-					</a>
-					<button type="button" id="exportRecords" class="btn btn-default">
-						<spring:message code="page.text.export"/>
-					</button>
-				</div>
+			<c:if test="${action == 'all'}">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/unusedDatasources">
+					<spring:message code="page.text.unused"/>
+				</a>
+				<c:if test="${sessionUser.hasPermission('migrate_records')}">
+					<div class="btn-group">
+						<a class="btn btn-default" href="${pageContext.request.contextPath}/importRecords?type=Datasources">
+							<spring:message code="page.text.import"/>
+						</a>
+						<button type="button" id="exportRecords" class="btn btn-default">
+							<spring:message code="page.text.export"/>
+						</button>
+					</div>
+				</c:if>
 			</c:if>
 		</div>
 

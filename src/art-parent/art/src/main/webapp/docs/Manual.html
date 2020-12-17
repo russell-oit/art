@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.0"> 
+  <meta name="version" content="5.1"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -933,6 +933,24 @@
         <td>Whether exception details are shown in the user interface</td> 
        </tr> 
        <tr> 
+        <td><strong>enableEmailing</strong></td> 
+        <td>Boolean</td> 
+        <td>true</td> 
+        <td>Whether sending of emails is enabled</td> 
+       </tr> 
+       <tr> 
+        <td><strong>jwtSecret</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>String used to sign JWT tokens used in API authentication. If blank, token based api authentication is disabled.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>encryptionKey</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>Key used for encryption of fields in the application e.g. datasource passwords. Must be either 16 bytes (128 bits), 24 bytes (192 bits)</td> 
+       </tr> 
+       <tr> 
         <td><strong>showErrorsApi</strong></td> 
         <td>Boolean</td> 
         <td>true</td> 
@@ -966,25 +984,7 @@
         <td><strong>enableGroovySandbox</strong></td> 
         <td>Boolean</td> 
         <td>true</td> 
-        <td>Whether to apply a sandbox when running groovy scripts</td> 
-       </tr> 
-       <tr> 
-        <td><strong>enableEmailing</strong></td> 
-        <td>Boolean</td> 
-        <td>true</td> 
-        <td>Whether sending of emails is enabled</td> 
-       </tr> 
-       <tr> 
-        <td><strong>jwtSecret</strong></td> 
-        <td>String</td> 
-        <td></td> 
-        <td>String used to sign JWT tokens used in API authentication. If blank, token based api authentication is disabled.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>encryptionKey</strong></td> 
-        <td>String</td> 
-        <td></td> 
-        <td>Key used for encryption of fields in the application e.g. datasource passwords. Must be either 16 bytes (128 bits), 24 bytes (192 bits) or 32 bytes (256 bits) as per the AES algorithm. If not specified, a default is used.</td> 
+        <td>Whether to apply a sandbox when running groovy scriptsor 32 bytes (256 bits) as per the AES algorithm. If not specified, a default is used.</td> 
        </tr> 
        <tr> 
         <td><strong>encryptionPassword.password</strong></td> 
@@ -1658,6 +1658,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>Max Running Reports Per User</strong></td> 
         <td>The maximum number of concurrent runs allowed for this report per user. A value of 0 means no maximum.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Report Formats</strong></td> 
+        <td>Comma separated list of report formats to be displayed for the report</td> 
        </tr> 
        <tr> 
         <td><strong>Use Groovy</strong></td> 
@@ -4266,7 +4270,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>It is possible to create dynamic SQL queries, allowing you to modify the structure of the query based on user parameters, possibly running different queries depending on the user input.</p> 
      <h2 id="using-groovy">Using Groovy</h2> 
      <p>You can use <a class="" href="http://groovy-lang.org/" rel="nofollow">groovy</a> in the SQL source section to achieve dynamic sql. Set the <strong>Use Groovy</strong> field of the report to specify that you are using groovy in the sql source. </p> 
-     <p>The groovy script may return a string that has the sql to be executed or it may return a <code>java.util.List</code> of <code>Map&lt;String, Object&gt;</code> or <a class="" href="http://docs.groovy-lang.org/latest/html/api/groovy/sql/GroovyRowResult.html" rel="nofollow">GroovyRowResult</a> objects that contain the data to be output. If returning a List of objects, the following options can be specified in the <strong>Options</strong> field of the report.</p> 
+     <p>The groovy script may return a string that has the sql to be executed or it may return a <code>java.util.List</code> of <code>Map&lt;String, Object&gt;</code> or <a class="" href="http://docs.groovy-lang.org/latest/html/api/groovy/sql/GroovyRowResult.html" rel="nofollow">GroovyRowResult</a> objects that contain the data to be output. If using a <code>Map</code> it would be better to use a <a class="" href="https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html" rel="nofollow">LinkedHashMap</a> in order to have predictable order of columns. If returning a List of objects, the following options can be specified in the <strong>Options</strong> field of the report.</p> 
      <table border="1"> 
       <thead> 
        <tr> 

@@ -882,12 +882,12 @@ public class JobService {
 
 		String sql = SQL_SELECT_ALL
 				//where holidays are used directly
-				+ " WHERE EXISTS (SELECT *"
+				+ " WHERE EXISTS (SELECT 1"
 				+ " FROM ART_JOB_HOLIDAY_MAP AJHM"
 				+ " WHERE AJHM.JOB_ID=AJ.JOB_ID AND AJHM.HOLIDAY_ID=?)"
 				+ " OR"
 				//where holidays are part of the fixed schedule
-				+ " EXISTS (SELECT *"
+				+ " EXISTS (SELECT 1"
 				+ " FROM ART_JOB_SCHEDULES AJS"
 				+ " INNER JOIN ART_SCHEDULE_HOLIDAY_MAP ASHM"
 				+ " ON AJS.SCHEDULE_ID=ASHM.SCHEDULE_ID"
@@ -1168,7 +1168,7 @@ public class JobService {
 		String sql = "SELECT AJ.JOB_ID"
 				+ " FROM ART_JOBS AJ"
 				+ " WHERE EXISTS("
-				+ " SELECT NULL"
+				+ " SELECT 1"
 				+ " FROM ART_QUERY_GROUPS AQG"
 				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
 				+ " ON AQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"

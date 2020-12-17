@@ -3,6 +3,7 @@
  <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta name="pdfTitle" content="ART Features"> 
   <title>Features - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -19,8 +20,38 @@
  </head> 
  <body class="wiki-Tips" id="forge"> 
   <div class="markdown_content">
-   <h1 id="art-features">ART Features</h1> 
-   <p>ART is a lightweight, multi-platform, web application that enables quick deployment of SQL query results. It has features that make it a simple yet effective reporting and business intelligence solution.</p> 
+   <div class="toc"> 
+    <ol> 
+     <li><a href="#features">Features</a></li> 
+     <li><a href="#details">Details</a> 
+      <ol> 
+       <li><a href="#drivers-for-varied-databases">Drivers for varied databases</a></li> 
+       <li><a href="#file-parameter">File parameter</a></li> 
+       <li><a href="#pipelines">Pipelines</a></li> 
+       <li><a href="#start-condition">Start condition</a></li> 
+       <li><a href="#holidays">Holidays</a></li> 
+       <li><a href="#encrypt-files-using-pgp-or-aes">Encrypt files using PGP or AES</a></li> 
+       <li><a href="#password-protect-pdf-or-excel-output">Password protect PDF or Excel output</a></li> 
+       <li><a href="#multiple-schedules">Multiple schedules</a></li> 
+       <li><a href="#job-error-notification">Job error notification</a></li> 
+       <li><a href="#application-error-notification">Application error notification</a></li> 
+       <li><a href="#ldap-authentication">LDAP authentication</a></li> 
+       <li><a href="#windows-domain-authentication">Windows domain authentication</a></li> 
+       <li><a href="#open-document-formats">Open Document formats</a></li> 
+       <li><a href="#write-application-logs-to-a-database">Write application logs to a database</a></li> 
+       <li><a href="#self-service-dashboards">Self service dashboards</a></li> 
+       <li><a href="#self-service-queries">Self service queries</a></li> 
+       <li><a href="#send-file-to-ftp">Send file to FTP</a></li> 
+       <li><a href="#upload-report-to-a-website">Upload report to a website</a></li> 
+       <li><a href="#tabbed-dashboards">Tabbed dashboards</a></li> 
+       <li><a href="#report-auto-refresh">Report auto-refresh</a></li> 
+       <li><a href="#fixed-width-files">Fixed-width files</a></li> 
+       <li><a href="#conditional-emails">Conditional emails</a></li> 
+      </ol></li> 
+    </ol> 
+   </div> 
+   <h1 id="features">Features</h1> 
+   <p>ART is a reporting tool that enables quick deployment of SQL query results. Some of its features include the following.</p> 
    <ul> 
     <li>Quick report creation</li> 
     <li>Interactive reports - run and accessed via a browser</li> 
@@ -47,7 +78,82 @@
     <li>FTP a file after it has been produced, or send it to a network share, Amazon S3 or Microsoft Azure cloud storage</li> 
     <li>Basic self service reports</li> 
     <li>Internationalized user interface, with translations in several languages</li> 
-   </ul>
+   </ul> 
+   <h1 id="details">Details</h1> 
+   <h2 id="drivers-for-varied-databases">Drivers for varied databases</h2> 
+   <p>ART comes with drivers for a number of databases. This means that you can start reporting from these databases right away and don't need to look for or install drivers for them. These include:</p> 
+   <ul> 
+    <li>CUBRID</li> 
+    <li>MySQL</li> 
+    <li>MariaDB</li> 
+    <li>PostgreSQL</li> 
+    <li>SQL Server</li> 
+    <li>Informix</li> 
+    <li>HSQLDB</li> 
+    <li>MS Access</li> 
+    <li>SQLite</li> 
+    <li>CSV files</li> 
+    <li>JSON files</li> 
+    <li>H2</li> 
+    <li>Cassandra</li> 
+    <li>MongoDB</li> 
+    <li>Elasticsearch</li> 
+    <li>Snowflake</li> 
+    <li>MemSQL</li> 
+    <li>Citus</li> 
+    <li>Amazon Aurora</li> 
+    <li>Greenplum</li> 
+    <li>TimescaleDB</li> 
+    <li>kdb+</li> 
+    <li>Google BigQuery</li> 
+    <li>CockroachDB</li> 
+    <li>Firebird</li> 
+    <li>MonetDB</li> 
+    <li>Presto</li> 
+   </ul> 
+   <p>Where a driver is not included in the ART distribution, you can still report from that database by obtaining the driver and adding it to the ART installation. Examples include Oracle, Db2 among others.</p> 
+   <h2 id="file-parameter">File parameter</h2> 
+   <p>You can specify a report to take a file parameter. Users will be provided with a dialog to select a file and this file can be processed in the report source as need be.</p> 
+   <h2 id="pipelines">Pipelines</h2> 
+   <p>You can specify jobs to run in a specific order e.g. run job1, then job3 then job6.</p> 
+   <h2 id="start-condition">Start condition</h2> 
+   <p>You can specify that before a job runs, a certain condition must be checked e.g. ensuring that a table has been loaded with data before a job runs. This prevents situations where a scheduled jobs runs in error or returns incorrect results because of a problem or a delay with an ETL process.</p> 
+   <h2 id="holidays">Holidays</h2> 
+   <p>You can specify that scheduled jobs should not run on certain days e.g. public holidays. This would prevent running or emailing of jobs unnecessarily.</p> 
+   <h2 id="encrypt-files-using-pgp-or-aes">Encrypt files using PGP or AES</h2> 
+   <p>You can specify that report output is encrypted using the PGP or AES algorithms immediately upon generation. This may be useful if the recipient of a file or report requires that it be encrypted and it can be done automatically on a schedule.</p> 
+   <h2 id="password-protect-pdf-or-excel-output">Password protect PDF or Excel output</h2> 
+   <p>You can specify that PDF or Excel output be password protected upon generation. This may be useful if you need to send report output to a client or clients as password protected and can be done automatically on a schedule. The passwords can come from the SQL query of the report and so can be dynamic and different for different recipients.</p> 
+   <h2 id="multiple-schedules">Multiple schedules</h2> 
+   <p>You can specify multiple schedules for a report job, in case the schedule required is complex and can't be specified using a single rule.</p> 
+   <h2 id="job-error-notification">Job error notification</h2> 
+   <p>You can specify to get an email if an error occurs when running a job. This may be useful for critical jobs where you may need to know if an error occurred for you to take action.</p> 
+   <h2 id="application-error-notification">Application error notification</h2> 
+   <p>You can specify to get an email when application errors or warnings occur. This may be useful to know if the system is performing ok or if there are error conditions that need to be addressed. Application errors can also be viewed on demand from within the Logs page of the application or from server logs.</p> 
+   <h2 id="ldap-authentication">LDAP authentication</h2> 
+   <p>You can specify that users authenticate to the application using credentials in an LDAP server. This may be useful if LDAP is already used for authentication within the organisation and so users may not need to know new passwords for the ART application.</p> 
+   <h2 id="windows-domain-authentication">Windows domain authentication</h2> 
+   <p>You can specify that users authenticate to the applications using credentials of a windows domain. This may be helpful to avoid users having to know a new password for the ART application and instead they can just use the password they use to log in to the windows domain.</p> 
+   <h2 id="open-document-formats">Open Document formats</h2> 
+   <p>Report output can be generated in ODF formats i.e. odt and ods. This may be useful if this format is required e.g. by regulation.</p> 
+   <h2 id="write-application-logs-to-a-database">Write application logs to a database</h2> 
+   <p>You can specify application logs to be written to a database. This may be useful to have a permanent record of the logs, and one that is more easily searchable.</p> 
+   <h2 id="self-service-dashboards">Self service dashboards</h2> 
+   <p>Allow users to create their own dashboards by specifying which reports they would like to appear on them.</p> 
+   <h2 id="self-service-queries">Self service queries</h2> 
+   <p>Allow users to do basic self service querying, allowing them to select the columns they would like to see and define conditions for the report. This would be useful to have users do simple ad-hoc queries themselves instead of having to go to the IT department for that.</p> 
+   <h2 id="send-file-to-ftp">Send file to FTP</h2> 
+   <p>You can send a report file to a number of destinations after a job is run. This may be useful to have backup copies of report files, or to send a report to an external recipient. These destinations include FTP, SFTP, Network Shares, Amazon S3, Microsoft Azure, Google Cloud Storage, Backblaze B2, WebDAV.</p> 
+   <h2 id="upload-report-to-a-website">Upload report to a website</h2> 
+   <p>You can have a report uploaded to a website after a job is run. This may help to automate a process where a report is required to be uploaded to a website.</p> 
+   <h2 id="tabbed-dashboards">Tabbed dashboards</h2> 
+   <p>You can define a dashboard to have tabs. This allows presentation of different charts or reports on different tabs, allowing quick access to varied pieces of information.</p> 
+   <h2 id="report-auto-refresh">Report auto-refresh</h2> 
+   <p>You can set dashboards and reports to auto-refresh after a given period of time. This allows for an easy way to have always up-to-date information being displayed on the screen.</p> 
+   <h2 id="fixed-width-files">Fixed-width files</h2> 
+   <p>You can generate fixed-width files to facilitate integration with legacy systems which require such files. These can be scheduled and automated to provide a fully automated integration with other systems.</p> 
+   <h2 id="conditional-emails">Conditional emails</h2> 
+   <p>Have emails sent only when a report contains data. This may help avoid unnecessary emails where a report sometimes contains no data. Users will be sure that any time they actually receive the report, it will have data in it.</p> 
   </div>  
  </body>
 </html>

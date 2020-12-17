@@ -158,6 +158,26 @@ public class ScheduleService {
 	}
 
 	/**
+	 * Returns unused schedules
+	 *
+	 * @return unused schedules
+	 * @throws SQLException
+	 */
+	public List<Schedule> getUnusedSchedules() throws SQLException {
+		logger.debug("Entering getUnusedSchedules");
+
+		String sql = "SELECT * FROM ART_JOB_SCHEDULES AJS"
+				+ " WHERE NOT EXISTS ("
+				+ " SELECT 1 FROM ART_JOBS WHERE SCHEDULE_ID = AJS.SCHEDULE_ID"
+				+ " UNION ALL"
+				+ " SELECT 1 FROM ART_PIPELINES WHERE SCHEDULE_ID = AJS.SCHEDULE_ID"
+				+ " )";
+
+		ResultSetHandler<List<Schedule>> h = new BeanListHandler<>(Schedule.class, new ScheduleMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
 	 * Returns a schedule
 	 *
 	 * @param id the schedule id
@@ -188,7 +208,7 @@ public class ScheduleService {
 		ActionResult result = new ActionResult();
 
 		//don't delete if important linked records exist
-		List<String> linkedJobs = getLinkedJobs(id);
+		List<String> linkedJobs = getLinkedRecords(id);
 		if (!linkedJobs.isEmpty()) {
 			result.setData(linkedJobs);
 			return result;
@@ -268,6 +288,23 @@ public class ScheduleService {
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
 	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
+		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
+
+		Connection conn = null;
+		updateSchedule(schedule, actionUser, conn);
+	}
+
+	/**
+	 * Updates an existing schedule
+	 *
+	 * @param schedule the updated schedule
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void updateSchedule(Schedule schedule, User actionUser,
+			Connection conn) throws SQLException {
+
 		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
 		Integer newRecordId = null;
@@ -407,7 +444,8 @@ public class ScheduleService {
 	 * @param conn the connection to use. if null, the art database will be used
 	 * @throws SQLException
 	 */
-	private void saveSchedule(Schedule schedule, Integer newRecordId,
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void saveSchedule(Schedule schedule, Integer newRecordId,
 			User actionUser, Connection conn) throws SQLException {
 
 		logger.debug("Entering saveSchedule: schedule={}, newRecordId={},"
@@ -489,30 +527,35 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Returns details of jobs that use a given schedule as a fixed schedule
+	 * Returns details of jobs and pipelines that use a given schedule as a
+	 * fixed schedule
 	 *
 	 * @param scheduleId the schedule id
 	 * @return linked job details
 	 * @throws SQLException
 	 */
-	public List<String> getLinkedJobs(int scheduleId) throws SQLException {
-		logger.debug("Entering getLinkedJobs: scheduleId={}", scheduleId);
+	private List<String> getLinkedRecords(int scheduleId) throws SQLException {
+		logger.debug("Entering getLinkedRecords: scheduleId={}", scheduleId);
 
-		String sql = "SELECT JOB_ID, JOB_NAME"
+		String sql = "SELECT JOB_ID AS RECORD_ID, JOB_NAME AS RECORD_NAME"
 				+ " FROM ART_JOBS"
+				+ " WHERE SCHEDULE_ID=?"
+				+ " UNION ALL"
+				+ " SELECT PIPELINE_ID AS RECORD_ID, NAME AS RECORD_NAME"
+				+ " FROM ART_PIPELINES"
 				+ " WHERE SCHEDULE_ID=?";
 
 		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
-		List<Map<String, Object>> jobDetails = dbService.query(sql, h, scheduleId);
+		List<Map<String, Object>> recordDetails = dbService.query(sql, h, scheduleId, scheduleId);
 
-		List<String> jobs = new ArrayList<>();
-		for (Map<String, Object> jobDetail : jobDetails) {
-			Number jobId = (Number) jobDetail.get("JOB_ID");
-			String jobName = (String) jobDetail.get("JOB_NAME");
-			jobs.add(jobName + " (" + String.valueOf(jobId) + ")");
+		List<String> records = new ArrayList<>();
+		for (Map<String, Object> recordDetail : recordDetails) {
+			Number recordId = (Number) recordDetail.get("RECORD_ID");
+			String recordName = (String) recordDetail.get("RECORD_NAME");
+			records.add(recordName + " (" + String.valueOf(recordId) + ")");
 		}
 
-		return jobs;
+		return records;
 	}
 
 	/**

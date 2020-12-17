@@ -19,6 +19,7 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
+import art.dbutils.DatabaseUtils;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.job.JobRunDetails;
@@ -51,6 +52,7 @@ import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -74,6 +76,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -544,6 +553,8 @@ public class Config extends HttpServlet {
 			createQuartzScheduler();
 
 			//upgrade art database
+			performLiquibaseUpgrade();
+			
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
@@ -1658,6 +1669,25 @@ public class Config extends HttpServlet {
 	 */
 	public static List<JobRunDetails> getRunningJobs() {
 		return runningJobs;
+	}
+
+	/**
+	 * Performs an auto upgrade of the art database using liquibase
+	 *
+	 * @throws Exception
+	 */
+	private static void performLiquibaseUpgrade() throws Exception {
+		Connection conn = null;
+
+		try {
+			conn = DbConnections.getArtDbConnection();
+			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
+			try (Liquibase liquibase = new Liquibase("liquibase/changelogs/changelog-master.xml", new ClassLoaderResourceAccessor(), database);) {
+				liquibase.update(new Contexts());
+			}
+		} finally {
+			DatabaseUtils.close(conn);
+		}
 	}
 
 }

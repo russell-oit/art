@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>TODO supply a title</title>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+		<!--/* natural template includes */-->
+		<link th:remove='all' rel="stylesheet" type="text/css" th:href="@{/js/bootstrap-3.3.7/css/bootstrap.min.css}"
+			  href="../../js/bootstrap-3.3.7/css/bootstrap.min.css"/>
+		<link th:remove='all' rel="stylesheet" type="text/css" th:href="@{/css/font-awesome-4.7.0/css/font-awesome.min.css}"
+			  href="../../css/font-awesome-4.7.0/css/font-awesome.min.css"/>
+		<script th:remove='all' type="text/javascript" th:src="@{/js/jquery-1.12.4.min.js}"
+		src='../../js/jquery-1.12.4.min.js'></script>
+		<script th:remove='all' type="text/javascript" th:src="@{/js/bootstrap-3.3.7/js/bootstrap.min.js}"
+		src='../../js/bootstrap-3.3.7/js/bootstrap.min.js'></script>
+		<script th:remove='all' type="text/javascript" th:src="@{/js/bootstrap-hover-dropdown-2.0.3.min.js}"
+		src='../../js/bootstrap-hover-dropdown-2.0.3.min.js'></script>
+	</head>
+	<body>
+		<div class="btn-group">
+			<a class="btn btn-default" 
+			   th:href="@{/editSchedule(id=${schedule.scheduleId})}" href="#">
+				<i class="fa fa-pencil-square-o"></i>
+				<th:block th:text="#{page.action.edit}">Edit</th:block>
+			</a>
+			<button type="button" class="btn btn-default deleteRecord">
+				<i class="fa fa-trash-o"></i>
+				<th:block th:text="#{page.action.delete}">Delete</th:block>
+			</button>
+			<a class="btn btn-default" 
+			   th:href="@{/copySchedule(id=${schedule.scheduleId})}" href="#">
+				<i class="fa fa-copy"></i>
+				<th:block th:text="#{page.action.copy}">Copy</th:block>
+			</a>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-default dropdown-toggle"
+					data-toggle="dropdown" data-hover="dropdown"
+					data-delay="100">
+				<th:block th:text="#{reports.action.more}">More</th:block>
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li>
+					<a 
+						th:href="@{/scheduleUsage(scheduleId=${schedule.scheduleId})}" href="#">
+						<th:block th:text="#{page.text.usage}">Usage</th:block>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>

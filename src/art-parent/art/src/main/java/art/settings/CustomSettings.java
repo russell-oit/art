@@ -21,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 /**
- * Represents settings that aren't set from the user interface (for
- * enhanced security)
+ * Represents settings that aren't set from the user interface (for enhanced
+ * security)
  *
  * @author Timothy Anyona
  */

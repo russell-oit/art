@@ -54,7 +54,7 @@ public enum DatabaseType {
 	CsvCalcite("csv-calcite"), JsonCalcite("json-calcite"),
 	MongoDBCalcite("mongodb-calcite"), CassandraCalcite("cassandra-calcite"),
 	ElasticsearchCalcite("elasticsearch-calcite"), JsonCalciteArt("json-calcite-art"),
-	BigQueryStarschema("bigquery-starschema");
+	BigQueryStarschema("bigquery-starschema"), CockroachDBPostgresql("cockroachdb-postgresql");
 
 	private final String value;
 
@@ -100,9 +100,9 @@ public enum DatabaseType {
 	 * @return enum options that can be used for the art database
 	 */
 	public static List<DatabaseType> listForArtDatabase() {
-		List<DatabaseType> items = Arrays.asList(Demo, CUBRID, Oracle, MySQL,
+		List<DatabaseType> items = Arrays.asList(Demo, Oracle, MySQL,
 				MariaDB, PostgreSQL, SqlServerMicrosoft, SqlServerJtds,
-				HsqldbStandAlone, HsqldbServer, Db2, SqlLogging,
+				HsqldbStandAlone, HsqldbServer, Db2, 
 				H2Server, H2Embedded, Firebird, Informix);
 
 		return sortByValue(items);
@@ -225,6 +225,8 @@ public enum DatabaseType {
 				return "JSON (Calcite - ART driver)";
 			case BigQueryStarschema:
 				return "BigQuery (Starschema driver)";
+			case CockroachDBPostgresql:
+				return "CockroachDB (PostgreSQL driver)";
 			default:
 				return toString();
 		}

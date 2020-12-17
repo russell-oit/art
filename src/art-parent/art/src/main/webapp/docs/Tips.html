@@ -40,7 +40,7 @@
    </div> 
    <h1 id="using-the-jtds-driver">Using the jTDS driver</h1> 
    <ul> 
-    <li> <p>If connecting to a named instance e.g. if you are using SQL Server 2008 Express, use a JDBC url like the following</p> 
+    <li>If connecting to a named instance e.g. if you are using SQL Server 2008 Express, use a JDBC url like the following 
      <div class="codehilite"> 
       <pre><span></span><span class="n">jdbc</span><span class="o">:</span><span class="n">jtds</span><span class="o">:</span><span class="n">sqlserver</span><span class="o">://</span><span class="n">localhost</span><span class="o">/</span><span class="n">mydatabase</span><span class="o">;</span><span class="n">instance</span><span class="o">=</span><span class="n">SQLEXPRESS</span>
 </pre> 
@@ -63,7 +63,7 @@
     <li>In the available items list, select all the tables except the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
     <li>Provide a name and directory where the job should be saved</li> 
     <li>Run the job</li> 
-    <li> <p>Run the following statement on your destination database e.g. using <a class="" href="http://www.heidisql.com/" rel="nofollow">HeidiSQL</a></p> 
+    <li>Run the following statement on your destination database e.g. using <a class="" href="http://www.heidisql.com/" rel="nofollow">HeidiSQL</a> 
      <div class="codehilite"> 
       <pre><span></span><span class="k">update</span> <span class="n">art_jobs</span> <span class="k">set</span> <span class="n">migrated_to_quartz</span><span class="o">=</span><span class="s1">'N'</span>
 </pre> 
@@ -85,14 +85,14 @@
     <li>Provide a name and directory where the job should be saved. The job must be saved before it runs.</li> 
     <li>Edit the job by deleting the create table steps and re-creating the connections from one step to the next for the remaining copy data steps, then save the job.</li> 
     <li>Run the job. You can use the <strong>Run this job</strong> icon to do this.</li> 
-    <li> <p>Run the following statement on your destination database</p> 
+    <li>Run the following statement on your destination database 
      <div class="codehilite"> 
       <pre><span></span><span class="k">update</span> <span class="n">art_jobs</span> <span class="k">set</span> <span class="n">migrated_to_quartz</span><span class="o">=</span><span class="s1">'N'</span>
 </pre> 
      </div> </li> 
    </ul> 
    <h1 id="upgrading-a-hsqldb-database">Upgrading a HSQLDB database</h1> 
-   <p>If you are upgrading your ART installation and are using a hsqldb database for the art repository, you can use the <a class="" href="http://squirrel-sql.sourceforge.net/" rel="nofollow">SQuirrel SQL Client</a> to run the upgrade scripts to update your repository.</p> 
+   <p>For versions of ART prior to 5.1, if you are upgrading your ART installation and are using a hsqldb database for the art repository, you can use the <a class="" href="http://squirrel-sql.sourceforge.net/" rel="nofollow">SQuirrel SQL Client</a> to run the upgrade scripts to update your repository. From ART 5.1, database upgrades are done automatically.</p> 
    <ul> 
     <li>Download, install and run SQuirrel SQL Client</li> 
     <li>In the <strong>Drivers</strong> section, right click on the <strong>HSQLDB Standalone</strong> driver and select <strong>Modify Driver</strong></li> 

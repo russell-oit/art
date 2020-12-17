@@ -403,7 +403,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_user_groups")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equalsAny(page, "datasources", "testDatasource")
+		} else if (StringUtils.equalsAny(page, "datasources")
 				|| StringUtils.endsWithAny(page, "Datasource", "Datasources")) {
 			if (user.hasPermission("configure_datasources")) {
 				authorised = true;
@@ -436,7 +436,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			if (user.hasPermission("configure_report_groups")) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "schedules")
+		} else if (StringUtils.equalsAny(page, "schedules", "scheduleUsage")
 				|| StringUtils.endsWithAny(page, "Schedule", "Schedules")) {
 			if (user.hasPermission("configure_schedules")) {
 				authorised = true;

@@ -153,6 +153,7 @@ public class Report implements Serializable {
 	private boolean openInNewWindow;
 	private int maxRunning;
 	private int maxRunningPerUser;
+	private String reportFormats;
 	private Datasource datasource;
 	private Encryptor encryptor;
 	private List<ReportParameter> reportParams; //used in import/export
@@ -175,6 +176,20 @@ public class Report implements Serializable {
 	private boolean selfServicePreview;
 	@JsonIgnore
 	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
+
+	/**
+	 * @return the reportFormats
+	 */
+	public String getReportFormats() {
+		return reportFormats;
+	}
+
+	/**
+	 * @param reportFormats the reportFormats to set
+	 */
+	public void setReportFormats(String reportFormats) {
+		this.reportFormats = reportFormats;
+	}
 
 	/**
 	 * @return the maxRunningPerUser

@@ -101,7 +101,7 @@ public class PipelineJob implements org.quartz.Job {
 							if (retryAttemptsLeft == null) {
 								retryAttemptsLeft = retryAttempts;
 							}
-							if (retryAttemptsLeft > 0) {
+							if (retryAttemptsLeft > 0 && retryDelayMins > 0) {
 								retryAttemptsLeft--;
 								String retryId = pipelineId + "-" + ArtUtils.getUniqueId();
 								JobDetail quartzJob = JobBuilder.newJob(ReportJob.class)

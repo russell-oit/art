@@ -697,6 +697,26 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
+	 * Returns the passed parameter value. Single string value or null for
+	 * single value parameters or a string array or null for multi value
+	 * parameters
+	 *
+	 * @return the passed parameter value
+	 */
+	@JsonIgnore
+	public Object getPassedValue() {
+		if (parameter.getParameterType() == ParameterType.SingleValue) {
+			if (passedParameterValues == null || passedParameterValues.length == 0) {
+				return null;
+			} else {
+				return passedParameterValues[0];
+			}
+		} else {
+			return passedParameterValues;
+		}
+	}
+
+	/**
 	 * Returns <code>true</code> if the given lov value should be selected in
 	 * the parameter dropdown list
 	 *

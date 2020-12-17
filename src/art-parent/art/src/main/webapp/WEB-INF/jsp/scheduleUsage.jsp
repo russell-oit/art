@@ -1,6 +1,5 @@
 <%-- 
-    Document   : jobsWithSchedule
-    Created on : 09-Dec-2017, 20:36:37
+    Document   : scheduleUsage
     Author     : Timothy Anyona
 --%>
 
@@ -25,8 +24,8 @@
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="schedules"]').parent().addClass('active');
 
-				var tbl = $('#jobs');
-
+				var tbl = $('#records');
+				
 				var pageLength = 10; //pass undefined to use the default
 				var showAllRowsText = "${showAllRowsText}";
 				var contextPath = "${pageContext.request.contextPath}";
@@ -60,23 +59,26 @@
 			<p>
 				<b><spring:message code="jobs.text.schedule"/>:</b> ${encode:forHtmlContent(schedule.name)}
 			</p>
-			<p>
-				<b><spring:message code="accessRights.text.jobs"/></b>
-			</p>
 		</div>
 
-		<table id="jobs" class="table table-striped table-bordered">
+		<table id="records" class="table table-striped table-bordered">
 			<thead>
 				<tr>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="page.text.name"/></th>
+					<th><spring:message code="page.text.pipeline"/></th>
+					<th><spring:message code="jobs.text.job"/></th>
 				</tr>
 			</thead>
 			<tbody>
+				<c:forEach var="pipeline" items="${pipelines}">
+					<tr>
+						<td>${encode:forHtmlContent(pipeline.name)}</td>
+						<td></td>
+					</tr>
+				</c:forEach>
 				<c:forEach var="job" items="${jobs}">
 					<tr>
-						<td>${job.jobId}</td>
-						<td>${encode:forHtmlContent(job.name)}</td>
+						<td></td>
+						<td>${encode:forHtmlContent(job.name)} (${job.jobId})</td>
 					</tr>
 				</c:forEach>
 			</tbody>

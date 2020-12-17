@@ -1998,6 +1998,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+						
+				<div id="reportFormatsDiv" class="form-group">
+					<label class="control-label col-md-4" for="reportFormats">
+						<spring:message code="settings.label.reportFormats"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="reportFormats" maxlength="200" class="form-control"/>
+						<form:errors path="reportFormats" cssClass="error"/>
+					</div>
+				</div>
 
 				<div id="useGroovyDiv" class="form-group">
 					<label class="control-label col-md-4" for="useGroovy">

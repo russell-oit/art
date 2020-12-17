@@ -9,6 +9,7 @@
 -- add start conditions permission
 -- add start condition id columns
 
+
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
 -- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
@@ -18,6 +19,8 @@
 -- for postgresql, replace CLOB with TEXT
 -- for cubrid, replace CLOB with STRING
 -- for hsqldb, replace CLOB with LONGVARCHAR
+
+-- for sql server, mysql replace TIMESTAMP with DATETIME
 
 -- ------------------------------------------------
 
