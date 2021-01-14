@@ -1,6 +1,5 @@
 ART 5.1.1
-* Updated chinese translation (thanks to linxd)
-* Updated spanish translation (thanks to Javier Gonzalez Dolz)
+* Updated chinese and spanish translations
 
 ART 5.1
 * Perform automatic database upgrades
