@@ -101,7 +101,7 @@
         "C3 Liniendiagramm": c3r["Line Chart"],
         "C3 Balkendiagramm": c3r["Bar Chart"],
         "C3 gestapeltes Balkendiagramm": c3r["Stacked Bar Chart"],
-        "C3 Flächenduagramm": c3r["Area Chart"],
+        "C3 Flächendiagramm": c3r["Area Chart"],
 		"C3 horizontales Balkendiagramm": c3r["Horizontal Bar Chart"],
 		"C3 horizontal gestapeltes Balkendiagramm": c3r["Horizontal Stacked Bar Chart"],
 		"Verteilungsdiagramm": c3r["Scatter Chart"]

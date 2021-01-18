@@ -1,7 +1,7 @@
 # ART
 ART stands for A Reporting Tool.
 
-ART is a reporting and business intelligence solution.
+ART (pronounced art) is a reporting and business intelligence solution. It is used to generate reports from business systems.
 
 Once an SQL query is ready, it can be published through ART in a few minutes. Authorised users can then log in and view the results in the browser.
 
@@ -14,9 +14,3 @@ Some of the features of ART include
 * Simple to install, administer and use
 
 A bigger list of features can be found in the [Features](https://sourceforge.net/p/art/wiki/Features/) page.
-
-## Online Demo
-
-* [Demo](https://art-demo.lon-2.paas.massivegrid.net/art/)
-* Username - auser
-* Password - auser

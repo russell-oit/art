@@ -1,27 +1,56 @@
 {
-    "sDecimal":           ",",
-    "sEmptyTable":        "Δεν υπάρχουν δεδομένα στον πίνακα",
-    "sInfo":              "Εμφανίζονται _START_ έως _END_ από _TOTAL_ εγγραφές",
-    "sInfoEmpty":         "Εμφανίζονται 0 έως 0 από 0 εγγραφές",
-    "sInfoFiltered":      "(φιλτραρισμένες από _MAX_ συνολικά εγγραφές)",
-    "sInfoPostFix":       "",
-    "sInfoThousands":     ".",
-    "sLengthMenu":        "Δείξε _MENU_ εγγραφές",
-    "sLoadingRecords":    "Φόρτωση...",
-    "sProcessing":        "Επεξεργασία...",
-    "sSearch":            "Αναζήτηση:",
-    "sSearchPlaceholder": "Αναζήτηση",
-    "sThousands":         ".",
-    "sUrl":               "",
-    "sZeroRecords":       "Δεν βρέθηκαν εγγραφές που να ταιριάζουν",
-    "oPaginate": {
-        "sFirst":    "Πρώτη",
-        "sPrevious": "Προηγούμενη",
-        "sNext":     "Επόμενη",
-        "sLast":     "Τελευταία"
-    },
-    "oAria": {
-        "sSortAscending":  ": ενεργοποιήστε για αύξουσα ταξινόμηση της στήλης",
-        "sSortDescending": ": ενεργοποιήστε για φθίνουσα ταξινόμηση της στήλης"
-    }
+	"sEmptyTable": "Δεν υπάρχουν δεδομένα στον πίνακα",
+	"sInfo": "Εμφανίζονται _START_ έως _END_ από _TOTAL_ εγγραφές",
+	"sInfoEmpty": "Εμφανίζονται 0 έως 0 από 0 εγγραφές",
+	"sInfoFiltered": "(φιλτραρισμένες από _MAX_ συνολικά εγγραφές)",
+	"sInfoPostFix": "",
+	"sInfoThousands": ".",
+	"sLengthMenu": "Εμφάνιση _MENU_ εγγραφών",
+	"sLoadingRecords": "Φόρτωση...",
+	"sProcessing": "Επεξεργασία...",
+	"sSearch": "Αναζήτηση:",
+	"sZeroRecords": "Δεν βρέθηκαν εγγραφές που να ταιριάζουν",
+	"oPaginate": {
+		"sFirst": "Πρώτη",
+		"sLast": "Τελευταία",
+		"sNext": "Επόμενη",
+		"sPrevious": "Προηγούμενη"
+	},
+	"oAria": {
+		"sSortAscending": ": ενεργοποιήστε για αύξουσα ταξινόμηση της στήλης",
+		"sSortDescending": ": ενεργοποιήστε για φθίνουσα ταξινόμηση της στήλης"
+	},
+	"select": {
+		"rows": {
+			"_": "%d επιλεγμένες γραμμές",
+			"0": "",
+			"1": "1 επιλεγμένη γραμμή"
+		},
+		"columns": {
+			"_": "%d επιλεγμένες στήλες",
+			"0": "",
+			"1": "1 επιλεγμένη στήλη"
+		},
+		"cells": {
+			"_": "%d επιλεγμένα κελιά",
+			"0": "",
+			"1": "1 επιλεγμένο κελί"
+		}
+	},
+	"buttons": {
+		"selected": "Επιλεγμένα",
+		"selectedSingle": "Μονή επιλογή",
+		"selectAll": "Επιλογή όλων",
+		"selectNone": "Αποεπιλογή όλων",
+		"selectRows": "Επιλογή γραμμών",
+		"selectColumns": "Επιλογή Στηλών",
+		"selectCells": "Επιλογή κελιών",
+		"colvis": "Στήλες",
+		"colvisRestore": "Επαναφορά",
+		"print": "Εκτύπωση",
+		"excel": "Excel",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Αντιγραφή"
+	}
 }
