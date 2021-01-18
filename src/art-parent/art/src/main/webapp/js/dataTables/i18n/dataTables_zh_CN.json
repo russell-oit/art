@@ -22,35 +22,35 @@
 	},
 	"select": {
 		"rows": {
-			"_": "%d rows selected",
+			"_": "%d 行已选择",
 			"0": "",
-			"1": "1 row selected"
+			"1": "1 行已选择"
 		},
 		"columns": {
-			"_": "%d columns selected",
+			"_": "%d 列已选择",
 			"0": "",
-			"1": "1 column selected"
+			"1": "1列已选择"
 		},
 		"cells": {
-			"_": "%d cells selected",
+			"_": "%d 个单元格已选择",
 			"0": "",
-			"1": "1 cell selected"
+			"1": "1个单元格已选择"
 		}
 	},
 	"buttons": {
-		"selected": "Selected",
-		"selectedSingle": "Selected single",
-		"selectAll": "Select all",
-		"selectNone": "Deselect all",
-		"selectRows": "Select rows",
-		"selectColumns": "Select columns",
-		"selectCells": "Select cells",
-		"colvis": "Columns",
-		"colvisRestore": "Restore",
-		"print": "Print",
+		"selected": "已选择",
+		"selectedSingle": "选中的单个项",
+		"selectAll": "全选",
+		"selectNone": "全不选",
+		"selectRows": "选定的行",
+		"selectColumns": "选择列",
+		"selectCells": "选择单元格",
+		"colvis": "列",
+		"colvisRestore": "还原",
+		"print": "打印",
 		"excel": "Excel",
 		"pdf": "PDF",
 		"csv": "CSV",
-		"copy": "Copy"
+		"copy": "复制"
 	}
 }

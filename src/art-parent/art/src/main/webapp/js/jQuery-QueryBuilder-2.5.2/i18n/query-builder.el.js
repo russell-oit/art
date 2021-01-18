@@ -66,10 +66,12 @@ QueryBuilder.regional['el'] = {
     "number_exceed_min": "Πρέπει να είναι μεγαλύτερο απο {0}",
     "number_exceed_max": "Πρέπει να είναι μικρότερο απο {0}",
     "number_wrong_step": "Πρέπει να είναι πολλαπλάσιο του {0}",
+	"number_between_invalid": "Invalid values, {0} is greater than {1}",
     "datetime_empty": "Χωρίς τιμή",
     "datetime_invalid": "Λανθασμένη μορφή ημερομηνίας ({0})",
     "datetime_exceed_min": "Νεότερο από {0}",
     "datetime_exceed_max": "Παλαιότερο από {0}",
+	"datetime_between_invalid": "Invalid values, {0} is greater than {1}",
     "boolean_not_valid": "Δεν είναι BOOLEAN",
     "operator_not_multiple": "Η συνθήκη \"{1}\" δεν μπορεί να δεχθεί πολλαπλές τιμές"
   },
