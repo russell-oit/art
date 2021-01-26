@@ -57,7 +57,7 @@
         "Massimo": tpl.max(frFmt),
         "Rapporto": tpl.sumOverSum(frFmt),
         "Limite superiore 80%": tpl.sumOverSumBound80(true, frFmt),
-        "limite inferiore 80%": tpl.sumOverSumBound80(false, frFmt),
+        "Limite inferiore 80%": tpl.sumOverSumBound80(false, frFmt),
         "Somma proporzionale al totale": tpl.fractionOf(tpl.sum(), "total", frFmtPct),
         "Somma proporzionale alla riga": tpl.fractionOf(tpl.sum(), "row", frFmtPct),
         "Somma proporzionale alla colonna": tpl.fractionOf(tpl.sum(), "col", frFmtPct),

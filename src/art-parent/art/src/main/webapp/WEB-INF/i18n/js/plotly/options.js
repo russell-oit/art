@@ -1,8 +1,8 @@
 //https://xem.github.io/terser-online/
 //https://skalman.github.io/UglifyJS-online/
+//https://github.com/plotly/plotly.js/tree/master/lib/locales
 //https://github.com/plotly/plotly.js/blob/master/src/locale-en.js
 //https://github.com/plotly/plotly.js/blob/master/tasks/util/constants.js
-//https://github.com/plotly/plotly.js/tree/master/lib/locales
 //https://github.com/plotly/plotly.js/issues/856
 //https://github.com/terser-js/terser/issues/106
 //https://github.com/plotly/plotly.js/blob/master/dist/translation-keys.txt

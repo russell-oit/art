@@ -1,17 +1,56 @@
 {
-    "sProcessing":   "Caricamento...",
-    "sLengthMenu":   "Visualizza _MENU_ elementi",
-    "sZeroRecords":  "La ricerca non ha portato alcun risultato.",
-    "sInfo":         "Vista da _START_ a _END_ di _TOTAL_ elementi",
-    "sInfoEmpty":    "Vista da 0 a 0 di 0 elementi",
-    "sInfoFiltered": "(filtrati da _MAX_ elementi totali)",
-    "sInfoPostFix":  "",
-    "sSearch":       "Cerca:",
-    "sUrl":          "",
-    "oPaginate": {
-        "sFirst":    "Inizio",
-        "sPrevious": "Precedente",
-        "sNext":     "Successivo",
-        "sLast":     "Fine"
-    }
+	"sEmptyTable": "Non sono disponibili dati nella tabella",
+	"sInfo": "Vista da _START_ a _END_ di _TOTAL_ elementi",
+	"sInfoEmpty": "Vista da 0 a 0 di 0 elementi",
+	"sInfoFiltered": "(filtrati da _MAX_ elementi totali)",
+	"sInfoPostFix": "",
+	"sInfoThousands": ",",
+	"sLengthMenu": "Visualizza _MENU_ elementi",
+	"sLoadingRecords": "Caricamento in corso…",
+	"sProcessing": "Caricamento...",
+	"sSearch": "Cerca:",
+	"sZeroRecords": "La ricerca non ha portato alcun risultato.",
+	"oPaginate": {
+		"sFirst": "Inizio",
+		"sLast": "Fine",
+		"sNext": "Successivo",
+		"sPrevious": "Precedente"
+	},
+	"oAria": {
+		"sSortAscending": ": activate per ordinare in ordine crescente",
+		"sSortDescending": ": activate per ordinare in ordine decrescente"
+	},
+	"select": {
+		"rows": {
+			"_": "%d celle selezionate",
+			"0": "",
+			"1": "1 riga selezionata"
+		},
+		"columns": {
+			"_": "%d celle selezionate",
+			"0": "",
+			"1": "1 cella selezionata"
+		},
+		"cells": {
+			"_": "%d celle selezionate",
+			"0": "",
+			"1": "1 cella selezionata"
+		}
+	},
+	"buttons": {
+		"selected": "Selezionato",
+		"selectedSingle": "Singolo selezionato",
+		"selectAll": "Seleziona Tutto",
+		"selectNone": "Deseleziona tutto",
+		"selectRows": "Seleziona righe",
+		"selectColumns": "Selezione Colonne",
+		"selectCells": "Seleziona celle",
+		"colvis": "Colonne",
+		"colvisRestore": "Ripristina",
+		"print": "Stampa",
+		"excel": "Excel",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Copia"
+	}
 }
