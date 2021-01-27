@@ -18,7 +18,6 @@
 package art.user;
 
 import art.encryption.PasswordUtils;
-import art.enums.AccessLevel;
 import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
 import art.servlets.Config;
@@ -202,20 +201,18 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/addUser", method = RequestMethod.GET)
-	public String addUser(Model model, HttpSession session) {
+	public String addUser(Model model) {
 		logger.debug("Entering addUser");
 
 		User user = new User();
 
 		model.addAttribute("user", user);
 
-		return showEditUser("add", model, session);
+		return showEditUser("add", model);
 	}
 
 	@RequestMapping(value = "/editUser", method = RequestMethod.GET)
-	public String editUser(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
-
+	public String editUser(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editUser: id={}", id);
 
 		User user = null;
@@ -227,20 +224,13 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		//ensure an admin cannot edit admins of higher access level than himself
-		if (!canEditUser(session, user)) {
-			return "accessDenied";
-		}
-
 		model.addAttribute("user", user);
 
-		return showEditUser("edit", model, session);
+		return showEditUser("edit", model);
 	}
 
 	@RequestMapping(value = "/copyUser", method = RequestMethod.GET)
-	public String copyUser(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
-
+	public String copyUser(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering copyUser: id={}", id);
 
 		User user = null;
@@ -252,44 +242,21 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		//ensure an admin cannot edit admins of higher access level than himself
-		if (!canEditUser(session, user)) {
-			return "accessDenied";
-		}
-
 		model.addAttribute("user", user);
 
-		return showEditUser("copy", model, session);
+		return showEditUser("copy", model);
 	}
 
 	@RequestMapping(value = "/editUsers", method = RequestMethod.GET)
-	public String editUsers(@RequestParam("ids") String ids, Model model,
-			HttpSession session) {
-
+	public String editUsers(@RequestParam("ids") String ids, Model model) {
 		logger.debug("Entering editUsers: ids={}", ids);
-
-		String[] singleIds = StringUtils.split(ids, ",");
-
-		for (String singleId : singleIds) {
-			try {
-				int id = Integer.parseInt(singleId);
-				User user = userService.getUser(id);
-				//ensure an admin cannot edit admins of higher access level than himself
-				if (!canEditUser(session, user)) {
-					return "accessDenied";
-				}
-			} catch (SQLException | RuntimeException ex) {
-				logger.error("Error", ex);
-				model.addAttribute("error", ex);
-			}
-		}
 
 		MultipleUserEdit multipleUserEdit = new MultipleUserEdit();
 		multipleUserEdit.setIds(ids);
 
 		model.addAttribute("multipleUserEdit", multipleUserEdit);
 
-		return showEditUsers(model, session);
+		return showEditUsers(model);
 	}
 
 	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
@@ -300,17 +267,10 @@ public class UserController {
 
 		logger.debug("Entering saveUser: user={}, action='{}'", user, action);
 
-		if (StringUtils.equals(action, "edit")) {
-			//ensure an admin cannot edit admins of higher access level than himself
-			if (!canEditUser(session, user)) {
-				return "accessDenied";
-			}
-		}
-
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUser(action, model, session);
+			return showEditUser(action, model);
 		}
 
 		try {
@@ -319,7 +279,7 @@ public class UserController {
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return showEditUser(action, model, session);
+				return showEditUser(action, model);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -338,7 +298,7 @@ public class UserController {
 
 				if (message != null) {
 					model.addAttribute("message", message);
-					return showEditUser(action, model, session);
+					return showEditUser(action, model);
 				}
 			}
 
@@ -397,7 +357,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUser(action, model, session);
+		return showEditUser(action, model);
 	}
 
 	@RequestMapping(value = "/saveUsers", method = RequestMethod.POST)
@@ -410,7 +370,7 @@ public class UserController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUsers(model, session);
+			return showEditUsers(model);
 		}
 
 		try {
@@ -440,7 +400,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUsers(model, session);
+		return showEditUsers(model);
 	}
 
 	/**
@@ -449,16 +409,14 @@ public class UserController {
 	 *
 	 * @param action the action. "add" or "edit"
 	 * @param model the model to use
-	 * @param session the http session
 	 * @return returns the jsp file to display
 	 */
-	private String showEditUser(String action, Model model, HttpSession session) {
+	private String showEditUser(String action, Model model) {
 		logger.debug("Entering showEditUser: action='{}'", action);
 
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
 			model.addAttribute("roles", roleService.getAllRoles());
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
@@ -476,47 +434,17 @@ public class UserController {
 	 *
 	 * @return returns the jsp file to display
 	 */
-	private String showEditUsers(Model model, HttpSession session) {
+	private String showEditUsers(Model model) {
 		logger.debug("Entering showEditUsers");
 
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		return "editUsers";
-	}
-
-	/**
-	 * Returns <code>true</code> if the session user can edit a given user
-	 *
-	 * @param sessionUser the session user
-	 * @param editUser the user to edit
-	 * @return <code>true</code> if the session user can edit the given user
-	 */
-	private boolean canEditUser(HttpSession session, User editUser) {
-		logger.debug("Entering canEditUser");
-
-		User sessionUser = (User) session.getAttribute("sessionUser");
-
-		logger.debug("sessionUser={}", sessionUser);
-		logger.debug("editUser={}", editUser);
-		if (sessionUser == null || editUser == null) {
-			return false;
-		}
-
-		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		logger.debug("editUser.getAccessLevel().getValue()={}", editUser.getAccessLevel().getValue());
-		if (sessionUser.isSetupUser()
-				|| sessionUser.getAccessLevel() == AccessLevel.SuperAdmin
-				|| sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	/**
@@ -643,39 +571,6 @@ public class UserController {
 		}
 
 		return from;
-	}
-
-	/**
-	 * Returns the relevant access levels to be used in the edit user page
-	 *
-	 * @param session the http session
-	 * @return the access levels to be used
-	 */
-	private List<AccessLevel> getAccessLevels(HttpSession session) {
-		logger.debug("Entering getAccessLevels");
-
-		List<AccessLevel> levels = new ArrayList<>();
-
-		//add only relevant levels according to the session user access level
-		//to ensure admin can't give himself a higher level
-		levels.add(AccessLevel.NormalUser);
-		levels.add(AccessLevel.ScheduleUser);
-		levels.add(AccessLevel.JuniorAdmin);
-		levels.add(AccessLevel.MidAdmin);
-		levels.add(AccessLevel.StandardAdmin);
-
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
-		if (sessionUser.isSetupUser()
-				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()) {
-			levels.add(AccessLevel.SeniorAdmin);
-		}
-		if (sessionUser.isSetupUser()
-				|| sessionUser.getAccessLevel().getValue() >= AccessLevel.SuperAdmin.getValue()) {
-			levels.add(AccessLevel.SuperAdmin);
-		}
-
-		return levels;
 	}
 
 }

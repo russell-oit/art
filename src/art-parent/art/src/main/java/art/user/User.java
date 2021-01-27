@@ -562,35 +562,6 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> if this is an admin user
-	 *
-	 * @return <code>true</code> if this is an admin user
-	 */
-	@JsonIgnore
-	public boolean isAdminUser() {
-		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	/**
-	 * Returns <code>true</code> if user has access level of standard admin and
-	 * above
-	 *
-	 * @return <code>true</code> if user has access level of standard admin and
-	 * above
-	 */
-	public boolean hasStandardAdminAndAboveAccessLevel() {
-		if (accessLevel != null && accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Encrypts the password field
 	 */
 	public void encryptPassword() {
@@ -827,7 +798,6 @@ public class User implements Serializable {
 	private static User createSetupUser() {
 		User user = new User();
 
-		user.setAccessLevel(AccessLevel.RepositoryUser);
 		user.buildSetupUserPermissions();
 
 		return user;
