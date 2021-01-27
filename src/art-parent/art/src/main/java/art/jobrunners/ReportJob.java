@@ -856,9 +856,11 @@ public class ReportJob implements org.quartz.Job {
 					connection.data(csrfTokenOutputField, csrfTokenValue);
 				}
 				Document document = connection.post();
-				Element element = document.body();
-				String postReply = element.text();
-				logger.debug("postReply='{}'", postReply);
+				Element body = document.body();
+				if (body != null) {
+					String postReply = body.text();
+					logger.debug("postReply='{}'", postReply);
+				}
 			}
 		} catch (IOException | RuntimeException ex) {
 			logErrorAndSetDetails(ex);
