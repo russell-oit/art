@@ -158,6 +158,7 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.quartz.DateBuilder.IntervalUnit;
 import static org.quartz.DateBuilder.futureDate;
 import org.quartz.JobBuilder;
@@ -855,7 +856,8 @@ public class ReportJob implements org.quartz.Job {
 					connection.data(csrfTokenOutputField, csrfTokenValue);
 				}
 				Document document = connection.post();
-				String postReply = document.body().text();
+				Element element = document.body();
+				String postReply = element.text();
 				logger.debug("postReply='{}'", postReply);
 			}
 		} catch (IOException | RuntimeException ex) {

@@ -117,7 +117,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_reports')}">
+									<c:if test="${sessionUser.hasAnyConfigureReportsPermission()}">
 										<li>
 											<a href="${pageContext.request.contextPath}/reportsConfig">
 												<spring:message code="header.link.reportsConfiguration"/>
@@ -128,6 +128,8 @@ Header that appears at the top of all pages, except the login and logs pages
 												<spring:message code="page.title.addReport"/>
 											</a>
 										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_reports')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/runningQueries">
 												<spring:message code="page.title.runningQueries"/>
@@ -207,7 +209,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_reports')}">
+									<c:if test="${sessionUser.hasAnyConfigureReportsPermission()}">
 										<li>
 											<a href="${pageContext.request.contextPath}/parameters">
 												<spring:message code="header.link.parameters"/>

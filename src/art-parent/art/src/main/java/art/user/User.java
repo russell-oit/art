@@ -770,6 +770,28 @@ public class User implements Serializable {
 	}
 
 	/**
+	 * Returns <code>true</code> if the user has "configure_reports" or
+	 * "configure_reports_partial" permission
+	 *
+	 * @return <code>true</code> if the user has "configure_reports" or
+	 * "configure_reports_partial" permission
+	 */
+	public boolean hasAnyConfigureReportsPermission() {
+		return hasStartsWithPermission("configure_reports");
+	}
+
+	/**
+	 * Returns <code>true</code> if the user has "configure_reports_partial"
+	 * permission without "configure_reports" permission
+	 *
+	 * @return <code>true</code> if the user has "configure_reports_partial"
+	 * permission without "configure_reports" permission
+	 */
+	public boolean hasOnlyConfigureReportsPartialPermission() {
+		return hasPermission("configure_reports_partial") && !hasPermission("configure_reports");
+	}
+
+	/**
 	 * Creates the initial setup user
 	 *
 	 * @return the initial setup user

@@ -521,7 +521,7 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Returns datasources that an admin can use, according to his access level
+	 * Returns datasources that an admin can use, according to his access rights
 	 *
 	 * @param user the admin user
 	 * @return available datasources
@@ -531,15 +531,13 @@ public class DatasourceService {
 	public List<Datasource> getAdminDatasources(User user) throws SQLException {
 		logger.debug("Entering getAdminDatasources: user={}", user);
 
-		if (user == null || user.getAccessLevel() == null) {
+		if (user == null || !user.hasAnyConfigureReportsPermission()) {
 			return Collections.emptyList();
 		}
 
-		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
-
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		if (user.hasStandardAdminAndAboveAccessLevel()) {
-			//standard admins and above can work with everything
+		if (user.hasConfigureReportsPermission()) {
+			//can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {
 			String sql = "SELECT AD.*"

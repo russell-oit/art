@@ -1,3 +1,6 @@
+ART 5.2
+* Added configure_reports_partial permission to replace user access levels
+
 ART 5.1.2
 * Updated italian translation (thanks to Alessandro Conti)
 
