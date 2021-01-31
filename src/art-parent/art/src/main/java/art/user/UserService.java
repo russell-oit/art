@@ -240,8 +240,7 @@ public class UserService {
 	}
 
 	/**
-	 * Returns admin users (those with either configure_reports or
-	 * configure_reports_partial permission)
+	 * Returns admin users (those with configure_reports_partial permission)
 	 *
 	 * @return admin users
 	 * @throws SQLException
@@ -254,23 +253,21 @@ public class UserService {
 				//permission on user
 				+ " WHERE EXISTS (SELECT 1"
 				+ " FROM ART_USER_PERMISSION_MAP AUPM"
-				+ " WHERE AUPM.USER_ID=AU.USER_ID AND AUPM.PERMISSION_ID IN(?,?))"
+				+ " WHERE AUPM.USER_ID=AU.USER_ID AND AUPM.PERMISSION_ID=?)"
 				+ " OR "
 				//permission on role
 				+ " EXISTS (SELECT 1"
 				+ " FROM ART_USER_ROLE_MAP AURM"
 				+ " INNER JOIN ART_ROLE_PERMISSION_MAP ARPM"
 				+ " ON AURM.ROLE_ID=ARPM.ROLE_ID"
-				+ " WHERE AURM.USER_ID=AU.USER_ID AND ARPM.PERMISSION_ID IN(?,?))";
+				+ " WHERE AURM.USER_ID=AU.USER_ID AND ARPM.PERMISSION_ID=?)";
 
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 
-		final int CONFIGURE_REPORTS_PERMISSION_ID = 13;
 		final int CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID = 34;
 
-		return dbService.query(sql, h, CONFIGURE_REPORTS_PERMISSION_ID,
+		return dbService.query(sql, h,
 				CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID,
-				CONFIGURE_REPORTS_PERMISSION_ID,
 				CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID);
 	}
 
