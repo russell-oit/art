@@ -150,7 +150,7 @@ public class UserGroupPermissionService {
 	 * @param permissionId the permission id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"permissions", "userGroups", "users"}, allEntries = true)
+	@CacheEvict(value = {"permissions", "userGroups", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void deleteUserGroupPermission(int userGroupId, int permissionId) throws SQLException {
 		logger.debug("Entering deleteUserGroupPermission: userGroupId={}, permissionId={}",
 				userGroupId, permissionId);
@@ -167,7 +167,7 @@ public class UserGroupPermissionService {
 	 * @param userGroup the user group
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "permissions", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserGroupPermissions(UserGroup userGroup) throws SQLException {
 		Connection conn = null;
 		recreateUserGroupPermissions(userGroup, conn);
@@ -180,7 +180,7 @@ public class UserGroupPermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "permissions", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserGroupPermissions(UserGroup userGroup, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserGroupPermissions: userGroup={}", userGroup);
 
@@ -241,7 +241,7 @@ public class UserGroupPermissionService {
 	 * @param permissions permission ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "permissions", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserGroupPermissions(String action, Integer[] userGroups,
 			Integer[] permissions) throws SQLException {
 
@@ -258,7 +258,7 @@ public class UserGroupPermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "permissions", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserGroupPermissions(String action, Integer[] userGroups,
 			Integer[] permissions, Connection conn) throws SQLException {
 

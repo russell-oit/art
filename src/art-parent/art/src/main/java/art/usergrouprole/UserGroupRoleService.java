@@ -150,7 +150,7 @@ public class UserGroupRoleService {
 	 * @param roleId the role id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "userGroups", "users"}, allEntries = true)
+	@CacheEvict(value = {"roles", "userGroups", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void deleteUserGroupRole(int userGroupId, int roleId) throws SQLException {
 		logger.debug("Entering deleteUserGroupRole: userGroupId={}, roleId={}",
 				userGroupId, roleId);
@@ -167,7 +167,7 @@ public class UserGroupRoleService {
 	 * @param userGroup the user group
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserGroupRoles(UserGroup userGroup) throws SQLException {
 		Connection conn = null;
 		recreateUserGroupRoles(userGroup, conn);
@@ -180,7 +180,7 @@ public class UserGroupRoleService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserGroupRoles(UserGroup userGroup, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserGroupRoles: userGroup={}", userGroup);
 
@@ -239,7 +239,7 @@ public class UserGroupRoleService {
 	 * @param roles role ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserGroupRoles(String action, Integer[] userGroups,
 			Integer[] roles) throws SQLException {
 
@@ -256,7 +256,7 @@ public class UserGroupRoleService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"userGroups", "roles", "users"}, allEntries = true)
+	@CacheEvict(value = {"userGroups", "roles", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserGroupRoles(String action, Integer[] userGroups,
 			Integer[] roles, Connection conn) throws SQLException {
 
