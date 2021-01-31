@@ -216,6 +216,27 @@ public class ReportGroupService {
 	}
 
 	/**
+	 * Returns ids for report groups that an admin user can work with
+	 * 
+	 * @param userId the admin's user id
+	 * @return ids of report groups that the admin user can work with
+	 * @throws SQLException 
+	 */
+	@Cacheable("reportGroups")
+	public List<Integer> getAdminReportGroupIds(Integer userId) throws SQLException {
+		logger.debug("Entering getAdminReportGroupIds: userId={}", userId);
+
+		String sql = "SELECT AQG.QUERY_GROUP_ID"
+				+ " FROM ART_QUERY_GROUPS AQG, ART_ADMIN_PRIVILEGES AAP"
+				+ " WHERE AQG.QUERY_GROUP_ID=AAP.VALUE_ID"
+				+ " AND AAP.PRIVILEGE='GRP'"
+				+ " AND AAP.USER_ID=?";
+
+		ResultSetHandler<List<Integer>> h = new ColumnListHandler<>("QUERY_GROUP_ID");
+		return dbService.query(sql, h, userId);
+	}
+
+	/**
 	 * Returns a report group
 	 *
 	 * @param id the report group id
