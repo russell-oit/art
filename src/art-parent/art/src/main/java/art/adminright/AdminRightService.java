@@ -175,6 +175,7 @@ public class AdminRightService {
 	 * @param datasourceId the datasource id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = {"datasources", "reports"}, allEntries = true) //clear caches so that admins can work with new values
 	public void deleteAdminDatasourceRight(int userId, int datasourceId) throws SQLException {
 		logger.debug("Entering deleteAdminDatasourceRight: userId={}, datasourceId={}",
 				userId, datasourceId);
@@ -193,6 +194,7 @@ public class AdminRightService {
 	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = {"reportGroups", "reports"}, allEntries = true) //clear caches so that admins can work with new values
 	public void deleteAdminReportGroupRight(int userId, int reportGroupId) throws SQLException {
 		logger.debug("Entering deleteAdminReportGroupRight: userId={}, reportGroupId={}",
 				userId, reportGroupId);
@@ -215,7 +217,7 @@ public class AdminRightService {
 	 * @param reportGroups the relevant report group ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"datasources", "reportGroups"}, allEntries = true) //clear caches so that admins can work with new values
+	@CacheEvict(value = {"datasources", "reportGroups", "reports"}, allEntries = true) //clear caches so that admins can work with new values
 	public void updateAdminRights(String action, String[] admins, Integer[] datasources,
 			Integer[] reportGroups) throws SQLException {
 

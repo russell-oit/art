@@ -150,7 +150,7 @@ public class UserRoleService {
 	 * @param roleId the role id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "users"}, allEntries = true)
+	@CacheEvict(value = {"users", "roles", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void deleteUserRole(int userId, int roleId) throws SQLException {
 		logger.debug("Entering deleteUserRole: userId={}, roleId={}", userId, roleId);
 
@@ -166,7 +166,7 @@ public class UserRoleService {
 	 * @param user the user
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "roles"}, allEntries = true)
+	@CacheEvict(value = {"users", "roles", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserRoles(User user) throws SQLException {
 		Connection conn = null;
 		recreateUserRoles(user, conn);
@@ -179,7 +179,7 @@ public class UserRoleService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "roles"}, allEntries = true)
+	@CacheEvict(value = {"users", "roles", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserRoles(User user, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserRoles: user={}", user);
 

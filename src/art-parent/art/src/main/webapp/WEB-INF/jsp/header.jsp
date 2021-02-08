@@ -117,7 +117,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_reports')}">
+									<c:if test="${sessionUser.hasAnyConfigureReportsPermission()}">
 										<li>
 											<a href="${pageContext.request.contextPath}/reportsConfig">
 												<spring:message code="header.link.reportsConfiguration"/>
@@ -128,6 +128,8 @@ Header that appears at the top of all pages, except the login and logs pages
 												<spring:message code="page.title.addReport"/>
 											</a>
 										</li>
+									</c:if>
+									<c:if test="${sessionUser.hasPermission('configure_reports')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/runningQueries">
 												<spring:message code="page.title.runningQueries"/>
@@ -207,7 +209,7 @@ Header that appears at the top of all pages, except the login and logs pages
 											</a>
 										</li>
 									</c:if>
-									<c:if test="${sessionUser.hasPermission('configure_reports')}">
+									<c:if test="${sessionUser.hasAnyConfigureReportsPermission()}">
 										<li>
 											<a href="${pageContext.request.contextPath}/parameters">
 												<spring:message code="header.link.parameters"/>
@@ -315,7 +317,7 @@ Header that appears at the top of all pages, except the login and logs pages
 								</ul>
 							</li>
 						</c:if>
-						<c:if test="${sessionUser.isAdminUser() || sessionUser.hasPermission('view_logs')}">
+						<c:if test="${sessionUser.hasPermission('view_logs')}">
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 									<i class="fa fa-desktop"></i>

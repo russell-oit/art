@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.1.2"> 
+  <meta name="version" content="5.2"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -51,7 +51,6 @@
      <li><a href="#users">Users</a> 
       <ol> 
        <li><a href="#creating-a-new-user">Creating a new user</a></li> 
-       <li><a href="#access-levels">Access Levels</a></li> 
       </ol></li> 
      <li><a href="#authentication">Authentication</a> 
       <ol> 
@@ -67,6 +66,7 @@
        <li><a href="#creating-a-new-role">Creating a new role</a></li> 
        <li><a href="#permissions">Permissions</a></li> 
       </ol></li> 
+     <li><a href="#admin-rights">Admin Rights</a></li> 
      <li><a href="#user-groups">User Groups</a></li> 
      <li><a href="#user-group-membership">User Group Membership</a></li> 
      <li><a href="#report-groups">Report Groups</a> 
@@ -287,7 +287,7 @@
          <li><a href="#create-the-report_2">Create the report</a></li> 
         </ol></li> 
       </ol></li> 
-     <li><a href="#scheduling">Scheduling</a> 
+     <li><a href="#jobs">Jobs</a> 
       <ol> 
        <li><a href="#scheduling-a-new-job">Scheduling a new job</a></li> 
        <li><a href="#job-options">Job Options</a></li> 
@@ -1242,10 +1242,6 @@
         <td>Whether the user can run reports without having logged into ART first</td> 
        </tr> 
        <tr> 
-        <td><strong>Access Level</strong></td> 
-        <td>The access level for the user</td> 
-       </tr> 
-       <tr> 
         <td><strong>Default Report Group</strong></td> 
         <td>A report group that will be pre-selected in the reports page when the user logs in</td> 
        </tr> 
@@ -1260,46 +1256,6 @@
        <tr> 
         <td><strong>Roles</strong></td> 
         <td>The roles that the user has</td> 
-       </tr> 
-      </tbody> 
-     </table> 
-     <h2 id="access-levels">Access Levels</h2> 
-     <p>Access levels affect some aspects of the of the user as they work with the application.</p> 
-     <table border="1"> 
-      <thead> 
-       <tr> 
-        <th>Access Level</th> 
-        <th>Effect</th> 
-       </tr> 
-      </thead> 
-      <tbody> 
-       <tr> 
-        <td><strong>Normal User</strong></td> 
-        <td></td> 
-       </tr> 
-       <tr> 
-        <td><strong>Schedule User</strong></td> 
-        <td></td> 
-       </tr> 
-       <tr> 
-        <td><strong>Junior Admin</strong></td> 
-        <td></td> 
-       </tr> 
-       <tr> 
-        <td><strong>Mid Admin</strong></td> 
-        <td></td> 
-       </tr> 
-       <tr> 
-        <td><strong>Standard Admin</strong></td> 
-        <td>Can work with any datasource when creating reports</td> 
-       </tr> 
-       <tr> 
-        <td><strong>Senior Admin</strong></td> 
-        <td></td> 
-       </tr> 
-       <tr> 
-        <td><strong>Super Admin</strong></td> 
-        <td></td> 
        </tr> 
       </tbody> 
      </table> 
@@ -1400,6 +1356,13 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <ul> 
       <li>If you change the roles or permissions of a user, they will need to log out and log in again for the new permissions to take effect.</li> 
      </ul> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="admin-rights">Admin Rights</h1> 
+     <p>Admin rights allows certain users to be given limited report creation rights, limiting the report groups and datasources they can work with. These users are given the <strong>configure_reports_partial</strong> permission to give them this limited right. Admin rights are configured using the <strong>Configure | Admin Rights</strong> menu, from where different users can be assigned the report groups and datasources they can work with.</p> 
     </div> 
    </div> 
    <div> 
@@ -5650,8 +5613,8 @@ WHERE {#!saleTypes#}
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="scheduling">Scheduling</h1> 
-     <p>In order to schedule a report, a user needs to have the <strong>schedule_jobs</strong> permission. Once logged in, a user's scheduled reports are available from the <strong>Jobs</strong> menu. </p> 
+     <h1 id="jobs">Jobs</h1> 
+     <p>A job is a report that has been scheduled to run automatically. In order to schedule a report, a user needs to have the <strong>schedule_jobs</strong> permission. Once logged in, a user's scheduled reports are available from the <strong>Jobs</strong> menu. </p> 
      <h2 id="scheduling-a-new-job">Scheduling a new job</h2> 
      <p>Take the following steps to schedule a new job</p> 
      <ul> 

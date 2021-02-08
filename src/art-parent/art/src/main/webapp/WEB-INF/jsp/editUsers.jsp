@@ -68,12 +68,6 @@
 
 				toggleCanChangePasswordEnabled();
 
-				$('#accessLevelUnchanged').on("change", function () {
-					toggleAccessLevelEnabled();
-				});
-
-				toggleAccessLevelEnabled();
-
 				$('#userGroupsUnchanged').on("change", function () {
 					toggleUserGroupsEnabled();
 				});
@@ -101,14 +95,6 @@
 				} else {
 //					$('#active').prop('disabled', false);
 					$('#canChangePassword').bootstrapSwitch('disabled', false);
-				}
-			}
-
-			function toggleAccessLevelEnabled() {
-				if ($('#accessLevelUnchanged').is(':checked')) {
-					$('#accessLevel').prop('disabled', true);
-				} else {
-					$('#accessLevel').prop('disabled', false);
 				}
 			}
 
@@ -186,23 +172,6 @@
 								<spring:message code="page.checkbox.unchanged"/>
 							</label>
 						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4">
-						<spring:message code="users.label.accessLevel"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="accessLevel" items="${accessLevels}"
-									 itemLabel="description" 
-									 class="form-control selectpicker"/>
-						<div class="checkbox">
-							<label>
-								<form:checkbox path="accessLevelUnchanged" id="accessLevelUnchanged"/>
-								<spring:message code="page.checkbox.unchanged"/>
-							</label>
-						</div>
-						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

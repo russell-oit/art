@@ -108,7 +108,7 @@ public class UserService {
 		userRoleService = new UserRoleService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS AU";
 
 	/**
 	 * Maps a resultset to an object
@@ -240,7 +240,7 @@ public class UserService {
 	}
 
 	/**
-	 * Returns admin users (junior admin and above)
+	 * Returns admin users (those with configure_reports_partial permission)
 	 *
 	 * @return admin users
 	 * @throws SQLException
@@ -249,9 +249,37 @@ public class UserService {
 	public List<User> getAdminUsers() throws SQLException {
 		logger.debug("Entering getAdminUsers");
 
-		String sql = SQL_SELECT_ALL + " WHERE ACCESS_LEVEL>=" + AccessLevel.JuniorAdmin.getValue();
+		String sql = SQL_SELECT_ALL
+				//permission on user
+				+ " WHERE (EXISTS (SELECT 1"
+				+ " FROM ART_USER_PERMISSION_MAP AUPM"
+				+ " WHERE AUPM.USER_ID=AU.USER_ID AND AUPM.PERMISSION_ID=?)"
+				+ " AND NOT EXISTS (SELECT 1"
+				+ " FROM ART_USER_PERMISSION_MAP AUPM"
+				+ " WHERE AUPM.USER_ID=AU.USER_ID AND AUPM.PERMISSION_ID=?))"
+				+ " OR "
+				//permission on role
+				+ " (EXISTS (SELECT 1"
+				+ " FROM ART_USER_ROLE_MAP AURM"
+				+ " INNER JOIN ART_ROLE_PERMISSION_MAP ARPM"
+				+ " ON AURM.ROLE_ID=ARPM.ROLE_ID"
+				+ " WHERE AURM.USER_ID=AU.USER_ID AND ARPM.PERMISSION_ID=?)"
+				+ " AND NOT EXISTS (SELECT 1"
+				+ " FROM ART_USER_ROLE_MAP AURM"
+				+ " INNER JOIN ART_ROLE_PERMISSION_MAP ARPM"
+				+ " ON AURM.ROLE_ID=ARPM.ROLE_ID"
+				+ " WHERE AURM.USER_ID=AU.USER_ID AND ARPM.PERMISSION_ID=?))";
+
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
-		return dbService.query(sql, h);
+
+		final int CONFIGURE_REPORTS_PERMISSION_ID = 13;
+		final int CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID = 34;
+
+		return dbService.query(sql, h,
+				CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID,
+				CONFIGURE_REPORTS_PERMISSION_ID,
+				CONFIGURE_REPORTS_PARTIAL_PERMISSION_ID,
+				CONFIGURE_REPORTS_PERMISSION_ID);
 	}
 
 	/**
@@ -592,20 +620,6 @@ public class UserService {
 
 			List<Object> valuesList = new ArrayList<>();
 			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isCanChangePassword()));
-			valuesList.add(actionUser.getUsername());
-			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
-			valuesList.addAll(idsList);
-
-			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
-
-			dbService.update(sql, valuesArray);
-		}
-		if (!multipleUserEdit.isAccessLevelUnchanged()) {
-			sql = "UPDATE ART_USERS SET ACCESS_LEVEL=?, UPDATED_BY=?, UPDATE_DATE=?"
-					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", idsList.size()) + ")";
-
-			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleUserEdit.getAccessLevel().getValue());
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(idsList);

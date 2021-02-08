@@ -414,7 +414,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equalsAny(page, "reportsConfig", "uploadResources",
 				"reportConfig")
-				|| StringUtils.endsWithAny(page, "Report", "Reports", "Queries")) {
+				|| StringUtils.endsWithAny(page, "Report", "Reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
+				authorised = true;
+			}
+		} else if (StringUtils.endsWith(page, "Queries")) {
 			if (user.hasPermission("configure_reports")) {
 				authorised = true;
 			}
@@ -453,7 +457,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equals(page, "drilldowns")
 				|| StringUtils.endsWithAny(page, "Drilldown", "Drilldowns")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "adminRights", "adminRightsConfig")
@@ -478,27 +482,27 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 			}
 		} else if (StringUtils.equalsAny(page, "rules", "reportRules")
 				|| StringUtils.endsWithAny(page, "Rule", "Rules")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "parameters", "reportParameterConfig")
 				|| StringUtils.endsWithAny(page, "Parameter", "Parameters")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "ruleValues", "ruleValuesConfig")
 				|| StringUtils.endsWithAny(page, "RuleValue", "RuleValues")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "paramDefaults", "paramDefaultsConfig")
 				|| StringUtils.endsWithAny(page, "ParamDefault", "ParamDefaults")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equalsAny(page, "fixedParamValues", "fixedParamValuesConfig")
 				|| StringUtils.endsWithAny(page, "FixedParamValue", "FixedParamValues")) {
-			if (user.hasPermission("configure_reports")) {
+			if (user.hasAnyConfigureReportsPermission()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "smtpServers")

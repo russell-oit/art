@@ -150,7 +150,7 @@ public class RolePermissionService {
 	 * @param permissionId the permission id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"permissions", "roles", "users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"permissions", "roles", "users", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void deleteRolePermission(int roleId, int permissionId) throws SQLException {
 		logger.debug("Entering deleteRolePermission: roleId={}, permissionId={}", roleId, permissionId);
 
@@ -166,7 +166,7 @@ public class RolePermissionService {
 	 * @param role the role
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateRolePermissions(Role role) throws SQLException {
 		Connection conn = null;
 		recreateRolePermissions(role, conn);
@@ -179,7 +179,7 @@ public class RolePermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateRolePermissions(Role role, Connection conn) throws SQLException {
 		logger.debug("Entering recreateRolePermissions: role={}", role);
 
@@ -238,7 +238,7 @@ public class RolePermissionService {
 	 * @param permissions permission ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateRolePermissions(String action, Integer[] roles,
 			Integer[] permissions) throws SQLException {
 
@@ -255,7 +255,7 @@ public class RolePermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"roles", "permissions", "users", "userGroups"}, allEntries = true)
+	@CacheEvict(value = {"roles", "permissions", "users", "userGroups", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateRolePermissions(String action, Integer[] roles,
 			Integer[] permissions, Connection conn) throws SQLException {
 

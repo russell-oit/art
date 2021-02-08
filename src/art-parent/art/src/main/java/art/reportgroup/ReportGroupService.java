@@ -187,7 +187,7 @@ public class ReportGroupService {
 
 	/**
 	 * Returns report groups that an admin can use, according to his access
-	 * level
+	 * rights
 	 *
 	 * @param user the admin user
 	 * @return available report groups
@@ -197,24 +197,43 @@ public class ReportGroupService {
 	public List<ReportGroup> getAdminReportGroups(User user) throws SQLException {
 		logger.debug("Entering getAdminReportGroups: user={}", user);
 
-		if (user == null || user.getAccessLevel() == null) {
+		if (user == null || !user.hasAnyConfigureReportsPermission()) {
 			return Collections.emptyList();
 		}
 
-		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
-
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
-		if (user.hasStandardAdminAndAboveAccessLevel()) {
-			//standard admins and above can work with everything
+		if (user.hasConfigureReportsPermission()) {
+			//can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {
 			String sql = "SELECT AQG.*"
-					+ " FROM ART_QUERY_GROUPS AQG, ART_ADMIN_PRIVILEGES AAP "
-					+ " WHERE AQG.QUERY_GROUP_ID = AAP.VALUE_ID "
-					+ " AND AAP.PRIVILEGE = 'GRP' "
+					+ " FROM ART_QUERY_GROUPS AQG, ART_ADMIN_PRIVILEGES AAP"
+					+ " WHERE AQG.QUERY_GROUP_ID = AAP.VALUE_ID"
+					+ " AND AAP.PRIVILEGE = 'GRP'"
 					+ " AND AAP.USER_ID = ? ";
 			return dbService.query(sql, h, user.getUserId());
 		}
+	}
+
+	/**
+	 * Returns ids for report groups that an admin user can work with
+	 * 
+	 * @param userId the admin's user id
+	 * @return ids of report groups that the admin user can work with
+	 * @throws SQLException 
+	 */
+	@Cacheable("reportGroups")
+	public List<Integer> getAdminReportGroupIds(Integer userId) throws SQLException {
+		logger.debug("Entering getAdminReportGroupIds: userId={}", userId);
+
+		String sql = "SELECT AQG.QUERY_GROUP_ID"
+				+ " FROM ART_QUERY_GROUPS AQG, ART_ADMIN_PRIVILEGES AAP"
+				+ " WHERE AQG.QUERY_GROUP_ID=AAP.VALUE_ID"
+				+ " AND AAP.PRIVILEGE='GRP'"
+				+ " AND AAP.USER_ID=?";
+
+		ResultSetHandler<List<Integer>> h = new ColumnListHandler<>("QUERY_GROUP_ID");
+		return dbService.query(sql, h, userId);
 	}
 
 	/**

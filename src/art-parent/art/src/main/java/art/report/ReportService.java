@@ -45,9 +45,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -327,6 +330,69 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new BasicReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Returns reports that an admin can configure with only basic properties
+	 * filled
+	 *
+	 * @param user the admin user
+	 * @return reports that an admin can configure with only basic properties
+	 * filled
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getAdminReportsBasic(User user) throws SQLException {
+		logger.debug("Entering getAdminReportsBasic: user={}", user);
+
+		if (user == null || !user.hasAnyConfigureReportsPermission()) {
+			return Collections.emptyList();
+		}
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new BasicReportMapper());
+		if (user.hasConfigureReportsPermission()) {
+			//can work with everything
+			return dbService.query(SQL_SELECT_ALL, h);
+		} else {
+			Integer userId = user.getUserId();
+
+			List<Integer> adminGroupIds = reportGroupService.getAdminReportGroupIds(userId);
+			Collections.sort(adminGroupIds);
+
+			String sql = SQL_SELECT_ALL
+					+ " WHERE EXISTS (SELECT 1"
+					+ " FROM ART_REPORT_REPORT_GROUPS ARRG"
+					+ " INNER JOIN ART_ADMIN_PRIVILEGES AAP"
+					+ " ON ARRG.REPORT_GROUP_ID=AAP.VALUE_ID"
+					+ " WHERE AAP.PRIVILEGE='GRP'"
+					+ " AND AAP.USER_ID=?"
+					+ " AND ARRG.REPORT_ID=AQ.QUERY_ID)";
+
+			List<Report> reports = dbService.query(sql, h, userId);
+
+			Iterator<Report> it = reports.iterator();
+			while (it.hasNext()) {
+				Report report = it.next();
+				List<ReportGroup> reportGroups = report.getReportGroups();
+				List<Integer> groupIds = reportGroups.stream()
+						.map(ReportGroup::getReportGroupId).collect(Collectors.toList());
+				Collections.sort(groupIds);
+
+				if (reportGroups.size() > adminGroupIds.size()) {
+					it.remove();
+				} else if (reportGroups.size() == adminGroupIds.size()) {
+					//https://stackoverflow.com/questions/16207718/java-compare-two-lists-object-values
+					//https://stackoverflow.com/questions/1075656/simple-way-to-find-if-two-different-lists-contain-exactly-the-same-elements
+					if (!adminGroupIds.equals(groupIds)) {
+						it.remove();
+					}
+				} else if (!adminGroupIds.containsAll(groupIds)) {
+					it.remove();
+				}
+			}
+
+			return reports;
+		}
 	}
 
 	/**

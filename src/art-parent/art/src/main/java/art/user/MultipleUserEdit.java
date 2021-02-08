@@ -17,7 +17,6 @@
  */
 package art.user;
 
-import art.enums.AccessLevel;
 import art.usergroup.UserGroup;
 import java.io.Serializable;
 import java.util.List;
@@ -35,8 +34,6 @@ public class MultipleUserEdit implements Serializable {
 	private boolean activeUnchanged = true;
 	private boolean canChangePassword;
 	private boolean canChangePasswordUnchanged = true;
-	private AccessLevel accessLevel;
-	private boolean accessLevelUnchanged = true;
 	private List<UserGroup> userGroups;
 	private boolean userGroupsUnchanged = true;
 
@@ -66,34 +63,6 @@ public class MultipleUserEdit implements Serializable {
 	 */
 	public void setCanChangePasswordUnchanged(boolean canChangePasswordUnchanged) {
 		this.canChangePasswordUnchanged = canChangePasswordUnchanged;
-	}
-
-	/**
-	 * @return the accessLevel
-	 */
-	public AccessLevel getAccessLevel() {
-		return accessLevel;
-	}
-
-	/**
-	 * @param accessLevel the accessLevel to set
-	 */
-	public void setAccessLevel(AccessLevel accessLevel) {
-		this.accessLevel = accessLevel;
-	}
-
-	/**
-	 * @return the accessLevelUnchanged
-	 */
-	public boolean isAccessLevelUnchanged() {
-		return accessLevelUnchanged;
-	}
-
-	/**
-	 * @param accessLevelUnchanged the accessLevelUnchanged to set
-	 */
-	public void setAccessLevelUnchanged(boolean accessLevelUnchanged) {
-		this.accessLevelUnchanged = accessLevelUnchanged;
 	}
 
 	/**

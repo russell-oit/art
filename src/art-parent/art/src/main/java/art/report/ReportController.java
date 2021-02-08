@@ -287,14 +287,16 @@ public class ReportController {
 	@GetMapping("/getConfigReports")
 	public @ResponseBody
 	AjaxResponse getConfigReports(Locale locale, HttpServletRequest request,
-			HttpServletResponse httpResponse) throws SQLException, IOException {
+			HttpServletResponse httpResponse, HttpSession session) throws SQLException, IOException {
 
 		logger.debug("Entering getConfigReports");
 
 		AjaxResponse ajaxResponse = new AjaxResponse();
 
 		try {
-			List<Report> reports = reportService.getAllReportsBasic();
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			
+			List<Report> reports = reportService.getAdminReportsBasic(sessionUser);
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
 			AjaxTableHelper ajaxTableHelper = new AjaxTableHelper(messageSource, locale);

@@ -119,6 +119,9 @@ Display edit user page
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
+
+				<form:hidden path="accessLevel"/>
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -226,17 +229,6 @@ Display edit user page
 						<div class="checkbox">
 							<form:checkbox path="publicUser" id="publicUser" class="switch-yes-no"/>
 						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4">
-						<spring:message code="users.label.accessLevel"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="accessLevel" items="${accessLevels}"
-									 itemLabel="description" 
-									 class="form-control selectpicker"/>
-						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

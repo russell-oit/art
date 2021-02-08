@@ -150,7 +150,7 @@ public class UserPermissionService {
 	 * @param permissionId the permission id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"permissions", "users"}, allEntries = true)
+	@CacheEvict(value = {"permissions", "users", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void deleteUserPermission(int userId, int permissionId) throws SQLException {
 		logger.debug("Entering deleteUserPermission: userId={}, permissionId={}", userId, permissionId);
 
@@ -166,7 +166,7 @@ public class UserPermissionService {
 	 * @param user the user
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"users", "permissions", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserPermissions(User user) throws SQLException {
 		Connection conn = null;
 		recreateUserPermissions(user, conn);
@@ -179,7 +179,7 @@ public class UserPermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"users", "permissions", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void recreateUserPermissions(User user, Connection conn) throws SQLException {
 		logger.debug("Entering recreateUserPermissions: user={}", user);
 
@@ -237,7 +237,7 @@ public class UserPermissionService {
 	 * @param permissions permission ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"users", "permissions", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserPermissions(String action, Integer[] users,
 			Integer[] permissions) throws SQLException {
 
@@ -254,7 +254,7 @@ public class UserPermissionService {
 	 * @param conn the connection to use
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"users", "permissions"}, allEntries = true)
+	@CacheEvict(value = {"users", "permissions", "reports", "reportGroups", "datasources"}, allEntries = true)
 	public void updateUserPermissions(String action, Integer[] users,
 			Integer[] permissions, Connection conn) throws SQLException {
 

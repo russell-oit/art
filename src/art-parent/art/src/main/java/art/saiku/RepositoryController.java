@@ -89,7 +89,7 @@ public class RepositoryController {
 			boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, reportId);
 			boolean canOverwrite;
 
-			if (exclusiveAccess || sessionUser.hasStandardAdminAndAboveAccessLevel()) {
+			if (exclusiveAccess || sessionUser.hasConfigureReportsPermission()) {
 				canOverwrite = true;
 			} else {
 				canOverwrite = false;
@@ -128,7 +128,7 @@ public class RepositoryController {
 		boolean exclusiveAccess = reportService.hasOwnerAccess(sessionUser, reportId);
 		boolean canDelete;
 
-		if (exclusiveAccess || sessionUser.hasStandardAdminAndAboveAccessLevel()) {
+		if (exclusiveAccess || sessionUser.hasConfigureReportsPermission()) {
 			canDelete = true;
 		} else {
 			canDelete = false;

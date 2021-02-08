@@ -74,7 +74,9 @@ QueryBuilder.regional['es'] = {
     "datetime_between_invalid": "Valores Inválidos, {0} es mayor que {1}",
     "boolean_not_valid": "No es booleano",
     "operator_not_multiple": "El operador \"{1}\" no puede aceptar valores multiples"
-  }
+  },
+  "invert": "Invertir",
+  "NOT": "NO"
 };
 
 QueryBuilder.defaults({ lang_code: 'es' });

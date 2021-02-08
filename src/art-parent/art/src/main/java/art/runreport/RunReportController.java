@@ -228,20 +228,22 @@ public class RunReportController {
 			sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (!sessionUser.hasConfigureReportsPermission()) {
-				if (!report.isActive()) {
-					model.addAttribute("message", "reports.message.reportDisabled");
-					return errorPage;
-				}
+				if (!(sessionUser.hasOnlyConfigureReportsPartialPermission() && reportId == 0)) {
+					if (!report.isActive()) {
+						model.addAttribute("message", "reports.message.reportDisabled");
+						return errorPage;
+					}
 
-				if (!reportService.canUserRunReport(sessionUser, reportId)) {
-					model.addAttribute("message", "reports.message.noPermission");
-					return errorPage;
-				}
+					if (!reportService.canUserRunReport(sessionUser, reportId)) {
+						model.addAttribute("message", "reports.message.noPermission");
+						return errorPage;
+					}
 
-				if (runningReportsCount > Config.getSettings().getMaxRunningReports()) {
-					logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
-					model.addAttribute("message", "reports.message.maxRunningReportsReached");
-					return errorPage;
+					if (runningReportsCount > Config.getSettings().getMaxRunningReports()) {
+						logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
+						model.addAttribute("message", "reports.message.maxRunningReportsReached");
+						return errorPage;
+					}
 				}
 			}
 
