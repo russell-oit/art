@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>5.2-SNAPSHOT</version>
+		<version>5.2</version>
 	</parent>
 	
 	<artifactId>calcite-file-art</artifactId>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>calcite-csv-art</artifactId>
-			<version>5.2-SNAPSHOT</version>
+			<version>5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.calcite</groupId>
