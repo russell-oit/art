@@ -53,7 +53,7 @@ QueryBuilder.regional['it'] = {
   "errors": {
     "no_filter": "Nessun filtro selezionato",
     "empty_group": "Il gruppo è vuoto",
-    "radio_empty": "No value selected",
+    "radio_empty": "Nessun valore selezionato",
     "checkbox_empty": "Nessun valore selezionato",
     "select_empty": "Nessun valore selezionato",
     "string_empty": "Valore vuoto",
@@ -66,13 +66,17 @@ QueryBuilder.regional['it'] = {
     "number_exceed_min": "Deve essere maggiore di {0}",
     "number_exceed_max": "Deve essere minore di {0}",
     "number_wrong_step": "Deve essere multiplo di {0}",
+	"number_between_invalid": "Valori non validi, {0} è maggiore di {1}",
     "datetime_empty": "Valore vuoto",
     "datetime_invalid": "Formato data non valido ({0})",
     "datetime_exceed_min": "Deve essere successivo a {0}",
     "datetime_exceed_max": "Deve essere precedente a {0}",
+	"datetime_between_invalid": "Valori non validi, {0} è maggiore di {1}",
     "boolean_not_valid": "Non è un booleano",
     "operator_not_multiple": "L'Operatore {0} non può accettare valori multipli"
-  }
+  },
+  "invert": "Inverti",
+  "NOT": "Non"
 };
 
 QueryBuilder.defaults({ lang_code: 'it' });

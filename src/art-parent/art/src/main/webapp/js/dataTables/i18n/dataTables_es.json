@@ -22,35 +22,35 @@
 	},
 	"select": {
 		"rows": {
-			"_": "%d rows selected",
+			"_": "%d filas seleccionadas",
 			"0": "",
-			"1": "1 row selected"
+			"1": "1 fila seleccionada"
 		},
 		"columns": {
-			"_": "%d columns selected",
+			"_": "%d columnas seleccionadas",
 			"0": "",
-			"1": "1 column selected"
+			"1": "1 columna seleccionada"
 		},
 		"cells": {
-			"_": "%d cells selected",
+			"_": "%d celdas seleccionadas",
 			"0": "",
-			"1": "1 cell selected"
+			"1": "1 celda seleccionada"
 		}
 	},
 	"buttons": {
-		"selected": "Selected",
-		"selectedSingle": "Selected single",
-		"selectAll": "Select all",
-		"selectNone": "Deselect all",
-		"selectRows": "Select rows",
-		"selectColumns": "Select columns",
-		"selectCells": "Select cells",
-		"colvis": "Columns",
-		"colvisRestore": "Restore",
-		"print": "Print",
+		"selected": "Seleccionado",
+		"selectedSingle": "Seleccionado único",
+		"selectAll": "Marcar todos",
+		"selectNone": "Desmarcar todos",
+		"selectRows": "Seleccionar filas",
+		"selectColumns": "Seleccionar columna",
+		"selectCells": "Seleccionar celdas",
+		"colvis": "Columnas",
+		"colvisRestore": "Restaurar",
+		"print": "Imprimir",
 		"excel": "Excel",
 		"pdf": "PDF",
 		"csv": "CSV",
-		"copy": "Copy"
+		"copy": "Copiar"
 	}
 }

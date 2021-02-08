@@ -56,6 +56,6 @@
     "boolean_not_valid": "No es booleano",
     "operator_not_multiple": "El operador \"{1}\" no puede aceptar valores multiples"
   },
-  "invert": "Invert",
-  "NOT": "NOT"
+  "invert": "Invertir",
+  "NOT": "NO"
 }
