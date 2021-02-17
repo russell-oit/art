@@ -34,18 +34,42 @@
 		momentDateFormat = '${defaultFormat}';
 	}
 
+	var dpOptions;
+	var paramOptionsString = '${encode:forJavaScript(reportParam.parameter.options)}';
+	if (paramOptionsString) {
+		var paramOptions = JSON.parse(paramOptionsString);
+		var dpOptions = paramOptions.dp;
+		if (dpOptions) {
+			//https://stackoverflow.com/questions/858181/how-to-check-a-not-defined-variable-in-javascript
+			//var datepickerOptions will be defined in external js/template file
+			if (typeof datepickerOptions !== 'undefined') {
+				$.extend(dpOptions, datepickerOptions);
+			}
+		}
+	}
+
+	if (!dpOptions && typeof datepickerOptions !== 'undefined') {
+		dpOptions = datepickerOptions;
+	}
+
 	//must use useStrict in addition to keepInvalid if using the format property
 	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/1711
 	//https://github.com/Eonasdan/bootstrap-datetimepicker/issues/919
 	//https://eonasdan.github.io/bootstrap-datetimepicker/Options/
-	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker({
+	var options = {
 		locale: '${locale}',
 		format: momentDateFormat,
 		keepInvalid: true,
 		useStrict: true
-	});
+	};
+
+	if (dpOptions) {
+		$.extend(options, dpOptions);
+	}
 	
-	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').on('dp.change', function(e) {
+	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').datetimepicker(options);
+
+	$('#div-${encode:forJavaScript(reportParam.htmlElementName)}').on('dp.change', function (e) {
 		var chosenDate = e.date.format(momentDateFormat);
 		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').val(chosenDate);
 		$('#${encode:forJavaScript(reportParam.hiddenHtmlElementName)}').change();
