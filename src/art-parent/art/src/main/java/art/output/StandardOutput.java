@@ -813,6 +813,7 @@ public abstract class StandardOutput {
 			}
 
 			if (rowCount > maxRows) {
+				logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 				//row limit exceeded
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
@@ -959,6 +960,7 @@ public abstract class StandardOutput {
 			}
 
 			if (rowCount > maxRows) {
+				logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 				//row limit exceeded
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
@@ -1382,6 +1384,7 @@ public abstract class StandardOutput {
 				}
 
 				if (rowCount > maxRows) {
+					logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 					//row limit exceeded
 					for (int i = 0; i < totalColumnCount; i++) {
 						addCellString("...");
@@ -2326,6 +2329,7 @@ public abstract class StandardOutput {
 				}
 
 				if (rowCount > maxRows) {
+					logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 					//row limit exceeded
 					for (int k = 0; k < totalColumnCount; k++) {
 						addCellString("...");
@@ -2397,6 +2401,7 @@ public abstract class StandardOutput {
 				}
 
 				if (rowCount > maxRows) {
+					logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 					//row limit exceeded
 					for (int k = 0; k < totalColumnCount; k++) {
 						addCellString("...");
@@ -2548,6 +2553,7 @@ public abstract class StandardOutput {
 				}
 
 				if (rowCount > maxRows) {
+					logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 					//row limit exceeded
 					for (int k = 0; k < totalColumnCount; k++) {
 						addCellString("...");
@@ -2619,6 +2625,7 @@ public abstract class StandardOutput {
 				}
 
 				if (rowCount > maxRows) {
+					logger.debug("rowCount={}, maxRows={}, reportFormat={}", rowCount, maxRows, reportFormat);
 					//row limit exceeded
 					for (int k = 0; k < totalColumnCount; k++) {
 						addCellString("...");
