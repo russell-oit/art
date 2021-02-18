@@ -55,6 +55,7 @@ import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
+import art.runreport.ReportOutputGeneratorResult;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
@@ -2831,9 +2832,17 @@ public class ReportJob implements org.quartz.Job {
 			reportOutputGenerator.setDynamicModifyPassword(dynamicModifyPassword);
 
 			try {
-				reportOutputGenerator.generateOutput(report, reportRunner,
+				ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
 						reportFormat, locale, paramProcessorResult, writer,
 						outputFileName, user, messageSource);
+				if (!outputResult.isSuccess()) {
+					runMessage = outputResult.getMessage();
+					fileName = "";
+					File generatedFile = new File(outputFileName);
+					if (generatedFile.exists()) {
+						generatedFile.delete();
+					}
+				}
 			} finally {
 				if (writer != null) {
 					writer.close();
