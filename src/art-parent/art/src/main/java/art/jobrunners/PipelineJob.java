@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.quartz.DateBuilder;
 import static org.quartz.DateBuilder.futureDate;
 import org.quartz.JobBuilder;
@@ -167,8 +168,14 @@ public class PipelineJob implements org.quartz.Job {
 			}
 
 			if (StringUtils.startsWith(part, "schedule:")) {
+				List<Integer> ids;
 				String scheduleName = StringUtils.substringAfter(part, "schedule:").trim();
-				List<Integer> ids = jobService.getJobIdsWithSchedule(scheduleName);
+				if (NumberUtils.isCreatable(scheduleName)) {
+					int scheduleId = NumberUtils.toInt(scheduleName);
+					ids = jobService.getJobIdsWithSchedule(scheduleId);
+				} else {
+					ids = jobService.getJobIdsWithSchedule(scheduleName);
+				}
 				//https://www.techiedelight.com/convert-list-integer-list-string-java/
 				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);

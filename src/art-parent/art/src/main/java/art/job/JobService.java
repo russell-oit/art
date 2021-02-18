@@ -545,7 +545,7 @@ public class JobService {
 				cachedDatasourceId = null;
 			}
 		}
-		
+
 		Integer startConditionId = null;
 		if (job.getStartCondition() != null) {
 			startConditionId = job.getStartCondition().getStartConditionId();
@@ -1146,6 +1146,33 @@ public class JobService {
 
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
 		List<Number> numberIds = dbService.query(sql, h, scheduleName);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Returns ids for jobs that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return ids for jobs that use a given schedule
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getJobIdsWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getJobIdsWithSchedule: schedulId='{}'", scheduleId);
+
+		String sql = "SELECT JOB_ID"
+				+ " FROM ART_JOBS"
+				+ " WHERE SCHEDULE_ID=?"
+				+ " ORDER BY JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, scheduleId);
 
 		List<Integer> integerIds = new ArrayList<>();
 		for (Number number : numberIds) {

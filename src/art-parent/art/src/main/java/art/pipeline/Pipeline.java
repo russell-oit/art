@@ -19,6 +19,7 @@ package art.pipeline;
 
 import art.schedule.Schedule;
 import art.startcondition.StartCondition;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -32,16 +33,20 @@ import org.apache.commons.lang3.StringUtils;
 public class Pipeline implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	public static int PARALLEL_PER_MINUTE_DEFAULT = 10;
 
 	private int pipelineId;
 	private String name;
 	private String description;
 	private String serial;
+	private String parallel;
+	private int parallelPerMinute;
 	private boolean continueOnError;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+	@JsonIgnore
 	private List<Integer> runningJobs;
 	private Schedule schedule;
 	private String quartzCalendarNames;
@@ -52,6 +57,34 @@ public class Pipeline implements Serializable {
 	 */
 	public StartCondition getStartCondition() {
 		return startCondition;
+	}
+
+	/**
+	 * @return the parallel
+	 */
+	public String getParallel() {
+		return parallel;
+	}
+
+	/**
+	 * @param parallel the parallel to set
+	 */
+	public void setParallel(String parallel) {
+		this.parallel = parallel;
+	}
+
+	/**
+	 * @return the parallelPerMinute
+	 */
+	public int getParallelPerMinute() {
+		return parallelPerMinute;
+	}
+
+	/**
+	 * @param parallelPerMinute the parallelPerMinute to set
+	 */
+	public void setParallelPerMinute(int parallelPerMinute) {
+		this.parallelPerMinute = parallelPerMinute;
 	}
 
 	/**

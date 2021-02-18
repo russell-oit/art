@@ -116,6 +116,8 @@ public class PipelineService {
 			pipeline.setName(rs.getString("NAME"));
 			pipeline.setDescription(rs.getString("DESCRIPTION"));
 			pipeline.setSerial(rs.getString("SERIAL"));
+			pipeline.setParallel(rs.getString("PARALLEL"));
+			pipeline.setParallelPerMinute(rs.getInt("PARALLEL_PER_MINUTE"));
 			pipeline.setContinueOnError(rs.getBoolean("CONTINUE_ON_ERROR"));
 			pipeline.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 			pipeline.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -484,17 +486,20 @@ public class PipelineService {
 
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PIPELINES"
-					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL,"
+					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL, PARALLEL,"
+					+ " PARALLEL_PER_MINUTE,"
 					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
 					+ " START_CONDITION_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 			Object[] values = {
 				newRecordId,
 				pipeline.getName(),
 				pipeline.getDescription(),
 				pipeline.getSerial(),
+				pipeline.getParallel(),
+				pipeline.getParallelPerMinute(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
@@ -506,7 +511,8 @@ public class PipelineService {
 			affectedRows = dbService.update(conn, sql, values);
 		} else {
 			String sql = "UPDATE ART_PIPELINES SET NAME=?, DESCRIPTION=?,"
-					+ "	SERIAL=?, CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
+					+ "	SERIAL=?, PARALLEL=?, PARALLEL_PER_MINUTE=?,"
+					+ " CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PIPELINE_ID=?";
@@ -515,6 +521,8 @@ public class PipelineService {
 				pipeline.getName(),
 				pipeline.getDescription(),
 				pipeline.getSerial(),
+				pipeline.getParallel(),
+				pipeline.getParallelPerMinute(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),

@@ -49,7 +49,7 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -101,7 +101,7 @@
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
-				
+
 				<form:hidden path="quartzCalendarNames" />
 
 				<div class="form-group">
@@ -137,25 +137,54 @@
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="serial">
-						<spring:message code="pipelines.label.serial"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="serial" maxlength="100" class="form-control"/>
-						<form:errors path="serial" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="continueOnError">
-						<spring:message code="pipelines.label.continueOnError"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="continueOnError" id="continueOnError" class="switch-yes-no"/>
+
+				<fieldset>
+					<legend><spring:message code="pipelines.label.serial"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="serial">
+							<spring:message code="pipelines.label.serial"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="serial" maxlength="100" class="form-control"/>
+							<form:errors path="serial" cssClass="error"/>
 						</div>
 					</div>
-				</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="continueOnError">
+							<spring:message code="pipelines.label.continueOnError"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="continueOnError" id="continueOnError" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<legend><spring:message code="pipelines.label.parallel"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="parallel">
+							<spring:message code="pipelines.label.parallel"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="parallel" maxlength="100" class="form-control"/>
+							<form:errors path="parallel" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="parallelPerMinute">
+							<spring:message code="pipelines.label.perMinute"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="parallelPerMinute" maxlength="4" class="form-control"/>
+							<form:errors path="parallelPerMinute" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<hr>
+
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="schedule">
 						<spring:message code="jobs.text.schedule"/>
