@@ -1214,6 +1214,39 @@ public class JobService {
 
 		return integerIds;
 	}
+	
+	/**
+	 * Returns ids for jobs whose report is in certain report groups
+	 *
+	 * @param reportGroupIds the report group ids
+	 * @return ids for jobs whose report is in certain report groups
+	 * @throws SQLException
+	 */
+	public List<Integer> getJobIdsWithReportGroups(Integer[] reportGroupIds) throws SQLException {
+		logger.debug("Entering getJobIdsWithReportGroups");
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ"
+				+ " WHERE EXISTS("
+				+ " SELECT 1"
+				+ " FROM ART_QUERY_GROUPS AQG"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE AJ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND AQG.QUERY_GROUP_ID IN(" + StringUtils.repeat("?", ",", reportGroupIds.length) + ")"
+				+ " )"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, (Object[]) reportGroupIds);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
 
 	/**
 	 * Returns jobs that use a given start condition

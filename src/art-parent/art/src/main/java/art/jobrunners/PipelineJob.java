@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
@@ -180,11 +181,25 @@ public class PipelineJob implements org.quartz.Job {
 				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);
 			} else if (StringUtils.startsWith(part, "reportGroup:")) {
-				String reportGroupNames = StringUtils.substringAfter(part, "reportGroup:");
-				String[] reportGroupNamesArray = StringUtils.split(reportGroupNames, ";");
-				String[] trimmedReportGroupNamesArray = Arrays.stream(reportGroupNamesArray).map(String::trim).toArray(String[]::new);
-				List<Integer> ids = jobService.getJobIdsWithReportGroups(trimmedReportGroupNamesArray);
-				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
+				String reportGroupDetails = StringUtils.substringAfter(part, "reportGroup:");
+				String[] reportGroupDetailsArray = StringUtils.split(reportGroupDetails, ";");
+				String[] trimmedReportGroupDetailsArray = Arrays.stream(reportGroupDetailsArray).map(String::trim).toArray(String[]::new);
+				Map<Boolean, List<String>> partitionedValues = Arrays.stream(trimmedReportGroupDetailsArray).collect(Collectors.partitioningBy(s -> NumberUtils.isCreatable(s)));
+				List<String> reportGroupStringIds = partitionedValues.get(true);
+				List<String> reportGroupNames = partitionedValues.get(false);
+				List<Integer> allIds = new ArrayList<>();
+				if (!reportGroupStringIds.isEmpty()) {
+					List<Integer> reportGroupIds = reportGroupStringIds.stream().map(Integer::parseInt).collect(Collectors.toList());
+					Integer[] reportGroupIdsArray = reportGroupIds.toArray(new Integer[0]);
+					List<Integer> idsFromIds = jobService.getJobIdsWithReportGroups(reportGroupIdsArray);
+					allIds.addAll(idsFromIds);
+				}
+				if (!reportGroupNames.isEmpty()) {
+					String[] reportGroupNamesArray = reportGroupNames.toArray(new String[0]);
+					List<Integer> idsFromNames = jobService.getJobIdsWithReportGroups(reportGroupNamesArray);
+					allIds.addAll(idsFromNames);
+				}
+				List<String> stringList = allIds.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);
 			} else if (StringUtils.contains(part, "-")) {
 				String start = StringUtils.substringBefore(part, "-").trim();
