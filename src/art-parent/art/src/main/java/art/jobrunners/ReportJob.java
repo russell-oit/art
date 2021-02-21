@@ -248,16 +248,18 @@ public class ReportJob implements org.quartz.Job {
 		Boolean startConditionOk = null;
 		StartCondition startCondition = null;
 		Integer retryAttemptsLeft = null;
+		String quartzJobName = null;
 
 		try {
 			JobDataMap dataMap = context.getMergedJobDataMap();
 			jobId = dataMap.getInt("jobId");
 			runUsername = dataMap.getString("username");
 			serial = dataMap.getString("serial");
+			quartzJobName = dataMap.getString("quartzJobName");
 
 			if (dataMap.containsKey("pipelineId")) {
 				pipelineId = dataMap.getInt("pipelineId");
-				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId);
+				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId, quartzJobName, serial);
 			}
 
 			initializeProgressLogger();
@@ -483,6 +485,10 @@ public class ReportJob implements org.quartz.Job {
 		pipelineRunningJobService.removePipelineRunningJob(pipelineId, currentJobId);
 
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
+			return;
+		}
+		
+		if(StringUtils.isBlank(serial)){
 			return;
 		}
 

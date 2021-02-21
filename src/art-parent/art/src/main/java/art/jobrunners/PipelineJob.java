@@ -128,12 +128,19 @@ public class PipelineJob implements org.quartz.Job {
 
 				if (runPipeline) {
 					String serial = pipeline.getSerial();
-					String finalSerial = processSerial(serial);
+					String finalSerial = processDefinition(serial);
 					String[] serialArray = StringUtils.split(finalSerial, ",");
 					if (serialArray != null && serialArray.length > 0) {
 						String firstJobIdString = serialArray[0].trim();
 						int firstJobId = Integer.parseInt(firstJobIdString);
 						startSerialPipeline(firstJobId, finalSerial, pipeline.getPipelineId());
+					}
+
+					String parallel = pipeline.getParallel();
+					String finalParallel = processDefinition(parallel);
+					String[] parallelArray = StringUtils.split(finalParallel, ",");
+					if (parallelArray != null && parallelArray.length > 0) {
+						startParallelPipeline(finalParallel, pipeline);
 					}
 				}
 			}
@@ -143,26 +150,26 @@ public class PipelineJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Returns a serial definition with ranges flattened
+	 * Returns a pipeline definition with ranges flattened
 	 *
-	 * @param serial the initial serial definition
-	 * @return serial definition with ranges flattened
+	 * @param definition the initial pipeline definition
+	 * @return pipeline definition with ranges flattened
 	 * @throws java.sql.SQLException
 	 */
-	private String processSerial(String serial) throws SQLException {
-		if (StringUtils.isBlank(serial)) {
+	private String processDefinition(String definition) throws SQLException {
+		if (StringUtils.isBlank(definition)) {
 			return null;
 		}
 
-		String[] serialArray = StringUtils.split(serial, ",");
+		String[] definitionArray = StringUtils.split(definition, ",");
 		//https://stackoverflow.com/questions/1128723/how-do-i-determine-whether-an-array-contains-a-particular-value-in-java
-		if (Arrays.stream(serialArray).anyMatch(s -> StringUtils.equalsIgnoreCase(s.trim(), "all"))) {
+		if (Arrays.stream(definitionArray).anyMatch(s -> StringUtils.equalsIgnoreCase(s.trim(), "all"))) {
 			List<Integer> allJobIds = jobService.getAllJobIds();
 			return StringUtils.join(allJobIds, ",");
 		}
 
 		List<String> finalList = new ArrayList<>();
-		for (String part : serialArray) {
+		for (String part : definitionArray) {
 			part = StringUtils.trimToEmpty(part);
 			if (StringUtils.isBlank(part)) {
 				continue;
@@ -226,9 +233,9 @@ public class PipelineJob implements org.quartz.Job {
 			}
 		}
 
-		String finalSerial = StringUtils.join(finalList, ",");
+		String finalDefinition = StringUtils.join(finalList, ",");
 
-		return finalSerial;
+		return finalDefinition;
 	}
 
 	/**
@@ -248,5 +255,25 @@ public class PipelineJob implements org.quartz.Job {
 
 		pipelineService.uncancelPipeline(pipelineId);
 		jobService.scheduleSerialPipelineJob(jobId, serial, pipelineId);
+	}
+
+	/**
+	 * Starts a serial pipeline
+	 *
+	 * @param jobId the job id
+	 * @param parallel the serial jobs to run
+	 * @param pipeline the pipeline
+	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	private void startParallelPipeline(String parallel, Pipeline pipeline)
+			throws SchedulerException, SQLException {
+
+		logger.debug("Entering startSerialPipeline: parallel='{}', pipeline={}",
+				 parallel, pipeline);
+
+		int pipelineId = pipeline.getPipelineId();
+		pipelineService.uncancelPipeline(pipelineId);
+		jobService.scheduleParallelPipelineJob(parallel, pipeline);
 	}
 }

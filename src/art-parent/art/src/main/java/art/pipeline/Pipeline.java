@@ -40,7 +40,7 @@ public class Pipeline implements Serializable {
 	private String description;
 	private String serial;
 	private String parallel;
-	private int parallelPerMinute;
+	private int parallelPerMinute = PARALLEL_PER_MINUTE_DEFAULT;
 	private boolean continueOnError;
 	private Date creationDate;
 	private Date updateDate;
@@ -294,7 +294,7 @@ public class Pipeline implements Serializable {
 
 	/**
 	 * Returns a comma separated string of running jobs for this pipeline
-	 * 
+	 *
 	 * @return a comma separated string of running jobs for this pipeline
 	 */
 	public String getRunningJobsString() {

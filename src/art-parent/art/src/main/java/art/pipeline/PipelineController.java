@@ -260,7 +260,7 @@ public class PipelineController {
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
-				.withIdentity("tempPipelineTrigger-" + runId, "tempTriggerGroup")
+				.withIdentity("tempPipelineTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
 				.startNow()
 				.build();
 
@@ -278,7 +278,7 @@ public class PipelineController {
 		try {
 			pipelineService.cancelPipeline(id);
 			response.setSuccess(true);
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | SchedulerException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

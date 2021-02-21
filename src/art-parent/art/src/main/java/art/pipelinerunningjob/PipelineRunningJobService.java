@@ -18,16 +18,23 @@
 package art.pipelinerunningjob;
 
 import art.dbutils.DbService;
+import art.role.Role;
+import art.role.RoleService;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,16 +57,60 @@ public class PipelineRunningJobService {
 	public PipelineRunningJobService() {
 		dbService = new DbService();
 	}
-	
+
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINE_RUNNING_JOBS";
+
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class PipelineRunningJobMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			PipelineRunningJob job = new PipelineRunningJob();
+
+			job.setPipelineId(rs.getInt("PIPELINE_ID"));
+			job.setJobId(rs.getInt("JOB_ID"));
+			job.setQuartzJobName(rs.getString("QUARTZ_JOB_NAME"));
+			job.setParallel(rs.getBoolean("PARALLEL"));
+
+			return type.cast(job);
+		}
+	}
+
+	/**
+	 * Returns parallel pipeline running jobs for a given pipeline
+	 *
+	 * @param pipelineId the pipeline id
+	 * @return parallel pipeline running jobs
+	 * @throws SQLException
+	 */
+	public List<PipelineRunningJob> getParallelPipelineRunningJobs(int pipelineId) throws SQLException {
+		logger.debug("Entering getParallelPipelineRunningJobs: pipelineId={}", pipelineId);
+
+		String sql = SQL_SELECT_ALL + " WHERE PARALLEL=1 AND PIPELINE_ID=?";
+		ResultSetHandler<List<PipelineRunningJob>> h = new BeanListHandler<>(PipelineRunningJob.class, new PipelineRunningJobMapper());
+		return dbService.query(sql, h, pipelineId);
+	}
+
 	/**
 	 * Returns the ids of jobs currently running as part of a pipeline
-	 * 
+	 *
 	 * @param pipelineId the pipeline id
 	 * @return ids of currently running pipeline jobs
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public List<Integer> getPipelineRunningJobs(int pipelineId) throws SQLException{
-		logger.debug("Entering getPipelineRunningJobs");
+	public List<Integer> getPipelineRunningJobIds(int pipelineId) throws SQLException {
+		logger.debug("Entering getPipelineRunningJobIds: pipelineId={}", pipelineId);
 
 		String sql = "SELECT JOB_ID"
 				+ " FROM ART_PIPELINE_RUNNING_JOBS"
@@ -81,20 +132,32 @@ public class PipelineRunningJobService {
 	 *
 	 * @param pipelineId the pipeline id
 	 * @param jobId the job id
+	 * @param quartzJobName the name of the quartz job
+	 * @param serial the current serial setting
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "pipelines", allEntries = true)
-	public void addPipelineRunningJob(int pipelineId, int jobId) throws SQLException {
-		logger.debug("Entering addPipelineRunningJob: pipelineId={}, jobId={}",
-				pipelineId, jobId);
+	public void addPipelineRunningJob(int pipelineId, int jobId, String quartzJobName,
+			String serial) throws SQLException {
+
+		logger.debug("Entering addPipelineRunningJob: pipelineId={}, jobId={},"
+				+ " quartzJobName='{}', serial='{}'",
+				pipelineId, jobId, quartzJobName, serial);
 
 		String sql = "INSERT INTO ART_PIPELINE_RUNNING_JOBS"
-				+ " (PIPELINE_ID, JOB_ID)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 2) + ")";
+				+ " (PIPELINE_ID, JOB_ID, QUARTZ_JOB_NAME, PARALLEL)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+
+		boolean parallel = false;
+		if (serial == null) {
+			parallel = true;
+		}
 
 		Object[] values = {
 			pipelineId,
-			jobId
+			jobId,
+			quartzJobName,
+			BooleanUtils.toInteger(parallel)
 		};
 
 		dbService.update(sql, values);

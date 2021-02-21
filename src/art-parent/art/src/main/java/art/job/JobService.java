@@ -28,6 +28,7 @@ import art.enums.JobType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
+import art.pipeline.Pipeline;
 import art.report.Report;
 import art.report.ReportService;
 import art.schedule.Schedule;
@@ -60,6 +61,7 @@ import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.DateBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -1086,22 +1088,75 @@ public class JobService {
 				+ " pipelineId={}", jobId, serial, pipelineId);
 
 		String runId = jobId + "-" + ArtUtils.getUniqueId();
+		String quartzJobName = "tempJob-" + runId;
 
 		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
-				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.withIdentity(quartzJobName, ArtUtils.TEMP_JOB_GROUP)
 				.usingJobData("jobId", jobId)
 				.usingJobData("serial", serial)
 				.usingJobData("pipelineId", pipelineId)
+				.usingJobData("quartzJobName", quartzJobName)
 				.usingJobData("tempJob", true)
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
 				.startNow()
 				.build();
 
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		scheduler.scheduleJob(tempJob, tempTrigger);
+	}
+
+	/**
+	 * Schedules a parallel pipeline job
+	 *
+	 * @param parallel the parallel setting
+	 * @param pipeline the pipeline
+	 * @throws SchedulerException
+	 */
+	public void scheduleParallelPipelineJob(String parallel, Pipeline pipeline)
+			throws SchedulerException {
+
+		logger.debug("Entering scheduleSerialPipelineJob: parallel='{}',"
+				+ " pipelineId={}", parallel, pipeline);
+
+		int pipelineId = pipeline.getPipelineId();
+		int parallelPerMinute = pipeline.getParallelPerMinute();
+		if (parallelPerMinute <= 0) {
+			parallelPerMinute = Pipeline.PARALLEL_PER_MINUTE_DEFAULT;
+		}
+
+		String[] parallelArray = StringUtils.split(parallel, ",");
+		int secondCount = 0;
+		for (int i = 0; i < parallelArray.length; i++) {
+			if ((i % parallelPerMinute == 0) && i > 0) {
+				secondCount += 60;
+			}
+
+			int startSecond = ArtUtils.getRandomNumber(1, 60);
+			int effectiveSecondStart = secondCount + startSecond;
+
+			int jobId = Integer.parseInt(parallelArray[i]);
+			String runId = jobId + "-" + ArtUtils.getUniqueId();
+			String quartzJobName = "tempJob-" + runId;
+
+			JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+					.withIdentity(quartzJobName, ArtUtils.TEMP_JOB_GROUP)
+					.usingJobData("jobId", jobId)
+					.usingJobData("pipelineId", pipelineId)
+					.usingJobData("quartzJobName", quartzJobName)
+					.usingJobData("tempJob", true)
+					.build();
+
+			Trigger tempTrigger = TriggerBuilder.newTrigger()
+					.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
+					.startAt(DateBuilder.futureDate(effectiveSecondStart, DateBuilder.IntervalUnit.SECOND))
+					.build();
+
+			Scheduler scheduler = SchedulerUtils.getScheduler();
+			scheduler.scheduleJob(tempJob, tempTrigger);
+		}
 	}
 
 	/**
@@ -1214,7 +1269,7 @@ public class JobService {
 
 		return integerIds;
 	}
-	
+
 	/**
 	 * Returns ids for jobs whose report is in certain report groups
 	 *

@@ -20,6 +20,7 @@ package art.pipeline;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.jobrunners.PipelineJob;
+import art.pipelinerunningjob.PipelineRunningJob;
 import art.pipelinerunningjob.PipelineRunningJobService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
@@ -49,6 +50,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -125,7 +127,7 @@ public class PipelineService {
 			pipeline.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			pipeline.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			List<Integer> runningJobs = pipelineRunningJobService.getPipelineRunningJobs(pipeline.getPipelineId());
+			List<Integer> runningJobs = pipelineRunningJobService.getPipelineRunningJobIds(pipeline.getPipelineId());
 			pipeline.setRunningJobs(runningJobs);
 
 			Schedule schedule = scheduleService.getSchedule(rs.getInt("SCHEDULE_ID"));
@@ -552,12 +554,22 @@ public class PipelineService {
 	 *
 	 * @param pipelineId the pipeline id
 	 * @throws SQLException
+	 * @throws org.quartz.SchedulerException
 	 */
-	public void cancelPipeline(int pipelineId) throws SQLException {
+	public void cancelPipeline(int pipelineId) throws SQLException, SchedulerException {
 		logger.debug("Entering cancelPipeline");
 
 		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1 WHERE PIPELINE_ID=?";
 		dbService.update(sql, pipelineId);
+
+		List<PipelineRunningJob> jobs = pipelineRunningJobService.getParallelPipelineRunningJobs(pipelineId);
+		Scheduler scheduler = SchedulerUtils.getScheduler();
+		if (scheduler != null) {
+			for (PipelineRunningJob job : jobs) {
+				String jobName = job.getQuartzJobName();
+				scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+			}
+		}
 	}
 
 	/**

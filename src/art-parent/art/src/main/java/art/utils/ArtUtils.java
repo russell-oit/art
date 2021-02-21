@@ -88,7 +88,9 @@ public class ArtUtils {
 	public static final String EMAIL_CC = "email_cc"; //column name in data query that contains email cc column
 	public static final String EMAIL_BCC = "email_bcc"; //column name in data query that contains email bcc column
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
+	public static final String TEMP_JOB_GROUP = "tempJobGroup"; //group name for temp quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
+	public static final String TEMP_TRIGGER_GROUP = "tempTriggerGroup"; //group name for temp quartz triggers
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure

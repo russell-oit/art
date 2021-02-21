@@ -343,14 +343,14 @@ public class JobController {
 		String username = sessionUser.getUsername();
 
 		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
-				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.withIdentity("tempJob-" + runId, ArtUtils.TEMP_JOB_GROUP)
 				.usingJobData("jobId", jobId)
 				.usingJobData("username", username)
 				.usingJobData("tempJob", true)
 				.build();
 
 		TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup");
+				.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP);
 
 		if (runDate == null) {
 			//create SimpleTrigger that will fire once, immediately

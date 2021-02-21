@@ -12,6 +12,12 @@
 		</update>
 	</changeSet>
 	<changeSet id="2" author="art">
+		<addColumn tableName="ART_PIPELINE_RUNNING_JOBS">
+			<column name="QUARTZ_JOB_NAME" type="VARCHAR(100)"/>
+			<column name="PARALLEL" type="INTEGER"/>
+		</addColumn>
+	</changeSet>
+	<changeSet id="3" author="art">
 		<addColumn tableName="ART_PIPELINES">
 			<column name="PARALLEL" type="VARCHAR(100)"/>
 			<column name="PARALLEL_PER_MINUTE" type="INTEGER"/>
