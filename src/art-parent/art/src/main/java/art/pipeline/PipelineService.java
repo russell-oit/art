@@ -20,8 +20,8 @@ package art.pipeline;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.jobrunners.PipelineJob;
-import art.pipelinerunningjob.PipelineRunningJob;
 import art.pipelinerunningjob.PipelineRunningJobService;
+import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.schedule.Schedule;
 import art.schedule.ScheduleService;
 import art.startcondition.StartCondition;
@@ -45,6 +45,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,16 +76,19 @@ public class PipelineService {
 	private final PipelineRunningJobService pipelineRunningJobService;
 	private final ScheduleService scheduleService;
 	private final StartConditionService startConditionService;
+	private final PipelineScheduledJobService pipelineScheduledJobService;
 
 	@Autowired
 	public PipelineService(DbService dbService,
 			PipelineRunningJobService pipelineRunningJobService,
-			ScheduleService scheduleService, StartConditionService startConditionService) {
+			ScheduleService scheduleService, StartConditionService startConditionService,
+			PipelineScheduledJobService pipelineScheduledJobService) {
 
 		this.dbService = dbService;
 		this.pipelineRunningJobService = pipelineRunningJobService;
 		this.scheduleService = scheduleService;
 		this.startConditionService = startConditionService;
+		this.pipelineScheduledJobService = pipelineScheduledJobService;
 	}
 
 	public PipelineService() {
@@ -92,6 +96,7 @@ public class PipelineService {
 		pipelineRunningJobService = new PipelineRunningJobService();
 		scheduleService = new ScheduleService();
 		startConditionService = new StartConditionService();
+		pipelineScheduledJobService = new PipelineScheduledJobService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PIPELINES AP";
@@ -135,6 +140,9 @@ public class PipelineService {
 
 			StartCondition startCondition = startConditionService.getStartCondition(rs.getInt("START_CONDITION_ID"));
 			pipeline.setStartCondition(startCondition);
+
+			List<Integer> scheduledJobs = pipelineScheduledJobService.getPipelineScheduledJobIds(pipeline.getPipelineId());
+			pipeline.setScheduledJobs(scheduledJobs);
 
 			return type.cast(pipeline);
 		}
@@ -556,20 +564,29 @@ public class PipelineService {
 	 * @throws SQLException
 	 * @throws org.quartz.SchedulerException
 	 */
+	@CacheEvict(value = "pipelines", allEntries = true)
 	public void cancelPipeline(int pipelineId) throws SQLException, SchedulerException {
-		logger.debug("Entering cancelPipeline");
+		logger.debug("Entering cancelPipeline: pipelineId={}", pipelineId);
 
 		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1 WHERE PIPELINE_ID=?";
 		dbService.update(sql, pipelineId);
 
-		List<PipelineRunningJob> jobs = pipelineRunningJobService.getParallelPipelineRunningJobs(pipelineId);
+		sql = "SELECT QUARTZ_JOB_NAME"
+				+ " FROM ART_PIPELINE_SCHEDULED_JOBS"
+				+ " WHERE PIPELINE_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
+		List<String> quartzJobNames = dbService.query(sql, h, pipelineId);
+
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		if (scheduler != null) {
-			for (PipelineRunningJob job : jobs) {
-				String jobName = job.getQuartzJobName();
-				scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+			for (String jobName : quartzJobNames) {
+				scheduler.deleteJob(jobKey(jobName, ArtUtils.TEMP_JOB_GROUP));
 			}
 		}
+
+		sql = "DELETE FROM ART_PIPELINE_SCHEDULED_JOBS WHERE PIPELINE_ID=?";
+		dbService.update(sql, pipelineId);
 	}
 
 	/**
@@ -578,6 +595,7 @@ public class PipelineService {
 	 * @param pipelineId the pipeline id
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "pipelines", allEntries = true)
 	public void uncancelPipeline(int pipelineId) throws SQLException {
 		logger.debug("Entering uncancelPipeline");
 

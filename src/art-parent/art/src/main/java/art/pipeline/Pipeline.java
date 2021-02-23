@@ -51,12 +51,28 @@ public class Pipeline implements Serializable {
 	private Schedule schedule;
 	private String quartzCalendarNames;
 	private StartCondition startCondition;
+	@JsonIgnore
+	private List<Integer> scheduledJobs;
 
 	/**
 	 * @return the startCondition
 	 */
 	public StartCondition getStartCondition() {
 		return startCondition;
+	}
+
+	/**
+	 * @return the scheduledJobs
+	 */
+	public List<Integer> getScheduledJobs() {
+		return scheduledJobs;
+	}
+
+	/**
+	 * @param scheduledJobs the scheduledJobs to set
+	 */
+	public void setScheduledJobs(List<Integer> scheduledJobs) {
+		this.scheduledJobs = scheduledJobs;
 	}
 
 	/**
@@ -298,7 +314,16 @@ public class Pipeline implements Serializable {
 	 * @return a comma separated string of running jobs for this pipeline
 	 */
 	public String getRunningJobsString() {
-		return StringUtils.join(runningJobs, ",");
+		return StringUtils.join(runningJobs, ", ");
+	}
+
+	/**
+	 * Returns a comma separated string of scheduled jobs for this pipeline
+	 *
+	 * @return a comma separated string of scheduled jobs for this pipeline
+	 */
+	public String getScheduledJobsString() {
+		return StringUtils.join(scheduledJobs, ", ");
 	}
 
 }

@@ -270,7 +270,7 @@ public class PipelineJob implements org.quartz.Job {
 			throws SchedulerException, SQLException {
 
 		logger.debug("Entering startSerialPipeline: parallel='{}', pipeline={}",
-				 parallel, pipeline);
+				parallel, pipeline);
 
 		int pipelineId = pipeline.getPipelineId();
 		pipelineService.uncancelPipeline(pipelineId);

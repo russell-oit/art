@@ -29,6 +29,7 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
 import art.pipeline.Pipeline;
+import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.schedule.Schedule;
@@ -94,13 +95,15 @@ public class JobService {
 	private final SmtpServerService smtpServerService;
 	private final DatasourceService datasourceService;
 	private final StartConditionService startConditionService;
+	private final PipelineScheduledJobService pipelineScheduledJobService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, ScheduleService scheduleService,
 			HolidayService holidayService, DestinationService destinationService,
 			SmtpServerService smtpServerService, DatasourceService datasourceService,
-			StartConditionService startConditionService) {
+			StartConditionService startConditionService,
+			PipelineScheduledJobService pipelineScheduledJobService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -111,6 +114,7 @@ public class JobService {
 		this.smtpServerService = smtpServerService;
 		this.datasourceService = datasourceService;
 		this.startConditionService = startConditionService;
+		this.pipelineScheduledJobService = pipelineScheduledJobService;
 	}
 
 	public JobService() {
@@ -123,6 +127,7 @@ public class JobService {
 		smtpServerService = new SmtpServerService();
 		datasourceService = new DatasourceService();
 		startConditionService = new StartConditionService();
+		pipelineScheduledJobService = new PipelineScheduledJobService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -1095,7 +1100,6 @@ public class JobService {
 				.usingJobData("jobId", jobId)
 				.usingJobData("serial", serial)
 				.usingJobData("pipelineId", pipelineId)
-				.usingJobData("quartzJobName", quartzJobName)
 				.usingJobData("tempJob", true)
 				.build();
 
@@ -1114,9 +1118,10 @@ public class JobService {
 	 * @param parallel the parallel setting
 	 * @param pipeline the pipeline
 	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
 	 */
 	public void scheduleParallelPipelineJob(String parallel, Pipeline pipeline)
-			throws SchedulerException {
+			throws SchedulerException, SQLException {
 
 		logger.debug("Entering scheduleSerialPipelineJob: parallel='{}',"
 				+ " pipelineId={}", parallel, pipeline);
@@ -1145,17 +1150,19 @@ public class JobService {
 					.withIdentity(quartzJobName, ArtUtils.TEMP_JOB_GROUP)
 					.usingJobData("jobId", jobId)
 					.usingJobData("pipelineId", pipelineId)
-					.usingJobData("quartzJobName", quartzJobName)
 					.usingJobData("tempJob", true)
 					.build();
 
+			Date runDate = DateBuilder.futureDate(effectiveSecondStart, DateBuilder.IntervalUnit.SECOND);
 			Trigger tempTrigger = TriggerBuilder.newTrigger()
 					.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
-					.startAt(DateBuilder.futureDate(effectiveSecondStart, DateBuilder.IntervalUnit.SECOND))
+					.startAt(runDate)
 					.build();
 
 			Scheduler scheduler = SchedulerUtils.getScheduler();
 			scheduler.scheduleJob(tempJob, tempTrigger);
+
+			pipelineScheduledJobService.addPipelineScheduledJob(pipelineId, jobId, quartzJobName, runDate);
 		}
 	}
 

@@ -11,7 +11,6 @@
 -- for sql server, replace CLOB with VARCHAR(MAX)
 -- for mysql, replace CLOB with LONGTEXT
 -- for postgresql, replace CLOB with TEXT
--- for cubrid, replace CLOB with STRING
 -- for hsqldb, replace CLOB with LONGVARCHAR
 
 -- ------------------------------------------------
@@ -1269,9 +1268,7 @@ CREATE TABLE ART_PIPELINES
 CREATE TABLE ART_PIPELINE_RUNNING_JOBS
 (
 	PIPELINE_ID INTEGER NOT NULL,
-	JOB_ID INTEGER NOT NULL,
-	QUARTZ_JOB_NAME VARCHAR(100),
-	PARALLEL INTEGER
+	JOB_ID INTEGER NOT NULL
 );
 
 
@@ -1293,4 +1290,15 @@ CREATE TABLE ART_START_CONDITIONS
 	CONSTRAINT art_stcdn_pk PRIMARY KEY(START_CONDITION_ID),
 	CONSTRAINT art_stcdn_uq_nm UNIQUE(NAME)
 );
-	
+
+
+-- ART_PIPELINE_SCHEDULED_JOBS
+-- Stores details of pipeline jobs that are scheduled
+
+CREATE TABLE ART_PIPELINE_SCHEDULED_JOBS
+(
+	PIPELINE_ID INTEGER NOT NULL,
+	JOB_ID INTEGER NOT NULL,
+	QUARTZ_JOB_NAME VARCHAR(100),
+	RUN_DATE TIMESTAMP
+);

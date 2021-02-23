@@ -48,6 +48,7 @@ import art.pipeline.Pipeline;
 import art.pipeline.PipelineJobData;
 import art.pipeline.PipelineService;
 import art.pipelinerunningjob.PipelineRunningJobService;
+import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -232,6 +233,9 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	private PipelineRunningJobService pipelineRunningJobService;
+	
+	@Autowired
+	private PipelineScheduledJobService pipelineScheduledJobService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -248,18 +252,16 @@ public class ReportJob implements org.quartz.Job {
 		Boolean startConditionOk = null;
 		StartCondition startCondition = null;
 		Integer retryAttemptsLeft = null;
-		String quartzJobName = null;
 
 		try {
 			JobDataMap dataMap = context.getMergedJobDataMap();
 			jobId = dataMap.getInt("jobId");
 			runUsername = dataMap.getString("username");
 			serial = dataMap.getString("serial");
-			quartzJobName = dataMap.getString("quartzJobName");
 
 			if (dataMap.containsKey("pipelineId")) {
 				pipelineId = dataMap.getInt("pipelineId");
-				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId, quartzJobName, serial);
+				pipelineRunningJobService.addPipelineRunningJob(pipelineId, jobId);
 			}
 
 			initializeProgressLogger();
@@ -483,6 +485,7 @@ public class ReportJob implements org.quartz.Job {
 				currentJobId, serial, pipelineId, errorOccurred);
 
 		pipelineRunningJobService.removePipelineRunningJob(pipelineId, currentJobId);
+		pipelineScheduledJobService.removePipelineScheduledJob(pipelineId, jobId);
 
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
 			return;
