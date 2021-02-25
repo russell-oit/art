@@ -15,6 +15,7 @@
 		<addColumn tableName="ART_PIPELINES">
 			<column name="PARALLEL" type="VARCHAR(100)"/>
 			<column name="PARALLEL_PER_MINUTE" type="INTEGER"/>
+			<column name="NEXT_SERIAL" type="CLOB"/>
 		</addColumn>
 	</changeSet>
 	<changeSet id="3" author="art">

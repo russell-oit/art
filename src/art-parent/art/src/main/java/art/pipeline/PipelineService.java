@@ -127,6 +127,7 @@ public class PipelineService {
 			pipeline.setParallelPerMinute(rs.getInt("PARALLEL_PER_MINUTE"));
 			pipeline.setContinueOnError(rs.getBoolean("CONTINUE_ON_ERROR"));
 			pipeline.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
+			pipeline.setNextSerial(rs.getString("NEXT_SERIAL"));
 			pipeline.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			pipeline.setCreatedBy(rs.getString("CREATED_BY"));
 			pipeline.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -499,9 +500,9 @@ public class PipelineService {
 					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL, PARALLEL,"
 					+ " PARALLEL_PER_MINUTE,"
 					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
-					+ " START_CONDITION_ID,"
+					+ " START_CONDITION_ID, NEXT_SERIAL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -514,6 +515,7 @@ public class PipelineService {
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
 				startConditionId,
+				pipeline.getNextSerial(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -524,6 +526,7 @@ public class PipelineService {
 					+ "	SERIAL=?, PARALLEL=?, PARALLEL_PER_MINUTE=?,"
 					+ " CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
+					+ " NEXT_SERIAL=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PIPELINE_ID=?";
 
@@ -537,6 +540,7 @@ public class PipelineService {
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
 				startConditionId,
+				pipeline.getNextSerial(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				pipeline.getPipelineId()
@@ -568,7 +572,7 @@ public class PipelineService {
 	public void cancelPipeline(int pipelineId) throws SQLException, SchedulerException {
 		logger.debug("Entering cancelPipeline: pipelineId={}", pipelineId);
 
-		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1 WHERE PIPELINE_ID=?";
+		String sql = "UPDATE ART_PIPELINES SET CANCELLED=1, NEXT_SERIAL=NULL WHERE PIPELINE_ID=?";
 		dbService.update(sql, pipelineId);
 
 		sql = "SELECT QUARTZ_JOB_NAME"
@@ -599,7 +603,7 @@ public class PipelineService {
 	public void uncancelPipeline(int pipelineId) throws SQLException {
 		logger.debug("Entering uncancelPipeline");
 
-		String sql = "UPDATE ART_PIPELINES SET CANCELLED=0 WHERE PIPELINE_ID=?";
+		String sql = "UPDATE ART_PIPELINES SET CANCELLED=0, NEXT_SERIAL=NULL WHERE PIPELINE_ID=?";
 		dbService.update(sql, pipelineId);
 	}
 
@@ -763,6 +767,21 @@ public class PipelineService {
 
 		ResultSetHandler<List<Pipeline>> h = new BeanListHandler<>(Pipeline.class, new PipelineMapper());
 		return dbService.query(sql, h, startConditionId);
+	}
+
+	/**
+	 * Updates the next serial field for a pipeline
+	 *
+	 * @param pipelineId the pipeline id
+	 * @param serial the next serial value
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "pipelines", allEntries = true)
+	public void updateNextSerial(int pipelineId, String serial) throws SQLException {
+		logger.debug("updateNextSerial: pipelineId={}, serial='{}'", pipelineId, serial);
+
+		String sql = "UPDATE ART_PIPELINES SET NEXT_SERIAL=? WHERE PIPELINE_ID=?";
+		dbService.update(sql, serial, pipelineId);
 	}
 
 }

@@ -29,6 +29,7 @@ import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
 import art.pipeline.Pipeline;
+import art.pipeline.PipelineService;
 import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.report.Report;
 import art.report.ReportService;
@@ -96,6 +97,7 @@ public class JobService {
 	private final DatasourceService datasourceService;
 	private final StartConditionService startConditionService;
 	private final PipelineScheduledJobService pipelineScheduledJobService;
+	private final PipelineService pipelineService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
@@ -103,7 +105,8 @@ public class JobService {
 			HolidayService holidayService, DestinationService destinationService,
 			SmtpServerService smtpServerService, DatasourceService datasourceService,
 			StartConditionService startConditionService,
-			PipelineScheduledJobService pipelineScheduledJobService) {
+			PipelineScheduledJobService pipelineScheduledJobService,
+			PipelineService pipelineService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -115,6 +118,7 @@ public class JobService {
 		this.datasourceService = datasourceService;
 		this.startConditionService = startConditionService;
 		this.pipelineScheduledJobService = pipelineScheduledJobService;
+		this.pipelineService = pipelineService;
 	}
 
 	public JobService() {
@@ -128,6 +132,7 @@ public class JobService {
 		datasourceService = new DatasourceService();
 		startConditionService = new StartConditionService();
 		pipelineScheduledJobService = new PipelineScheduledJobService();
+		pipelineService = new PipelineService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -1085,12 +1090,16 @@ public class JobService {
 	 * @param serial the serial setting
 	 * @param pipelineId the pipeline id
 	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
 	 */
 	public void scheduleSerialPipelineJob(int jobId, String serial, int pipelineId)
-			throws SchedulerException {
+			throws SchedulerException, SQLException {
 
 		logger.debug("Entering scheduleSerialPipelineJob: jobId={}, serial='{}',"
 				+ " pipelineId={}", jobId, serial, pipelineId);
+
+		String nextSerial = StringUtils.substringAfter(serial, ",");
+		pipelineService.updateNextSerial(pipelineId, nextSerial);
 
 		String runId = jobId + "-" + ArtUtils.getUniqueId();
 		String quartzJobName = "tempJob-" + runId;

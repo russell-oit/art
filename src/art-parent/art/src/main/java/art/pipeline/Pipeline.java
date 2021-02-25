@@ -53,12 +53,28 @@ public class Pipeline implements Serializable {
 	private StartCondition startCondition;
 	@JsonIgnore
 	private List<Integer> scheduledJobs;
+	@JsonIgnore
+	private String nextSerial;
 
 	/**
 	 * @return the startCondition
 	 */
 	public StartCondition getStartCondition() {
 		return startCondition;
+	}
+
+	/**
+	 * @return the nextSerial
+	 */
+	public String getNextSerial() {
+		return nextSerial;
+	}
+
+	/**
+	 * @param nextSerial the nextSerial to set
+	 */
+	public void setNextSerial(String nextSerial) {
+		this.nextSerial = nextSerial;
 	}
 
 	/**
@@ -324,6 +340,15 @@ public class Pipeline implements Serializable {
 	 */
 	public String getScheduledJobsString() {
 		return StringUtils.join(scheduledJobs, ", ");
+	}
+	
+	/**
+	 * Returns the next serial value with a space after every comma
+	 * 
+	 * @return the next serial value with a space after every comma
+	 */
+	public String getNextSerialForDisplay(){
+		return StringUtils.replace(nextSerial, ",", ", ");
 	}
 
 }
