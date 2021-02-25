@@ -1,5 +1,6 @@
 ART 5.3
 * Allow specifying of datepicker options
+* Added parallel pipelines
 
 ART 5.2
 * Added configure_reports_partial permission to replace user access levels
