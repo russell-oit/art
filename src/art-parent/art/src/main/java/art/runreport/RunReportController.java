@@ -259,18 +259,7 @@ public class RunReportController {
 				selfServiceHelper.applySelfServiceFields(report, sessionUser, runId);
 			}
 
-			ReportFormat reportFormat;
-			String reportFormatString = request.getParameter("reportFormat");
-			if (StringUtils.isBlank(reportFormatString) || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				String reportDefaultFormat = report.getDefaultReportFormat();
-				if (StringUtils.isBlank(reportDefaultFormat) || StringUtils.equalsIgnoreCase(reportDefaultFormat, "default")) {
-					reportFormat = runReportHelper.getDefaultReportFormat(reportType);
-				} else {
-					reportFormat = ReportFormat.toEnum(reportDefaultFormat);
-				}
-			} else {
-				reportFormat = ReportFormat.toEnum(reportFormatString);
-			}
+			ReportFormat reportFormat = runReportHelper.getReportFormat(request, report);
 
 			if (reportType.isDashboard()) {
 				//https://stackoverflow.com/questions/8585216/spring-forward-with-added-parameters

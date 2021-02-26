@@ -315,13 +315,7 @@ public class ReportRestController {
 
 			RunReportHelper runReportHelper = new RunReportHelper();
 
-			ReportFormat reportFormat;
-			String reportFormatString = request.getParameter("reportFormat");
-			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
-				reportFormat = runReportHelper.getDefaultReportFormat(reportType);
-			} else {
-				reportFormat = ReportFormat.toEnum(reportFormatString);
-			}
+			ReportFormat reportFormat = runReportHelper.getReportFormat(request, report);
 
 			if (reportType != ReportType.Update && reportFormat.isHtml()) {
 				String message = "report format not allowed: " + reportFormat;
