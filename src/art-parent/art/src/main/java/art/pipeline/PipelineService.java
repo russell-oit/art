@@ -123,9 +123,10 @@ public class PipelineService {
 			pipeline.setName(rs.getString("NAME"));
 			pipeline.setDescription(rs.getString("DESCRIPTION"));
 			pipeline.setSerial(rs.getString("SERIAL"));
+			pipeline.setContinueOnError(rs.getBoolean("CONTINUE_ON_ERROR"));
 			pipeline.setParallel(rs.getString("PARALLEL"));
 			pipeline.setParallelPerMinute(rs.getInt("PARALLEL_PER_MINUTE"));
-			pipeline.setContinueOnError(rs.getBoolean("CONTINUE_ON_ERROR"));
+			pipeline.setParallelDurationMins(rs.getInt("PARALLEL_DURATION_MINS"));
 			pipeline.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 			pipeline.setNextSerial(rs.getString("NEXT_SERIAL"));
 			pipeline.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -498,11 +499,11 @@ public class PipelineService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_PIPELINES"
 					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL, PARALLEL,"
-					+ " PARALLEL_PER_MINUTE,"
+					+ " PARALLEL_PER_MINUTE, PARALLEL_DURATION_MINS,"
 					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
 					+ " START_CONDITION_ID, NEXT_SERIAL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -511,6 +512,7 @@ public class PipelineService {
 				pipeline.getSerial(),
 				pipeline.getParallel(),
 				pipeline.getParallelPerMinute(),
+				pipeline.getParallelDurationMins(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
@@ -524,6 +526,7 @@ public class PipelineService {
 		} else {
 			String sql = "UPDATE ART_PIPELINES SET NAME=?, DESCRIPTION=?,"
 					+ "	SERIAL=?, PARALLEL=?, PARALLEL_PER_MINUTE=?,"
+					+ " PARALLEL_DURATION_MINS=?,"
 					+ " CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
 					+ " NEXT_SERIAL=?,"
@@ -536,6 +539,7 @@ public class PipelineService {
 				pipeline.getSerial(),
 				pipeline.getParallel(),
 				pipeline.getParallelPerMinute(),
+				pipeline.getParallelDurationMins(),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),

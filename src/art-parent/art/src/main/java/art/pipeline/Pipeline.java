@@ -39,9 +39,10 @@ public class Pipeline implements Serializable {
 	private String name;
 	private String description;
 	private String serial;
+	private boolean continueOnError;
 	private String parallel;
 	private int parallelPerMinute = PARALLEL_PER_MINUTE_DEFAULT;
-	private boolean continueOnError;
+	private int parallelDurationMins;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
@@ -57,10 +58,31 @@ public class Pipeline implements Serializable {
 	private String nextSerial;
 
 	/**
+	 * @return the parallelDurationMins
+	 */
+	public int getParallelDurationMins() {
+		return parallelDurationMins;
+	}
+
+	/**
+	 * @param parallelDurationMins the parallelDurationMins to set
+	 */
+	public void setParallelDurationMins(int parallelDurationMins) {
+		this.parallelDurationMins = parallelDurationMins;
+	}
+
+	/**
 	 * @return the startCondition
 	 */
 	public StartCondition getStartCondition() {
 		return startCondition;
+	}
+	
+	/**
+	 * @param startCondition the startCondition to set
+	 */
+	public void setStartCondition(StartCondition startCondition) {
+		this.startCondition = startCondition;
 	}
 
 	/**
@@ -117,13 +139,6 @@ public class Pipeline implements Serializable {
 	 */
 	public void setParallelPerMinute(int parallelPerMinute) {
 		this.parallelPerMinute = parallelPerMinute;
-	}
-
-	/**
-	 * @param startCondition the startCondition to set
-	 */
-	public void setStartCondition(StartCondition startCondition) {
-		this.startCondition = startCondition;
 	}
 
 	/**

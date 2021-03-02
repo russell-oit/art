@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -1140,6 +1141,7 @@ public class JobService {
 		if (parallelPerMinute <= 0) {
 			parallelPerMinute = Pipeline.PARALLEL_PER_MINUTE_DEFAULT;
 		}
+		int parallelDurationMins = pipeline.getParallelDurationMins();
 
 		String[] parallelArray = StringUtils.split(parallel, ",");
 		int secondCount = 0;
@@ -1148,8 +1150,14 @@ public class JobService {
 				secondCount += 60;
 			}
 
-			int startSecond = ArtUtils.getRandomNumber(1, 60);
-			int effectiveSecondStart = secondCount + startSecond;
+			int effectiveSecondStart;
+			if (parallelDurationMins > 0) {
+				long paralledDurationSecs = TimeUnit.MINUTES.toSeconds(parallelDurationMins);
+				effectiveSecondStart = (int) ArtUtils.getRandomNumber(1L, paralledDurationSecs);
+			} else {
+				int startSecond = ArtUtils.getRandomNumber(1, 60);
+				effectiveSecondStart = secondCount + startSecond;
+			}
 
 			int jobId = Integer.parseInt(parallelArray[i]);
 			String runId = jobId + "-" + ArtUtils.getUniqueId();

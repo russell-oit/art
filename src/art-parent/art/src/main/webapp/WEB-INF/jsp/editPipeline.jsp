@@ -173,6 +173,15 @@
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="control-label col-md-4" for="parallelDurationMins">
+							<spring:message code="pipelines.label.durationMins"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="parallelDurationMins" maxlength="5" class="form-control"/>
+							<form:errors path="parallelDurationMins" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="control-label col-md-4" for="parallelPerMinute">
 							<spring:message code="pipelines.label.perMinute"/>
 						</label>
