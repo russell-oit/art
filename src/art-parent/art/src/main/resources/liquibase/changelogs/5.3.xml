@@ -16,6 +16,7 @@
 			<column name="PARALLEL" type="VARCHAR(100)"/>
 			<column name="PARALLEL_PER_MINUTE" type="INTEGER"/>
 			<column name="PARALLEL_DURATION_MINS" type="INTEGER"/>
+			<column name="PARALLEL_END_TIME" type="DATETIME"/>
 			<column name="NEXT_SERIAL" type="CLOB"/>
 		</addColumn>
 	</changeSet>

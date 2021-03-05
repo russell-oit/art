@@ -50,7 +50,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -1141,7 +1144,33 @@ public class JobService {
 		if (parallelPerMinute <= 0) {
 			parallelPerMinute = Pipeline.PARALLEL_PER_MINUTE_DEFAULT;
 		}
+
 		int parallelDurationMins = pipeline.getParallelDurationMins();
+		Date parallelEndTime = pipeline.getParallelEndTime();
+
+		long parallelDurationSeconds = 0;
+
+		if (parallelDurationMins > 0) {
+			parallelDurationSeconds = TimeUnit.MINUTES.toSeconds(parallelDurationMins);
+		} else if (parallelEndTime != null) {
+			Calendar endTimeCalendar = Calendar.getInstance();
+			endTimeCalendar.setTime(parallelEndTime);
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.HOUR_OF_DAY, endTimeCalendar.get(Calendar.HOUR_OF_DAY));
+			calendar.set(Calendar.MINUTE, endTimeCalendar.get(Calendar.MINUTE));
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			Date effectiveParallelEndTime = calendar.getTime();
+
+			Instant now = Instant.now();
+			Instant endTime = effectiveParallelEndTime.toInstant();
+			Duration duration = Duration.between(now, endTime);
+			if (duration.isNegative() || duration.isZero()) {
+				throw new RuntimeException("End Time in the past: " + pipeline.getEndTimeString());
+			} else {
+				parallelDurationSeconds = duration.getSeconds();
+			}
+		}
 
 		String[] parallelArray = StringUtils.split(parallel, ",");
 		int secondCount = 0;
@@ -1151,9 +1180,8 @@ public class JobService {
 			}
 
 			int effectiveSecondStart;
-			if (parallelDurationMins > 0) {
-				long paralledDurationSecs = TimeUnit.MINUTES.toSeconds(parallelDurationMins);
-				effectiveSecondStart = (int) ArtUtils.getRandomNumber(1L, paralledDurationSecs);
+			if (parallelDurationSeconds > 0) {
+				effectiveSecondStart = ArtUtils.getRandomNumber(1, (int) parallelDurationSeconds);
 			} else {
 				int startSecond = ArtUtils.getRandomNumber(1, 60);
 				effectiveSecondStart = secondCount + startSecond;

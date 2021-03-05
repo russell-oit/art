@@ -26,6 +26,8 @@ import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +66,7 @@ public class PipelineController {
 
 	@Autowired
 	private ScheduleService scheduleService;
-	
+
 	@Autowired
 	private StartConditionService startConditionService;
 
@@ -173,6 +175,14 @@ public class PipelineController {
 		}
 
 		try {
+			String endTimeString = pipeline.getEndTimeString();
+			if (StringUtils.isNotBlank(endTimeString)) {
+				String endDateString = "2000-01-01 " + endTimeString;
+				SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				Date endDate = dateFormatter.parse(endDateString);
+				pipeline.setParallelEndTime(endDate);
+			}
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			if (StringUtils.equalsAny(action, "add", "copy")) {
 				pipelineService.addPipeline(pipeline, sessionUser);
@@ -193,7 +203,7 @@ public class PipelineController {
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 
 			return "redirect:/pipelines";
-		} catch (SQLException | RuntimeException ex) {
+		} catch (SQLException | ParseException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

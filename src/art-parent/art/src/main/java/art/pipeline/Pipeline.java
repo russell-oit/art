@@ -41,8 +41,9 @@ public class Pipeline implements Serializable {
 	private String serial;
 	private boolean continueOnError;
 	private String parallel;
-	private int parallelPerMinute = PARALLEL_PER_MINUTE_DEFAULT;
+	private int parallelPerMinute;
 	private int parallelDurationMins;
+	private Date parallelEndTime;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
@@ -56,6 +57,36 @@ public class Pipeline implements Serializable {
 	private List<Integer> scheduledJobs;
 	@JsonIgnore
 	private String nextSerial;
+	@JsonIgnore
+	private String endTimeString;
+
+	/**
+	 * @return the endTimeString
+	 */
+	public String getEndTimeString() {
+		return endTimeString;
+	}
+
+	/**
+	 * @param endTimeString the endTimeString to set
+	 */
+	public void setEndTimeString(String endTimeString) {
+		this.endTimeString = endTimeString;
+	}
+
+	/**
+	 * @return the parallelEndTime
+	 */
+	public Date getParallelEndTime() {
+		return parallelEndTime;
+	}
+
+	/**
+	 * @param parallelEndTime the parallelEndTime to set
+	 */
+	public void setParallelEndTime(Date parallelEndTime) {
+		this.parallelEndTime = parallelEndTime;
+	}
 
 	/**
 	 * @return the parallelDurationMins
@@ -77,7 +108,7 @@ public class Pipeline implements Serializable {
 	public StartCondition getStartCondition() {
 		return startCondition;
 	}
-	
+
 	/**
 	 * @param startCondition the startCondition to set
 	 */
@@ -356,13 +387,13 @@ public class Pipeline implements Serializable {
 	public String getScheduledJobsString() {
 		return StringUtils.join(scheduledJobs, ", ");
 	}
-	
+
 	/**
 	 * Returns the next serial value with a space after every comma
-	 * 
+	 *
 	 * @return the next serial value with a space after every comma
 	 */
-	public String getNextSerialForDisplay(){
+	public String getNextSerialForDisplay() {
 		return StringUtils.replace(nextSerial, ",", ", ");
 	}
 

@@ -35,7 +35,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +129,7 @@ public class PipelineService {
 			pipeline.setParallel(rs.getString("PARALLEL"));
 			pipeline.setParallelPerMinute(rs.getInt("PARALLEL_PER_MINUTE"));
 			pipeline.setParallelDurationMins(rs.getInt("PARALLEL_DURATION_MINS"));
+			pipeline.setParallelEndTime(rs.getTimestamp("PARALLEL_END_TIME"));
 			pipeline.setQuartzCalendarNames(rs.getString("QUARTZ_CALENDAR_NAMES"));
 			pipeline.setNextSerial(rs.getString("NEXT_SERIAL"));
 			pipeline.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -145,6 +148,14 @@ public class PipelineService {
 
 			List<Integer> scheduledJobs = pipelineScheduledJobService.getPipelineScheduledJobIds(pipeline.getPipelineId());
 			pipeline.setScheduledJobs(scheduledJobs);
+
+			Date parallelEndTime = pipeline.getParallelEndTime();
+			if (parallelEndTime != null) {
+				//https://stackoverflow.com/questions/5683728/convert-java-util-date-to-string
+				SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm");
+				String endTimeString = dateFormatter.format(parallelEndTime);
+				pipeline.setEndTimeString(endTimeString);
+			}
 
 			return type.cast(pipeline);
 		}
@@ -500,10 +511,11 @@ public class PipelineService {
 			String sql = "INSERT INTO ART_PIPELINES"
 					+ " (PIPELINE_ID, NAME, DESCRIPTION, SERIAL, PARALLEL,"
 					+ " PARALLEL_PER_MINUTE, PARALLEL_DURATION_MINS,"
+					+ " PARALLEL_END_TIME,"
 					+ " CONTINUE_ON_ERROR, SCHEDULE_ID, QUARTZ_CALENDAR_NAMES,"
 					+ " START_CONDITION_ID, NEXT_SERIAL,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -513,6 +525,7 @@ public class PipelineService {
 				pipeline.getParallel(),
 				pipeline.getParallelPerMinute(),
 				pipeline.getParallelDurationMins(),
+				DatabaseUtils.toSqlTimestamp(pipeline.getParallelEndTime()),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
@@ -526,7 +539,7 @@ public class PipelineService {
 		} else {
 			String sql = "UPDATE ART_PIPELINES SET NAME=?, DESCRIPTION=?,"
 					+ "	SERIAL=?, PARALLEL=?, PARALLEL_PER_MINUTE=?,"
-					+ " PARALLEL_DURATION_MINS=?,"
+					+ " PARALLEL_DURATION_MINS=?, PARALLEL_END_TIME=?,"
 					+ " CONTINUE_ON_ERROR=?, SCHEDULE_ID=?,"
 					+ " QUARTZ_CALENDAR_NAMES=?, START_CONDITION_ID=?,"
 					+ " NEXT_SERIAL=?,"
@@ -540,6 +553,7 @@ public class PipelineService {
 				pipeline.getParallel(),
 				pipeline.getParallelPerMinute(),
 				pipeline.getParallelDurationMins(),
+				DatabaseUtils.toSqlTimestamp(pipeline.getParallelEndTime()),
 				BooleanUtils.toInteger(pipeline.isContinueOnError()),
 				scheduleId,
 				pipeline.getQuartzCalendarNames(),
