@@ -28,9 +28,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.quartz.DateBuilder;
 import static org.quartz.DateBuilder.futureDate;
 import org.quartz.JobBuilder;
@@ -126,12 +128,19 @@ public class PipelineJob implements org.quartz.Job {
 
 				if (runPipeline) {
 					String serial = pipeline.getSerial();
-					String finalSerial = processSerial(serial);
+					String finalSerial = processDefinition(serial);
 					String[] serialArray = StringUtils.split(finalSerial, ",");
 					if (serialArray != null && serialArray.length > 0) {
 						String firstJobIdString = serialArray[0].trim();
 						int firstJobId = Integer.parseInt(firstJobIdString);
 						startSerialPipeline(firstJobId, finalSerial, pipeline.getPipelineId());
+					}
+
+					String parallel = pipeline.getParallel();
+					String finalParallel = processDefinition(parallel);
+					String[] parallelArray = StringUtils.split(finalParallel, ",");
+					if (parallelArray != null && parallelArray.length > 0) {
+						startParallelPipeline(finalParallel, pipeline);
 					}
 				}
 			}
@@ -141,43 +150,63 @@ public class PipelineJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Returns a serial definition with ranges flattened
+	 * Returns a pipeline definition with ranges flattened
 	 *
-	 * @param serial the initial serial definition
-	 * @return serial definition with ranges flattened
+	 * @param definition the initial pipeline definition
+	 * @return pipeline definition with ranges flattened
 	 * @throws java.sql.SQLException
 	 */
-	private String processSerial(String serial) throws SQLException {
-		if (StringUtils.isBlank(serial)) {
+	private String processDefinition(String definition) throws SQLException {
+		if (StringUtils.isBlank(definition)) {
 			return null;
 		}
 
-		String[] serialArray = StringUtils.split(serial, ",");
+		String[] definitionArray = StringUtils.split(definition, ",");
 		//https://stackoverflow.com/questions/1128723/how-do-i-determine-whether-an-array-contains-a-particular-value-in-java
-		if (Arrays.stream(serialArray).anyMatch(s -> StringUtils.equalsIgnoreCase(s.trim(), "all"))) {
+		if (Arrays.stream(definitionArray).anyMatch(s -> StringUtils.equalsIgnoreCase(s.trim(), "all"))) {
 			List<Integer> allJobIds = jobService.getAllJobIds();
 			return StringUtils.join(allJobIds, ",");
 		}
 
 		List<String> finalList = new ArrayList<>();
-		for (String part : serialArray) {
+		for (String part : definitionArray) {
 			part = StringUtils.trimToEmpty(part);
 			if (StringUtils.isBlank(part)) {
 				continue;
 			}
 
 			if (StringUtils.startsWith(part, "schedule:")) {
+				List<Integer> ids;
 				String scheduleName = StringUtils.substringAfter(part, "schedule:").trim();
-				List<Integer> ids = jobService.getJobIdsWithSchedule(scheduleName);
+				if (NumberUtils.isCreatable(scheduleName)) {
+					int scheduleId = NumberUtils.toInt(scheduleName);
+					ids = jobService.getJobIdsWithSchedule(scheduleId);
+				} else {
+					ids = jobService.getJobIdsWithSchedule(scheduleName);
+				}
 				//https://www.techiedelight.com/convert-list-integer-list-string-java/
 				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);
 			} else if (StringUtils.startsWith(part, "reportGroup:")) {
-				String reportGroupNames = StringUtils.substringAfter(part, "reportGroup:");
-				String[] reportGroupNamesArray = StringUtils.split(reportGroupNames, ";");
-				String[] trimmedReportGroupNamesArray = Arrays.stream(reportGroupNamesArray).map(String::trim).toArray(String[]::new);
-				List<Integer> ids = jobService.getJobIdsWithReportGroups(trimmedReportGroupNamesArray);
-				List<String> stringList = ids.stream().map(String::valueOf).collect(Collectors.toList());
+				String reportGroupDetails = StringUtils.substringAfter(part, "reportGroup:");
+				String[] reportGroupDetailsArray = StringUtils.split(reportGroupDetails, ";");
+				String[] trimmedReportGroupDetailsArray = Arrays.stream(reportGroupDetailsArray).map(String::trim).toArray(String[]::new);
+				Map<Boolean, List<String>> partitionedValues = Arrays.stream(trimmedReportGroupDetailsArray).collect(Collectors.partitioningBy(s -> NumberUtils.isCreatable(s)));
+				List<String> reportGroupStringIds = partitionedValues.get(true);
+				List<String> reportGroupNames = partitionedValues.get(false);
+				List<Integer> allIds = new ArrayList<>();
+				if (!reportGroupStringIds.isEmpty()) {
+					List<Integer> reportGroupIds = reportGroupStringIds.stream().map(Integer::parseInt).collect(Collectors.toList());
+					Integer[] reportGroupIdsArray = reportGroupIds.toArray(new Integer[0]);
+					List<Integer> idsFromIds = jobService.getJobIdsWithReportGroups(reportGroupIdsArray);
+					allIds.addAll(idsFromIds);
+				}
+				if (!reportGroupNames.isEmpty()) {
+					String[] reportGroupNamesArray = reportGroupNames.toArray(new String[0]);
+					List<Integer> idsFromNames = jobService.getJobIdsWithReportGroups(reportGroupNamesArray);
+					allIds.addAll(idsFromNames);
+				}
+				List<String> stringList = allIds.stream().map(String::valueOf).collect(Collectors.toList());
 				finalList.addAll(stringList);
 			} else if (StringUtils.contains(part, "-")) {
 				String start = StringUtils.substringBefore(part, "-").trim();
@@ -204,9 +233,9 @@ public class PipelineJob implements org.quartz.Job {
 			}
 		}
 
-		String finalSerial = StringUtils.join(finalList, ",");
+		String finalDefinition = StringUtils.join(finalList, ",");
 
-		return finalSerial;
+		return finalDefinition;
 	}
 
 	/**
@@ -226,5 +255,25 @@ public class PipelineJob implements org.quartz.Job {
 
 		pipelineService.uncancelPipeline(pipelineId);
 		jobService.scheduleSerialPipelineJob(jobId, serial, pipelineId);
+	}
+
+	/**
+	 * Starts a serial pipeline
+	 *
+	 * @param jobId the job id
+	 * @param parallel the serial jobs to run
+	 * @param pipeline the pipeline
+	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	private void startParallelPipeline(String parallel, Pipeline pipeline)
+			throws SchedulerException, SQLException {
+
+		logger.debug("Entering startSerialPipeline: parallel='{}', pipeline={}",
+				parallel, pipeline);
+
+		int pipelineId = pipeline.getPipelineId();
+		pipelineService.uncancelPipeline(pipelineId);
+		jobService.scheduleParallelPipelineJob(parallel, pipeline);
 	}
 }

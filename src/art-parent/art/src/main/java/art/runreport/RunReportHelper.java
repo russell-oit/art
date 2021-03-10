@@ -1514,4 +1514,29 @@ public class RunReportHelper {
 		return columnNames;
 	}
 
+	/**
+	 * Returns the report format to use for a report run
+	 * 
+	 * @param request the http request
+	 * @param report the report object
+	 * @return the report format to use
+	 */
+	public ReportFormat getReportFormat(HttpServletRequest request, Report report) {
+		ReportFormat reportFormat;
+		
+		String reportFormatString = request.getParameter("reportFormat");
+		if (StringUtils.isBlank(reportFormatString) || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
+			String reportDefaultFormat = report.getDefaultReportFormat();
+			if (StringUtils.isBlank(reportDefaultFormat) || StringUtils.equalsIgnoreCase(reportDefaultFormat, "default")) {
+				reportFormat = getDefaultReportFormat(report.getReportType());
+			} else {
+				reportFormat = ReportFormat.toEnum(reportDefaultFormat);
+			}
+		} else {
+			reportFormat = ReportFormat.toEnum(reportFormatString);
+		}
+
+		return reportFormat;
+	}
+
 }

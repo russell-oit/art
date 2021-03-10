@@ -73,6 +73,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Provides general utility methods
@@ -88,7 +92,9 @@ public class ArtUtils {
 	public static final String EMAIL_CC = "email_cc"; //column name in data query that contains email cc column
 	public static final String EMAIL_BCC = "email_bcc"; //column name in data query that contains email bcc column
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
+	public static final String TEMP_JOB_GROUP = "tempJobGroup"; //group name for temp quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
+	public static final String TEMP_TRIGGER_GROUP = "tempTriggerGroup"; //group name for temp quartz triggers
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
@@ -873,12 +879,29 @@ public class ArtUtils {
 			return null;
 		}
 
+		//https://stackoverflow.com/questions/19598690/how-to-get-host-name-with-port-from-a-http-or-https-request/19599143#19599143
+		//https://sourceforge.net/p/art/discussion/352129/thread/b07cd72374/?limit=25
 		//https://stackoverflow.com/questions/2222238/httpservletrequest-to-complete-url
 		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests/16675399
-		String baseUrl = request.getScheme() + "://"
-				+ request.getServerName()
-				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-				+ request.getContextPath();
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		String scheme = uriComponents.getScheme();             // http / https
+		String serverName = request.getServerName();     // hostname.com
+		int serverPort = request.getServerPort();        // 80
+		String contextPath = request.getContextPath();   // /app
+
+		// Reconstruct original requesting URL
+		StringBuilder url = new StringBuilder();
+		url.append(scheme).append("://");
+		url.append(serverName);
+
+		if (serverPort != 80 && serverPort != 443) {
+			url.append(":").append(serverPort);
+		}
+		url.append(contextPath);
+
+		String baseUrl = url.toString();
 
 		return baseUrl;
 	}

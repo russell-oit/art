@@ -35,12 +35,12 @@ Display input for date and datetime parameters
 	</div>
 </c:if>
 
-<t:addDatePicker reportParam="${reportParam}" locale="${locale}"
-				 defaultFormat="YYYY-MM-DD"/>
-
 <c:if test="${not empty reportParam.parameter.template}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>
 </c:if>
+
+<t:addDatePicker reportParam="${reportParam}" locale="${locale}"
+				 defaultFormat="YYYY-MM-DD"/>
 
 <t:addRobinHerbotsMask reportParam="${reportParam}"/>
 

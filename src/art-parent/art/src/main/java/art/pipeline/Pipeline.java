@@ -19,6 +19,7 @@ package art.pipeline;
 
 import art.schedule.Schedule;
 import art.startcondition.StartCondition;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -32,20 +33,74 @@ import org.apache.commons.lang3.StringUtils;
 public class Pipeline implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	public static int PARALLEL_PER_MINUTE_DEFAULT = 10;
 
 	private int pipelineId;
 	private String name;
 	private String description;
 	private String serial;
 	private boolean continueOnError;
+	private String parallel;
+	private int parallelPerMinute;
+	private int parallelDurationMins;
+	private Date parallelEndTime;
 	private Date creationDate;
 	private Date updateDate;
 	private String createdBy;
 	private String updatedBy;
+	@JsonIgnore
 	private List<Integer> runningJobs;
 	private Schedule schedule;
 	private String quartzCalendarNames;
 	private StartCondition startCondition;
+	@JsonIgnore
+	private List<Integer> scheduledJobs;
+	@JsonIgnore
+	private String nextSerial;
+	@JsonIgnore
+	private String endTimeString;
+
+	/**
+	 * @return the endTimeString
+	 */
+	public String getEndTimeString() {
+		return endTimeString;
+	}
+
+	/**
+	 * @param endTimeString the endTimeString to set
+	 */
+	public void setEndTimeString(String endTimeString) {
+		this.endTimeString = endTimeString;
+	}
+
+	/**
+	 * @return the parallelEndTime
+	 */
+	public Date getParallelEndTime() {
+		return parallelEndTime;
+	}
+
+	/**
+	 * @param parallelEndTime the parallelEndTime to set
+	 */
+	public void setParallelEndTime(Date parallelEndTime) {
+		this.parallelEndTime = parallelEndTime;
+	}
+
+	/**
+	 * @return the parallelDurationMins
+	 */
+	public int getParallelDurationMins() {
+		return parallelDurationMins;
+	}
+
+	/**
+	 * @param parallelDurationMins the parallelDurationMins to set
+	 */
+	public void setParallelDurationMins(int parallelDurationMins) {
+		this.parallelDurationMins = parallelDurationMins;
+	}
 
 	/**
 	 * @return the startCondition
@@ -59,6 +114,62 @@ public class Pipeline implements Serializable {
 	 */
 	public void setStartCondition(StartCondition startCondition) {
 		this.startCondition = startCondition;
+	}
+
+	/**
+	 * @return the nextSerial
+	 */
+	public String getNextSerial() {
+		return nextSerial;
+	}
+
+	/**
+	 * @param nextSerial the nextSerial to set
+	 */
+	public void setNextSerial(String nextSerial) {
+		this.nextSerial = nextSerial;
+	}
+
+	/**
+	 * @return the scheduledJobs
+	 */
+	public List<Integer> getScheduledJobs() {
+		return scheduledJobs;
+	}
+
+	/**
+	 * @param scheduledJobs the scheduledJobs to set
+	 */
+	public void setScheduledJobs(List<Integer> scheduledJobs) {
+		this.scheduledJobs = scheduledJobs;
+	}
+
+	/**
+	 * @return the parallel
+	 */
+	public String getParallel() {
+		return parallel;
+	}
+
+	/**
+	 * @param parallel the parallel to set
+	 */
+	public void setParallel(String parallel) {
+		this.parallel = parallel;
+	}
+
+	/**
+	 * @return the parallelPerMinute
+	 */
+	public int getParallelPerMinute() {
+		return parallelPerMinute;
+	}
+
+	/**
+	 * @param parallelPerMinute the parallelPerMinute to set
+	 */
+	public void setParallelPerMinute(int parallelPerMinute) {
+		this.parallelPerMinute = parallelPerMinute;
 	}
 
 	/**
@@ -261,11 +372,29 @@ public class Pipeline implements Serializable {
 
 	/**
 	 * Returns a comma separated string of running jobs for this pipeline
-	 * 
+	 *
 	 * @return a comma separated string of running jobs for this pipeline
 	 */
 	public String getRunningJobsString() {
-		return StringUtils.join(runningJobs, ",");
+		return StringUtils.join(runningJobs, ", ");
+	}
+
+	/**
+	 * Returns a comma separated string of scheduled jobs for this pipeline
+	 *
+	 * @return a comma separated string of scheduled jobs for this pipeline
+	 */
+	public String getScheduledJobsString() {
+		return StringUtils.join(scheduledJobs, ", ");
+	}
+
+	/**
+	 * Returns the next serial value with a space after every comma
+	 *
+	 * @return the next serial value with a space after every comma
+	 */
+	public String getNextSerialForDisplay() {
+		return StringUtils.replace(nextSerial, ",", ", ");
 	}
 
 }

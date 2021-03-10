@@ -1,6 +1,6 @@
 /*
  * ART. A Reporting Tool.
- * Copyright (C) 2020 Enrico Liboni <eliboni@users.sf.net>
+ * Copyright (C) 2021 Enrico Liboni <eliboni@users.sf.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.pipelinerunningjob;
+package art.pipelinescheduledjob;
 
+import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
@@ -36,33 +38,33 @@ import org.springframework.stereotype.Service;
  * @author Timothy Anyona
  */
 @Service
-public class PipelineRunningJobService {
+public class PipelineScheduledJobService {
 
-	private static final Logger logger = LoggerFactory.getLogger(PipelineRunningJobService.class);
+	private static final Logger logger = LoggerFactory.getLogger(PipelineScheduledJobService.class);
 
 	private final DbService dbService;
 
 	@Autowired
-	public PipelineRunningJobService(DbService dbService) {
+	public PipelineScheduledJobService(DbService dbService) {
 		this.dbService = dbService;
 	}
 
-	public PipelineRunningJobService() {
+	public PipelineScheduledJobService() {
 		dbService = new DbService();
 	}
 
 	/**
-	 * Returns the ids of jobs currently running as part of a pipeline
+	 * Returns the ids of jobs scheduled as part of a pipeline
 	 *
 	 * @param pipelineId the pipeline id
-	 * @return ids of currently running pipeline jobs
+	 * @return ids of scheduled pipeline jobs
 	 * @throws SQLException
 	 */
-	public List<Integer> getPipelineRunningJobIds(int pipelineId) throws SQLException {
-		logger.debug("Entering getPipelineRunningJobIds: pipelineId={}", pipelineId);
+	public List<Integer> getPipelineScheduledJobIds(int pipelineId) throws SQLException {
+		logger.debug("Entering getPipelineScheduledJobIds: pipelineId={}", pipelineId);
 
 		String sql = "SELECT JOB_ID"
-				+ " FROM ART_PIPELINE_RUNNING_JOBS"
+				+ " FROM ART_PIPELINE_SCHEDULED_JOBS"
 				+ " WHERE PIPELINE_ID=?";
 
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
@@ -77,25 +79,31 @@ public class PipelineRunningJobService {
 	}
 
 	/**
-	 * Adds a pipeline running job record
+	 * Adds a pipeline scheduled job record
 	 *
 	 * @param pipelineId the pipeline id
 	 * @param jobId the job id
+	 * @param quartzJobName the quartz job name
+	 * @param runDate the run date for the job
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "pipelines", allEntries = true)
-	public void addPipelineRunningJob(int pipelineId, int jobId) throws SQLException {
+	public void addPipelineScheduledJob(int pipelineId, int jobId, String quartzJobName,
+			Date runDate) throws SQLException {
 
-		logger.debug("Entering addPipelineRunningJob: pipelineId={}, jobId={}",
-				pipelineId, jobId);
+		logger.debug("Entering addPipelineScheduledJob: pipelineId={}, jobId={},"
+				+ " quartzJobName='{}', runDate={}",
+				pipelineId, jobId, quartzJobName, runDate);
 
-		String sql = "INSERT INTO ART_PIPELINE_RUNNING_JOBS"
-				+ " (PIPELINE_ID, JOB_ID)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 2) + ")";
+		String sql = "INSERT INTO ART_PIPELINE_SCHEDULED_JOBS"
+				+ " (PIPELINE_ID, JOB_ID, QUARTZ_JOB_NAME, RUN_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
 
 		Object[] values = {
 			pipelineId,
-			jobId
+			jobId,
+			quartzJobName,
+			DatabaseUtils.toSqlTimestamp(runDate)
 		};
 
 		dbService.update(sql, values);
@@ -109,11 +117,11 @@ public class PipelineRunningJobService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "pipelines", allEntries = true)
-	public void removePipelineRunningJob(int pipelineId, int jobId) throws SQLException {
-		logger.debug("Entering removePipelineRunningJob: pipelineId={}, jobId={}",
+	public void removePipelineScheduledJob(int pipelineId, int jobId) throws SQLException {
+		logger.debug("Entering removePipelineScheduledJob: pipelineId={}, jobId={}",
 				pipelineId, jobId);
 
-		String sql = "DELETE FROM ART_PIPELINE_RUNNING_JOBS"
+		String sql = "DELETE FROM ART_PIPELINE_SCHEDULED_JOBS"
 				+ " WHERE PIPELINE_ID=? AND JOB_ID=?";
 
 		dbService.update(sql, pipelineId, jobId);

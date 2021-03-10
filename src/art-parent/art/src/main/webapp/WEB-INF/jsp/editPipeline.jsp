@@ -37,10 +37,13 @@
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.22.2/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -49,7 +52,13 @@
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				
+
+				$('#endTimePicker').datetimepicker({
+					format: 'HH:mm',
+					locale: '${pageContext.response.locale}',
+					useCurrent: false //Important! See issue #1075
+				});
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -101,7 +110,7 @@
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
-				
+
 				<form:hidden path="quartzCalendarNames" />
 
 				<div class="form-group">
@@ -137,25 +146,77 @@
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="serial">
-						<spring:message code="pipelines.label.serial"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="serial" maxlength="100" class="form-control"/>
-						<form:errors path="serial" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="continueOnError">
-						<spring:message code="pipelines.label.continueOnError"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="continueOnError" id="continueOnError" class="switch-yes-no"/>
+
+				<fieldset>
+					<legend><spring:message code="pipelines.label.serial"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="serial">
+							<spring:message code="pipelines.label.serial"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="serial" maxlength="100" class="form-control"/>
+							<form:errors path="serial" cssClass="error"/>
 						</div>
 					</div>
-				</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="continueOnError">
+							<spring:message code="pipelines.label.continueOnError"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="continueOnError" id="continueOnError" class="switch-yes-no"/>
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<legend><spring:message code="pipelines.label.parallel"/></legend>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="parallel">
+							<spring:message code="pipelines.label.parallel"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="parallel" maxlength="100" class="form-control"/>
+							<form:errors path="parallel" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="parallelDurationMins">
+							<spring:message code="pipelines.label.durationMins"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="parallelDurationMins" maxlength="5" class="form-control"/>
+							<form:errors path="parallelDurationMins" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="endTime">
+							<spring:message code="pipelines.label.endTime"/>
+						</label>
+						<div class="col-md-8">
+							<div id="endTimePicker" class='input-group date datetimepicker'>
+								<form:input path="endTimeString" class="form-control"/>
+								<span class="input-group-addon">
+									<span class="glyphicon glyphicon-time"></span>
+								</span>
+							</div>
+							<form:errors path="endTimeString" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="parallelPerMinute">
+							<spring:message code="pipelines.label.perMinute"/>
+						</label>
+						<div class="col-md-8">
+							<form:input type="number" path="parallelPerMinute" maxlength="4" class="form-control"/>
+							<form:errors path="parallelPerMinute" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<hr>
+
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="schedule">
 						<spring:message code="jobs.text.schedule"/>

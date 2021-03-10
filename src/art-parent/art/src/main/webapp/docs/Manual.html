@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.2"> 
+  <meta name="version" content="5.3"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -3950,7 +3950,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Template</strong></td> 
-        <td>An optional javascript file for additional configuration. For <strong>DateRange</strong> data types, the file can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file. For masks, the file may contain additional configuration options. For "mask1" masks, specify the additional options in a variable named <strong>mask1Options</strong>.</td> 
+        <td>An optional javascript file for additional configuration. For <strong>DateRange</strong> data types, the file can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file. For masks, the file may contain additional configuration options. For "mask1" masks, specify the additional options in a variable named <strong>mask1Options</strong>. For <strong>Date</strong> and <strong>DateTime</strong> data types, datepicker options can be specified in a variable named <strong>datepickerOptions</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>Shared</strong></td> 
@@ -3994,10 +3994,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h2 id="single-value-parameters">Single-Value Parameters</h2> 
      <p>Single-value parameters are used to pass single values to the SQL query. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
-    <span class="nv">FROM</span> <span class="nv">orders</span>
-    <span class="nv">WHERE</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span>#
-    <span class="nv">AND</span> <span class="nv">vendor_name</span> <span class="nv">like</span> #<span class="nv">vendor</span># <span class="o">--</span> <span class="k">do</span> <span class="nv">not</span> <span class="nv">put</span> <span class="nv">the</span> <span class="s1">'</span><span class="s"> character around the name</span>
+      <pre><span></span><span class="err">    SELECT *</span>
+<span class="err">    FROM orders</span>
+<span class="err">    WHERE order_date &gt; #date#</span>
+<span class="err">    AND vendor_name like #vendor# -- do not put the ' character around the name</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a single-value parameter</p> 
@@ -4046,29 +4046,29 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">mytable</span> <span class="k">WHERE</span> <span class="n">my_boolean_column</span><span class="o">=#</span><span class="n">boolean_param</span><span class="o">#</span>
+      <pre><span></span><span class="err">    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#</span>
 </pre> 
      </div> 
      <p>Example static LOV query for boolean values</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">true</span><span class="o">|</span><span class="k">True</span>
-    <span class="k">false</span><span class="o">|</span><span class="k">False</span>
+      <pre><span></span><span class="err">    true|True</span>
+<span class="err">    false|False</span>
 </pre> 
      </div> 
      <p>Lastly, create a <strong>Single-Value</strong> parameter named <code>boolean_param</code>, with data type as <strong>Varchar</strong>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the <strong>LOV Report</strong> to the report created for this purpose above.</p> 
      <p>If the boolean states are "1" and "0" instead of "true" and "false", you can create a static LOV query like the one below and set the parameter data type to <strong>Integer</strong> instead of Varchar.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="mi">1</span><span class="o">|</span><span class="k">True</span>
-    <span class="mi">0</span><span class="o">|</span><span class="k">False</span>
+      <pre><span></span><span class="err">    1|True</span>
+<span class="err">    0|False</span>
 </pre> 
      </div> 
      <p><br></p> 
      <h2 id="multi-value-parameters">Multi-Value Parameters</h2> 
      <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
-    <span class="k">FROM</span> <span class="n">orders</span>
-    <span class="k">WHERE</span> <span class="n">product_name</span> <span class="k">IN</span><span class="p">(</span><span class="o">#</span><span class="n">product_list</span><span class="o">#</span><span class="p">)</span>
+      <pre><span></span><span class="err">    SELECT *</span>
+<span class="err">    FROM orders</span>
+<span class="err">    WHERE product_name IN(#product_list#)</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a multi-value parameter </p> 
@@ -4087,9 +4087,9 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <h3 id="in-not-in">IN, NOT IN</h3> 
      <p>This is used with multi-value parameters. IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">SELECT</span> <span class="o">*</span>
-    <span class="k">FROM</span> <span class="n">orders</span>
-    <span class="k">WHERE</span> <span class="err">$</span><span class="n">x</span><span class="err">{</span><span class="k">in</span><span class="p">,</span><span class="n">product_name</span><span class="p">,</span><span class="n">product_list</span><span class="err">}</span>
+      <pre><span></span><span class="err">    SELECT *</span>
+<span class="err">    FROM orders</span>
+<span class="err">    WHERE $x{in,product_name,product_list}</span>
 </pre> 
      </div> 
      <p>This syntax would particularly be used when running reports against Oracle databases and the multi-value parameter is expected to have more than 1000 items. Using the normal syntax would result in an error like the following <strong>ORA-01795: maximum number of expressions in a list is 1000</strong>.</p> 
@@ -4196,6 +4196,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td><strong>mask1</strong></td> 
         <td>Object</td> 
         <td>Enables use of a mask for the parameter as per the <a class="" href="https://github.com/RobinHerbots/Inputmask" rel="nofollow">RobinHerbots Inputmask</a> e.g. <code>"mask1": { "mask": "99-aa", "autoUnmask": true }</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>dp</strong></td> 
+        <td>Object</td> 
+        <td>Enables specifying of <a class="" href="https://getdatepicker.com/4/Options/" rel="nofollow">DatePicker options</a></td> 
        </tr> 
       </tbody> 
      </table> 
@@ -6436,11 +6441,27 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Serial</strong></td> 
-        <td>A comma separated list of job ids that should be run in the order given. You can use <strong>all</strong> to specify that all jobs should be run. You can also specify jobs that use a given schedule by using the syntax <strong>schedule:</strong><code>&lt;schedule name&gt;</code> e.g. <code>schedule: daily</code>. You can also use <strong>+</strong> after a job id to indicate running of all jobs from that id to the last e.g. <code>13+</code>. You can also use <strong>-</strong> to specify job ranges e.g. <code>1-5</code>. You can specify jobs whose report belongs to a certain report group by using the syntax <strong>reportGroup:</strong><code>&lt;report group name&gt;</code> e.g. <code>reportGroup: test</code>. You can specify multiple report groups by separating them with <strong>;</strong> e.g. <code>reportGroup: test;admin</code>.</td> 
+        <td>A comma separated list of job ids that should be run in the order given. You can use <strong>all</strong> to specify that all jobs should be run. You can also specify jobs that use a given schedule by using the syntax <strong>schedule:</strong><code>&lt;schedule name or id&gt;</code> e.g. <code>schedule: daily</code>. You can also use <strong>+</strong> after a job id to indicate running of all jobs from that id to the last e.g. <code>13+</code>. You can also use <strong>-</strong> to specify job ranges e.g. <code>1-5</code>. You can specify jobs whose report belongs to a certain report group by using the syntax <strong>reportGroup:</strong><code>&lt;report group name or id&gt;</code> e.g. <code>reportGroup: test</code>. You can specify multiple report groups by separating them with <strong>;</strong> e.g. <code>reportGroup: test;admin</code>.</td> 
        </tr> 
        <tr> 
         <td><strong>Continue On Error</strong></td> 
-        <td>For serial jobs, whether the next jobs should be run if the current one encounters an error</td> 
+        <td>For <strong>Serial</strong> jobs, whether the next jobs should be run if the current one encounters an error</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Parallel</strong></td> 
+        <td>A comma separated list of job ids that can be run in parallel. The definition is similar to that for the serial field.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Duration (Mins)</strong></td> 
+        <td>For <strong>Parallel</strong> jobs, the duration in minutes in which the jobs should run</td> 
+       </tr> 
+       <tr> 
+        <td><strong>End Time</strong></td> 
+        <td>For <strong>Parallel</strong> jobs, the time that the job runs should end. Will be applied if Duration is not set.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Per Minute</strong></td> 
+        <td>For <strong>Parallel</strong> jobs, the number of jobs to be run per minute. Will be applied if Duration and End Time fields are not set.</td> 
        </tr> 
        <tr> 
         <td><strong>Schedule</strong></td> 

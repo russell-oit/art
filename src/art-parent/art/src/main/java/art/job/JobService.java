@@ -28,6 +28,9 @@ import art.enums.JobType;
 import art.holiday.Holiday;
 import art.holiday.HolidayService;
 import art.jobrunners.ReportJob;
+import art.pipeline.Pipeline;
+import art.pipeline.PipelineService;
+import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.schedule.Schedule;
@@ -47,11 +50,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -60,6 +67,7 @@ import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.DateBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -92,13 +100,17 @@ public class JobService {
 	private final SmtpServerService smtpServerService;
 	private final DatasourceService datasourceService;
 	private final StartConditionService startConditionService;
+	private final PipelineScheduledJobService pipelineScheduledJobService;
+	private final PipelineService pipelineService;
 
 	@Autowired
 	public JobService(DbService dbService, ReportService reportService,
 			UserService userService, ScheduleService scheduleService,
 			HolidayService holidayService, DestinationService destinationService,
 			SmtpServerService smtpServerService, DatasourceService datasourceService,
-			StartConditionService startConditionService) {
+			StartConditionService startConditionService,
+			PipelineScheduledJobService pipelineScheduledJobService,
+			PipelineService pipelineService) {
 
 		this.dbService = dbService;
 		this.reportService = reportService;
@@ -109,6 +121,8 @@ public class JobService {
 		this.smtpServerService = smtpServerService;
 		this.datasourceService = datasourceService;
 		this.startConditionService = startConditionService;
+		this.pipelineScheduledJobService = pipelineScheduledJobService;
+		this.pipelineService = pipelineService;
 	}
 
 	public JobService() {
@@ -121,6 +135,8 @@ public class JobService {
 		smtpServerService = new SmtpServerService();
 		datasourceService = new DatasourceService();
 		startConditionService = new StartConditionService();
+		pipelineScheduledJobService = new PipelineScheduledJobService();
+		pipelineService = new PipelineService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -545,7 +561,7 @@ public class JobService {
 				cachedDatasourceId = null;
 			}
 		}
-		
+
 		Integer startConditionId = null;
 		if (job.getStartCondition() != null) {
 			startConditionId = job.getStartCondition().getStartConditionId();
@@ -1078,17 +1094,22 @@ public class JobService {
 	 * @param serial the serial setting
 	 * @param pipelineId the pipeline id
 	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
 	 */
 	public void scheduleSerialPipelineJob(int jobId, String serial, int pipelineId)
-			throws SchedulerException {
+			throws SchedulerException, SQLException {
 
 		logger.debug("Entering scheduleSerialPipelineJob: jobId={}, serial='{}',"
 				+ " pipelineId={}", jobId, serial, pipelineId);
 
+		String nextSerial = StringUtils.substringAfter(serial, ",");
+		pipelineService.updateNextSerial(pipelineId, nextSerial);
+
 		String runId = jobId + "-" + ArtUtils.getUniqueId();
+		String quartzJobName = "tempJob-" + runId;
 
 		JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
-				.withIdentity("tempJob-" + runId, "tempJobGroup")
+				.withIdentity(quartzJobName, ArtUtils.TEMP_JOB_GROUP)
 				.usingJobData("jobId", jobId)
 				.usingJobData("serial", serial)
 				.usingJobData("pipelineId", pipelineId)
@@ -1096,12 +1117,98 @@ public class JobService {
 				.build();
 
 		Trigger tempTrigger = TriggerBuilder.newTrigger()
-				.withIdentity("tempTrigger-" + runId, "tempTriggerGroup")
+				.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
 				.startNow()
 				.build();
 
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 		scheduler.scheduleJob(tempJob, tempTrigger);
+	}
+
+	/**
+	 * Schedules a parallel pipeline job
+	 *
+	 * @param parallel the parallel setting
+	 * @param pipeline the pipeline
+	 * @throws SchedulerException
+	 * @throws java.sql.SQLException
+	 */
+	public void scheduleParallelPipelineJob(String parallel, Pipeline pipeline)
+			throws SchedulerException, SQLException {
+
+		logger.debug("Entering scheduleSerialPipelineJob: parallel='{}',"
+				+ " pipelineId={}", parallel, pipeline);
+
+		int pipelineId = pipeline.getPipelineId();
+		int parallelPerMinute = pipeline.getParallelPerMinute();
+		if (parallelPerMinute <= 0) {
+			parallelPerMinute = Pipeline.PARALLEL_PER_MINUTE_DEFAULT;
+		}
+
+		int parallelDurationMins = pipeline.getParallelDurationMins();
+		Date parallelEndTime = pipeline.getParallelEndTime();
+
+		long parallelDurationSeconds = 0;
+
+		if (parallelDurationMins > 0) {
+			parallelDurationSeconds = TimeUnit.MINUTES.toSeconds(parallelDurationMins);
+		} else if (parallelEndTime != null) {
+			Calendar endTimeCalendar = Calendar.getInstance();
+			endTimeCalendar.setTime(parallelEndTime);
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.HOUR_OF_DAY, endTimeCalendar.get(Calendar.HOUR_OF_DAY));
+			calendar.set(Calendar.MINUTE, endTimeCalendar.get(Calendar.MINUTE));
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			Date effectiveParallelEndTime = calendar.getTime();
+
+			Instant now = Instant.now();
+			Instant endTime = effectiveParallelEndTime.toInstant();
+			Duration duration = Duration.between(now, endTime);
+			if (duration.isNegative() || duration.isZero()) {
+				throw new RuntimeException("End Time in the past: " + pipeline.getEndTimeString());
+			} else {
+				parallelDurationSeconds = duration.getSeconds();
+			}
+		}
+
+		String[] parallelArray = StringUtils.split(parallel, ",");
+		int secondCount = 0;
+		for (int i = 0; i < parallelArray.length; i++) {
+			if ((i % parallelPerMinute == 0) && i > 0) {
+				secondCount += 60;
+			}
+
+			int effectiveSecondStart;
+			if (parallelDurationSeconds > 0) {
+				effectiveSecondStart = ArtUtils.getRandomNumber(1, (int) parallelDurationSeconds);
+			} else {
+				int startSecond = ArtUtils.getRandomNumber(1, 60);
+				effectiveSecondStart = secondCount + startSecond;
+			}
+
+			int jobId = Integer.parseInt(parallelArray[i]);
+			String runId = jobId + "-" + ArtUtils.getUniqueId();
+			String quartzJobName = "tempJob-" + runId;
+
+			JobDetail tempJob = JobBuilder.newJob(ReportJob.class)
+					.withIdentity(quartzJobName, ArtUtils.TEMP_JOB_GROUP)
+					.usingJobData("jobId", jobId)
+					.usingJobData("pipelineId", pipelineId)
+					.usingJobData("tempJob", true)
+					.build();
+
+			Date runDate = DateBuilder.futureDate(effectiveSecondStart, DateBuilder.IntervalUnit.SECOND);
+			Trigger tempTrigger = TriggerBuilder.newTrigger()
+					.withIdentity("tempTrigger-" + runId, ArtUtils.TEMP_TRIGGER_GROUP)
+					.startAt(runDate)
+					.build();
+
+			Scheduler scheduler = SchedulerUtils.getScheduler();
+			scheduler.scheduleJob(tempJob, tempTrigger);
+
+			pipelineScheduledJobService.addPipelineScheduledJob(pipelineId, jobId, quartzJobName, runDate);
+		}
 	}
 
 	/**
@@ -1156,6 +1263,33 @@ public class JobService {
 	}
 
 	/**
+	 * Returns ids for jobs that use a given schedule
+	 *
+	 * @param scheduleId the schedule id
+	 * @return ids for jobs that use a given schedule
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Integer> getJobIdsWithSchedule(int scheduleId) throws SQLException {
+		logger.debug("Entering getJobIdsWithSchedule: schedulId='{}'", scheduleId);
+
+		String sql = "SELECT JOB_ID"
+				+ " FROM ART_JOBS"
+				+ " WHERE SCHEDULE_ID=?"
+				+ " ORDER BY JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, scheduleId);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
 	 * Returns ids for jobs whose report is in certain report groups
 	 *
 	 * @param reportGroupNames the report group names
@@ -1179,6 +1313,39 @@ public class JobService {
 
 		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
 		List<Number> numberIds = dbService.query(sql, h, (Object[]) reportGroupNames);
+
+		List<Integer> integerIds = new ArrayList<>();
+		for (Number number : numberIds) {
+			integerIds.add(number.intValue());
+		}
+
+		return integerIds;
+	}
+
+	/**
+	 * Returns ids for jobs whose report is in certain report groups
+	 *
+	 * @param reportGroupIds the report group ids
+	 * @return ids for jobs whose report is in certain report groups
+	 * @throws SQLException
+	 */
+	public List<Integer> getJobIdsWithReportGroups(Integer[] reportGroupIds) throws SQLException {
+		logger.debug("Entering getJobIdsWithReportGroups");
+
+		String sql = "SELECT AJ.JOB_ID"
+				+ " FROM ART_JOBS AJ"
+				+ " WHERE EXISTS("
+				+ " SELECT 1"
+				+ " FROM ART_QUERY_GROUPS AQG"
+				+ " INNER JOIN ART_REPORT_REPORT_GROUPS ARRG"
+				+ " ON AQG.QUERY_GROUP_ID=ARRG.REPORT_GROUP_ID"
+				+ " WHERE AJ.QUERY_ID=ARRG.REPORT_ID"
+				+ " AND AQG.QUERY_GROUP_ID IN(" + StringUtils.repeat("?", ",", reportGroupIds.length) + ")"
+				+ " )"
+				+ " ORDER BY AJ.JOB_ID";
+
+		ResultSetHandler<List<Number>> h = new ColumnListHandler<>("JOB_ID");
+		List<Number> numberIds = dbService.query(sql, h, (Object[]) reportGroupIds);
 
 		List<Integer> integerIds = new ArrayList<>();
 		for (Number number : numberIds) {

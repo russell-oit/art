@@ -22,7 +22,7 @@
 		<span class="glyphicon glyphicon-calendar"></span>
 	</span>
 </div>
-	
+
 <c:if test="${reportParam.parameter.allowNull}">
 	<div>
 		<label class="checkbox-inline">
@@ -33,11 +33,11 @@
 	</div>
 </c:if>
 
-<t:addDatePicker reportParam="${reportParam}" locale="${locale}"
-				 defaultFormat="YYYY-MM-DD HH:mm"/>
-
 <c:if test="${not empty reportParam.parameter.template}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(reportParam.parameter.template)}"></script>
 </c:if>
+
+<t:addDatePicker reportParam="${reportParam}" locale="${locale}"
+				 defaultFormat="YYYY-MM-DD HH:mm"/>
 
 <t:addRobinHerbotsMask reportParam="${reportParam}"/>

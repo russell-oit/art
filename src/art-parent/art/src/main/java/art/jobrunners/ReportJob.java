@@ -48,6 +48,7 @@ import art.pipeline.Pipeline;
 import art.pipeline.PipelineJobData;
 import art.pipeline.PipelineService;
 import art.pipelinerunningjob.PipelineRunningJobService;
+import art.pipelinescheduledjob.PipelineScheduledJobService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -55,6 +56,7 @@ import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
+import art.runreport.ReportOutputGeneratorResult;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.smtpserver.SmtpServer;
@@ -231,6 +233,9 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	private PipelineRunningJobService pipelineRunningJobService;
+	
+	@Autowired
+	private PipelineScheduledJobService pipelineScheduledJobService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -480,8 +485,13 @@ public class ReportJob implements org.quartz.Job {
 				currentJobId, serial, pipelineId, errorOccurred);
 
 		pipelineRunningJobService.removePipelineRunningJob(pipelineId, currentJobId);
+		pipelineScheduledJobService.removePipelineScheduledJob(pipelineId, jobId);
 
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
+			return;
+		}
+		
+		if(StringUtils.isBlank(serial)){
 			return;
 		}
 
@@ -2831,9 +2841,17 @@ public class ReportJob implements org.quartz.Job {
 			reportOutputGenerator.setDynamicModifyPassword(dynamicModifyPassword);
 
 			try {
-				reportOutputGenerator.generateOutput(report, reportRunner,
+				ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
 						reportFormat, locale, paramProcessorResult, writer,
 						outputFileName, user, messageSource);
+				if (!outputResult.isSuccess()) {
+					runMessage = outputResult.getMessage();
+					fileName = "";
+					File generatedFile = new File(outputFileName);
+					if (generatedFile.exists()) {
+						generatedFile.delete();
+					}
+				}
 			} finally {
 				if (writer != null) {
 					writer.close();

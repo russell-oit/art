@@ -25,6 +25,8 @@
 <spring:message code="pipelines.message.cancelled" var="cancelledText" javaScriptEscape="true"/>
 <spring:message code="reports.text.status" var="statusText" javaScriptEscape="true"/>
 <spring:message code="pipelines.message.refreshed" var="refreshedText" javaScriptEscape="true"/>
+<spring:message code="jobs.message.scheduled" var="scheduledText" javaScriptEscape="true"/>
+<spring:message code="pipelines.text.next" var="nextText" javaScriptEscape="true"/>
 
 <t:mainPageWithPanel title="${pageTitle}" configPage="true">
 
@@ -144,7 +146,15 @@
 								var result = '';
 								var runningJobsString = pipeline.runningJobsString;
 								if (runningJobsString) {
-									result = "${runningText}: " + runningJobsString;
+									result += "${runningText}: " + runningJobsString;
+								}
+								var nextSerialString = pipeline.nextSerialForDisplay;
+								if (nextSerialString) {
+									result += "<br>${nextText}: " + nextSerialString;
+								}
+								var scheduledJobsString = pipeline.scheduledJobsString;
+								if (scheduledJobsString) {
+									result += "<br>${scheduledText}: " + scheduledJobsString;
 								}
 
 								table.cell(row, 4).data(result);
