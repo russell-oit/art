@@ -142,7 +142,7 @@ Display application logs
 
 			/* Formating function for row details */
 			function formatDetails(data) {
-				return '<div class="details">' + data[8] + '</div>';
+				return '<div class="details">' + data[10] + '</div>';
 			}
 
 		</script>
@@ -167,7 +167,10 @@ Display application logs
 						<th><spring:message code="page.text.user"/></th>
 						<th class="dtHidden"><spring:message code="logs.text.page"/></th>
 						<th class="dtHidden"><spring:message code="logs.text.ipAddress"/></th>
+						<th class="dtHidden"><spring:message code="reports.text.reportId"/></th>
+						<th class="dtHidden"><spring:message code="jobs.text.jobId"/></th>
 						<th class="dtHidden"><spring:message code="logs.text.details"/></th> <%-- exception details column. must be last column. hidden --%>
+						
 							<%-- if change number of columns, must modify array index in format function --%>
 					</tr>
 				</thead>
@@ -184,6 +187,8 @@ Display application logs
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['user'])}</td>
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['requestURI'])}</td>
 							<td>${encode:forHtmlContent(log.MDCPropertyMap['remoteAddr'])}</td>
+							<td>${encode:forHtmlContent(log.MDCPropertyMap['reportId'])}</td>
+							<td>${encode:forHtmlContent(log.MDCPropertyMap['jobId'])}</td>
 							<td>${log.formattedException}</td>
 						</tr>
 					</c:forEach>

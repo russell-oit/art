@@ -117,6 +117,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.MessageSource;
 
 /**
@@ -332,6 +333,9 @@ public class ReportOutputGenerator {
 		}
 
 		fileName = FilenameUtils.getName(fullOutputFilename);
+		
+		int reportId = report.getReportId();
+		MDC.put("reportId",String.valueOf(reportId));
 
 		try {
 			reportParamsMap = paramProcessorResult.getReportParamsMap();
@@ -424,6 +428,8 @@ public class ReportOutputGenerator {
 		}
 
 		outputResult.setRowCount(rowsRetrieved);
+		
+		MDC.remove("reportId");
 
 		return outputResult;
 	}
