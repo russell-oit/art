@@ -1185,20 +1185,26 @@ public class Config extends HttpServlet {
 	 * @return the max rows for the given report format
 	 */
 	public static int getMaxRows(String reportFormatString) {
+		logger.debug("Entering getMaxRows: reportFormatString='{}'", reportFormatString);
+		
 		int max = settings.getMaxRowsDefault();
+		logger.debug("max = {}", max);
 
 		String setting = settings.getMaxRowsSpecific();
+		logger.debug("setting = '{}'", setting);
+		
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
 				if (StringUtils.containsIgnoreCase(maxSetting, reportFormatString)) {
 					String value = StringUtils.substringAfter(maxSetting, ":");
-					max = Integer.parseInt(value);
+					max = Integer.parseInt(value.trim());
+					logger.debug("specific max = {}", max);
 					break;
 				}
 			}
 		}
-
+		
 		return max;
 	}
 
