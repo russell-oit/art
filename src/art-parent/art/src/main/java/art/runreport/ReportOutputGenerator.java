@@ -425,12 +425,11 @@ public class ReportOutputGenerator {
 			}
 		} finally {
 			DatabaseUtils.close(rs);
+			MDC.remove("reportId");
 		}
 
 		outputResult.setRowCount(rowsRetrieved);
 		
-		MDC.remove("reportId");
-
 		return outputResult;
 	}
 

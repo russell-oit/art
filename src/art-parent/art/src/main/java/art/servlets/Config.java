@@ -158,11 +158,8 @@ public class Config extends HttpServlet {
 
 		closeSaikuConnections();
 
-		logger.debug("runningStatements.size()={}", runningStatements.size());
 		runningStatements.clear();
-		logger.debug("runningQueries.size()={}", runningQueries.size());
 		runningQueries.clear();
-		logger.debug("runningReports.size()={}", runningReports.size());
 		runningReports.clear();
 		runningJobs.clear();
 
