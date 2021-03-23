@@ -359,6 +359,7 @@ public class RunReportHelper {
 			case Plotly:
 			case XDocReportFreeMarkerPptx:
 			case XDocReportVelocityPptx:
+			case AwesomeChartJs:
 				enableReportFormats = false;
 				break;
 			default:
@@ -473,6 +474,7 @@ public class RunReportHelper {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case AwesomeChartJs:
 				enablePrint = false;
 				break;
 			default:
@@ -541,6 +543,7 @@ public class RunReportHelper {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case AwesomeChartJs:
 				enableEmail = false;
 				break;
 			default:

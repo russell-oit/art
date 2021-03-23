@@ -68,6 +68,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportengine.ReportEngineOutput;
+import art.reportoptions.AwesomeChartJsOptions;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
@@ -333,9 +334,9 @@ public class ReportOutputGenerator {
 		}
 
 		fileName = FilenameUtils.getName(fullOutputFilename);
-		
+
 		int reportId = report.getReportId();
-		MDC.put("reportId",String.valueOf(reportId));
+		MDC.put("reportId", String.valueOf(reportId));
 
 		try {
 			reportParamsMap = paramProcessorResult.getReportParamsMap();
@@ -420,6 +421,8 @@ public class ReportOutputGenerator {
 				generatePlotlyReport();
 			} else if (reportType == ReportType.File) {
 				generateFileReport();
+			} else if (reportType == ReportType.AwesomeChartJs) {
+				generateAwesomeChartJsReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -429,7 +432,7 @@ public class ReportOutputGenerator {
 		}
 
 		outputResult.setRowCount(rowsRetrieved);
-		
+
 		return outputResult;
 	}
 
@@ -2743,6 +2746,65 @@ public class ReportOutputGenerator {
 		request.setAttribute("data", jsonData);
 		request.setAttribute("options", plotlyOptions);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPlotly.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates an awesomechartjs report
+	 *
+	 * @throws Exception
+	 */
+	private void generateAwesomeChartJsReport() throws Exception {
+		logger.debug("Entering generateAwesomeChartJsReport");
+
+		if (isJob) {
+			throw new RuntimeException("AwesomeChartJs report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		List<String> labels = new ArrayList<>();
+		List<Double> data = new ArrayList<>();
+		if (groovyData == null) {
+			int rowCount = 0;
+			while (rs.next()) {
+				rowCount++;
+				String rowLabel = rs.getString(1);
+				Double rowData = rs.getDouble(2);
+				labels.add(rowLabel);
+				data.add(rowData);
+			}
+			rowsRetrieved = rowCount;
+		} else {
+			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+			rowsRetrieved = dataDetails.getRowCount();
+			List<List<Object>> listData = RunReportHelper.getListData(groovyData);
+			for (List<Object> row : listData) {
+				String rowLabel = String.valueOf(row.get(0));
+				Double rowData = (Double) row.get(1);
+				labels.add(rowLabel);
+				data.add(rowData);
+			}
+		}
+
+		//https://stackoverflow.com/questions/17440164/converting-a-java-arraylist-of-strings-to-a-javascript-array
+		String jsonData = ArtUtils.objectToJson(data);
+		String jsonLabels = ArtUtils.objectToJson(labels);
+
+		AwesomeChartJsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new AwesomeChartJsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, AwesomeChartJsOptions.class);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("options", options);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("labels", jsonLabels);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showAwesomeChartJs.jsp").include(request, response);
 	}
 
 }
