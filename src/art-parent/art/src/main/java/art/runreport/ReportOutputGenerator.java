@@ -93,6 +93,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -423,6 +425,8 @@ public class ReportOutputGenerator {
 				generateFileReport();
 			} else if (reportType == ReportType.AwesomeChartJs) {
 				generateAwesomeChartJsReport();
+			} else if (reportType == ReportType.ApexChartsJs) {
+				generateApexChartsJsReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -2749,7 +2753,7 @@ public class ReportOutputGenerator {
 	}
 
 	/**
-	 * Generates an awesomechartjs report
+	 * Generates an AwesomeChartJs report
 	 *
 	 * @throws Exception
 	 */
@@ -2805,6 +2809,71 @@ public class ReportOutputGenerator {
 		request.setAttribute("data", jsonData);
 		request.setAttribute("labels", jsonLabels);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showAwesomeChartJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates an ApexCharts.js report
+	 *
+	 * @throws Exception
+	 */
+	private void generateApexChartsJsReport() throws Exception {
+		logger.debug("Entering generateApexChartsJsReport");
+
+		if (isJob) {
+			throw new RuntimeException("ApexCharts.js report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String localeString = locale.toString();
+		localeString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		localeString = StringUtils.replace(localeString, "_", "-");
+		String languageFileName = localeString + ".json";
+
+		String languageFilePath = Config.getJsPath()
+				+ "apexcharts.js-3.26.0" + File.separator
+				+ "locales" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("localeString", localeString);
+			String localeContent = new String(Files.readAllBytes(Paths.get(languageFilePath)), "UTF-8");
+			request.setAttribute("localeContent", localeContent);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showApexChartsJs.jsp").include(request, response);
 	}
 
 }

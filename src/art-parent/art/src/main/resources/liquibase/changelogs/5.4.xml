@@ -16,5 +16,9 @@
 			<column name="REPORT_TYPE" valueNumeric="164"/>
 			<column name="DESCRIPTION" value="AwesomeChartJs"/>
 		</insert>
+		<insert tableName="ART_REPORT_TYPES">
+			<column name="REPORT_TYPE" valueNumeric="165"/>
+			<column name="DESCRIPTION" value="ApexCharts.js"/>
+		</insert>
 	</changeSet>
 </databaseChangeLog>
