@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.sf.art</groupId>
 		<artifactId>art-parent</artifactId>
-		<version>5.3</version>
+		<version>5.4</version>
 	</parent>
 	
 	<artifactId>jpivot-art</artifactId>
@@ -107,12 +107,12 @@
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>wcf-art</artifactId>
-			<version>5.3</version>
+			<version>5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
 			<artifactId>mondrian-art</artifactId>
-			<version>5.3</version>
+			<version>5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

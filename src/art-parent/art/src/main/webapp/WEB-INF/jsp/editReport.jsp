@@ -750,6 +750,7 @@ Edit report page
 					case 157: //org chart ajax
 					case 159: //reportengine file
 					case 160: //plotly
+					case 165: //apexcharts.js
 						$("#templateDiv").show();
 						break;
 					default:
@@ -906,6 +907,8 @@ Edit report page
 					case 157: //org chart ajax
 					case 160: //plotly
 					case 163: //link
+					case 164: //awesomechartjs
+					case 165: //apexcharts.js
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

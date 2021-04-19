@@ -68,6 +68,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportengine.ReportEngineOutput;
+import art.reportoptions.AwesomeChartJsOptions;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
@@ -92,6 +93,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -117,6 +120,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.MessageSource;
 
 /**
@@ -333,6 +337,9 @@ public class ReportOutputGenerator {
 
 		fileName = FilenameUtils.getName(fullOutputFilename);
 
+		int reportId = report.getReportId();
+		MDC.put("reportId", String.valueOf(reportId));
+
 		try {
 			reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
@@ -416,11 +423,16 @@ public class ReportOutputGenerator {
 				generatePlotlyReport();
 			} else if (reportType == ReportType.File) {
 				generateFileReport();
+			} else if (reportType == ReportType.AwesomeChartJs) {
+				generateAwesomeChartJsReport();
+			} else if (reportType == ReportType.ApexChartsJs) {
+				generateApexChartsJsReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
 		} finally {
 			DatabaseUtils.close(rs);
+			MDC.remove("reportId");
 		}
 
 		outputResult.setRowCount(rowsRetrieved);
@@ -2738,6 +2750,130 @@ public class ReportOutputGenerator {
 		request.setAttribute("data", jsonData);
 		request.setAttribute("options", plotlyOptions);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showPlotly.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates an AwesomeChartJs report
+	 *
+	 * @throws Exception
+	 */
+	private void generateAwesomeChartJsReport() throws Exception {
+		logger.debug("Entering generateAwesomeChartJsReport");
+
+		if (isJob) {
+			throw new RuntimeException("AwesomeChartJs report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		List<String> labels = new ArrayList<>();
+		List<Double> data = new ArrayList<>();
+		if (groovyData == null) {
+			int rowCount = 0;
+			while (rs.next()) {
+				rowCount++;
+				String rowLabel = rs.getString(1);
+				Double rowData = rs.getDouble(2);
+				labels.add(rowLabel);
+				data.add(rowData);
+			}
+			rowsRetrieved = rowCount;
+		} else {
+			GroovyDataDetails dataDetails = RunReportHelper.getGroovyDataDetails(groovyData, report);
+			rowsRetrieved = dataDetails.getRowCount();
+			List<List<Object>> listData = RunReportHelper.getListData(groovyData);
+			for (List<Object> row : listData) {
+				String rowLabel = String.valueOf(row.get(0));
+				Double rowData = (Double) row.get(1);
+				labels.add(rowLabel);
+				data.add(rowData);
+			}
+		}
+
+		//https://stackoverflow.com/questions/17440164/converting-a-java-arraylist-of-strings-to-a-javascript-array
+		String jsonData = ArtUtils.objectToJson(data);
+		String jsonLabels = ArtUtils.objectToJson(labels);
+
+		AwesomeChartJsOptions options;
+		String optionsString = report.getOptions();
+		if (StringUtils.isBlank(optionsString)) {
+			options = new AwesomeChartJsOptions();
+		} else {
+			ObjectMapper mapper = new ObjectMapper();
+			options = mapper.readValue(optionsString, AwesomeChartJsOptions.class);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("options", options);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("labels", jsonLabels);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showAwesomeChartJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates an ApexCharts.js report
+	 *
+	 * @throws Exception
+	 */
+	private void generateApexChartsJsReport() throws Exception {
+		logger.debug("Entering generateApexChartsJsReport");
+
+		if (isJob) {
+			throw new RuntimeException("ApexCharts.js report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String localeString = locale.toString();
+		localeString = StringUtils.lowerCase(localeString, Locale.ENGLISH);
+		localeString = StringUtils.replace(localeString, "_", "-");
+		String languageFileName = localeString + ".json";
+
+		String languageFilePath = Config.getJsPath()
+				+ "apexcharts.js-3.26.0" + File.separator
+				+ "locales" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			request.setAttribute("localeString", localeString);
+			String localeContent = new String(Files.readAllBytes(Paths.get(languageFilePath)), "UTF-8");
+			request.setAttribute("localeContent", localeContent);
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showApexChartsJs.jsp").include(request, response);
 	}
 
 }

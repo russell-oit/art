@@ -52,7 +52,8 @@ public enum ReportType {
 	C3(142), Plotly(160), ChartJs(143), Datamaps(144), DatamapsFile(145),
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
-	ReportEngine(158), ReportEngineFile(159), View(161), File(162), Link(163);
+	ReportEngine(158), ReportEngineFile(159), View(161), File(162), Link(163),
+	AwesomeChartJs(164), ApexChartsJs(165);
 
 	private final int value;
 
@@ -161,6 +162,7 @@ public enum ReportType {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case ApexChartsJs:
 				return true;
 			default:
 				return false;
@@ -205,6 +207,9 @@ public enum ReportType {
 			case OrgChartAjax:
 			case Plotly:
 			case View:
+			case Link:
+			case AwesomeChartJs:
+			case ApexChartsJs:
 				return false;
 			default:
 				return true;
@@ -681,22 +686,14 @@ public enum ReportType {
 	 */
 	public String getDescription() {
 		switch (this) {
-			case Tabular:
-				return "Tabular";
 			case Update:
 				return "Update Statement";
-			case Crosstab:
-				return "Crosstab";
 			case CrosstabHtml:
 				return "Crosstab (html only)";
 			case TabularHtml:
 				return "Tabular (html only)";
-			case Dashboard:
-				return "Dashboard";
 			case GridstackDashboard:
 				return "Dashboard: Gridstack";
-			case Text:
-				return "Text";
 			case JPivotMondrian:
 				return "JPivot: Mondrian";
 			case JPivotMondrianXmla:
@@ -751,10 +748,6 @@ public enum ReportType {
 				return "Chart: Horizontal Bar 2D";
 			case StackedHorizontalBar2DChart:
 				return "Chart: Stacked Horizontal Bar 2D";
-			case Group:
-				return "Group";
-			case FreeMarker:
-				return "FreeMarker";
 			case XDocReportFreeMarkerDocx:
 				return "XDocReport: Freemarker engine - Docx";
 			case XDocReportVelocityDocx:
@@ -767,24 +760,16 @@ public enum ReportType {
 				return "XDocReport: Freemarker engine - PPTX";
 			case XDocReportVelocityPptx:
 				return "XDocReport: Velocity engine - PPTX";
-			case ReactPivot:
-				return "ReactPivot";
-			case Thymeleaf:
-				return "Thymeleaf";
 			case PivotTableJs:
 				return "PivotTable.js";
 			case PivotTableJsCsvLocal:
 				return "PivotTable.js: CSV Local";
 			case PivotTableJsCsvServer:
 				return "PivotTable.js: CSV Server";
-			case Dygraphs:
-				return "Dygraphs";
 			case DygraphsCsvLocal:
 				return "Dygraphs: CSV Local";
 			case DygraphsCsvServer:
 				return "Dygraphs: CSV Server";
-			case DataTables:
-				return "DataTables";
 			case DataTablesCsvLocal:
 				return "DataTables: CSV Local";
 			case DataTablesCsvServer:
@@ -795,26 +780,14 @@ public enum ReportType {
 				return "C3.js";
 			case ChartJs:
 				return "Chart.js";
-			case Datamaps:
-				return "Datamaps";
 			case DatamapsFile:
 				return "Datamaps: File";
-			case Leaflet:
-				return "Leaflet";
-			case OpenLayers:
-				return "OpenLayers";
 			case TabularHeatmap:
 				return "Tabular: Heatmap";
 			case SaikuReport:
 				return "Saiku: Report";
 			case SaikuConnection:
 				return "Saiku: Connection";
-			case MongoDB:
-				return "MongoDB";
-			case CSV:
-				return "CSV";
-			case Velocity:
-				return "Velocity";
 			case OrgChartDatabase:
 				return "OrgChart: Database";
 			case OrgChartJson:
@@ -823,18 +796,12 @@ public enum ReportType {
 				return "OrgChart: List";
 			case OrgChartAjax:
 				return "OrgChart: Ajax";
-			case ReportEngine:
-				return "ReportEngine";
 			case ReportEngineFile:
 				return "ReportEngine: File";
 			case Plotly:
 				return "Plotly.js";
-			case View:
-				return "View";
-			case File:
-				return "File";
-			case Link:
-				return "Link";
+			case ApexChartsJs:
+				return "ApexCharts.js";
 			default:
 				return this.name();
 		}

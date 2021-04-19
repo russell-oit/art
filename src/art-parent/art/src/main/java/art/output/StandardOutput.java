@@ -801,6 +801,7 @@ public abstract class StandardOutput {
 			columnTotals = new HashMap<>();
 		}
 
+		rowCount = 0;
 		while (rs.next()) {
 			rowCount++;
 
@@ -948,6 +949,7 @@ public abstract class StandardOutput {
 			columnTotals = new HashMap<>();
 		}
 
+		rowCount = 0;
 		for (Object row : dataList) {
 			rowCount++;
 
@@ -1288,6 +1290,7 @@ public abstract class StandardOutput {
 		FileOutputStream fos = null;
 
 		try {
+			rowCount = 0;
 			while (rs.next()) {
 				rowCount++;
 
@@ -2317,6 +2320,7 @@ public abstract class StandardOutput {
 			beginRows();
 
 			//  _ Jan Feb Mar
+			rowCount = 0;
 			for (j = 0; j < ya.length; j++) {
 				rowCount++;
 
@@ -2389,6 +2393,7 @@ public abstract class StandardOutput {
 			beginRows();
 
 			//  _ Jan Feb Mar
+			rowCount = 0;
 			for (j = 0; j < ya.length; j++) {
 				rowCount++;
 
@@ -2541,6 +2546,7 @@ public abstract class StandardOutput {
 			beginRows();
 
 			//  _ Jan Feb Mar
+			rowCount = 0;
 			for (j = 0; j < ya.length; j++) {
 				rowCount++;
 
@@ -2613,6 +2619,7 @@ public abstract class StandardOutput {
 			beginRows();
 
 			//  _ Jan Feb Mar
+			rowCount = 0;
 			for (j = 0; j < ya.length; j++) {
 				rowCount++;
 

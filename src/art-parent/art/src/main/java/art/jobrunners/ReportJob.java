@@ -174,6 +174,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -258,6 +259,8 @@ public class ReportJob implements org.quartz.Job {
 			jobId = dataMap.getInt("jobId");
 			runUsername = dataMap.getString("username");
 			serial = dataMap.getString("serial");
+			
+			MDC.put("jobId", String.valueOf(jobId));
 
 			if (dataMap.containsKey("pipelineId")) {
 				pipelineId = dataMap.getInt("pipelineId");
@@ -464,6 +467,8 @@ public class ReportJob implements org.quartz.Job {
 
 			cacheHelper.clearPipelines();
 		}
+		
+		MDC.remove("jobId");
 	}
 
 	/**

@@ -359,6 +359,8 @@ public class RunReportHelper {
 			case Plotly:
 			case XDocReportFreeMarkerPptx:
 			case XDocReportVelocityPptx:
+			case AwesomeChartJs:
+			case ApexChartsJs:
 				enableReportFormats = false;
 				break;
 			default:
@@ -473,6 +475,8 @@ public class RunReportHelper {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case AwesomeChartJs:
+			case ApexChartsJs:
 				enablePrint = false;
 				break;
 			default:
@@ -541,6 +545,8 @@ public class RunReportHelper {
 			case OrgChartList:
 			case OrgChartAjax:
 			case Plotly:
+			case AwesomeChartJs:
+			case ApexChartsJs:
 				enableEmail = false;
 				break;
 			default:
@@ -1516,14 +1522,14 @@ public class RunReportHelper {
 
 	/**
 	 * Returns the report format to use for a report run
-	 * 
+	 *
 	 * @param request the http request
 	 * @param report the report object
 	 * @return the report format to use
 	 */
 	public ReportFormat getReportFormat(HttpServletRequest request, Report report) {
 		ReportFormat reportFormat;
-		
+
 		String reportFormatString = request.getParameter("reportFormat");
 		if (StringUtils.isBlank(reportFormatString) || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
 			String reportDefaultFormat = report.getDefaultReportFormat();

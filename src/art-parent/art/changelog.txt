@@ -1,3 +1,10 @@
+ART 5.4
+* Added report id and job id to logs
+* Added AwesomeChartJs report type with simple pareto chart type
+* Added ApexCharts.js report type
+* Corrected art-tables.sql for new installs
+* Updated bigquery driver, poi, jxls
+
 ART 5.3
 * Allow specifying of datepicker options
 * Added parallel pipelines
