@@ -598,29 +598,25 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Converts a string parameter value to a time object or string
+	 * Converts a string parameter value to a time object
 	 *
 	 * @param value the string parameter value
 	 * @param param the parameter object for the value
-	 * @return a time object or a string
+	 * @return a time object
 	 */
-	private Object convertParameterStringValueToTime(String value, Parameter param) {
-		if (param.isTimeAsString()) {
-			return value;
-		} else {
-			return convertParameterStringValueToTime(value, param.getDateFormat());
-		}
+	private LocalTime convertParameterStringValueToTime(String value, Parameter param) {
+		return convertParameterStringValueToTime(value, param.getDateFormat());
 	}
 
 	/**
-	 * Converts a string parameter value to a time object or string
+	 * Converts a string parameter value to a time object
 	 *
 	 * @param value the string parameter value
 	 * @param timeFormat the date format that the value is in
-	 * @return a time object or string
+	 * @return a date object
 	 * @throws ParseException
 	 */
-	private Object convertParameterStringValueToTime(String value, String timeFormat) {
+	private LocalTime convertParameterStringValueToTime(String value, String timeFormat) {
 		logger.debug("Entering convertParameterStringValueToTime: value='{}',"
 				+ " timeFormat='{}'", value, timeFormat);
 
