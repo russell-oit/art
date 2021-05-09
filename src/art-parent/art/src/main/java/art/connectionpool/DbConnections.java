@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -54,31 +53,18 @@ public class DbConnections {
 	private static Map<Integer, MongoClient> mongodbConnections;
 
 	/**
-	 * Create connection pools for the art database and active datasources
+	 * Create connection pools for active datasources
 	 *
 	 * @param artDbConfig the art database configuration
 	 * @throws SQLException
 	 */
-	public static void createConnectionPools(ArtDatabase artDbConfig) throws SQLException {
-		logger.debug("Entering createConnectionPools");
-
-		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
-
-		//reset pools map
-		closeAllConnections();
-		connectionPoolMap = new HashMap<>();
-		mongodbConnections = new HashMap<>();
-
-		//create connection pool for the art database
-		createArtDbConnectionPool(artDbConfig);
-
+	public static void createDatasourceConnectionPools(ArtDatabase artDbConfig) throws SQLException {
 		ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
 
 		logger.debug("connectionPoolLibrary={}", connectionPoolLibrary);
 		logger.debug("maxPoolSize={}", maxPoolSize);
 
-		//create connection pools for active datasources
 		createDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
 	}
 
@@ -341,7 +327,7 @@ public class DbConnections {
 
 	/**
 	 * Closes all connection pools (really closes all connections in all the
-	 * connection pools) and clears and nullifies the connection pool map
+	 * connection pools) and clears the connection pool map
 	 */
 	public static void closeAllConnections() {
 		logger.debug("Entering closeAllConnections");
@@ -362,6 +348,8 @@ public class DbConnections {
 			mongodbConnections = null;
 		}
 
+		connectionPoolMap = new HashMap<>();
+		mongodbConnections = new HashMap<>();
 	}
 
 	/**

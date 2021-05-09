@@ -1,6 +1,6 @@
 ART 5.5
 * Added Time parameter type
-* Updated mariadb driver
+* Updated mariadb driver, mysql driver
 
 ART 5.4
 * Added report id and job id to logs

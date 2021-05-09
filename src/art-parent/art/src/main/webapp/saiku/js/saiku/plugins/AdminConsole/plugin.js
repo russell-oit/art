@@ -176,7 +176,7 @@ var AdminConsole = Backbone.View.extend({
         var dbUrl = this.$el.find('input[name="jdbcurl"]').val();
         var dbDriver = this.$el.find('input[name="driver"]').val();
         var jdbcDriver = {
-            'mysql'      : 'com.mysql.jdbc.Driver',
+            'mysql'      : 'com.mysql.cj.jdbc.Driver',
             'postgresql' : 'org.postgresql.Driver',
             'oracle'     : 'oracle.jdbc.OracleDriver',
             'drill'      : 'org.apache.drill.jdbc.Driver',

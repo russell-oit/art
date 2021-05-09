@@ -543,18 +543,23 @@ public class Config extends HttpServlet {
 		}
 
 		try {
-			//create connection pools
-			DbConnections.createConnectionPools(artDbConfig);
+			DbConnections.closeAllConnections();
+
+			//create art db connection pool
+			DbConnections.createArtDbConnectionPool(artDbConfig);
 
 			//create quartz scheduler. must be done before upgrade is run
 			createQuartzScheduler();
 
 			//upgrade art database
 			performLiquibaseUpgrade();
-			
+
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
+
+			//create datasource connection pools
+			DbConnections.createDatasourceConnectionPools(artDbConfig);
 		} finally {
 			//load settings
 			//put in finally block so that a settings object is always available
@@ -1184,13 +1189,13 @@ public class Config extends HttpServlet {
 	 */
 	public static int getMaxRows(String reportFormatString) {
 		logger.debug("Entering getMaxRows: reportFormatString='{}'", reportFormatString);
-		
+
 		int max = settings.getMaxRowsDefault();
 		logger.debug("max = {}", max);
 
 		String setting = settings.getMaxRowsSpecific();
 		logger.debug("setting = '{}'", setting);
-		
+
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
@@ -1202,7 +1207,7 @@ public class Config extends HttpServlet {
 				}
 			}
 		}
-		
+
 		return max;
 	}
 
