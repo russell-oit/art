@@ -173,6 +173,15 @@ Edit parameter definition
 					default:
 						$("#lovFields").show();
 				}
+				
+				//show/hide time as string field
+				switch (dataType) {
+					case "Time":
+						$("#timeAsStringDiv").show();
+						break;
+					default:
+						$("#timeAsStringDiv").hide();
+				}
 
 				//show/hide other fields
 				switch (dataType) {
@@ -365,6 +374,16 @@ Edit parameter definition
 					<div class="col-md-8">
 						<form:input path="dateFormat" maxlength="100" class="form-control"/>
 						<form:errors path="dateFormat" cssClass="error"/>
+					</div>
+				</div>
+				<div id="timeAsStringDiv" class="form-group">
+					<label class="control-label col-md-4" for="timeAsString">
+						<spring:message code="parameters.label.timeAsString"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="timeAsString" id="timeAsString" class="switch-yes-no"/>
+						</div>
 					</div>
 				</div>
 

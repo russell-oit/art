@@ -73,6 +73,7 @@ public class Parameter implements Serializable {
 	private boolean allowNull;
 	private boolean multipleFiles;
 	private String fileAccept;
+	private boolean timeAsString;
 	private String template;
 	@JsonIgnore
 	private ParameterOptions parameterOptions;
@@ -82,6 +83,20 @@ public class Parameter implements Serializable {
 	private String dtAction;
 	@JsonIgnore
 	private boolean overwriteFiles;
+
+	/**
+	 * @return the timeAsString
+	 */
+	public boolean isTimeAsString() {
+		return timeAsString;
+	}
+
+	/**
+	 * @param timeAsString the timeAsString to set
+	 */
+	public void setTimeAsString(boolean timeAsString) {
+		this.timeAsString = timeAsString;
+	}
 
 	/**
 	 * @return the fileAccept

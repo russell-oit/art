@@ -162,6 +162,7 @@ public class ParameterService {
 		parameter.setAllowNull(rs.getBoolean("ALLOW_NULL"));
 		parameter.setMultipleFiles(rs.getBoolean("MULTIPLE_FILES"));
 		parameter.setFileAccept(rs.getString("FILE_ACCEPT"));
+		parameter.setTimeAsString(rs.getBoolean("TIME_AS_STRING"));
 		parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		parameter.setCreatedBy(rs.getString("CREATED_BY"));
@@ -613,8 +614,9 @@ public class ParameterService {
 					+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION, PARAMETER_OPTIONS,"
 					+ " PARAMETER_DATE_FORMAT, PLACEHOLDER_TEXT, USE_DEFAULT_VALUE_IN_JOBS,"
 					+ " TEMPLATE, ALLOW_NULL, MULTIPLE_FILES, FILE_ACCEPT,"
+					+ " TIME_AS_STRING,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 27) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 28) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -642,6 +644,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isAllowNull()),
 				BooleanUtils.toInteger(parameter.isMultipleFiles()),
 				parameter.getFileAccept(),
+				BooleanUtils.toInteger(parameter.isTimeAsString()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -655,7 +658,7 @@ public class ParameterService {
 					+ " USE_RULES_IN_LOV=?, DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " PARAMETER_OPTIONS=?, PARAMETER_DATE_FORMAT=?, PLACEHOLDER_TEXT=?,"
 					+ " USE_DEFAULT_VALUE_IN_JOBS=?, TEMPLATE=?, ALLOW_NULL=?,"
-					+ " MULTIPLE_FILES=?, FILE_ACCEPT=?,"
+					+ " MULTIPLE_FILES=?, FILE_ACCEPT=?, TIME_AS_STRING=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
 
@@ -684,6 +687,7 @@ public class ParameterService {
 				BooleanUtils.toInteger(parameter.isAllowNull()),
 				BooleanUtils.toInteger(parameter.isMultipleFiles()),
 				parameter.getFileAccept(),
+				BooleanUtils.toInteger(parameter.isTimeAsString()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()
