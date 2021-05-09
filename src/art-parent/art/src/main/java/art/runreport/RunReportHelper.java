@@ -254,7 +254,8 @@ public class RunReportHelper {
 		boolean hasDateParam = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
-			if (param.isForDisplay() && param.getDataType().isDate()) {
+			if (param.isForDisplay() && (param.getDataType().isDate()
+					|| param.getDataType() == ParameterDataType.Time)) {
 				hasDateParam = true;
 				break;
 			}

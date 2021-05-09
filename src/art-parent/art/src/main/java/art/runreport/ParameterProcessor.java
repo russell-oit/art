@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -523,8 +524,6 @@ public class ParameterProcessor {
 			return null;
 		}
 
-		ParameterDataType paramDataType = param.getDataType();
-
 		String username = null;
 		if (user != null) {
 			username = user.getUsername();
@@ -533,10 +532,14 @@ public class ParameterProcessor {
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		value = expressionHelper.processString(value, username);
 
+		ParameterDataType paramDataType = param.getDataType();
+
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
 		} else if (paramDataType.isDate()) {
 			return convertParameterStringValueToDate(value, param);
+		} else if (paramDataType == ParameterDataType.Time) {
+			return convertParameterStringValueToTime(value, param);
 		} else {
 			//parameter data types that are treated as strings
 			return value;
@@ -592,6 +595,34 @@ public class ParameterProcessor {
 			default:
 				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);
 		}
+	}
+
+	/**
+	 * Converts a string parameter value to a time object
+	 *
+	 * @param value the string parameter value
+	 * @param param the parameter object for the value
+	 * @return a time object
+	 */
+	private LocalTime convertParameterStringValueToTime(String value, Parameter param) {
+		return convertParameterStringValueToTime(value, param.getDateFormat());
+	}
+
+	/**
+	 * Converts a string parameter value to a time object
+	 *
+	 * @param value the string parameter value
+	 * @param timeFormat the date format that the value is in
+	 * @return a date object
+	 * @throws ParseException
+	 */
+	private LocalTime convertParameterStringValueToTime(String value, String timeFormat) {
+		logger.debug("Entering convertParameterStringValueToTime: value='{}',"
+				+ " timeFormat='{}'", value, timeFormat);
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		LocalTime timeValue = expressionHelper.convertStringToTime(value, timeFormat, locale);
+		return timeValue;
 	}
 
 	/**

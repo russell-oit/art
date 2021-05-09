@@ -25,6 +25,7 @@ import art.utils.ArtUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -500,6 +501,8 @@ public class ReportParameter implements Serializable {
 			ParameterDataType parameterDataType = parameter.getDataType();
 			if (parameterDataType.isDate()) {
 				returnValue = parameter.getDateString(value, locale);
+			} else if (parameterDataType == ParameterDataType.Time) {
+				returnValue = parameter.getTimeString(value, locale);
 			} else if (parameterDataType.isNumeric()) {
 				String[] passedValues = passedParameterValues;
 				String defaultValue = parameter.getLocalizedDefaultValue(locale);

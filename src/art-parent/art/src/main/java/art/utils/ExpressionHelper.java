@@ -30,6 +30,10 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -466,6 +470,82 @@ public class ExpressionHelper {
 		}
 
 		return dateValue;
+	}
+
+	/**
+	 * Converts a string representation of a time to a tme object
+	 *
+	 * @param string the string
+	 * @param timeFormat the time format that the string is in
+	 * @param locale the locale to use for the time
+	 * @return the time object of the string representation
+	 */
+	public LocalTime convertStringToTime(String string, String timeFormat,
+			Locale locale) {
+
+		logger.debug("Entering convertStringToTime: string='{}',"
+				+ " timeFormat='{}', locale={}", string, timeFormat, locale);
+
+		if (string == null) {
+			return null;
+		}
+
+		LocalTime timeValue;
+		LocalTime now = LocalTime.now();
+
+		String trimString = StringUtils.trimToEmpty(string);
+
+		if (StringUtils.equalsIgnoreCase(trimString, "now")
+				|| StringUtils.isBlank(string)) {
+			timeValue = now;
+		} else if (StringUtils.startsWithIgnoreCase(trimString, "add")) {
+			//e.g. add hours 1
+			String[] tokens = StringUtils.split(trimString); //splits by space
+			if (tokens.length != 3) {
+				throw new IllegalArgumentException("Invalid interval: " + trimString);
+			}
+
+			String period = tokens[1];
+			int offset = Integer.parseInt(tokens[2]);
+
+			if (StringUtils.startsWithIgnoreCase(period, "hour")) {
+				timeValue = now.plusHours(offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
+				timeValue = now.plusMinutes(offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
+				timeValue = now.plusSeconds(offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
+				timeValue = now.plus(offset, ChronoUnit.MILLIS);
+			} else {
+				throw new IllegalArgumentException("Invalid period: " + period);
+			}
+		} else {
+			//convert time string as it is to a date
+			if (StringUtils.isBlank(timeFormat)) {
+				if (string.length() == ArtUtils.ISO_TIME_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_FORMAT;
+				} else if (string.length() == ArtUtils.ISO_TIME_SECONDS_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_SECONDS_FORMAT;
+				} else if (string.length() == ArtUtils.ISO_TIME_MILLISECONDS_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_MILLISECONDS_FORMAT;
+				} else {
+					throw new IllegalArgumentException("Unexpected time format: " + string);
+				}
+			}
+
+			if (locale == null) {
+				locale = Locale.getDefault();
+			}
+
+			//https://stackoverflow.com/questions/38250379/java8-datetimeformatter-am-pm
+			DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
+					.parseCaseInsensitive()
+					.appendPattern(timeFormat)
+					.toFormatter(locale);
+			timeValue = LocalTime.parse(string, timeFormatter);
+		}
+
+		return timeValue;
 	}
 
 	/**
