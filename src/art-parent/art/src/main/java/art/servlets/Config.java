@@ -420,7 +420,8 @@ public class Config extends HttpServlet {
 		//https://stackoverflow.com/questions/22056967/apache-velocity-resource-not-found-exception-even-though-template-file-is-in-the
 		//https://stackoverflow.com/questions/34662161/velocitys-fileresourceloader-cant-find-resources
 		//https://velocity.apache.org/engine/1.7/developer-guide.html#resource-management
-		velocityEngine.setProperty("file.resource.loader.path", "");
+		//https://sourceforge.net/p/art/discussion/352129/thread/32568f0d62/?limit=25#fb27
+		velocityEngine.setProperty("resource.loader.file.path", "");
 
 		velocityEngine.init();
 	}
