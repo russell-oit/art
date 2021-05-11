@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -598,34 +597,6 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Converts a string parameter value to a time object
-	 *
-	 * @param value the string parameter value
-	 * @param param the parameter object for the value
-	 * @return a time object
-	 */
-	private LocalTime convertParameterStringValueToTime(String value, Parameter param) {
-		return convertParameterStringValueToTime(value, param.getDateFormat());
-	}
-
-	/**
-	 * Converts a string parameter value to a time object
-	 *
-	 * @param value the string parameter value
-	 * @param timeFormat the date format that the value is in
-	 * @return a date object
-	 * @throws ParseException
-	 */
-	private LocalTime convertParameterStringValueToTime(String value, String timeFormat) {
-		logger.debug("Entering convertParameterStringValueToTime: value='{}',"
-				+ " timeFormat='{}'", value, timeFormat);
-
-		ExpressionHelper expressionHelper = new ExpressionHelper();
-		LocalTime timeValue = expressionHelper.convertStringToTime(value, timeFormat, locale);
-		return timeValue;
-	}
-
-	/**
 	 * Converts a string parameter value to a date object
 	 *
 	 * @param value the string parameter value
@@ -652,6 +623,35 @@ public class ParameterProcessor {
 		ExpressionHelper expressionHelper = new ExpressionHelper();
 		Date dateValue = expressionHelper.convertStringToDate(value, dateFormat, locale);
 		return dateValue;
+	}
+	
+	/**
+	 * Converts a string parameter value to a date object representing the time
+	 *
+	 * @param value the string parameter value
+	 * @param param the parameter object for the value
+	 * @return a date object
+	 * @throws ParseException
+	 */
+	private Date convertParameterStringValueToTime(String value, Parameter param) throws ParseException {
+		return convertParameterStringValueToTime(value, param.getDateFormat());
+	}
+
+	/**
+	 * Converts a string parameter value to a date object representing the time
+	 *
+	 * @param value the string parameter value
+	 * @param timeFormat the time format that the value is in
+	 * @return a date object
+	 * @throws ParseException
+	 */
+	private Date convertParameterStringValueToTime(String value, String timeFormat) throws ParseException {
+		logger.debug("Entering convertParameterStringValueToTime: value='{}',"
+				+ " timeFormat='{}'", value, timeFormat);
+
+		ExpressionHelper expressionHelper = new ExpressionHelper();
+		Date timeValue = expressionHelper.convertStringToTime(value, timeFormat, locale);
+		return timeValue;
 	}
 
 	/**

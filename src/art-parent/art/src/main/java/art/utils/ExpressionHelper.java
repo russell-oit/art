@@ -30,10 +30,6 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -473,15 +469,17 @@ public class ExpressionHelper {
 	}
 
 	/**
-	 * Converts a string representation of a time to a tme object
+	 * Converts a string representation of a time to a date object representing
+	 * the time
 	 *
 	 * @param string the string
 	 * @param timeFormat the time format that the string is in
 	 * @param locale the locale to use for the time
-	 * @return the time object of the string representation
+	 * @return the date object of the string representation
+	 * @throws java.text.ParseException
 	 */
-	public LocalTime convertStringToTime(String string, String timeFormat,
-			Locale locale) {
+	public Date convertStringToTime(String string, String timeFormat,
+			Locale locale) throws ParseException {
 
 		logger.debug("Entering convertStringToTime: string='{}',"
 				+ " timeFormat='{}', locale={}", string, timeFormat, locale);
@@ -490,8 +488,8 @@ public class ExpressionHelper {
 			return null;
 		}
 
-		LocalTime timeValue;
-		LocalTime now = LocalTime.now();
+		Date timeValue;
+		Date now = new Date();
 
 		String trimString = StringUtils.trimToEmpty(string);
 
@@ -509,13 +507,13 @@ public class ExpressionHelper {
 			int offset = Integer.parseInt(tokens[2]);
 
 			if (StringUtils.startsWithIgnoreCase(period, "hour")) {
-				timeValue = now.plusHours(offset);
+				timeValue = DateUtils.addHours(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
-				timeValue = now.plusMinutes(offset);
+				timeValue = DateUtils.addMinutes(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
-				timeValue = now.plusSeconds(offset);
+				timeValue = DateUtils.addSeconds(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
-				timeValue = now.plus(offset, ChronoUnit.MILLIS);
+				timeValue = DateUtils.addMilliseconds(now, offset);
 			} else {
 				throw new IllegalArgumentException("Invalid period: " + period);
 			}
@@ -537,12 +535,18 @@ public class ExpressionHelper {
 				locale = Locale.getDefault();
 			}
 
-			//https://stackoverflow.com/questions/38250379/java8-datetimeformatter-am-pm
-			DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
-					.parseCaseInsensitive()
-					.appendPattern(timeFormat)
-					.toFormatter(locale);
-			timeValue = LocalTime.parse(string, timeFormatter);
+			//not all locales work with simpledateformat
+			//with lenient set to false, parsing may throw an error if the locale is not available
+			if (logger.isDebugEnabled()) {
+				Locale[] locales = SimpleDateFormat.getAvailableLocales();
+				if (!Arrays.asList(locales).contains(locale)) {
+					logger.debug("Locale '{}' not available for time parameter parsing", locale);
+				}
+			}
+
+			SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat, locale);
+			timeFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
+			timeValue = timeFormatter.parse(string);
 		}
 
 		return timeValue;

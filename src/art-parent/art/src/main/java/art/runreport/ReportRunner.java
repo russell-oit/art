@@ -57,7 +57,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -935,13 +934,17 @@ public class ReportRunner {
 	private void addJdbcParam(Object paramValue, ParameterDataType paramDataType) {
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
-			if (paramDataType == ParameterDataType.Date) {
-				jdbcParams.add(DatabaseUtils.toSqlDate(dateValue));
-			} else {
-				jdbcParams.add(DatabaseUtils.toSqlTimestamp(dateValue));
+			switch (paramDataType) {
+				case Date:
+					jdbcParams.add(DatabaseUtils.toSqlDate(dateValue));
+					break;
+				case Time:
+					jdbcParams.add(DatabaseUtils.toSqlTime(dateValue));
+					break;
+				default:
+					jdbcParams.add(DatabaseUtils.toSqlTimestamp(dateValue));
+					break;
 			}
-		} else if (paramValue instanceof LocalTime) {
-			jdbcParams.add(DatabaseUtils.toSqlTime((LocalTime) paramValue));
 		} else {
 			jdbcParams.add(paramValue);
 		}

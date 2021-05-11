@@ -1283,7 +1283,7 @@ public class Config extends HttpServlet {
 		if (time == null) {
 			timeString = "";
 		} else {
-			timeString = ArtUtils.simpleIsoTimeSecondsFormatter.format(time);
+			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
 		}
 		
 		return timeString;

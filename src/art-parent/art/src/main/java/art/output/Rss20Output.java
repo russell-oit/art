@@ -154,7 +154,7 @@ public class Rss20Output extends StandardOutput {
 		if (value == null) {
 			formattedValue = "";
 		} else {
-			formattedValue = ArtUtils.simpleIsoTimeSecondsFormatter.format(value);
+			formattedValue = ArtUtils.isoTimeSecondsFormatter.format(value);
 		}
 
 		out.println("<" + columnNames[columnIndex] + ">"

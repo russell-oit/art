@@ -331,6 +331,9 @@ public class ReportParameter implements Serializable {
 					case DateTime:
 						paramValueString = ArtUtils.isoDateTimeSecondsFormatter.format((Date) paramValue);
 						break;
+					case Time:
+						paramValueString = ArtUtils.isoTimeSecondsFormatter.format((Date) paramValue);
+						break;
 					default:
 						paramValueString = String.valueOf(paramValue);
 				}
@@ -599,6 +602,9 @@ public class ReportParameter implements Serializable {
 				case DateTime:
 					stringValue = ArtUtils.isoDateTimeFormatter.format(dataValue);
 					break;
+				case Time:
+					stringValue = ArtUtils.isoTimeSecondsFormatter.format(dataValue);
+					break;
 				default:
 					stringValue = String.valueOf(dataValue);
 			}
@@ -654,6 +660,9 @@ public class ReportParameter implements Serializable {
 						case DateTime:
 							finalValue = "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
 							break;
+						case Time:
+							finalValue = "'" + ArtUtils.isoTimeSecondsFormatter.format(value) + "'";
+							break;
 						default:
 							finalValue = String.valueOf(value);
 							StringUtils.replace(finalValue, "'", "''");
@@ -679,6 +688,11 @@ public class ReportParameter implements Serializable {
 						case DateTime:
 							for (Object listValue : values) {
 								stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(listValue) + "'");
+							}
+							break;
+						case Time:
+							for (Object listValue : values) {
+								stringValues.add("'" + ArtUtils.isoTimeSecondsFormatter.format(listValue) + "'");
 							}
 							break;
 						default:

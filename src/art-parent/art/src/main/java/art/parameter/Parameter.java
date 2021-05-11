@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -670,10 +668,10 @@ public class Parameter implements Serializable {
 		}
 
 		if (StringUtils.isBlank(dateFormat)) {
-			return ((LocalTime) value).format(ArtUtils.isoTimeFormatter);
+			return ArtUtils.isoTimeSecondsFormatter.format(value);
 		} else {
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(dateFormat, locale);
-			return ((LocalTime) value).format(timeFormatter);
+			SimpleDateFormat timeFormatter = new SimpleDateFormat(dateFormat, locale);
+			return timeFormatter.format(value);
 		}
 	}
 
