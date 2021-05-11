@@ -122,6 +122,17 @@ public class CsvOutputArt extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		appendValue(formattedValue);
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = Config.getTimeDisplayString(value);
+		appendValue(formattedValue);
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		appendValue(formattedValue);
+	}
 
 	@Override
 	public void newRow() {

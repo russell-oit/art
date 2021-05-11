@@ -183,6 +183,17 @@ public class OdtOutput extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		outputCellText(formattedValue);
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = formatTimeValue(value);
+		outputCellText(formattedValue);
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		outputCellText(formattedValue);
+	}
 
 	@Override
 	public void addCellImage(byte[] binaryData) {

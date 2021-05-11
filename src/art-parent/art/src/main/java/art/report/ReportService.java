@@ -270,6 +270,7 @@ public class ReportService {
 		report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
 		report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
 		report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
+		report.setTimeFormat(rs.getString("TIME_COLUMN_FORMAT"));
 		report.setNumberFormat(rs.getString("NUMBER_COLUMN_FORMAT"));
 		report.setColumnFormats(rs.getString("COLUMN_FORMATS"));
 		report.setLocale(rs.getString("LOCALE"));
@@ -1015,8 +1016,9 @@ public class ReportService {
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS, LINK, OPEN_IN_NEW_WINDOW,"
 					+ " MAX_RUNNING, MAX_RUNNING_PER_USER, REPORT_FORMATS,"
+					+ " TIME_COLUMN_FORMAT,"
 					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 54) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 55) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1070,6 +1072,7 @@ public class ReportService {
 				report.getMaxRunning(),
 				report.getMaxRunningPerUser(),
 				report.getReportFormats(),
+				report.getTimeFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				actionUser.getUserId()
@@ -1094,6 +1097,7 @@ public class ReportService {
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
 					+ " SELF_SERVICE_OPTIONS=?, LINK=?, OPEN_IN_NEW_WINDOW=?,"
 					+ " MAX_RUNNING=?, MAX_RUNNING_PER_USER=?, REPORT_FORMATS=?,"
+					+ " TIME_COLUMN_FORMAT=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1148,6 +1152,7 @@ public class ReportService {
 				report.getMaxRunning(),
 				report.getMaxRunningPerUser(),
 				report.getReportFormats(),
+				report.getTimeFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

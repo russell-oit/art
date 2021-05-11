@@ -11,4 +11,9 @@
 			<column name="DATABASE_VERSION" value="5.5"/>
 		</update>
 	</changeSet>
+	<changeSet id="2" author="art">
+		<addColumn tableName="ART_QUERIES">
+			<column name="TIME_COLUMN_FORMAT" type="VARCHAR(100)"/>
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

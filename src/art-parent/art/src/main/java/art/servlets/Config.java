@@ -119,6 +119,7 @@ public class Config extends HttpServlet {
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat testTimeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
@@ -551,7 +552,7 @@ public class Config extends HttpServlet {
 
 			//upgrade art database
 			performLiquibaseUpgrade();
-			
+
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
@@ -680,10 +681,12 @@ public class Config extends HttpServlet {
 		settingsService.setSettingsDefaults(settings);
 
 		//set date formatters
+		testTimeFormatter.applyPattern("HH:mm:ss.SSS");
 		String dateFormat = settings.getDateFormat();
-		timeFormatter.applyPattern("HH:mm:ss.SSS");
+		String timeFormat = settings.getTimeFormat();
 		dateFormatter.applyPattern(dateFormat);
-		dateTimeFormatter.applyPattern(dateFormat + " " + settings.getTimeFormat());
+		timeFormatter.applyPattern(timeFormat);
+		dateTimeFormatter.applyPattern(dateFormat + " " + timeFormat);
 
 		//set available report formats
 		String reportFormatsString = settings.getReportFormats();
@@ -1184,13 +1187,13 @@ public class Config extends HttpServlet {
 	 */
 	public static int getMaxRows(String reportFormatString) {
 		logger.debug("Entering getMaxRows: reportFormatString='{}'", reportFormatString);
-		
+
 		int max = settings.getMaxRowsDefault();
 		logger.debug("max = {}", max);
 
 		String setting = settings.getMaxRowsSpecific();
 		logger.debug("setting = '{}'", setting);
-		
+
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
@@ -1202,7 +1205,7 @@ public class Config extends HttpServlet {
 				}
 			}
 		}
-		
+
 		return max;
 	}
 
@@ -1217,13 +1220,14 @@ public class Config extends HttpServlet {
 
 		if (date == null) {
 			dateString = "";
-		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
+		} else if (testTimeFormatter.format(date).equals("00:00:00.000")) {
 			//time portion is 0. display date only
 			dateString = dateFormatter.format(date);
 		} else {
 			//display date and time
 			dateString = dateTimeFormatter.format(date);
 		}
+		
 		return dateString;
 	}
 
@@ -1238,14 +1242,51 @@ public class Config extends HttpServlet {
 
 		if (date == null) {
 			dateString = "";
-		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
+		} else if (testTimeFormatter.format(date).equals("00:00:00.000")) {
 			//time portion is 0. display date only
 			dateString = ArtUtils.isoDateFormatter.format(date);
 		} else {
 			//display date and time
 			dateString = ArtUtils.isoDateTimeSecondsFormatter.format(date);
 		}
+		
 		return dateString;
+	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a time field
+	 *
+	 * @param time the time value
+	 * @return the string value to be displayed
+	 */
+	public static String getTimeDisplayString(Date time) {
+		String timeString;
+
+		if (time == null) {
+			timeString = "";
+		} else {
+			timeString = timeFormatter.format(time);
+		}
+		
+		return timeString;
+	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a time field
+	 *
+	 * @param time the time value
+	 * @return the string value in iso format
+	 */
+	public static String getIsoTimeDisplayString(Date time) {
+		String timeString;
+
+		if (time == null) {
+			timeString = "";
+		} else {
+			timeString = ArtUtils.simpleIsoTimeSecondsFormatter.format(time);
+		}
+		
+		return timeString;
 	}
 
 	/**

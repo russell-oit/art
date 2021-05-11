@@ -157,6 +157,19 @@ public class TsvOutput extends StandardOutput {
 		addColumnTab();
 		sb.append(formattedValue);
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		addColumnTab();
+		String formattedValue = Config.getTimeDisplayString(value);
+		sb.append(formattedValue);
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		addColumnTab();
+		sb.append(formattedValue);
+	}
 
 	@Override
 	public void newRow() {

@@ -1535,6 +1535,15 @@ Edit report page
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="control-label col-md-4" for="timeFormat">
+							<spring:message code="reports.label.timeFormat"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="timeFormat" maxlength="100" class="form-control"/>
+							<form:errors path="timeFormat" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="control-label col-md-4" for="numberFormat">
 							<spring:message code="reports.label.numberFormat"/>
 						</label>

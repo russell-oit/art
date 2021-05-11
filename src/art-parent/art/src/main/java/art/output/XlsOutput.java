@@ -60,6 +60,7 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle headerStyle;
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
+	private HSSFCellStyle timeStyle;
 	private HSSFCellStyle totalStyle;
 	private HSSFCellStyle numberStyle;
 	private int currentRow;
@@ -93,6 +94,7 @@ public class XlsOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		timeStyle = null;
 		totalStyle = null;
 		numberStyle = null;
 		currentRow = 0;
@@ -153,6 +155,16 @@ public class XlsOutput extends StandardOutput {
 				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			}
 			dateStyle.setFont(bodyFont);
+			
+			timeStyle = wb.createCellStyle();
+			if (StringUtils.isBlank(javaDateFormat)) {
+				timeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("h:mm:ss"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+				timeStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			}
+			timeStyle.setFont(bodyFont);
 
 			if (StringUtils.isNotBlank(numberFormat)) {
 				numberStyle = wb.createCellStyle();
@@ -260,6 +272,16 @@ public class XlsOutput extends StandardOutput {
 		if (value != null) {
 			cell.setCellValue(value);
 			cell.setCellStyle(dateStyle);
+		}
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			cell.setCellValue(value);
+			cell.setCellStyle(timeStyle);
 		}
 	}
 	

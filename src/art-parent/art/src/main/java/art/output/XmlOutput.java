@@ -153,6 +153,19 @@ public class XmlOutput extends StandardOutput {
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = Config.getIsoTimeDisplayString(value);
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"time\">" + escapedFormattedValue + "</col>");
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"time\">" + escapedFormattedValue + "</col>");
+	}
 
 	@Override
 	public void addCellImage(byte[] binaryData) {

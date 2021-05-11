@@ -19,6 +19,7 @@ package art.output;
 
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -139,6 +140,21 @@ public class Rss20Output extends StandardOutput {
 			formattedValue = "";
 		} else {
 			formattedValue = Rfc822DateFormat.format(value);
+		}
+
+		out.println("<" + columnNames[columnIndex] + ">"
+				+ formattedValue + "</" + columnNames[columnIndex] + ">");
+		columnIndex++;
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue;
+
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = ArtUtils.simpleIsoTimeSecondsFormatter.format(value);
 		}
 
 		out.println("<" + columnNames[columnIndex] + ">"

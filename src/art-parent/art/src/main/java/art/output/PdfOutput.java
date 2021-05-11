@@ -248,6 +248,26 @@ public class PdfOutput extends StandardOutput {
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = formatTimeValue(value);
+
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
 
 	@Override
 	public void addCellImage(byte[] binaryData) {

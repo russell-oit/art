@@ -211,6 +211,22 @@ public class SlkOutput extends StandardOutput {
 				.append(columnCount++).append(";K\"")
 				.append(formattedValue).append("\"\n");
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = Config.getTimeDisplayString(value);
+
+		sb.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(formattedValue).append("\"\n");
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		sb.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(formattedValue).append("\"\n");
+	}
 
 	@Override
 	public void newRow() {

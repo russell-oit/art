@@ -113,6 +113,7 @@ public class ArtUtils {
 	public static final SimpleDateFormat isoDateTimeMillisecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_MILLISECONDS_FORMAT);
 	public static final DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern(ISO_TIME_FORMAT);
 	public static final DateTimeFormatter isoTimeSecondsFormatter = DateTimeFormatter.ofPattern(ISO_TIME_SECONDS_FORMAT);
+	public static final SimpleDateFormat simpleIsoTimeSecondsFormatter = new SimpleDateFormat(ISO_TIME_SECONDS_FORMAT);
 	public static final String FILE_NAME_DATE_FORMAT = "yyyy_MM_dd-HH_mm_ss_SSS";
 	public static final SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat(FILE_NAME_DATE_FORMAT);
 	public static final String PARAM_PREFIX = "p-"; //prefix for report parameters in html element names or from url

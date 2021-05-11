@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum ColumnType {
 
-	Numeric, Date, Clob, String, Other, Binary;
+	Numeric, Date, Clob, String, Other, Binary, Time;
 
 	/**
 	 * Converts a value to an enum. If the conversion fails, String is returned

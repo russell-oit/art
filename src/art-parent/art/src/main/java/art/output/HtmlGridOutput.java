@@ -150,6 +150,25 @@ public class HtmlGridOutput extends StandardOutput {
 		out.println("<td style='text-align: left' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = formatTimeValue(value);
+		long sortValue = getDateSortValue(value);
+
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: left' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: left' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
 
 	@Override
 	public void addCellImage(byte[] binaryData) {
