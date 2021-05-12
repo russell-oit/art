@@ -139,7 +139,7 @@ public class HtmlGridOutput extends StandardOutput {
 
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 
@@ -147,7 +147,7 @@ public class HtmlGridOutput extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 	
@@ -158,7 +158,7 @@ public class HtmlGridOutput extends StandardOutput {
 
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 	
@@ -166,7 +166,7 @@ public class HtmlGridOutput extends StandardOutput {
 	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 
