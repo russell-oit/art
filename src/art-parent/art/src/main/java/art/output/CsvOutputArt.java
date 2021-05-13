@@ -19,12 +19,11 @@ package art.output;
 
 import art.enums.ZipType;
 import art.reportoptions.CsvOutputArtOptions;
-import art.servlets.Config;
 import art.utils.FilenameHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
@@ -41,15 +40,16 @@ public class CsvOutputArt extends StandardOutput {
 	private ZipOutputStream zout;
 	private StringBuilder sb;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
-	private final CsvOutputArtOptions options;
+	private CsvOutputArtOptions options;
 	private int currentColumnIndex = 1;
 	private ZipType zipType = ZipType.None;
 	private int localRowCount;
 
-	public CsvOutputArt(CsvOutputArtOptions options, ZipType zipType) {
-		Objects.requireNonNull(options, "options must not be null");
+	public CsvOutputArt() {
+		this(ZipType.None);
+	}
 
-		this.options = options;
+	public CsvOutputArt(ZipType zipType) {
 		this.zipType = zipType;
 	}
 
@@ -62,7 +62,7 @@ public class CsvOutputArt extends StandardOutput {
 		fout = null;
 		sb = null;
 		currentColumnIndex = 1;
-		localRowCount=0;
+		localRowCount = 0;
 	}
 
 	@Override
@@ -72,6 +72,14 @@ public class CsvOutputArt extends StandardOutput {
 		sb = new StringBuilder(8 * 1024);
 
 		try {
+			String optionsString = report.getOptions();
+			if (StringUtils.isBlank(optionsString)) {
+				options = new CsvOutputArtOptions(); //has default values set
+			} else {
+				ObjectMapper mapper = new ObjectMapper();
+				options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
+			}
+
 			fout = new FileOutputStream(fullOutputFileName);
 
 			if (zipType == ZipType.Zip) {
@@ -115,7 +123,7 @@ public class CsvOutputArt extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		appendValue(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellDateTime(Date value) {
 		String formattedValue = formatDateTimeValue(value);
@@ -126,13 +134,13 @@ public class CsvOutputArt extends StandardOutput {
 	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
 		appendValue(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellTime(Date value) {
 		String formattedValue = formatTimeValue(value);
 		appendValue(formattedValue);
 	}
-	
+
 	@Override
 	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
 		appendValue(formattedValue);
@@ -141,7 +149,7 @@ public class CsvOutputArt extends StandardOutput {
 	@Override
 	public void newRow() {
 		localRowCount++;
-		
+
 		sb.append("\n");
 
 		currentColumnIndex = 1;// reset column index

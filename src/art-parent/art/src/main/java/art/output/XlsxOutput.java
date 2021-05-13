@@ -70,13 +70,6 @@ public class XlsxOutput extends StandardOutput {
 	private int cellNumber;
 	private Row row;
 	private Cell cell;
-	private final String javaDateFormat;
-	private final String numberFormat;
-
-	public XlsxOutput(String javaDateFormat, String numberFormat) {
-		this.javaDateFormat = javaDateFormat;
-		this.numberFormat = numberFormat;
-	}
 
 	/**
 	 * Resets global variables in readiness for output generation. Especially
@@ -136,6 +129,11 @@ public class XlsxOutput extends StandardOutput {
 		bodyStyle = wb.createCellStyle();
 		bodyStyle.setFont(bodyFont);
 
+		String javaDateFormat = report.getDateFormat();
+		String javaDateTimeFormat = report.getDateTimeFormat();
+		String javaTimeFormat = report.getTimeFormat();
+		String numberFormat = report.getNumberFormat();
+
 		dateStyle = wb.createCellStyle();
 		if (StringUtils.isBlank(javaDateFormat)) {
 			//https://poi.apache.org/apidocs/dev/org/apache/poi/ss/usermodel/BuiltinFormats.html
@@ -146,25 +144,25 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 		}
 		dateStyle.setFont(bodyFont);
-		
+
 		dateTimeStyle = wb.createCellStyle();
-		if (StringUtils.isBlank(javaDateFormat)) {
+		if (StringUtils.isBlank(javaDateTimeFormat)) {
 			//https://poi.apache.org/apidocs/dev/org/apache/poi/ss/usermodel/BuiltinFormats.html
 			dateTimeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 		} else {
 			DataFormat poiFormat = wb.createDataFormat();
-			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
-			dateTimeStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			String excelDateTimeFormat = DateFormatConverter.convert(locale, javaDateTimeFormat);
+			dateTimeStyle.setDataFormat(poiFormat.getFormat(excelDateTimeFormat));
 		}
 		dateTimeStyle.setFont(bodyFont);
-		
+
 		timeStyle = wb.createCellStyle();
-		if (StringUtils.isBlank(javaDateFormat)) {
+		if (StringUtils.isBlank(javaTimeFormat)) {
 			timeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("h:mm:ss"));
 		} else {
 			DataFormat poiFormat = wb.createDataFormat();
-			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
-			timeStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			String excelTimeFormat = DateFormatConverter.convert(locale, javaTimeFormat);
+			timeStyle.setDataFormat(poiFormat.getFormat(excelTimeFormat));
 		}
 		timeStyle.setFont(bodyFont);
 
@@ -270,7 +268,7 @@ public class XlsxOutput extends StandardOutput {
 			cell.setCellStyle(dateStyle);
 		}
 	}
-	
+
 	@Override
 	public void addCellDateTime(Date value) {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#CreateDateCells
@@ -281,7 +279,7 @@ public class XlsxOutput extends StandardOutput {
 			cell.setCellStyle(dateTimeStyle);
 		}
 	}
-	
+
 	@Override
 	public void addCellTime(Date value) {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#CreateDateCells
