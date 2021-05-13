@@ -156,8 +156,21 @@ public class XmlOutput extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = getIsoDateTimeDisplayString(value);
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
-		String formattedValue = getIsoTimeDisplayString(value);
+		String formattedValue = formatIsoTimeValue(value);
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"time\">" + escapedFormattedValue + "</col>");
 	}
@@ -246,21 +259,4 @@ public class XmlOutput extends StandardOutput {
 		return dateString;
 	}
 	
-	/**
-	 * Returns the string to be displayed in report output for a time field
-	 *
-	 * @param time the time value
-	 * @return the string value in iso format
-	 */
-	private String getIsoTimeDisplayString(Date time) {
-		String timeString;
-
-		if (time == null) {
-			timeString = "";
-		} else {
-			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
-		}
-		
-		return timeString;
-	}
 }

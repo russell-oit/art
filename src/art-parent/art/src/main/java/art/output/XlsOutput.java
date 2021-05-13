@@ -36,6 +36,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
@@ -60,6 +61,7 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle headerStyle;
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
+	private HSSFCellStyle dateTimeStyle;
 	private HSSFCellStyle timeStyle;
 	private HSSFCellStyle totalStyle;
 	private HSSFCellStyle numberStyle;
@@ -94,6 +96,7 @@ public class XlsOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		dateTimeStyle = null;
 		timeStyle = null;
 		totalStyle = null;
 		numberStyle = null;
@@ -148,13 +151,23 @@ public class XlsOutput extends StandardOutput {
 
 			dateStyle = wb.createCellStyle();
 			if (StringUtils.isBlank(javaDateFormat)) {
-				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
 			} else {
 				DataFormat poiFormat = wb.createDataFormat();
 				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
 				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			}
 			dateStyle.setFont(bodyFont);
+			
+			dateTimeStyle = wb.createCellStyle();
+			if (StringUtils.isBlank(javaDateFormat)) {
+				dateTimeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+				dateTimeStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			}
+			dateTimeStyle.setFont(bodyFont);
 			
 			timeStyle = wb.createCellStyle();
 			if (StringUtils.isBlank(javaDateFormat)) {
@@ -276,11 +289,23 @@ public class XlsOutput extends StandardOutput {
 	}
 	
 	@Override
-	public void addCellTime(Date value) {
+	public void addCellDateTime(Date value) {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
 			cell.setCellValue(value);
+			cell.setCellStyle(dateTimeStyle);
+		}
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			//https://stackoverflow.com/questions/51411771/apache-poi-write-hhmmss-string-to-excel-time-data-type
+			String timeString = ArtUtils.isoTimeSecondsFormatter.format(value);
+			cell.setCellValue(DateUtil.convertTime(timeString));
 			cell.setCellStyle(timeStyle);
 		}
 	}

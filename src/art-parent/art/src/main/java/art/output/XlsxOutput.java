@@ -21,14 +21,28 @@ import art.enums.PageOrientation;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.utils.ArtUtils;
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Picture;
+import org.apache.poi.ss.usermodel.PrintSetup;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFDrawing;
@@ -48,6 +62,7 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle headerStyle;
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
+	private CellStyle dateTimeStyle;
 	private CellStyle timeStyle;
 	private CellStyle totalStyle;
 	private CellStyle numberStyle;
@@ -78,6 +93,7 @@ public class XlsxOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		dateTimeStyle = null;
 		timeStyle = null;
 		totalStyle = null;
 		numberStyle = null;
@@ -123,13 +139,24 @@ public class XlsxOutput extends StandardOutput {
 		dateStyle = wb.createCellStyle();
 		if (StringUtils.isBlank(javaDateFormat)) {
 			//https://poi.apache.org/apidocs/dev/org/apache/poi/ss/usermodel/BuiltinFormats.html
-			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
 		} else {
 			DataFormat poiFormat = wb.createDataFormat();
 			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
 			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 		}
 		dateStyle.setFont(bodyFont);
+		
+		dateTimeStyle = wb.createCellStyle();
+		if (StringUtils.isBlank(javaDateFormat)) {
+			//https://poi.apache.org/apidocs/dev/org/apache/poi/ss/usermodel/BuiltinFormats.html
+			dateTimeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+		} else {
+			DataFormat poiFormat = wb.createDataFormat();
+			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+			dateTimeStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+		}
+		dateTimeStyle.setFont(bodyFont);
 		
 		timeStyle = wb.createCellStyle();
 		if (StringUtils.isBlank(javaDateFormat)) {
@@ -245,12 +272,25 @@ public class XlsxOutput extends StandardOutput {
 	}
 	
 	@Override
-	public void addCellTime(Date value) {
+	public void addCellDateTime(Date value) {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#CreateDateCells
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
 			cell.setCellValue(value);
+			cell.setCellStyle(dateTimeStyle);
+		}
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		//https://poi.apache.org/spreadsheet/quick-guide.html#CreateDateCells
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			//https://stackoverflow.com/questions/51411771/apache-poi-write-hhmmss-string-to-excel-time-data-type
+			String timeString = ArtUtils.isoTimeSecondsFormatter.format(value);
+			cell.setCellValue(DateUtil.convertTime(timeString));
 			cell.setCellStyle(timeStyle);
 		}
 	}

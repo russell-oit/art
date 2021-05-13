@@ -99,6 +99,7 @@ public abstract class StandardOutput {
 	private boolean showSelectedParameters;
 	private Map<Integer, Double> columnTotals;
 	private SimpleDateFormat globalDateFormatter;
+	private SimpleDateFormat globalDateTimeFormatter;
 	private SimpleDateFormat globalTimeFormatter;
 	private Map<Integer, Object> columnFormatters;
 	private DecimalFormat globalNumericFormatter;
@@ -541,6 +542,24 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Outputs a DateTime value to the current row
+	 *
+	 * @param value the value to output
+	 */
+	public abstract void addCellDateTime(Date value);
+
+	/**
+	 * Outputs a datetime value to the current row
+	 *
+	 * @param dateTimeValue the datetime value
+	 * @param formattedValue the formatted string for the datetime value
+	 * @param sortValue the sort value to use
+	 */
+	protected void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		addCellDateTime(dateTimeValue);
+	}
+
+	/**
 	 * Outputs a time value to the current row
 	 *
 	 * @param value the value to output
@@ -644,6 +663,24 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Formats a numberic value for display as a plain number or empty string
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatNumericValuePlain(Double value) {
+		String formattedValue;
+
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = plainNumberFormatter.format(value);
+		}
+
+		return formattedValue;
+	}
+
+	/**
 	 * Formats a date value for display
 	 *
 	 * @param value the value to format
@@ -671,6 +708,16 @@ public abstract class StandardOutput {
 	 */
 	protected String formatTimeValue(Date value) {
 		return Config.getTimeDisplayString(value);
+	}
+	
+	/**
+	 * Formats a time value for display in iso format, HH:mm:ss
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatIsoTimeValue(Date value) {
+		return Config.getIsoTimeDisplayString(value);
 	}
 
 	/**
@@ -1064,6 +1111,11 @@ public abstract class StandardOutput {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
 
+		String globalDateTimeFormat = report.getDateTimeFormat();
+		if (StringUtils.isNotBlank(globalDateTimeFormat)) {
+			globalDateTimeFormatter = new SimpleDateFormat(globalDateTimeFormat, columnFormatLocale);
+		}
+
 		String globalTimeFormat = report.getTimeFormat();
 		if (StringUtils.isNotBlank(globalTimeFormat)) {
 			globalTimeFormatter = new SimpleDateFormat(globalTimeFormat, columnFormatLocale);
@@ -1104,12 +1156,10 @@ public abstract class StandardOutput {
 					ColumnType columnType = columnTypeDefinition.getColumnType();
 					switch (columnType) {
 						case Date:
+						case DateTime:
+						case Time:
 							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, columnFormatLocale);
 							columnFormatters.put(i, dateFormatter);
-							break;
-						case Time:
-							SimpleDateFormat timeFormatter = new SimpleDateFormat(format, columnFormatLocale);
-							columnFormatters.put(i, timeFormatter);
 							break;
 						case Numeric:
 							DecimalFormat numberFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
@@ -1603,14 +1653,16 @@ public abstract class StandardOutput {
 			columnType = ColumnType.Numeric;
 		} else if (isDate(sqlType)) {
 			columnType = ColumnType.Date;
-		} else if (isClob(sqlType)) {
-			columnType = ColumnType.Clob;
-		} else if (sqlType == Types.OTHER) {
-			columnType = ColumnType.Other;
+		} else if (isDateTime(sqlType)) {
+			columnType = ColumnType.DateTime;
 		} else if (isTime(sqlType)) {
 			columnType = ColumnType.Time;
+		} else if (isClob(sqlType)) {
+			columnType = ColumnType.Clob;
 		} else if (isBinary(sqlType)) {
 			columnType = ColumnType.Binary;
+		} else if (sqlType == Types.OTHER) {
+			columnType = ColumnType.Other;
 		} else {
 			columnType = ColumnType.String;
 		}
@@ -1862,7 +1914,7 @@ public abstract class StandardOutput {
 								if (globalDateFormatter != null) {
 									formattedValue = globalDateFormatter.format(dateValue);
 								} else {
-									formattedValue = Config.getDateDisplayString(dateValue);
+									formattedValue = formatDateValue(dateValue);
 								}
 
 								addCellDate(dateValue, formattedValue, sortValue);
@@ -1870,6 +1922,40 @@ public abstract class StandardOutput {
 						}
 					} else {
 						addCellDate(dateValue);
+					}
+					break;
+				case DateTime:
+					Date dateTimeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateTimeValue == null) {
+							addCellDateTime(dateTimeValue);
+						} else {
+							long sortValue = getDateSortValue(dateTimeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateTimeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellDateTime(dateTimeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateTimeFormatter != null) {
+									formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+								} else {
+									formattedValue = formatDateTimeValue(dateTimeValue);
+								}
+
+								addCellDateTime(dateTimeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellDateTime(dateTimeValue);
 					}
 					break;
 				case Time:
@@ -1896,7 +1982,7 @@ public abstract class StandardOutput {
 								if (globalTimeFormatter != null) {
 									formattedValue = globalTimeFormatter.format(timeValue);
 								} else {
-									formattedValue = Config.getTimeDisplayString(timeValue);
+									formattedValue = formatTimeValue(timeValue);
 								}
 
 								addCellTime(timeValue, formattedValue, sortValue);
@@ -2023,7 +2109,8 @@ public abstract class StandardOutput {
 					}
 					break;
 				case Date:
-					value = rs.getTimestamp(columnIndex);
+					//https://stackoverflow.com/questions/21162753/jdbc-resultset-i-need-a-getdatetime-but-there-is-only-getdate-and-gettimestamp/21163453
+					value = rs.getDate(columnIndex);
 					Date dateValue = (Date) value;
 
 					if (reportFormat.isUseColumnFormatting()) {
@@ -2047,7 +2134,7 @@ public abstract class StandardOutput {
 								if (globalDateFormatter != null) {
 									formattedValue = globalDateFormatter.format(dateValue);
 								} else {
-									formattedValue = Config.getDateDisplayString(dateValue);
+									formattedValue = formatDateValue(dateValue);
 								}
 
 								addCellDate(dateValue, formattedValue, sortValue);
@@ -2055,6 +2142,41 @@ public abstract class StandardOutput {
 						}
 					} else {
 						addCellDate(dateValue);
+					}
+					break;
+				case DateTime:
+					value = rs.getTimestamp(columnIndex);
+					Date dateTimeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateTimeValue == null) {
+							addCellDateTime(dateTimeValue);
+						} else {
+							long sortValue = getDateSortValue(dateTimeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateTimeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellDateTime(dateTimeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateTimeFormatter != null) {
+									formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+								} else {
+									formattedValue = formatDateTimeValue(dateTimeValue);
+								}
+
+								addCellDateTime(dateTimeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellDateTime(dateTimeValue);
 					}
 					break;
 				case Time:
@@ -2082,7 +2204,7 @@ public abstract class StandardOutput {
 								if (globalTimeFormatter != null) {
 									formattedValue = globalTimeFormatter.format(timeValue);
 								} else {
-									formattedValue = Config.getTimeDisplayString(timeValue);
+									formattedValue = formatTimeValue(timeValue);
 								}
 
 								addCellTime(timeValue, formattedValue, sortValue);
@@ -2210,7 +2332,6 @@ public abstract class StandardOutput {
 
 		switch (sqlType) {
 			case Types.DATE:
-			case Types.TIMESTAMP:
 				date = true;
 				break;
 			default:
@@ -2218,6 +2339,26 @@ public abstract class StandardOutput {
 		}
 
 		return date;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given sql type is a datetime one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a datetime one
+	 */
+	private boolean isDateTime(int sqlType) {
+		boolean dateTime;
+
+		switch (sqlType) {
+			case Types.TIMESTAMP:
+				dateTime = true;
+				break;
+			default:
+				dateTime = false;
+		}
+
+		return dateTime;
 	}
 
 	/**
@@ -2874,6 +3015,9 @@ public abstract class StandardOutput {
 				}
 				break;
 			case Date:
+				value = rs.getDate(columnIndex);
+				break;
+			case DateTime:
 				value = rs.getTimestamp(columnIndex);
 				break;
 			case Time:
@@ -2955,10 +3099,26 @@ public abstract class StandardOutput {
 					if (globalDateFormatter != null) {
 						formattedValue = globalDateFormatter.format(dateValue);
 					} else {
-						formattedValue = Config.getDateDisplayString(dateValue);
+						formattedValue = formatDateValue(dateValue);
 					}
 
 					addCellDate(dateValue, formattedValue, sortValue);
+				}
+				break;
+			case DateTime:
+				Date dateTimeValue = (Date) value;
+				if (dateTimeValue == null) {
+					addCellDateTime(dateTimeValue);
+				} else {
+					long sortValue = getDateSortValue(dateTimeValue);
+					String formattedValue;
+					if (globalDateTimeFormatter != null) {
+						formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+					} else {
+						formattedValue = formatDateTimeValue(dateTimeValue);
+					}
+
+					addCellDateTime(dateTimeValue, formattedValue, sortValue);
 				}
 				break;
 			case Time:
@@ -2971,7 +3131,7 @@ public abstract class StandardOutput {
 					if (globalTimeFormatter != null) {
 						formattedValue = globalTimeFormatter.format(timeValue);
 					} else {
-						formattedValue = Config.getTimeDisplayString(timeValue);
+						formattedValue = formatTimeValue(timeValue);
 					}
 
 					addCellTime(timeValue, formattedValue, sortValue);

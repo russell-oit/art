@@ -231,6 +231,17 @@ public class DocxOutput extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+		outputCellText(formattedValue);
+	}
+	
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		outputCellText(formattedValue);
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
 		String formattedValue = formatTimeValue(value);
 		outputCellText(formattedValue);

@@ -250,6 +250,26 @@ public class PdfOutput extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+		cell.setPaddingLeft(PdfHelper.CELL_PADDING_LEFT);
+		cell.setPaddingRight(PdfHelper.CELL_PADDING_RIGHT);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
 		String formattedValue = formatTimeValue(value);
 

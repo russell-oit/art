@@ -1209,7 +1209,22 @@ public class Config extends HttpServlet {
 
 		return max;
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if the date object has the time portion as 0
+	 * 
+	 * @param date the date object
+	 * @return <code>true</code> if the date object has the time portion as 0
+	 */
+	public static boolean isDateOnly(Date date) {
+		if (testTimeFormatter.format(date).equals("00:00:00.000")) {
+			//time portion is 0
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns the string to be displayed for a date/datetime value
 	 *
@@ -1228,7 +1243,7 @@ public class Config extends HttpServlet {
 			//display date and time
 			dateString = dateTimeFormatter.format(date);
 		}
-		
+
 		return dateString;
 	}
 
@@ -1246,7 +1261,7 @@ public class Config extends HttpServlet {
 		} else {
 			dateString = dateFormatter.format(date);
 		}
-		
+
 		return dateString;
 	}
 
@@ -1264,10 +1279,10 @@ public class Config extends HttpServlet {
 		} else {
 			dateTimeString = dateTimeFormatter.format(dateTime);
 		}
-		
+
 		return dateTimeString;
 	}
-	
+
 	/**
 	 * Returns the string to be displayed in report output for a time field
 	 *
@@ -1282,10 +1297,28 @@ public class Config extends HttpServlet {
 		} else {
 			timeString = timeFormatter.format(time);
 		}
-		
+
 		return timeString;
 	}
 	
+	/**
+	 * Returns the string to be displayed in report output for a time field
+	 *
+	 * @param time the time value
+	 * @return the string value in iso format
+	 */
+	public static String getIsoTimeDisplayString(Date time) {
+		String timeString;
+
+		if (time == null) {
+			timeString = "";
+		} else {
+			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
+		}
+		
+		return timeString;
+	}
+
 	/**
 	 * Returns the art database configuration settings
 	 *

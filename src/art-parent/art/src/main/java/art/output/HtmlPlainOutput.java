@@ -192,6 +192,21 @@ public class HtmlPlainOutput extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
 		String formattedValue = formatTimeValue(value);
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);

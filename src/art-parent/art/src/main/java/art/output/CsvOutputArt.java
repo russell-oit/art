@@ -101,20 +101,13 @@ public class CsvOutputArt extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = plainNumberFormatter.format(value.doubleValue());
-		}
-
+		String formattedValue = formatNumericValuePlain(value);
 		appendValue(formattedValue);
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue = Config.getDateDisplayString(value);
+		String formattedValue = formatDateValue(value);
 		appendValue(formattedValue);
 	}
 
@@ -124,8 +117,19 @@ public class CsvOutputArt extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+		appendValue(formattedValue);
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		appendValue(formattedValue);
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
-		String formattedValue = Config.getTimeDisplayString(value);
+		String formattedValue = formatTimeValue(value);
 		appendValue(formattedValue);
 	}
 	

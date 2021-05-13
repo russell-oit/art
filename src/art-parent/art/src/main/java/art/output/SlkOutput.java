@@ -198,7 +198,7 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue = Config.getDateDisplayString(value);
+		String formattedValue = formatDateValue(value);
 
 		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
@@ -207,6 +207,22 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		sb.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(formattedValue).append("\"\n");
+	}
+	
+	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+
+		sb.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(formattedValue).append("\"\n");
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
 		sb.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
 				.append(formattedValue).append("\"\n");

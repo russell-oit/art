@@ -148,14 +148,13 @@ public class Rss20Output extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellDateTime(Date value) {
+		addCellDate(value);
+	}
+	
+	@Override
 	public void addCellTime(Date value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = ArtUtils.isoTimeSecondsFormatter.format(value);
-		}
+		String formattedValue = formatIsoTimeValue(value);
 
 		out.println("<" + columnNames[columnIndex] + ">"
 				+ formattedValue + "</" + columnNames[columnIndex] + ">");
