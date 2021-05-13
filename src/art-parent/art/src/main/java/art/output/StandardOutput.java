@@ -539,14 +539,14 @@ public abstract class StandardOutput {
 	protected void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		addCellDate(dateValue);
 	}
-	
+
 	/**
 	 * Outputs a time value to the current row
 	 *
 	 * @param value the value to output
 	 */
 	public abstract void addCellTime(Date value);
-	
+
 	/**
 	 * Outputs a time value to the current row
 	 *
@@ -650,17 +650,19 @@ public abstract class StandardOutput {
 	 * @return the string representation to display
 	 */
 	protected String formatDateValue(Date value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getDateDisplayString(value);
-		}
-
-		return formattedValue;
+		return Config.getDateDisplayString(value);
 	}
-	
+
+	/**
+	 * Formats a datetime value for display
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatDateTimeValue(Date value) {
+		return Config.getDateTimeDisplayString(value);
+	}
+
 	/**
 	 * Formats a time value for display
 	 *
@@ -668,15 +670,7 @@ public abstract class StandardOutput {
 	 * @return the string representation to display
 	 */
 	protected String formatTimeValue(Date value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getTimeDisplayString(value);
-		}
-
-		return formattedValue;
+		return Config.getTimeDisplayString(value);
 	}
 
 	/**
@@ -1069,7 +1063,7 @@ public abstract class StandardOutput {
 		if (StringUtils.isNotBlank(globalDateFormat)) {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
-		
+
 		String globalTimeFormat = report.getTimeFormat();
 		if (StringUtils.isNotBlank(globalTimeFormat)) {
 			globalTimeFormatter = new SimpleDateFormat(globalTimeFormat, columnFormatLocale);
@@ -1613,7 +1607,7 @@ public abstract class StandardOutput {
 			columnType = ColumnType.Clob;
 		} else if (sqlType == Types.OTHER) {
 			columnType = ColumnType.Other;
-		} else if(isTime(sqlType)){
+		} else if (isTime(sqlType)) {
 			columnType = ColumnType.Time;
 		} else if (isBinary(sqlType)) {
 			columnType = ColumnType.Binary;
@@ -2225,7 +2219,7 @@ public abstract class StandardOutput {
 
 		return date;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given sql type is a time one
 	 *

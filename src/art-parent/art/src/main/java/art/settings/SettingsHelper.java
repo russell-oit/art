@@ -45,7 +45,7 @@ public class SettingsHelper {
 		}
 
 		if (servletContext != null) {
-			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+			String dateDisplayPattern = settings.getDateTimeFormat();
 			servletContext.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 		}
 	}

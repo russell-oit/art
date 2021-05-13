@@ -118,9 +118,9 @@ public class Config extends HttpServlet {
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat testTimeFormatter = new SimpleDateFormat();
-	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDbConfig;
@@ -262,7 +262,7 @@ public class Config extends HttpServlet {
 			logger.error("Error", ex);
 		}
 
-		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+		String dateDisplayPattern = settings.getDateTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 	}
 
@@ -683,10 +683,11 @@ public class Config extends HttpServlet {
 		//set date formatters
 		testTimeFormatter.applyPattern("HH:mm:ss.SSS");
 		String dateFormat = settings.getDateFormat();
+		String dateTimeFormat = settings.getDateTimeFormat();
 		String timeFormat = settings.getTimeFormat();
 		dateFormatter.applyPattern(dateFormat);
+		dateTimeFormatter.applyPattern(dateTimeFormat);
 		timeFormatter.applyPattern(timeFormat);
-		dateTimeFormatter.applyPattern(dateFormat + " " + timeFormat);
 
 		//set available report formats
 		String reportFormatsString = settings.getReportFormats();
@@ -1208,14 +1209,14 @@ public class Config extends HttpServlet {
 
 		return max;
 	}
-
+	
 	/**
-	 * Returns the string to be displayed in report output for a date field
+	 * Returns the string to be displayed for a date/datetime value
 	 *
-	 * @param date the date value
+	 * @param date the date/datetime value
 	 * @return the string value to be displayed
 	 */
-	public static String getDateDisplayString(Date date) {
+	public static String getGeneralDateDisplayString(Date date) {
 		String dateString;
 
 		if (date == null) {
@@ -1235,22 +1236,36 @@ public class Config extends HttpServlet {
 	 * Returns the string to be displayed in report output for a date field
 	 *
 	 * @param date the date value
-	 * @return the string value in iso format
+	 * @return the string value to be displayed
 	 */
-	public static String getIsoDateDisplayString(Date date) {
+	public static String getDateDisplayString(Date date) {
 		String dateString;
 
 		if (date == null) {
 			dateString = "";
-		} else if (testTimeFormatter.format(date).equals("00:00:00.000")) {
-			//time portion is 0. display date only
-			dateString = ArtUtils.isoDateFormatter.format(date);
 		} else {
-			//display date and time
-			dateString = ArtUtils.isoDateTimeSecondsFormatter.format(date);
+			dateString = dateFormatter.format(date);
 		}
 		
 		return dateString;
+	}
+
+	/**
+	 * Returns the string to be displayed in report output for a datetime field
+	 *
+	 * @param dateTime the datetime value
+	 * @return the string value to be displayed
+	 */
+	public static String getDateTimeDisplayString(Date dateTime) {
+		String dateTimeString;
+
+		if (dateTime == null) {
+			dateTimeString = "";
+		} else {
+			dateTimeString = dateTimeFormatter.format(dateTime);
+		}
+		
+		return dateTimeString;
 	}
 	
 	/**
@@ -1271,24 +1286,6 @@ public class Config extends HttpServlet {
 		return timeString;
 	}
 	
-	/**
-	 * Returns the string to be displayed in report output for a time field
-	 *
-	 * @param time the time value
-	 * @return the string value in iso format
-	 */
-	public static String getIsoTimeDisplayString(Date time) {
-		String timeString;
-
-		if (time == null) {
-			timeString = "";
-		} else {
-			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
-		}
-		
-		return timeString;
-	}
-
 	/**
 	 * Returns the art database configuration settings
 	 *
