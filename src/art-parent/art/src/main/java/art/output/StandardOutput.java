@@ -52,6 +52,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -709,7 +710,7 @@ public abstract class StandardOutput {
 	protected String formatTimeValue(Date value) {
 		return Config.getTimeDisplayString(value);
 	}
-	
+
 	/**
 	 * Formats a time value for display in iso format, HH:mm:ss
 	 *
@@ -732,7 +733,13 @@ public abstract class StandardOutput {
 		if (value == null) {
 			sortValue = 0;
 		} else {
-			sortValue = value.getTime();
+			//correctly sort java.sql.Time values
+			//https://stackoverflow.com/questions/61341120/why-java-sql-timestamp-return-negative-value-when-the-date-is-after-1970-01-01
+			//https://stackoverflow.com/questions/53864387/getting-negative-value-in-date-gettime
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(value);
+			sortValue = cal.getTimeInMillis() + (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET));
+			//sortValue = value.getTime();
 		}
 
 		return sortValue;
