@@ -262,7 +262,7 @@ public class Config extends HttpServlet {
 			logger.error("Error", ex);
 		}
 
-		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+		String dateDisplayPattern = settings.getDateTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 	}
 
@@ -683,7 +683,7 @@ public class Config extends HttpServlet {
 		//set date formatters
 		testTimeFormatter.applyPattern("HH:mm:ss.SSS");
 		String dateFormat = settings.getDateFormat();
-		String dateTimeFormat = settings.getDateFormat() + " " + settings.getTimeFormat();
+		String dateTimeFormat = settings.getDateTimeFormat();
 		String timeFormat = settings.getTimeFormat();
 		dateFormatter.applyPattern(dateFormat);
 		dateTimeFormatter.applyPattern(dateTimeFormat);
@@ -1254,28 +1254,14 @@ public class Config extends HttpServlet {
 	 * @return the string value to be displayed
 	 */
 	public static String getDateDisplayString(Date date) {
-		return getGeneralDateDisplayString(date);
-	}
-	
-	/**
-	 * Returns the string to be displayed in report output for a date field
-	 *
-	 * @param date the date value
-	 * @return the string value in iso format
-	 */
-	public static String getIsoDateDisplayString(Date date) {
 		String dateString;
 
 		if (date == null) {
 			dateString = "";
-		} else if (testTimeFormatter.format(date).equals("00:00:00.000")) {
-			//time portion is 0. display date only
-			dateString = ArtUtils.isoDateFormatter.format(date);
 		} else {
-			//display date and time
-			dateString = ArtUtils.isoDateTimeSecondsFormatter.format(date);
+			dateString = dateFormatter.format(date);
 		}
-		
+
 		return dateString;
 	}
 

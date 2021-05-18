@@ -1,5 +1,6 @@
 ART 5.5
 * Added Time parameter type
+* Added DateTime format option for tabular reports
 * Updated mariadb driver
 
 ART 5.4

@@ -1118,7 +1118,7 @@ public abstract class StandardOutput {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
 
-		String globalDateTimeFormat = null;
+		String globalDateTimeFormat = report.getDateTimeFormat();
 		if (StringUtils.isNotBlank(globalDateTimeFormat)) {
 			globalDateTimeFormatter = new SimpleDateFormat(globalDateTimeFormat, columnFormatLocale);
 		}
@@ -2117,7 +2117,7 @@ public abstract class StandardOutput {
 					break;
 				case Date:
 					//https://stackoverflow.com/questions/21162753/jdbc-resultset-i-need-a-getdatetime-but-there-is-only-getdate-and-gettimestamp/21163453
-					value = rs.getTimestamp(columnIndex);
+					value = rs.getDate(columnIndex);
 					Date dateValue = (Date) value;
 
 					if (reportFormat.isUseColumnFormatting()) {
@@ -2339,7 +2339,6 @@ public abstract class StandardOutput {
 
 		switch (sqlType) {
 			case Types.DATE:
-			case Types.TIMESTAMP:
 				date = true;
 				break;
 			default:
@@ -3023,7 +3022,7 @@ public abstract class StandardOutput {
 				}
 				break;
 			case Date:
-				value = rs.getTimestamp(columnIndex);
+				value = rs.getDate(columnIndex);
 				break;
 			case DateTime:
 				value = rs.getTimestamp(columnIndex);

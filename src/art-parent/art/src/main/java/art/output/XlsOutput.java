@@ -146,13 +146,13 @@ public class XlsOutput extends StandardOutput {
 			bodyStyle.setFont(bodyFont);
 
 			String javaDateFormat = report.getDateFormat();
-			String javaDateTimeFormat = null;
+			String javaDateTimeFormat = report.getDateTimeFormat();
 			String javaTimeFormat = report.getTimeFormat();
 			String numberFormat = report.getNumberFormat();
 
 			dateStyle = wb.createCellStyle();
 			if (StringUtils.isBlank(javaDateFormat)) {
-				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
 			} else {
 				DataFormat poiFormat = wb.createDataFormat();
 				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);

@@ -144,7 +144,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue = Config.getIsoDateDisplayString(value);
+		String formattedValue = getIsoDateDisplayString(value);
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
 	}
@@ -221,6 +221,24 @@ public class XmlOutput extends StandardOutput {
 	public void endOutput() {
 		out.println("<totalrows>" + localRowCount + "</totalrows>");
 		out.println("</table>");
+	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a date field
+	 *
+	 * @param date the date value
+	 * @return the string value in iso format
+	 */
+	private String getIsoDateDisplayString(Date date) {
+		String dateString;
+
+		if (date == null) {
+			dateString = "";
+		} else {
+			dateString = ArtUtils.isoDateFormatter.format(date);
+		}
+		
+		return dateString;
 	}
 	
 	/**
