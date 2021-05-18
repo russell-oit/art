@@ -985,7 +985,7 @@ public class RunReportHelper {
 					resultSetColumnType = SqlColumnType.Numeric;
 					break;
 				case Date:
-					resultSetColumnType = SqlColumnType.Date;
+					resultSetColumnType = SqlColumnType.DateTime;
 					break;
 				case DateTime:
 					resultSetColumnType = SqlColumnType.DateTime;
@@ -1046,11 +1046,7 @@ public class RunReportHelper {
 		if (columnValue instanceof Number) {
 			columnTypeDefinition.setColumnType(ColumnType.Numeric);
 		} else if (columnValue instanceof Date) {
-			if (Config.isDateOnly((Date) columnValue)) {
-				columnTypeDefinition.setColumnType(ColumnType.Date);
-			} else {
-				columnTypeDefinition.setColumnType(ColumnType.DateTime);
-			}
+			columnTypeDefinition.setColumnType(ColumnType.Date);
 		} else {
 			columnTypeDefinition.setColumnType(ColumnType.String);
 		}

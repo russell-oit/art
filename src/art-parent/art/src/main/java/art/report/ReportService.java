@@ -293,7 +293,6 @@ public class ReportService {
 		report.setMaxRunningPerUser(rs.getInt("MAX_RUNNING_PER_USER"));
 		report.setReportFormats(rs.getString("REPORT_FORMATS"));
 		report.setTimeFormat(rs.getString("TIME_COLUMN_FORMAT"));
-		report.setDateTimeFormat(rs.getString("DATETIME_COLUMN_FORMAT"));
 		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -1017,9 +1016,9 @@ public class ReportService {
 					+ " USE_GROOVY, PIVOTTABLEJS_SAVED_OPTIONS, GRIDSTACK_SAVED_OPTIONS,"
 					+ " VIEW_REPORT_ID, SELF_SERVICE_OPTIONS, LINK, OPEN_IN_NEW_WINDOW,"
 					+ " MAX_RUNNING, MAX_RUNNING_PER_USER, REPORT_FORMATS,"
-					+ " TIME_COLUMN_FORMAT, DATETIME_COLUMN_FORMAT,"
+					+ " TIME_COLUMN_FORMAT,"
 					+ " CREATION_DATE, CREATED_BY, CREATED_BY_ID)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 56) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 55) + ")";
 
 			Object[] values = {
 				newRecordId,
@@ -1074,7 +1073,6 @@ public class ReportService {
 				report.getMaxRunningPerUser(),
 				report.getReportFormats(),
 				report.getTimeFormat(),
-				report.getDateTimeFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				actionUser.getUserId()
@@ -1099,7 +1097,7 @@ public class ReportService {
 					+ " GRIDSTACK_SAVED_OPTIONS=?, VIEW_REPORT_ID=?,"
 					+ " SELF_SERVICE_OPTIONS=?, LINK=?, OPEN_IN_NEW_WINDOW=?,"
 					+ " MAX_RUNNING=?, MAX_RUNNING_PER_USER=?, REPORT_FORMATS=?,"
-					+ " TIME_COLUMN_FORMAT=?, DATETIME_COLUMN_FORMAT=?,"
+					+ " TIME_COLUMN_FORMAT=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -1155,7 +1153,6 @@ public class ReportService {
 				report.getMaxRunningPerUser(),
 				report.getReportFormats(),
 				report.getTimeFormat(),
-				report.getDateTimeFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

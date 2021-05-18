@@ -115,7 +115,6 @@ public class Report implements Serializable {
 	private String hiddenColumns;
 	private String totalColumns;
 	private String dateFormat;
-	private String dateTimeFormat;
 	private String timeFormat;
 	private String numberFormat;
 	private String columnFormats;
@@ -179,19 +178,6 @@ public class Report implements Serializable {
 	@JsonIgnore
 	private boolean passwordsEncrypted; // for use with the export process, encryptAllPasswords() method
 
-	/**
-	 * @return the dateTimeFormat
-	 */
-	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
-	}
 
 	/**
 	 * @return the timeFormat

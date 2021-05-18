@@ -140,7 +140,6 @@ public class SettingsService {
 			settings.setJwtTokenExpiryMins(rs.getInt("JWT_TOKEN_EXPIRY"));
 			settings.setEnableDirectReportEmailing(rs.getBoolean("DIRECT_REPORT_EMAILING"));
 			settings.setJsonOptions(rs.getString("JSON_OPTIONS"));
-			settings.setDateTimeFormat(rs.getString("APP_DATETIME_FORMAT"));
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
@@ -271,9 +270,9 @@ public class SettingsService {
 				+ " ERROR_EMAIL_EXPIRE_AFTER, ERROR_EMAIL_DIGEST_FREQUENCY,"
 				+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
 				+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL, JWT_TOKEN_EXPIRY,"
-				+ " DIRECT_REPORT_EMAILING, JSON_OPTIONS, APP_DATETIME_FORMAT,"
+				+ " DIRECT_REPORT_EMAILING, JSON_OPTIONS,"
 				+ " UPDATE_DATE, UPDATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 63) + ")";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 62) + ")";
 
 		Object[] values = {
 			settings.getSmtpServer(),
@@ -336,7 +335,6 @@ public class SettingsService {
 			settings.getJwtTokenExpiryMins(),
 			BooleanUtils.toInteger(settings.isEnableDirectReportEmailing()),
 			settings.getJsonOptions(),
-			settings.getDateTimeFormat(),
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			actionUser.getUsername()
 		};
@@ -375,9 +373,6 @@ public class SettingsService {
 		}
 		if (StringUtils.isBlank(settings.getDateFormat())) {
 			settings.setDateFormat("dd-MMM-yyyy");
-		}
-		if (StringUtils.isBlank(settings.getDateTimeFormat())) {
-			settings.setDateTimeFormat("dd-MMM-yyyy HH:mm:ss");
 		}
 		if (StringUtils.isBlank(settings.getTimeFormat())) {
 			settings.setTimeFormat("HH:mm:ss");

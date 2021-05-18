@@ -14,12 +14,6 @@
 	<changeSet id="2" author="art">
 		<addColumn tableName="ART_QUERIES">
 			<column name="TIME_COLUMN_FORMAT" type="VARCHAR(100)"/>
-			<column name="DATETIME_COLUMN_FORMAT" type="VARCHAR(100)"/>
-		</addColumn>
-	</changeSet>
-	<changeSet id="3" author="art">
-		<addColumn tableName="ART_SETTINGS">
-			<column name="APP_DATETIME_FORMAT" type="VARCHAR(50)"/>
 		</addColumn>
 	</changeSet>
 </databaseChangeLog>

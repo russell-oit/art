@@ -73,7 +73,6 @@ public class Settings implements Serializable {
 	private String administratorEmail;
 	private String dateFormat;
 	private String timeFormat;
-	private String dateTimeFormat;
 	private String reportFormats;
 	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
@@ -105,20 +104,6 @@ public class Settings implements Serializable {
 	private int jwtTokenExpiryMins = 60;
 	private boolean enableDirectReportEmailing;
 	private String jsonOptions;
-
-	/**
-	 * @return the dateTimeFormat
-	 */
-	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
-	}
 
 	/**
 	 * @return the jsonOptions
