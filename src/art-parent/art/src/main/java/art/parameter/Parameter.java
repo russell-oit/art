@@ -614,6 +614,8 @@ public class Parameter implements Serializable {
 			case DateTime:
 				//convert date to string that will be recognised by parameter processor class
 				return getDateString(value, locale);
+			case Time:
+				return getTimeString(value, locale);
 			default:
 				return String.valueOf(value);
 		}
@@ -648,6 +650,28 @@ public class Parameter implements Serializable {
 				}
 			default:
 				throw new IllegalArgumentException("Unexpected date data type: " + dataType);
+		}
+	}
+
+	/**
+	 * Returns a time string for a given time object, formatted according to the
+	 * parameter's date format setting
+	 *
+	 * @param value the time value
+	 * @param locale the locale to use
+	 * @return the formatted time string
+	 */
+	public String getTimeString(Object value, Locale locale) {
+		if (value instanceof String) {
+			//may be string when value obtained from job parameters for display purposes only in editJob.jsp
+			return (String) value;
+		}
+
+		if (StringUtils.isBlank(dateFormat)) {
+			return ArtUtils.isoTimeSecondsFormatter.format(value);
+		} else {
+			SimpleDateFormat timeFormatter = new SimpleDateFormat(dateFormat, locale);
+			return timeFormatter.format(value);
 		}
 	}
 

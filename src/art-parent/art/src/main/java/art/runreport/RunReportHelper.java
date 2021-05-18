@@ -254,7 +254,8 @@ public class RunReportHelper {
 		boolean hasDateParam = false;
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
-			if (param.isForDisplay() && param.getDataType().isDate()) {
+			if (param.isForDisplay() && (param.getDataType().isDate()
+					|| param.getDataType() == ParameterDataType.Time)) {
 				hasDateParam = true;
 				break;
 			}
@@ -984,7 +985,13 @@ public class RunReportHelper {
 					resultSetColumnType = SqlColumnType.Numeric;
 					break;
 				case Date:
+					resultSetColumnType = SqlColumnType.Date;
+					break;
+				case DateTime:
 					resultSetColumnType = SqlColumnType.DateTime;
+					break;
+				case Time:
+					resultSetColumnType = SqlColumnType.Time;
 					break;
 				default:
 					resultSetColumnType = SqlColumnType.String;
@@ -1039,7 +1046,11 @@ public class RunReportHelper {
 		if (columnValue instanceof Number) {
 			columnTypeDefinition.setColumnType(ColumnType.Numeric);
 		} else if (columnValue instanceof Date) {
-			columnTypeDefinition.setColumnType(ColumnType.Date);
+			if (Config.isDateOnly((Date) columnValue)) {
+				columnTypeDefinition.setColumnType(ColumnType.Date);
+			} else {
+				columnTypeDefinition.setColumnType(ColumnType.DateTime);
+			}
 		} else {
 			columnTypeDefinition.setColumnType(ColumnType.String);
 		}

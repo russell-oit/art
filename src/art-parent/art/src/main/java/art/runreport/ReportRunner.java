@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -933,10 +934,16 @@ public class ReportRunner {
 	private void addJdbcParam(Object paramValue, ParameterDataType paramDataType) {
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
-			if (paramDataType == ParameterDataType.Date) {
-				jdbcParams.add(DatabaseUtils.toSqlDate(dateValue));
-			} else {
-				jdbcParams.add(DatabaseUtils.toSqlTimestamp(dateValue));
+			switch (paramDataType) {
+				case Date:
+					jdbcParams.add(DatabaseUtils.toSqlDate(dateValue));
+					break;
+				case Time:
+					jdbcParams.add(DatabaseUtils.toSqlTime(dateValue));
+					break;
+				default:
+					jdbcParams.add(DatabaseUtils.toSqlTimestamp(dateValue));
+					break;
 			}
 		} else {
 			jdbcParams.add(paramValue);
@@ -1254,7 +1261,7 @@ public class ReportRunner {
 			}
 			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 		}
-		
+
 		boolean bigQueryStarschema = false;
 		if (StringUtils.startsWith(jdbcUrl, "jdbc:BQDriver:")) {
 			bigQueryStarschema = true;
@@ -1270,7 +1277,7 @@ public class ReportRunner {
 		} else {
 			psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 		}
-		
+
 		if (applyFetchSize) {
 			psQuery.setFetchSize(fetchSize);
 		}
@@ -1280,7 +1287,7 @@ public class ReportRunner {
 
 			DatabaseUtils.setValues((PreparedStatement) psQuery, paramValues);
 		}
-		
+
 		//https://www.programcreek.com/java-api-examples/?class=java.sql.Statement&method=setQueryTimeout
 		//https://docs.oracle.com/javase/7/docs/api/java/sql/Statement.html#setQueryTimeout(int)
 		Integer queryTimeoutSeconds = report.getGeneralOptions().getQueryTimeoutSeconds();
@@ -1915,6 +1922,8 @@ public class ReportRunner {
 				return "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
 			} else if (value instanceof java.sql.Date) {
 				return "'" + ArtUtils.isoDateFormatter.format(value) + "'";
+			} else if (value instanceof Time) {
+				return "'" + String.valueOf(value) + "'";
 			} else if (value instanceof Boolean) {
 				Boolean booleanValue = (Boolean) value;
 				return booleanValue ? "1" : "0";

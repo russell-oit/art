@@ -36,6 +36,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
@@ -60,22 +61,20 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle headerStyle;
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
+	private HSSFCellStyle dateTimeStyle;
+	private HSSFCellStyle timeStyle;
 	private HSSFCellStyle totalStyle;
 	private HSSFCellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
 	private ZipType zipType = ZipType.None;
-	private final String javaDateFormat;
-	private final String numberFormat;
 
-	public XlsOutput(String javaDateFormat, String numberFormat) {
-		this(javaDateFormat, numberFormat, ZipType.None);
+	public XlsOutput() {
+		this(ZipType.None);
 	}
 
-	public XlsOutput(String javaDateFormat, String numberFormat, ZipType zipType) {
+	public XlsOutput(ZipType zipType) {
 		this.zipType = zipType;
-		this.javaDateFormat = javaDateFormat;
-		this.numberFormat = numberFormat;
 	}
 
 	/**
@@ -93,6 +92,8 @@ public class XlsOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		dateTimeStyle = null;
+		timeStyle = null;
 		totalStyle = null;
 		numberStyle = null;
 		currentRow = 0;
@@ -114,7 +115,7 @@ public class XlsOutput extends StandardOutput {
 			}
 
 			wb = new HSSFWorkbook();
-			
+
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			sheet = wb.createSheet(sheetName);
 
@@ -144,15 +145,40 @@ public class XlsOutput extends StandardOutput {
 			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 
+			String javaDateFormat = report.getDateFormat();
+			String javaDateTimeFormat = report.getDateTimeFormat();
+			String javaTimeFormat = report.getTimeFormat();
+			String numberFormat = report.getNumberFormat();
+
 			dateStyle = wb.createCellStyle();
 			if (StringUtils.isBlank(javaDateFormat)) {
-				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
 			} else {
 				DataFormat poiFormat = wb.createDataFormat();
 				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
 				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			}
 			dateStyle.setFont(bodyFont);
+
+			dateTimeStyle = wb.createCellStyle();
+			if (StringUtils.isBlank(javaDateTimeFormat)) {
+				dateTimeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelDateTimeFormat = DateFormatConverter.convert(locale, javaDateTimeFormat);
+				dateTimeStyle.setDataFormat(poiFormat.getFormat(excelDateTimeFormat));
+			}
+			dateTimeStyle.setFont(bodyFont);
+
+			timeStyle = wb.createCellStyle();
+			if (StringUtils.isBlank(javaTimeFormat)) {
+				timeStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("h:mm:ss"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelTimeFormat = DateFormatConverter.convert(locale, javaTimeFormat);
+				timeStyle.setDataFormat(poiFormat.getFormat(excelTimeFormat));
+			}
+			timeStyle.setFont(bodyFont);
 
 			if (StringUtils.isNotBlank(numberFormat)) {
 				numberStyle = wb.createCellStyle();
@@ -262,7 +288,29 @@ public class XlsOutput extends StandardOutput {
 			cell.setCellStyle(dateStyle);
 		}
 	}
-	
+
+	@Override
+	public void addCellDateTime(Date value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			cell.setCellValue(value);
+			cell.setCellStyle(dateTimeStyle);
+		}
+	}
+
+	@Override
+	public void addCellTime(Date value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			//https://stackoverflow.com/questions/51411771/apache-poi-write-hhmmss-string-to-excel-time-data-type
+			String timeString = ArtUtils.isoTimeSecondsFormatter.format(value);
+			cell.setCellValue(DateUtil.convertTime(timeString));
+			cell.setCellStyle(timeStyle);
+		}
+	}
+
 	@Override
 	public void addCellImage(byte[] binaryData) {
 		cell = row.createCell(cellNumber++);

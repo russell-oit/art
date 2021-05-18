@@ -254,6 +254,9 @@ public class CachedResult {
 					case Types.TIMESTAMP:
 						createStatementSB.append(columnName).append(" TIMESTAMP, ");
 						break;
+					case Types.TIME:
+						createStatementSB.append(columnName).append(" TIME, ");
+						break;
 					case Types.BOOLEAN:
 					case Types.BIT:
 						createStatementSB.append(columnName).append(" BOOLEAN, ");
@@ -363,6 +366,13 @@ public class CachedResult {
 								ps.setNull(j, Types.TIMESTAMP);
 							} else {
 								ps.setTimestamp(j, rs.getTimestamp(j));
+							}
+							break;
+						case Types.TIME:
+							if (o == null) {
+								ps.setNull(j, Types.TIME);
+							} else {
+								ps.setTime(j, rs.getTime(j));
 							}
 							break;
 						case Types.BOOLEAN:

@@ -1,9 +1,6 @@
 <%-- 
-    Document   : dateInput
-    Created on : 08-Mar-2016, 17:28:14
+    Document   : timeInput
     Author     : Timothy Anyona
-
-Display input for date parameters
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -21,7 +18,7 @@ Display input for date parameters
 		   id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		   value="${encode:forHtmlAttribute(reportParam.getHtmlValueWithLocale(locale))}">
 	<span class="input-group-addon">
-		<span class="glyphicon glyphicon-calendar"></span>
+		<span class="glyphicon glyphicon-time"></span>
 	</span>
 </div>
 
@@ -40,6 +37,6 @@ Display input for date parameters
 </c:if>
 
 <t:addDatePicker reportParam="${reportParam}" locale="${locale}"
-				 defaultFormat="YYYY-MM-DD"/>
+				 defaultFormat="HH:mm"/>
 
 <t:addRobinHerbotsMask reportParam="${reportParam}"/>

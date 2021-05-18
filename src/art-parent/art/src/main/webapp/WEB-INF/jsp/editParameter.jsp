@@ -113,6 +113,7 @@ Edit parameter definition
 				switch (dataType) {
 					case "Date":
 					case "DateTime":
+					case "Time":
 						$("#dateFormatDiv").show();
 						break;
 					default:

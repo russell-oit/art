@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -162,6 +163,20 @@ public class DatabaseUtils {
 			return null;
 		} else {
 			return new java.sql.Date(date.getTime());
+		}
+	}
+
+	/**
+	 * Converts the given java.util.Date to a java.sql.Time
+	 *
+	 * @param time the java.util.Date to be converted, may be null
+	 * @return the converted java.sql.Time. null if time passed was null
+	 */
+	public static Time toSqlTime(java.util.Date time) {
+		if (time == null) {
+			return null;
+		} else {
+			return new Time(time.getTime());
 		}
 	}
 

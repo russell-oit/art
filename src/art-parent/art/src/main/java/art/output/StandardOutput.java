@@ -52,6 +52,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -99,6 +100,8 @@ public abstract class StandardOutput {
 	private boolean showSelectedParameters;
 	private Map<Integer, Double> columnTotals;
 	private SimpleDateFormat globalDateFormatter;
+	private SimpleDateFormat globalDateTimeFormatter;
+	private SimpleDateFormat globalTimeFormatter;
 	private Map<Integer, Object> columnFormatters;
 	private DecimalFormat globalNumericFormatter;
 	protected MessageSource messageSource;
@@ -540,6 +543,42 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Outputs a DateTime value to the current row
+	 *
+	 * @param value the value to output
+	 */
+	public abstract void addCellDateTime(Date value);
+
+	/**
+	 * Outputs a datetime value to the current row
+	 *
+	 * @param dateTimeValue the datetime value
+	 * @param formattedValue the formatted string for the datetime value
+	 * @param sortValue the sort value to use
+	 */
+	protected void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		addCellDateTime(dateTimeValue);
+	}
+
+	/**
+	 * Outputs a time value to the current row
+	 *
+	 * @param value the value to output
+	 */
+	public abstract void addCellTime(Date value);
+
+	/**
+	 * Outputs a time value to the current row
+	 *
+	 * @param timeValue the time value
+	 * @param formattedValue the formatted string for the time value
+	 * @param sortValue the sort value to use
+	 */
+	protected void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		addCellTime(timeValue);
+	}
+
+	/**
 	 * Outputs an image to the current row
 	 *
 	 * @param binaryData the binary data for the image
@@ -625,21 +664,61 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Formats a numberic value for display as a plain number or empty string
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatNumericValuePlain(Double value) {
+		String formattedValue;
+
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = plainNumberFormatter.format(value);
+		}
+
+		return formattedValue;
+	}
+
+	/**
 	 * Formats a date value for display
 	 *
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
 	protected String formatDateValue(Date value) {
-		String formattedValue;
+		return Config.getDateDisplayString(value);
+	}
 
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getDateDisplayString(value);
-		}
+	/**
+	 * Formats a datetime value for display
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatDateTimeValue(Date value) {
+		return Config.getDateTimeDisplayString(value);
+	}
 
-		return formattedValue;
+	/**
+	 * Formats a time value for display
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatTimeValue(Date value) {
+		return Config.getTimeDisplayString(value);
+	}
+
+	/**
+	 * Formats a time value for display in iso format, HH:mm:ss
+	 *
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	protected String formatIsoTimeValue(Date value) {
+		return Config.getIsoTimeDisplayString(value);
 	}
 
 	/**
@@ -654,7 +733,13 @@ public abstract class StandardOutput {
 		if (value == null) {
 			sortValue = 0;
 		} else {
-			sortValue = value.getTime();
+			//correctly sort java.sql.Time values
+			//https://stackoverflow.com/questions/61341120/why-java-sql-timestamp-return-negative-value-when-the-date-is-after-1970-01-01
+			//https://stackoverflow.com/questions/53864387/getting-negative-value-in-date-gettime
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(value);
+			sortValue = cal.getTimeInMillis() + (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET));
+			//sortValue = value.getTime();
 		}
 
 		return sortValue;
@@ -829,7 +914,7 @@ public abstract class StandardOutput {
 				return result;
 			} else {
 				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
-				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
+				outputDrilldownColumns(drilldowns, columnValues);
 			}
 		}
 
@@ -977,7 +1062,7 @@ public abstract class StandardOutput {
 				return result;
 			} else {
 				List<Object> columnValues = outputDataColumns(columnTypes, row, columnNames, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
-				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
+				outputDrilldownColumns(drilldowns, columnValues);
 			}
 		}
 
@@ -1033,6 +1118,16 @@ public abstract class StandardOutput {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
 
+		String globalDateTimeFormat = report.getDateTimeFormat();
+		if (StringUtils.isNotBlank(globalDateTimeFormat)) {
+			globalDateTimeFormatter = new SimpleDateFormat(globalDateTimeFormat, columnFormatLocale);
+		}
+
+		String globalTimeFormat = report.getTimeFormat();
+		if (StringUtils.isNotBlank(globalTimeFormat)) {
+			globalTimeFormatter = new SimpleDateFormat(globalTimeFormat, columnFormatLocale);
+		}
+
 		String globalNumberFormat = report.getNumberFormat();
 		if (StringUtils.isNotBlank(globalNumberFormat)) {
 			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
@@ -1068,6 +1163,8 @@ public abstract class StandardOutput {
 					ColumnType columnType = columnTypeDefinition.getColumnType();
 					switch (columnType) {
 						case Date:
+						case DateTime:
+						case Time:
 							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, columnFormatLocale);
 							columnFormatters.put(i, dateFormatter);
 							break;
@@ -1563,12 +1660,16 @@ public abstract class StandardOutput {
 			columnType = ColumnType.Numeric;
 		} else if (isDate(sqlType)) {
 			columnType = ColumnType.Date;
+		} else if (isDateTime(sqlType)) {
+			columnType = ColumnType.DateTime;
+		} else if (isTime(sqlType)) {
+			columnType = ColumnType.Time;
 		} else if (isClob(sqlType)) {
 			columnType = ColumnType.Clob;
-		} else if (sqlType == Types.OTHER) {
-			columnType = ColumnType.Other;
 		} else if (isBinary(sqlType)) {
 			columnType = ColumnType.Binary;
+		} else if (sqlType == Types.OTHER) {
+			columnType = ColumnType.Other;
 		} else {
 			columnType = ColumnType.String;
 		}
@@ -1820,7 +1921,7 @@ public abstract class StandardOutput {
 								if (globalDateFormatter != null) {
 									formattedValue = globalDateFormatter.format(dateValue);
 								} else {
-									formattedValue = Config.getDateDisplayString(dateValue);
+									formattedValue = formatDateValue(dateValue);
 								}
 
 								addCellDate(dateValue, formattedValue, sortValue);
@@ -1828,6 +1929,74 @@ public abstract class StandardOutput {
 						}
 					} else {
 						addCellDate(dateValue);
+					}
+					break;
+				case DateTime:
+					Date dateTimeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateTimeValue == null) {
+							addCellDateTime(dateTimeValue);
+						} else {
+							long sortValue = getDateSortValue(dateTimeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateTimeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellDateTime(dateTimeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateTimeFormatter != null) {
+									formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+								} else {
+									formattedValue = formatDateTimeValue(dateTimeValue);
+								}
+
+								addCellDateTime(dateTimeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellDateTime(dateTimeValue);
+					}
+					break;
+				case Time:
+					Date timeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (timeValue == null) {
+							addCellTime(timeValue);
+						} else {
+							long sortValue = getDateSortValue(timeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(timeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellTime(timeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalTimeFormatter != null) {
+									formattedValue = globalTimeFormatter.format(timeValue);
+								} else {
+									formattedValue = formatTimeValue(timeValue);
+								}
+
+								addCellTime(timeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellTime(timeValue);
 					}
 					break;
 				default:
@@ -1947,7 +2116,8 @@ public abstract class StandardOutput {
 					}
 					break;
 				case Date:
-					value = rs.getTimestamp(columnIndex);
+					//https://stackoverflow.com/questions/21162753/jdbc-resultset-i-need-a-getdatetime-but-there-is-only-getdate-and-gettimestamp/21163453
+					value = rs.getDate(columnIndex);
 					Date dateValue = (Date) value;
 
 					if (reportFormat.isUseColumnFormatting()) {
@@ -1971,7 +2141,7 @@ public abstract class StandardOutput {
 								if (globalDateFormatter != null) {
 									formattedValue = globalDateFormatter.format(dateValue);
 								} else {
-									formattedValue = Config.getDateDisplayString(dateValue);
+									formattedValue = formatDateValue(dateValue);
 								}
 
 								addCellDate(dateValue, formattedValue, sortValue);
@@ -1979,6 +2149,76 @@ public abstract class StandardOutput {
 						}
 					} else {
 						addCellDate(dateValue);
+					}
+					break;
+				case DateTime:
+					value = rs.getTimestamp(columnIndex);
+					Date dateTimeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (dateTimeValue == null) {
+							addCellDateTime(dateTimeValue);
+						} else {
+							long sortValue = getDateSortValue(dateTimeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(dateTimeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellDateTime(dateTimeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalDateTimeFormatter != null) {
+									formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+								} else {
+									formattedValue = formatDateTimeValue(dateTimeValue);
+								}
+
+								addCellDateTime(dateTimeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellDateTime(dateTimeValue);
+					}
+					break;
+				case Time:
+					value = rs.getTime(columnIndex);
+					Date timeValue = (Date) value;
+
+					if (reportFormat.isUseColumnFormatting()) {
+						if (timeValue == null) {
+							addCellTime(timeValue);
+						} else {
+							long sortValue = getDateSortValue(timeValue);
+							String columnFormattedValue = null;
+
+							if (columnFormatters != null) {
+								SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+								if (columnFormatter != null) {
+									columnFormattedValue = columnFormatter.format(timeValue);
+								}
+							}
+
+							if (columnFormattedValue != null) {
+								addCellTime(timeValue, columnFormattedValue, sortValue);
+							} else {
+								String formattedValue;
+								if (globalTimeFormatter != null) {
+									formattedValue = globalTimeFormatter.format(timeValue);
+								} else {
+									formattedValue = formatTimeValue(timeValue);
+								}
+
+								addCellTime(timeValue, formattedValue, sortValue);
+							}
+						}
+					} else {
+						addCellTime(timeValue);
 					}
 					break;
 				case Clob:
@@ -2022,13 +2262,11 @@ public abstract class StandardOutput {
 	 * Outputs values for drilldown columns
 	 *
 	 * @param drilldowns the drilldowns to use, may be null
-	 * @param reportParamsList the report parameters
 	 * @param columnValues the values from the resultset data
 	 * @throws SQLException
 	 */
 	private void outputDrilldownColumns(List<Drilldown> drilldowns,
-			List<ReportParameter> reportParamsList, List<Object> columnValues)
-			throws SQLException {
+			List<Object> columnValues) throws SQLException {
 
 		if (CollectionUtils.isEmpty(drilldowns)) {
 			return;
@@ -2101,8 +2339,6 @@ public abstract class StandardOutput {
 
 		switch (sqlType) {
 			case Types.DATE:
-			case Types.TIME:
-			case Types.TIMESTAMP:
 				date = true;
 				break;
 			default:
@@ -2110,6 +2346,46 @@ public abstract class StandardOutput {
 		}
 
 		return date;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given sql type is a datetime one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a datetime one
+	 */
+	private boolean isDateTime(int sqlType) {
+		boolean dateTime;
+
+		switch (sqlType) {
+			case Types.TIMESTAMP:
+				dateTime = true;
+				break;
+			default:
+				dateTime = false;
+		}
+
+		return dateTime;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given sql type is a time one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a time one
+	 */
+	private boolean isTime(int sqlType) {
+		boolean time;
+
+		switch (sqlType) {
+			case Types.TIME:
+				time = true;
+				break;
+			default:
+				time = false;
+		}
+
+		return time;
 	}
 
 	/**
@@ -2746,7 +3022,13 @@ public abstract class StandardOutput {
 				}
 				break;
 			case Date:
+				value = rs.getDate(columnIndex);
+				break;
+			case DateTime:
 				value = rs.getTimestamp(columnIndex);
+				break;
+			case Time:
+				value = rs.getTime(columnIndex);
 				break;
 			case Clob:
 				Clob clob = rs.getClob(columnIndex);
@@ -2824,10 +3106,42 @@ public abstract class StandardOutput {
 					if (globalDateFormatter != null) {
 						formattedValue = globalDateFormatter.format(dateValue);
 					} else {
-						formattedValue = Config.getDateDisplayString(dateValue);
+						formattedValue = formatDateValue(dateValue);
 					}
 
 					addCellDate(dateValue, formattedValue, sortValue);
+				}
+				break;
+			case DateTime:
+				Date dateTimeValue = (Date) value;
+				if (dateTimeValue == null) {
+					addCellDateTime(dateTimeValue);
+				} else {
+					long sortValue = getDateSortValue(dateTimeValue);
+					String formattedValue;
+					if (globalDateTimeFormatter != null) {
+						formattedValue = globalDateTimeFormatter.format(dateTimeValue);
+					} else {
+						formattedValue = formatDateTimeValue(dateTimeValue);
+					}
+
+					addCellDateTime(dateTimeValue, formattedValue, sortValue);
+				}
+				break;
+			case Time:
+				Date timeValue = (Date) value;
+				if (timeValue == null) {
+					addCellTime(timeValue);
+				} else {
+					long sortValue = getDateSortValue(timeValue);
+					String formattedValue;
+					if (globalTimeFormatter != null) {
+						formattedValue = globalTimeFormatter.format(timeValue);
+					} else {
+						formattedValue = formatTimeValue(timeValue);
+					}
+
+					addCellTime(timeValue, formattedValue, sortValue);
 				}
 				break;
 			case Clob:

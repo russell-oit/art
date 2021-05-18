@@ -19,6 +19,7 @@ package art.output;
 
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
@@ -143,7 +144,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue = Config.getIsoDateDisplayString(value);
+		String formattedValue = getIsoDateDisplayString(value);
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
 	}
@@ -152,6 +153,32 @@ public class XmlOutput extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forXml(formattedValue);
 		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+	
+	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = getIsoDateTimeDisplayString(value);
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = formatIsoTimeValue(value);
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"time\">" + escapedFormattedValue + "</col>");
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"time\">" + escapedFormattedValue + "</col>");
 	}
 
 	@Override
@@ -195,4 +222,41 @@ public class XmlOutput extends StandardOutput {
 		out.println("<totalrows>" + localRowCount + "</totalrows>");
 		out.println("</table>");
 	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a date field
+	 *
+	 * @param date the date value
+	 * @return the string value in iso format
+	 */
+	private String getIsoDateDisplayString(Date date) {
+		String dateString;
+
+		if (date == null) {
+			dateString = "";
+		} else {
+			dateString = ArtUtils.isoDateFormatter.format(date);
+		}
+		
+		return dateString;
+	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a date field
+	 *
+	 * @param date the date value
+	 * @return the string value in iso format
+	 */
+	private String getIsoDateTimeDisplayString(Date date) {
+		String dateString;
+
+		if (date == null) {
+			dateString = "";
+		} else {
+			dateString = ArtUtils.isoDateTimeSecondsFormatter.format(date);
+		}
+		
+		return dateString;
+	}
+	
 }

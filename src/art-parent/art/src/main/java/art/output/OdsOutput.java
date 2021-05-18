@@ -198,6 +198,30 @@ public class OdsOutput extends StandardOutput {
 			cell.setFont(bodyFont);
 		}
 	}
+	
+	@Override
+	public void addCellDateTime(Date value) {
+		cell = row.getCellByIndex(cellNumber++);
+
+		if (value != null) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(value);
+			cell.setDateTimeValue(calendar);
+			cell.setFont(bodyFont);
+		}
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		cell = row.getCellByIndex(cellNumber++);
+
+		if (value != null) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(value);
+			cell.setTimeValue(calendar);
+			cell.setFont(bodyFont);
+		}
+	}
 
 	@Override
 	public void addCellImage(byte[] binaryData) {

@@ -251,9 +251,9 @@ public class JobController {
 				lastRunMessage = messageSource.getMessage(lastRunMessage, null, locale);
 				job.setLastRunMessage(lastRunMessage);
 			}
-			String lastEndDateString = Config.getDateDisplayString(job.getLastEndDate());
+			String lastEndDateString = Config.getDateTimeDisplayString(job.getLastEndDate());
 			job.setLastEndDateString(lastEndDateString);
-			String nextRunDateString = Config.getDateDisplayString(job.getNextRunDate());
+			String nextRunDateString = Config.getDateTimeDisplayString(job.getNextRunDate());
 			job.setNextRunDateString(nextRunDateString);
 
 			List<JobRunDetails> runningJobs = Config.getRunningJobs();

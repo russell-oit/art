@@ -91,6 +91,9 @@
 								<c:when test="${reportParam.parameter.dataType == 'DateTime'}">
 									<jsp:include page="datetimeInput.jsp" />
 								</c:when>
+								<c:when test="${reportParam.parameter.dataType == 'Time'}">
+									<jsp:include page="timeInput.jsp" />
+								</c:when>
 								<c:when test="${reportParam.parameter.dataType == 'DateRange'}">
 									<jsp:include page="daterangeInput.jsp" />
 								</c:when>

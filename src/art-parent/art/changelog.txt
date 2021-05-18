@@ -1,3 +1,8 @@
+ART 5.5
+* Added Time parameter type
+* Added DateTime format option for tabular reports
+* Updated mariadb driver
+
 ART 5.4
 * Added report id and job id to logs
 * Added AwesomeChartJs report type with simple pareto chart type

@@ -118,8 +118,9 @@ public class Config extends HttpServlet {
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
-	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat testTimeFormatter = new SimpleDateFormat();
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDbConfig;
@@ -261,7 +262,7 @@ public class Config extends HttpServlet {
 			logger.error("Error", ex);
 		}
 
-		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+		String dateDisplayPattern = settings.getDateTimeFormat();
 		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 	}
 
@@ -420,6 +421,7 @@ public class Config extends HttpServlet {
 		//https://stackoverflow.com/questions/22056967/apache-velocity-resource-not-found-exception-even-though-template-file-is-in-the
 		//https://stackoverflow.com/questions/34662161/velocitys-fileresourceloader-cant-find-resources
 		//https://velocity.apache.org/engine/1.7/developer-guide.html#resource-management
+		//https://sourceforge.net/p/art/discussion/352129/thread/32568f0d62/?limit=25#fb27
 		velocityEngine.setProperty("file.resource.loader.path", "");
 
 		velocityEngine.init();
@@ -550,7 +552,7 @@ public class Config extends HttpServlet {
 
 			//upgrade art database
 			performLiquibaseUpgrade();
-			
+
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(templatesPath);
@@ -679,10 +681,13 @@ public class Config extends HttpServlet {
 		settingsService.setSettingsDefaults(settings);
 
 		//set date formatters
+		testTimeFormatter.applyPattern("HH:mm:ss.SSS");
 		String dateFormat = settings.getDateFormat();
-		timeFormatter.applyPattern("HH:mm:ss.SSS");
+		String dateTimeFormat = settings.getDateTimeFormat();
+		String timeFormat = settings.getTimeFormat();
 		dateFormatter.applyPattern(dateFormat);
-		dateTimeFormatter.applyPattern(dateFormat + " " + settings.getTimeFormat());
+		dateTimeFormatter.applyPattern(dateTimeFormat);
+		timeFormatter.applyPattern(timeFormat);
 
 		//set available report formats
 		String reportFormatsString = settings.getReportFormats();
@@ -1183,13 +1188,13 @@ public class Config extends HttpServlet {
 	 */
 	public static int getMaxRows(String reportFormatString) {
 		logger.debug("Entering getMaxRows: reportFormatString='{}'", reportFormatString);
-		
+
 		int max = settings.getMaxRowsDefault();
 		logger.debug("max = {}", max);
 
 		String setting = settings.getMaxRowsSpecific();
 		logger.debug("setting = '{}'", setting);
-		
+
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
@@ -1201,8 +1206,45 @@ public class Config extends HttpServlet {
 				}
 			}
 		}
-		
+
 		return max;
+	}
+
+	/**
+	 * Returns <code>true</code> if the date object has the time portion as 0
+	 * 
+	 * @param date the date object
+	 * @return <code>true</code> if the date object has the time portion as 0
+	 */
+	public static boolean isDateOnly(Date date) {
+		if (testTimeFormatter.format(date).equals("00:00:00.000")) {
+			//time portion is 0
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the string to be displayed for a date/datetime value
+	 *
+	 * @param date the date/datetime value
+	 * @return the string value to be displayed
+	 */
+	public static String getGeneralDateDisplayString(Date date) {
+		String dateString;
+
+		if (date == null) {
+			dateString = "";
+		} else if (testTimeFormatter.format(date).equals("00:00:00.000")) {
+			//time portion is 0. display date only
+			dateString = dateFormatter.format(date);
+		} else {
+			//display date and time
+			dateString = dateTimeFormatter.format(date);
+		}
+
+		return dateString;
 	}
 
 	/**
@@ -1216,35 +1258,65 @@ public class Config extends HttpServlet {
 
 		if (date == null) {
 			dateString = "";
-		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
-			//time portion is 0. display date only
-			dateString = dateFormatter.format(date);
 		} else {
-			//display date and time
-			dateString = dateTimeFormatter.format(date);
+			dateString = dateFormatter.format(date);
 		}
+
 		return dateString;
 	}
 
 	/**
-	 * Returns the string to be displayed in report output for a date field
+	 * Returns the string to be displayed in report output for a datetime field
 	 *
-	 * @param date the date value
+	 * @param dateTime the datetime value
+	 * @return the string value to be displayed
+	 */
+	public static String getDateTimeDisplayString(Date dateTime) {
+		String dateTimeString;
+
+		if (dateTime == null) {
+			dateTimeString = "";
+		} else {
+			dateTimeString = dateTimeFormatter.format(dateTime);
+		}
+
+		return dateTimeString;
+	}
+
+	/**
+	 * Returns the string to be displayed in report output for a time field
+	 *
+	 * @param time the time value
+	 * @return the string value to be displayed
+	 */
+	public static String getTimeDisplayString(Date time) {
+		String timeString;
+
+		if (time == null) {
+			timeString = "";
+		} else {
+			timeString = timeFormatter.format(time);
+		}
+
+		return timeString;
+	}
+	
+	/**
+	 * Returns the string to be displayed in report output for a time field
+	 *
+	 * @param time the time value
 	 * @return the string value in iso format
 	 */
-	public static String getIsoDateDisplayString(Date date) {
-		String dateString;
+	public static String getIsoTimeDisplayString(Date time) {
+		String timeString;
 
-		if (date == null) {
-			dateString = "";
-		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
-			//time portion is 0. display date only
-			dateString = ArtUtils.isoDateFormatter.format(date);
+		if (time == null) {
+			timeString = "";
 		} else {
-			//display date and time
-			dateString = ArtUtils.isoDateTimeSecondsFormatter.format(date);
+			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
 		}
-		return dateString;
+		
+		return timeString;
 	}
 
 	/**

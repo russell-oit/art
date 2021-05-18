@@ -469,6 +469,90 @@ public class ExpressionHelper {
 	}
 
 	/**
+	 * Converts a string representation of a time to a date object representing
+	 * the time
+	 *
+	 * @param string the string
+	 * @param timeFormat the time format that the string is in
+	 * @param locale the locale to use for the time
+	 * @return the date object of the string representation
+	 * @throws java.text.ParseException
+	 */
+	public Date convertStringToTime(String string, String timeFormat,
+			Locale locale) throws ParseException {
+
+		logger.debug("Entering convertStringToTime: string='{}',"
+				+ " timeFormat='{}', locale={}", string, timeFormat, locale);
+
+		if (string == null) {
+			return null;
+		}
+
+		Date timeValue;
+		Date now = new Date();
+
+		String trimString = StringUtils.trimToEmpty(string);
+
+		if (StringUtils.equalsIgnoreCase(trimString, "now")
+				|| StringUtils.isBlank(string)) {
+			timeValue = now;
+		} else if (StringUtils.startsWithIgnoreCase(trimString, "add")) {
+			//e.g. add hours 1
+			String[] tokens = StringUtils.split(trimString); //splits by space
+			if (tokens.length != 3) {
+				throw new IllegalArgumentException("Invalid interval: " + trimString);
+			}
+
+			String period = tokens[1];
+			int offset = Integer.parseInt(tokens[2]);
+
+			if (StringUtils.startsWithIgnoreCase(period, "hour")) {
+				timeValue = DateUtils.addHours(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "min")) {
+				timeValue = DateUtils.addMinutes(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "sec")) {
+				timeValue = DateUtils.addSeconds(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "milli")) {
+				timeValue = DateUtils.addMilliseconds(now, offset);
+			} else {
+				throw new IllegalArgumentException("Invalid period: " + period);
+			}
+		} else {
+			//convert time string as it is to a date
+			if (StringUtils.isBlank(timeFormat)) {
+				if (string.length() == ArtUtils.ISO_TIME_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_FORMAT;
+				} else if (string.length() == ArtUtils.ISO_TIME_SECONDS_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_SECONDS_FORMAT;
+				} else if (string.length() == ArtUtils.ISO_TIME_MILLISECONDS_FORMAT.length()) {
+					timeFormat = ArtUtils.ISO_TIME_MILLISECONDS_FORMAT;
+				} else {
+					throw new IllegalArgumentException("Unexpected time format: " + string);
+				}
+			}
+
+			if (locale == null) {
+				locale = Locale.getDefault();
+			}
+
+			//not all locales work with simpledateformat
+			//with lenient set to false, parsing may throw an error if the locale is not available
+			if (logger.isDebugEnabled()) {
+				Locale[] locales = SimpleDateFormat.getAvailableLocales();
+				if (!Arrays.asList(locales).contains(locale)) {
+					logger.debug("Locale '{}' not available for time parameter parsing", locale);
+				}
+			}
+
+			SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat, locale);
+			timeFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
+			timeValue = timeFormatter.parse(string);
+		}
+
+		return timeValue;
+	}
+
+	/**
 	 * Converts a date representation that includes simple arithmetic like "add
 	 * days 1" to a proper date string
 	 *

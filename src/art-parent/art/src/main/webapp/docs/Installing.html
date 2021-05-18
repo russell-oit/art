@@ -55,7 +55,7 @@
    </div> 
    <h1 id="requirements">Requirements</h1> 
    <ul> 
-    <li>Java application server or servlet container e.g. Apache Tomcat 9</li> 
+    <li>Java application server or servlet container e.g. Apache Tomcat 9. ART currently doesn't work with Tomcat 10 or any Jakarta EE 9 application server.</li> 
     <li>Java 8 and above</li> 
    </ul> 
    <h1 id="download-art">Download ART</h1> 
@@ -72,8 +72,8 @@
     <li>Download the latest binary distribution</li> 
     <li>Unpack the archive somewhere e.g. 
      <div class="codehilite"> 
-      <pre><span></span><span class="n">tar</span> <span class="n">xvzf</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mi">7</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">23</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span>
-<span class="n">sudo</span> <span class="n">mv</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mi">7</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">23</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">local</span><span class="o">/</span><span class="n">tomcat</span>
+      <pre><span></span>tar xvzf apache-tomcat-7.0.23.tar.gz
+sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
 </pre> 
      </div> </li> 
    </ul> 
@@ -143,7 +143,7 @@
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="k">c</span><span class="p">:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">h</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
+      <pre><span></span>c:\&gt; mysql -h localhost -u root -p
 </pre> 
      </div> </li> 
     <li> <p>Enter the password and the following subsequent commands</p> 
@@ -163,19 +163,19 @@
     <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window and type the following command</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="k">c</span><span class="p">:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">psql</span> <span class="o">-</span><span class="n">U</span> <span class="n">postgres</span>
+      <pre><span></span>c:\&gt; psql -U postgres
 </pre> 
      </div> </li> 
     <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not "postgres", use the appropriate name in place of postgres in the -U switch of the command.</p> </li> 
     <li>Enter the following subsequent commands 
      <div class="codehilite"> 
-      <pre><span></span><span class="n">postgres</span><span class="o">=#</span> <span class="k">create</span> <span class="k">user</span> <span class="n">artuser</span> <span class="n">password</span> <span class="s1">'artpassword'</span><span class="p">;</span>
-<span class="n">postgres</span><span class="o">=#</span> <span class="k">create</span> <span class="k">database</span> <span class="n">art</span> <span class="k">owner</span> <span class="n">artuser</span><span class="p">;</span>
-<span class="n">postgres</span><span class="o">=#</span> <span class="err">\</span><span class="k">c</span> <span class="n">art</span>
+      <pre><span></span>postgres=# create user artuser password 'artpassword';
+postgres=# create database art owner artuser;
+postgres=# \c art
 
-<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">i</span> <span class="s1">'c:/somepath/database/art_tables.sql'</span>
-<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">i</span> <span class="s1">'c:/somepath/database/quartz/tables_postgres.sql'</span>
-<span class="n">art</span><span class="o">=#</span> <span class="err">\</span><span class="n">q</span>
+art=# \i 'c:/somepath/database/art_tables.sql'
+art=# \i 'c:/somepath/database/quartz/tables_postgres.sql'
+art=# \q
 </pre> 
      </div> </li> 
    </ul> 

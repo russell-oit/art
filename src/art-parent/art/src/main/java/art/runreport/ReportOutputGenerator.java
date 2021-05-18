@@ -71,7 +71,6 @@ import art.reportengine.ReportEngineOutput;
 import art.reportoptions.AwesomeChartJsOptions;
 import art.reportoptions.C3Options;
 import art.reportoptions.ChartJsOptions;
-import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvOutputUnivocityOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
@@ -572,22 +571,6 @@ public class ReportOutputGenerator {
 
 		StandardOutput standardOutput;
 
-		String xlsDateFormat;
-		String reportDateFormat = report.getDateFormat();
-		if (StringUtils.isBlank(reportDateFormat)) {
-			xlsDateFormat = null;
-		} else {
-			xlsDateFormat = reportDateFormat;
-		}
-
-		String xlsNumberFormat;
-		String reportNumberFormat = report.getNumberFormat();
-		if (StringUtils.isBlank(reportNumberFormat)) {
-			xlsNumberFormat = null;
-		} else {
-			xlsNumberFormat = reportNumberFormat;
-		}
-
 		switch (reportFormat) {
 			case htmlPlain:
 				standardOutput = new HtmlPlainOutput(isJob);
@@ -611,13 +594,13 @@ public class ReportOutputGenerator {
 				standardOutput = new Rss20Output();
 				break;
 			case xls:
-				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat);
+				standardOutput = new XlsOutput();
 				break;
 			case xlsZip:
-				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat, ZipType.Zip);
+				standardOutput = new XlsOutput(ZipType.Zip);
 				break;
 			case xlsx:
-				standardOutput = new XlsxOutput(xlsDateFormat, xlsNumberFormat);
+				standardOutput = new XlsxOutput();
 				break;
 			case slk:
 				standardOutput = new SlkOutput();
@@ -644,22 +627,10 @@ public class ReportOutputGenerator {
 				standardOutput = new OdsOutput();
 				break;
 			case csv:
+				standardOutput = new CsvOutputArt();
+				break;
 			case csvZip:
-				CsvOutputArtOptions options;
-				String optionsString = report.getOptions();
-				if (StringUtils.isBlank(optionsString)) {
-					options = new CsvOutputArtOptions(); //has default values set
-				} else {
-					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
-				}
-
-				ZipType zipType = ZipType.None;
-				if (reportFormat == ReportFormat.csvZip) {
-					zipType = ZipType.Zip;
-				}
-
-				standardOutput = new CsvOutputArt(options, zipType);
+				standardOutput = new CsvOutputArt(ZipType.Zip);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);

@@ -139,7 +139,7 @@ public class HtmlGridOutput extends StandardOutput {
 
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 
@@ -147,7 +147,45 @@ public class HtmlGridOutput extends StandardOutput {
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
-		out.println("<td style='text-align: left' sorttable_customkey='"
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellDateTime(Date value) {
+		String formattedValue = formatDateTimeValue(value);
+		long sortValue = getDateSortValue(value);
+
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellTime(Date value) {
+		String formattedValue = formatTimeValue(value);
+		long sortValue = getDateSortValue(value);
+
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+
+		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 

@@ -128,14 +128,7 @@ public class TsvOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		addColumnTab();
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = plainNumberFormatter.format(value.doubleValue());
-		}
-
+		String formattedValue = formatNumericValuePlain(value);
 		sb.append(formattedValue);
 	}
 
@@ -148,12 +141,38 @@ public class TsvOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date value) {
 		addColumnTab();
-		String formattedValue = Config.getDateDisplayString(value);
+		String formattedValue = formatDateValue(value);
 		sb.append(formattedValue);
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		addColumnTab();
+		sb.append(formattedValue);
+	}
+
+	@Override
+	public void addCellDateTime(Date value) {
+		addColumnTab();
+		String formattedValue = formatDateTimeValue(value);
+		sb.append(formattedValue);
+	}
+
+	@Override
+	public void addCellDateTime(Date dateTimeValue, String formattedValue, long sortValue) {
+		addColumnTab();
+		sb.append(formattedValue);
+	}
+
+	@Override
+	public void addCellTime(Date value) {
+		addColumnTab();
+		String formattedValue = Config.getTimeDisplayString(value);
+		sb.append(formattedValue);
+	}
+
+	@Override
+	public void addCellTime(Date timeValue, String formattedValue, long sortValue) {
 		addColumnTab();
 		sb.append(formattedValue);
 	}
