@@ -31,6 +31,7 @@
 		<spring.security.version>4.2.9.RELEASE</spring.security.version>
 		<morphia.version>1.5.8</morphia.version>
 		<calcite.version>1.23.0</calcite.version>
+		<jasperreports.version>6.8.1</jasperreports.version>
 	</properties>
 
 	<build>
@@ -641,7 +642,17 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.8.1</version>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-functions</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>${jasperreports.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jaspersoft.connectors.mongodb</groupId>

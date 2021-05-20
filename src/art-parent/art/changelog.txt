@@ -1,3 +1,6 @@
+ART 5.6
+* Added jasperreports-functions jar
+
 ART 5.5
 * Added Time parameter type
 * Added DateTime format option for tabular reports
