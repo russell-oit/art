@@ -170,12 +170,8 @@ public class DbConnections {
 		if (datasource.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
 			pool = new JndiConnectionPool();
-		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
-			pool = new HikariCPConnectionPool();
-		} else if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
-			pool = new ArtDBCPConnectionPool();
 		} else {
-			throw new IllegalArgumentException("Unexpected connection pool library: " + connectionPoolLibrary);
+			pool = new HikariCPConnectionPool();
 		}
 
 		pool.create(datasource, maxPoolSize);

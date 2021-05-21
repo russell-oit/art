@@ -216,11 +216,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.art</groupId>
-			<artifactId>art-dbcp</artifactId>
-			<version>5.6-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
 			<version>5.6-SNAPSHOT</version>
 		</dependency>
