@@ -140,7 +140,6 @@ public class SettingsService {
 			settings.setJwtTokenExpiryMins(rs.getInt("JWT_TOKEN_EXPIRY"));
 			settings.setEnableDirectReportEmailing(rs.getBoolean("DIRECT_REPORT_EMAILING"));
 			settings.setJsonOptions(rs.getString("JSON_OPTIONS"));
-			settings.setDateTimeFormat(rs.getString("APP_DATETIME_FORMAT"));
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
 
@@ -375,9 +374,6 @@ public class SettingsService {
 		}
 		if (StringUtils.isBlank(settings.getDateFormat())) {
 			settings.setDateFormat("dd-MMM-yyyy");
-		}
-		if (StringUtils.isBlank(settings.getDateTimeFormat())) {
-			settings.setDateTimeFormat("dd-MMM-yyyy HH:mm:ss");
 		}
 		if (StringUtils.isBlank(settings.getTimeFormat())) {
 			settings.setTimeFormat("HH:mm:ss");

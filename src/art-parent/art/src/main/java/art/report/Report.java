@@ -115,7 +115,6 @@ public class Report implements Serializable {
 	private String hiddenColumns;
 	private String totalColumns;
 	private String dateFormat;
-	private String dateTimeFormat;
 	private String timeFormat;
 	private String numberFormat;
 	private String columnFormats;
@@ -182,15 +181,16 @@ public class Report implements Serializable {
 	/**
 	 * @return the dateTimeFormat
 	 */
+	@JsonIgnore
 	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
+		//https://stackoverflow.com/questions/24583475/what-is-the-right-approach-to-concatenating-a-null-string-in-java
+		//https://stackoverflow.com/questions/36705880/concatenate-string-values-with-delimiter-handling-null-and-empty-strings
+		//https://stackoverflow.com/questions/8502434/join-comma-if-not-empty-or-null
+		if (StringUtils.isNotBlank(dateFormat) && StringUtils.isNotBlank(timeFormat)) {
+			return dateFormat + " " + timeFormat;
+		} else {
+			return null;
+		}
 	}
 
 	/**
