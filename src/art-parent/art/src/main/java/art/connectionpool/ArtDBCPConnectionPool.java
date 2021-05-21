@@ -64,8 +64,7 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 		logger.debug("Entering registerDriver: driver='{}'", driver);
 
 		try {
-			//for jdbc 4 drivers, you don't have to specify driver or use class.forName()
-			//https://stackoverflow.com/questions/5484227/jdbc-class-forname-vs-drivermanager-registerdriver
+			//https://stackoverflow.com/questions/28119328/why-do-i-need-to-call-class-forname-in-tomcat-web-application-even-if-i-use-a-jd
 			//newInstance needed for buggy drivers e.g. neo4j 3.1.0
 			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
 			if (StringUtils.isNotBlank(driver)) {

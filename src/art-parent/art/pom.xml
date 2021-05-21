@@ -434,8 +434,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<!-- 8.x has changed the driver class name -->
-			<version>5.1.42</version>
+			<version>8.0.14</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

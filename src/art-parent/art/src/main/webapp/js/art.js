@@ -144,12 +144,12 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 	} else if (databaseType === "MySQL") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		$(databaseProtocolSelector).val('');
-		driverElement.value = "com.mysql.jdbc.Driver";
+		driverElement.value = "com.mysql.cj.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MemSQLMysql") {
 		$(databaseProtocolSelector).val('');
-		driverElement.value = "com.mysql.jdbc.Driver";
+		driverElement.value = "com.mysql.cj.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MariaDB") {
