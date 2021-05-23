@@ -19,7 +19,6 @@ package art.output;
 
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtUtils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
