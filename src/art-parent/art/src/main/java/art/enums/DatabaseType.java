@@ -224,7 +224,7 @@ public enum DatabaseType {
 			case JsonCalciteArt:
 				return "JSON (Calcite - ART driver)";
 			case BigQueryStarschema:
-				return "BigQuery (Starschema driver)";
+				return "BigQuery (Starschema driver) - driver not included";
 			case CockroachDBPostgresql:
 				return "CockroachDB (PostgreSQL driver)";
 			default:
