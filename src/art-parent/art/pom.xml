@@ -28,7 +28,7 @@
 		<thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.2</xdocreport.version>
 		<jclouds.version>2.1.2</jclouds.version>
-		<spring.security.version>4.2.9.RELEASE</spring.security.version>
+		<spring.security.version>4.2.20.RELEASE</spring.security.version>
 		<morphia.version>1.5.8</morphia.version>
 		<calcite.version>1.23.0</calcite.version>
 		<jasperreports.version>6.8.1</jasperreports.version>
