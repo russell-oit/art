@@ -188,7 +188,7 @@ public enum DatabaseType {
 			case Vertica:
 				return "Vertica - driver not included"; //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 			case CassandraAdejanovski:
-				return "Cassandra (adejanovski driver)";
+				return "Cassandra (adejanovski driver) - driver not included";
 			case CassandraCalcite:
 				return "Cassandra (Calcite driver)";
 			case MongoDBCalcite:
