@@ -12,6 +12,10 @@
 	
 	<name>calcite-file-art</name>
 	
+	<properties>
+		<calcite.version>1.23.0</calcite.version>
+	</properties>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -38,7 +42,7 @@
 		<dependency>
 			<groupId>org.apache.calcite</groupId>
 			<artifactId>calcite-core</artifactId>
-			<version>1.23.0</version>
+			<version>${calcite.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.art</groupId>
@@ -48,7 +52,7 @@
 		<dependency>
 			<groupId>org.apache.calcite</groupId>
 			<artifactId>calcite-linq4j</artifactId>
-			<version>1.23.0</version>
+			<version>${calcite.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
