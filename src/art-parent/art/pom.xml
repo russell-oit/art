@@ -105,12 +105,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 			</plugin>
-			<plugin>
+<!--			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
 				<version>6.1.6</version>
 				<configuration>
-					<!--<failBuildOnCVSS>9</failBuildOnCVSS>-->
+					<failBuildOnCVSS>9</failBuildOnCVSS>
 					<assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
 					<nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
 				</configuration>
@@ -121,7 +121,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
 		</plugins>
 	</build>
 
