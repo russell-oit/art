@@ -190,11 +190,11 @@ public enum DatabaseType {
 			case CassandraAdejanovski:
 				return "Cassandra (adejanovski driver) - driver not included";
 			case CassandraCalcite:
-				return "Cassandra (Calcite driver)";
+				return "Cassandra (Calcite driver) - driver not included";
 			case MongoDBCalcite:
 				return "MongoDB (Calcite driver)";
 			case ElasticsearchCalcite:
-				return "Elasticsearch (Calcite driver)";
+				return "Elasticsearch (Calcite driver) - driver not included";
 			case Neo4j:
 				return "Neo4j - driver not included"; //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 			case Exasol:

@@ -604,7 +604,7 @@
 			<version>${calcite.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.apache.calcite</groupId>
 			<artifactId>calcite-cassandra</artifactId>
 			<version>${calcite.version}</version>
@@ -615,7 +615,7 @@
 			<artifactId>calcite-elasticsearch</artifactId>
 			<version>${calcite.version}</version>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency>-->
 <!--		<dependency>
 			<groupId>com.github.jonathanswenson</groupId>
 			<artifactId>bqjdbc</artifactId>
