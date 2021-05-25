@@ -464,7 +464,7 @@
 		<dependency>
 			<groupId>cubrid</groupId>
 			<artifactId>cubrid-jdbc</artifactId>
-			<version>10.1.2.7694</version>
+			<version>11.0.0.0248</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
