@@ -535,12 +535,12 @@
 			<version>3.13.4</version>
 			<scope>runtime</scope>
 		</dependency>-->
-		<dependency>
+<!--		<dependency>
 			<groupId>com.facebook.presto</groupId>
 			<artifactId>presto-jdbc</artifactId>
 			<version>0.253</version>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>kx</groupId>
 			<artifactId>kdb-jdbc</artifactId>

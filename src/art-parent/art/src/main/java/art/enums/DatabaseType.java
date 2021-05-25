@@ -227,6 +227,8 @@ public enum DatabaseType {
 				return "BigQuery (Starschema driver) - driver not included";
 			case CockroachDBPostgresql:
 				return "CockroachDB (PostgreSQL driver)";
+			case Presto:
+				return "Presto - driver not included";
 			default:
 				return toString();
 		}
