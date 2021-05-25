@@ -204,9 +204,9 @@ public enum DatabaseType {
 			case Teradata:
 				return "Teradata - driver not included"; //license issues. https://downloads.teradata.com/download/license?destination=download/files/7424/187200/1/TeraJDBC__indep_indep.14.10.00.39.zip&message=License%2520Agreement
 			case SnowflakeUsWest:
-				return "Snowflake (US West Region)";
+				return "Snowflake (US West Region) - driver not included";
 			case SnowflakeOther:
-				return "Snowflake (Other Regions)";
+				return "Snowflake (Other Regions) - driver not included";
 			case MemSQLMysql:
 				return "MemSQL (MySQL driver)";
 			case CitusPostgresql:

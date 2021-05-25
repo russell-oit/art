@@ -529,12 +529,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>net.snowflake</groupId>
 			<artifactId>snowflake-jdbc</artifactId>
-			<version>3.6.16</version>
+			<version>3.13.4</version>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>com.facebook.presto</groupId>
 			<artifactId>presto-jdbc</artifactId>
