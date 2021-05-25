@@ -61,7 +61,7 @@ public class ExportHelper {
 			//https://stackoverflow.com/questions/18634337/how-to-set-filename-containing-spaces-in-content-disposition-header
 			response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 		}
-		
+
 		//https://stackoverflow.com/questions/35639142/java-download-large-file-stops-unexpectedly
 		//https://sourceforge.net/p/art/discussion/352129/thread/9c29eeb09e/?limit=25
 		response.setHeader("Content-Length", String.valueOf(file.length()));
@@ -76,7 +76,14 @@ public class ExportHelper {
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		} finally {
-			IOUtils.closeQuietly(fs);
+			try {
+				if (fs != null) {
+					fs.close();
+				}
+			} catch (IOException ex) {
+				logger.debug("Error", ex);
+			}
+
 			try {
 				if (os != null) {
 					os.flush();
