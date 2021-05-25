@@ -506,7 +506,7 @@
 		<dependency>
 			<groupId>net.sourceforge.csvjdbc</groupId>
 			<artifactId>csvjdbc</artifactId>
-			<version>1.0.34</version>
+			<version>1.0.37</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
