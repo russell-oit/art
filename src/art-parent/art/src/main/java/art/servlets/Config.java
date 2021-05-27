@@ -1164,7 +1164,7 @@ public class Config extends HttpServlet {
 	 * @return <code>true</code> if the email server has been configured
 	 */
 	public static boolean isEmailServerConfigured() {
-		if (StringUtils.isBlank(settings.getSmtpServer())) {
+		if (StringUtils.isBlank(settings.getSmtpServer()) && settings.getOtherSmtpServer() == null) {
 			return false;
 		} else {
 			return true;
@@ -1212,7 +1212,7 @@ public class Config extends HttpServlet {
 
 	/**
 	 * Returns <code>true</code> if the date object has the time portion as 0
-	 * 
+	 *
 	 * @param date the date object
 	 * @return <code>true</code> if the date object has the time portion as 0
 	 */
@@ -1300,7 +1300,7 @@ public class Config extends HttpServlet {
 
 		return timeString;
 	}
-	
+
 	/**
 	 * Returns the string to be displayed in report output for a time field
 	 *
@@ -1315,7 +1315,7 @@ public class Config extends HttpServlet {
 		} else {
 			timeString = ArtUtils.isoTimeSecondsFormatter.format(time);
 		}
-		
+
 		return timeString;
 	}
 

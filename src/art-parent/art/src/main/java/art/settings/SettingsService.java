@@ -23,6 +23,8 @@ import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.LoggerLevel;
+import art.smtpserver.SmtpServer;
+import art.smtpserver.SmtpServerService;
 import art.user.User;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,14 +52,17 @@ public class SettingsService {
 	private static final Logger logger = LoggerFactory.getLogger(SettingsService.class);
 
 	private final DbService dbService;
+	private final SmtpServerService smtpServerService;
 
 	@Autowired
-	public SettingsService(DbService dbService) {
+	public SettingsService(DbService dbService, SmtpServerService smtpServerService) {
 		this.dbService = dbService;
+		this.smtpServerService = smtpServerService;
 	}
 
 	public SettingsService() {
 		dbService = new DbService();
+		smtpServerService = new SmtpServerService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_SETTINGS";
@@ -142,6 +147,9 @@ public class SettingsService {
 			settings.setJsonOptions(rs.getString("JSON_OPTIONS"));
 			settings.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			settings.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			SmtpServer otherSmtpServer = smtpServerService.getSmtpServer(rs.getInt("SMTP_SERVER_ID"));
+			settings.setOtherSmtpServer(otherSmtpServer);
 
 			try {
 				settings.decryptPasswords();
@@ -248,6 +256,14 @@ public class SettingsService {
 			logsDatasourceId = null;
 		}
 
+		Integer otherSmtpServerId = null;
+		if (settings.getOtherSmtpServer() != null) {
+			otherSmtpServerId = settings.getOtherSmtpServer().getSmtpServerId();
+			if (otherSmtpServerId == 0) {
+				otherSmtpServerId = null;
+			}
+		}
+
 		sql = "INSERT INTO ART_SETTINGS"
 				+ " (SMTP_SERVER, SMTP_PORT, SMTP_USE_STARTTLS,"
 				+ " USE_SMTP_AUTHENTICATION, SMTP_USERNAME, SMTP_PASSWORD,"
@@ -271,8 +287,9 @@ public class SettingsService {
 				+ " PASSWORD_MIN_LENGTH, PASSWORD_MIN_LOWERCASE, PASSWORD_MIN_UPPERCASE,"
 				+ " PASSWORD_MIN_NUMERIC, PASSWORD_MIN_SPECIAL, JWT_TOKEN_EXPIRY,"
 				+ " DIRECT_REPORT_EMAILING, JSON_OPTIONS, APP_DATETIME_FORMAT,"
+				+ " SMTP_SERVER_ID,"
 				+ " UPDATE_DATE, UPDATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 63) + ")";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 64) + ")";
 
 		Object[] values = {
 			settings.getSmtpServer(),
@@ -336,6 +353,7 @@ public class SettingsService {
 			BooleanUtils.toInteger(settings.isEnableDirectReportEmailing()),
 			settings.getJsonOptions(),
 			settings.getDateTimeFormat(),
+			otherSmtpServerId,
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			actionUser.getUsername()
 		};

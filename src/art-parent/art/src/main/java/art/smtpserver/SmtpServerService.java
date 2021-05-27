@@ -63,18 +63,19 @@ public class SmtpServerService {
 
 	private static final Logger logger = LoggerFactory.getLogger(SmtpServerService.class);
 
-	@Autowired
-	private CacheHelper cacheHelper;
+	private final CacheHelper cacheHelper;
 
 	private final DbService dbService;
 
 	@Autowired
-	public SmtpServerService(DbService dbService) {
+	public SmtpServerService(DbService dbService, CacheHelper cacheHelper) {
 		this.dbService = dbService;
+		this.cacheHelper = cacheHelper;
 	}
 
 	public SmtpServerService() {
 		dbService = new DbService();
+		cacheHelper = new CacheHelper();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_SMTP_SERVERS";
@@ -661,7 +662,7 @@ public class SmtpServerService {
 
 		dbService.update(sql, values);
 
-		//note that cacheHelper will be null if SmtpServerService instantiated with new rather than @Autowired
+		//clear cache may not work if SmtpServerService instantiated with new rather than @Autowired
 		cacheHelper.clearSmtpServers();
 	}
 

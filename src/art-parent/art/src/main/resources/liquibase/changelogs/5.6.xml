@@ -23,4 +23,9 @@
 			<where>DB_AUTHENTICATION_DRIVER='com.mysql.jdbc.Driver'</where>
 		</update>
 	</changeSet>
+	<changeSet id="4" author="art">
+		<addColumn tableName="ART_SETTINGS">
+			<column name="SMTP_SERVER_ID" type="INTEGER"/>
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

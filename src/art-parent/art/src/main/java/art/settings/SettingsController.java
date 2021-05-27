@@ -211,6 +211,7 @@ public class SettingsController {
 
 		try {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
+			model.addAttribute("smtpServers", smtpServerService.getAllSmtpServers());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
