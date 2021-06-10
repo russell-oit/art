@@ -50,6 +50,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -279,5 +280,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	public CommonsMultipartResolver filterMultipartResolver() {
 		return new CommonsMultipartResolver();
 	}
+	
+	@Override
+    public void addCorsMappings(CorsRegistry registry) {
+		//https://www.baeldung.com/spring-cors
+		//https://spring.io/blog/2015/06/08/cors-support-in-spring-framework
+        registry.addMapping("/**");
+    }
 
 }

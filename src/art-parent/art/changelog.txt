@@ -2,6 +2,7 @@ ART 5.6
 * Added jasperreports-functions jar
 * Removed ART-DBCP connection pool library option
 * Added saved smtp server option to settings
+* Enable CORS
 * Omitted some database drivers
 * Updated mysql driver to version 8
 * Updated some libraries

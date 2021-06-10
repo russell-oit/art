@@ -41,6 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		//https://stackoverflow.com/questions/22524470/spring-security-3-2-csrf-disable-for-specfic-urls
 		//https://stackoverflow.com/questions/32698808/how-to-ignore-spring-security-csrf-for-specific-urls-in-spring-boot-project
 		http
+				//https://www.baeldung.com/spring-cors
+				.cors().and() //uncomment to enable cors
 				//https://docs.spring.io/autorepo/docs/spring-security/3.2.0.CI-SNAPSHOT/reference/html/headers.html
 				//https://docs.spring.io/spring-security/site/docs/4.0.2.RELEASE/reference/htmlsingle/#headers-frame-options
 				//https://stackoverflow.com/questions/28647136/how-to-disable-x-frame-options-response-header-in-spring-security
