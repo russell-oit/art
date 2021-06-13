@@ -295,7 +295,7 @@ public class ReportController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			
+
 			List<Report> reports = reportService.getAdminReportsBasic(sessionUser);
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
@@ -627,23 +627,23 @@ public class ReportController {
 			bccs = StringUtils.split(mailBcc, ";");
 		}
 
-		Mailer mailer = mailService.getMailer();
-
-		mailer.setFrom(from);
-		mailer.setSubject(subject);
-		mailer.setMessage(mailMessage);
-		mailer.setTo(tos);
-		mailer.setCc(ccs);
-		mailer.setBcc(bccs);
-
-		List<File> attachments = new ArrayList<>();
-		attachments.add(reportFile);
-		mailer.setAttachments(attachments);
-
 		//disable email for now? feature may be abused by users to send spam?
 		try {
+			Mailer mailer = mailService.getMailer();
+
+			mailer.setFrom(from);
+			mailer.setSubject(subject);
+			mailer.setMessage(mailMessage);
+			mailer.setTo(tos);
+			mailer.setCc(ccs);
+			mailer.setBcc(bccs);
+
+			List<File> attachments = new ArrayList<>();
+			attachments.add(reportFile);
+			mailer.setAttachments(attachments);
+
 			mailer.send();
-		} catch (MessagingException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setSuccess(false);
 			response.setErrorMessage(ex.getMessage());
