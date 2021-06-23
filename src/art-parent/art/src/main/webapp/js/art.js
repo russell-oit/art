@@ -1214,29 +1214,6 @@ function addSelectDeselectAllHandler() {
 	});
 }
 
-var workCount = 0;
-function artAddWork() {
-	workCount++;
-
-	if (workCount > 0) {
-//		Element.show('spinner');
-		jQuery('#spinner').show();
-	}
-
-//	console.log("artAddWork " + workCount);
-}
-function artRemoveWork() {
-	workCount--;
-
-	if (workCount <= 0) {
-//		Element.hide('spinner');
-		jQuery('#spinner').hide();
-	}
-
-//	console.log("artRemoveWork " + workCount);
-}
-
-
 function escapeRegExp(string) {
 	//return string.replace(/([.*+?^=!:$(){}|\[\]\/\\])/g, "\\$1");
 	//https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
