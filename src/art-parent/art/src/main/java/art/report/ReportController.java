@@ -45,6 +45,7 @@ import art.user.UserService;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.AjaxTableHelper;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import art.utils.MailService;
@@ -61,7 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -252,6 +252,9 @@ public class ReportController {
 
 				RunReportHelper runReportHelper = new RunReportHelper();
 				runReportHelper.setSelectReportParameterAttributes(report, request, session, locale);
+
+				ArtHelper artHelper = new ArtHelper();
+				artHelper.setTinymceLanguage(locale, request);
 			}
 		} catch (SQLException | RuntimeException | ParseException | IOException ex) {
 			logger.error("Error", ex);
@@ -295,7 +298,7 @@ public class ReportController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			
+
 			List<Report> reports = reportService.getAdminReportsBasic(sessionUser);
 
 			WebContext ctx = new WebContext(request, httpResponse, servletContext, locale);
@@ -393,7 +396,7 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/addReport", method = RequestMethod.GET)
-	public String addReport(Model model, HttpSession session) {
+	public String addReport(Model model, HttpSession session, Locale locale) {
 		logger.debug("Entering addReport");
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -403,12 +406,12 @@ public class ReportController {
 
 		model.addAttribute("report", report);
 
-		return showEditReport("add", model, session);
+		return showEditReport("add", model, session, locale);
 	}
 
 	@RequestMapping(value = "/editReport", method = RequestMethod.GET)
 	public String editReport(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering editReport: id={}", id);
 
@@ -419,7 +422,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReport("edit", model, session);
+		return showEditReport("edit", model, session, locale);
 	}
 
 	@RequestMapping(value = "/editReports", method = RequestMethod.GET)
@@ -448,7 +451,7 @@ public class ReportController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditReport(action, model, session);
+			return showEditReport(action, model, session, locale);
 		}
 
 		try {
@@ -457,7 +460,7 @@ public class ReportController {
 			logger.debug("setPasswordsMessage='{}'", setPasswordsMessage);
 			if (setPasswordsMessage != null) {
 				model.addAttribute("message", setPasswordsMessage);
-				return showEditReport(action, model, session);
+				return showEditReport(action, model, session, locale);
 			}
 
 			//save template file
@@ -465,7 +468,7 @@ public class ReportController {
 			logger.debug("saveFileMessage='{}'", saveFileMessage);
 			if (saveFileMessage != null) {
 				model.addAttribute("plainMessage", saveFileMessage);
-				return showEditReport(action, model, session);
+				return showEditReport(action, model, session, locale);
 			}
 
 			//finalise report properties
@@ -496,7 +499,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReport(action, model, session);
+		return showEditReport(action, model, session, locale);
 	}
 
 	@RequestMapping(value = "/saveReports", method = RequestMethod.POST)
@@ -627,23 +630,23 @@ public class ReportController {
 			bccs = StringUtils.split(mailBcc, ";");
 		}
 
-		Mailer mailer = mailService.getMailer();
-
-		mailer.setFrom(from);
-		mailer.setSubject(subject);
-		mailer.setMessage(mailMessage);
-		mailer.setTo(tos);
-		mailer.setCc(ccs);
-		mailer.setBcc(bccs);
-
-		List<File> attachments = new ArrayList<>();
-		attachments.add(reportFile);
-		mailer.setAttachments(attachments);
-
 		//disable email for now? feature may be abused by users to send spam?
 		try {
+			Mailer mailer = mailService.getMailer();
+
+			mailer.setFrom(from);
+			mailer.setSubject(subject);
+			mailer.setMessage(mailMessage);
+			mailer.setTo(tos);
+			mailer.setCc(ccs);
+			mailer.setBcc(bccs);
+
+			List<File> attachments = new ArrayList<>();
+			attachments.add(reportFile);
+			mailer.setAttachments(attachments);
+
 			mailer.send();
-		} catch (MessagingException | RuntimeException | IOException ex) {
+		} catch (Exception ex) {
 			logger.error("Error", ex);
 			response.setSuccess(false);
 			response.setErrorMessage(ex.getMessage());
@@ -819,7 +822,7 @@ public class ReportController {
 
 	@RequestMapping(value = "/copyReport", method = RequestMethod.GET)
 	public String copyReport(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering copyReport: id={}", id);
 
@@ -830,7 +833,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditReport("copy", model, session);
+		return showEditReport("copy", model, session, locale);
 	}
 
 	/**
@@ -839,9 +842,12 @@ public class ReportController {
 	 * @param action the action to take
 	 * @param model the model to use
 	 * @param session the http session
+	 * @param locale the locale
 	 * @return the jsp file to display
 	 */
-	private String showEditReport(String action, Model model, HttpSession session) {
+	private String showEditReport(String action, Model model, HttpSession session,
+			Locale locale) {
+
 		logger.debug("Entering showEditReport: action='{}'", action);
 
 		try {
@@ -854,6 +860,9 @@ public class ReportController {
 			model.addAttribute("pageOrientations", PageOrientation.list());
 			model.addAttribute("encryptors", encryptorService.getAllEncryptors());
 			model.addAttribute("runId", ArtUtils.getUniqueId());
+
+			ArtHelper artHelper = new ArtHelper();
+			artHelper.setTinymceLanguage(locale, model);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

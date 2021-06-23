@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Sets mdc attributes for each request
@@ -31,7 +31,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * @author Timothy Anyona
  */
 @Component
-public class MdcInterceptor extends HandlerInterceptorAdapter {
+public class MdcInterceptor implements HandlerInterceptor {
 	//https://github.com/hoserdude/spring-petclinic-instrumented/blob/master/src/main/java/org/springframework/samples/petclinic/util/LogInterceptor.java
 	//http://logback.qos.ch/manual/mdc.html
 	//http://logback.qos.ch/xref/ch/qos/logback/classic/helpers/MDCInsertingServletFilter.html

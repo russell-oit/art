@@ -72,7 +72,7 @@ Edit report page
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-5.8.1/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/js/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-File-Upload-9.28.0/js/vendor/jquery.ui.widget.js"></script>
@@ -85,6 +85,12 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
+			var tinymceLang = '${tinymceLang}';
+			if (tinymceLang) {
+				$.extend(tinymceConfig, {
+					language: tinymceLang
+				});
+			}
 			tinymce.init(tinymceConfig);
 		</script>
 
@@ -1535,15 +1541,6 @@ Edit report page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="dateTimeFormat">
-							<spring:message code="page.label.dateTimeFormat"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="dateTimeFormat" maxlength="100" class="form-control"/>
-							<form:errors path="dateTimeFormat" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="control-label col-md-4" for="timeFormat">
 							<spring:message code="reports.label.timeFormat"/>
 						</label>
@@ -2019,7 +2016,7 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
-						
+
 				<div id="reportFormatsDiv" class="form-group">
 					<label class="control-label col-md-4" for="reportFormats">
 						<spring:message code="settings.label.reportFormats"/>
@@ -2096,7 +2093,7 @@ Edit report page
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">
 					<div class="col-md-12">
-						<form:textarea path="reportSourceHtml" rows="20" cols="70" wrap="off" class="form-control editor"/>
+						<form:textarea path="reportSourceHtml" rows="30" cols="70" wrap="off" class="form-control editor"/>
 						<input name="image" type="file" id="upload" style="display:none;" onchange="">
 						<form:errors path="reportSourceHtml" cssClass="error"/>
 					</div>

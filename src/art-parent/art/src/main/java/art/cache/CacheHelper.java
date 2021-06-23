@@ -100,7 +100,7 @@ public class CacheHelper {
 
 		try {
 			//create/update file that indicates when the cache was last cleared
-			FileUtils.writeStringToFile(cacheFile, new Date().toString());
+			FileUtils.writeStringToFile(cacheFile, new Date().toString(), "UTF-8");
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}

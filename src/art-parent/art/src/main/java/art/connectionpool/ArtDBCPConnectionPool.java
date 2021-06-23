@@ -18,10 +18,7 @@
 package art.connectionpool;
 
 import art.datasource.Datasource;
-import art.dbcp.ArtDBCPDataSource;
-import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,76 +31,76 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtDBCPConnectionPool.class);
 
-	private ArtDBCPDataSource artDbcpDataSource;
+//	private ArtDBCPDataSource artDbcpDataSource;
 
 	@Override
 	protected DataSource createPool(Datasource datasource, int maxPoolSize) {
 		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
 
-		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasource.getConnectionPoolTimeoutMins());
-		artDbcpDataSource = new ArtDBCPDataSource(timeoutSeconds);
-
-		artDbcpDataSource.setPoolName(datasource.getName()); //use the datasoure name as the connection pool name
-		artDbcpDataSource.setUsername(datasource.getUsername());
-		artDbcpDataSource.setPassword(datasource.getPassword());
-		artDbcpDataSource.setMaxPoolSize(maxPoolSize);
-		artDbcpDataSource.setUrl(datasource.getUrl());
-		artDbcpDataSource.setDriverClassName(datasource.getDriver());
-		artDbcpDataSource.setTestSql(datasource.getTestSql());
-
-		//set application name connection property
-		artDbcpDataSource.setConnectionProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
-
-		//register driver so that connections are immediately usable
-		registerDriver(datasource.getDriver());
-
-		return artDbcpDataSource;
+//		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasource.getConnectionPoolTimeoutMins());
+//		artDbcpDataSource = new ArtDBCPDataSource(timeoutSeconds);
+//
+//		artDbcpDataSource.setPoolName(datasource.getName()); //use the datasoure name as the connection pool name
+//		artDbcpDataSource.setUsername(datasource.getUsername());
+//		artDbcpDataSource.setPassword(datasource.getPassword());
+//		artDbcpDataSource.setMaxPoolSize(maxPoolSize);
+//		artDbcpDataSource.setUrl(datasource.getUrl());
+//		artDbcpDataSource.setDriverClassName(datasource.getDriver());
+//		artDbcpDataSource.setTestSql(datasource.getTestSql());
+//
+//		//set application name connection property
+//		artDbcpDataSource.setConnectionProperties(getAppNameProperty(datasource.getUrl(), datasource.getName()));
+//
+//		//register driver so that connections are immediately usable
+//		registerDriver(datasource.getDriver());
+//
+//		return artDbcpDataSource;
+		return null;
 	}
 
-	private void registerDriver(String driver) {
-		logger.debug("Entering registerDriver: driver='{}'", driver);
-
-		try {
-			//for jdbc 4 drivers, you don't have to specify driver or use class.forName()
-			//https://stackoverflow.com/questions/5484227/jdbc-class-forname-vs-drivermanager-registerdriver
-			//newInstance needed for buggy drivers e.g. neo4j 3.1.0
-			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
-			if (StringUtils.isNotBlank(driver)) {
-				Class.forName(driver).newInstance();
-				logger.debug("JDBC driver registered: '{}'", driver);
-			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
-		}
-	}
-
-	@Override
-	protected void closePool() {
-		artDbcpDataSource.close();
-	}
-
-	@Override
-	public void refresh() {
-		artDbcpDataSource.refreshConnections();
-	}
-
-	@Override
-	public Integer getCurrentSize() {
-		return artDbcpDataSource.getCurrentPoolSize();
-	}
-
-	@Override
-	public Integer getInUseCount() {
-		return artDbcpDataSource.getInUseCount();
-	}
-
-	@Override
-	public Integer getHighestReachedSize() {
-		return artDbcpDataSource.getHighestReachedPoolSize();
-	}
-
-	@Override
-	public Long getTotalConnectionRequests() {
-		return artDbcpDataSource.getTotalConnectionRequests();
-	}
+//	private void registerDriver(String driver) {
+//		logger.debug("Entering registerDriver: driver='{}'", driver);
+//
+//		try {
+//			//https://stackoverflow.com/questions/28119328/why-do-i-need-to-call-class-forname-in-tomcat-web-application-even-if-i-use-a-jd
+//			//newInstance needed for buggy drivers e.g. neo4j 3.1.0
+//			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
+//			if (StringUtils.isNotBlank(driver)) {
+//				Class.forName(driver).newInstance();
+//				logger.debug("JDBC driver registered: '{}'", driver);
+//			}
+//		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+//			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
+//		}
+//	}
+//
+//	@Override
+//	protected void closePool() {
+//		artDbcpDataSource.close();
+//	}
+//
+//	@Override
+//	public void refresh() {
+//		artDbcpDataSource.refreshConnections();
+//	}
+//
+//	@Override
+//	public Integer getCurrentSize() {
+//		return artDbcpDataSource.getCurrentPoolSize();
+//	}
+//
+//	@Override
+//	public Integer getInUseCount() {
+//		return artDbcpDataSource.getInUseCount();
+//	}
+//
+//	@Override
+//	public Integer getHighestReachedSize() {
+//		return artDbcpDataSource.getHighestReachedPoolSize();
+//	}
+//
+//	@Override
+//	public Long getTotalConnectionRequests() {
+//		return artDbcpDataSource.getTotalConnectionRequests();
+//	}
 }

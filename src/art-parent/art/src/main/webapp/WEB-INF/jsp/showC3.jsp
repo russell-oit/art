@@ -26,9 +26,9 @@
 
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-5.16.0/d3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.7.20/c3.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.7.20/c3.min.js"></script>
 
 
 <script type="text/javascript">

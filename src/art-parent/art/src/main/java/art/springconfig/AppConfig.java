@@ -50,10 +50,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -73,7 +74,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 @Configuration
 @EnableWebMvc
 @ComponentScan("art")
-public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationContextAware {
+public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 
 	@Autowired
 	private StringToUserGroup stringToUserGroup;
@@ -116,7 +117,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Autowired
 	private StringToUser stringToUser;
-	
+
 	@Autowired
 	private StringToStartCondition stringToStartCondition;
 
@@ -142,7 +143,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 
 	@Override
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-		configurer.defaultContentType(MediaType.APPLICATION_JSON_UTF8);
+		configurer.defaultContentType(MediaType.APPLICATION_JSON);
 	}
 
 	@Override
@@ -232,7 +233,10 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 				.excludePathPatterns("/login", "/logout", "/logout2",
 						"/accessDenied", "/customAuthentication", "/api/**",
 						"/error", "/error-404", "/error-405", "/error-400",
-						"/error-403", "/error-500");
+						"/error-403", "/error-500",
+						"/css/**", "/js/**", "/images/**", "/docs/**",
+						"/jpivot/**", "/wcf/**", "/js-templates/**",
+						"/saiku/**");
 
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");
@@ -278,6 +282,13 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Bean
 	public CommonsMultipartResolver filterMultipartResolver() {
 		return new CommonsMultipartResolver();
+	}
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		//https://www.baeldung.com/spring-cors
+		//https://spring.io/blog/2015/06/08/cors-support-in-spring-framework
+		registry.addMapping("/**");
 	}
 
 }

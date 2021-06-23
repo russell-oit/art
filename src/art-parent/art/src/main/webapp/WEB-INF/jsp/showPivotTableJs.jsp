@@ -51,16 +51,16 @@
 
 <%-- c3 0.4 doesn't work with d3 4.x --%>
 <%-- https://github.com/nicolaskruchten/pivottable/issues/579 --%>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.10/c3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-5.16.0/d3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.7.20/c3.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.7.20/c3.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/pivot.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/c3_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.23.0/export_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.6.2/papaparse.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-5.3.0/papaparse.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/subtotal-1.10.0/subtotal.min.js"></script>

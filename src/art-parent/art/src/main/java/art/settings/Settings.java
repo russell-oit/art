@@ -22,6 +22,7 @@ import art.enums.ArtAuthenticationMethod;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.LoggerLevel;
+import art.smtpserver.SmtpServer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -73,7 +74,6 @@ public class Settings implements Serializable {
 	private String administratorEmail;
 	private String dateFormat;
 	private String timeFormat;
-	private String dateTimeFormat;
 	private String reportFormats;
 	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
@@ -104,20 +104,29 @@ public class Settings implements Serializable {
 	private boolean clearTextPasswords; //used to enable import with passwords specified in clear text
 	private int jwtTokenExpiryMins = 60;
 	private boolean enableDirectReportEmailing;
+	private SmtpServer otherSmtpServer;
 	private String jsonOptions;
+
+	/**
+	 * @return the otherSmtpServer
+	 */
+	public SmtpServer getOtherSmtpServer() {
+		return otherSmtpServer;
+	}
+
+	/**
+	 * @param otherSmtpServer the otherSmtpServer to set
+	 */
+	public void setOtherSmtpServer(SmtpServer otherSmtpServer) {
+		this.otherSmtpServer = otherSmtpServer;
+	}
 
 	/**
 	 * @return the dateTimeFormat
 	 */
+	@JsonIgnore
 	public String getDateTimeFormat() {
-		return dateTimeFormat;
-	}
-
-	/**
-	 * @param dateTimeFormat the dateTimeFormat to set
-	 */
-	public void setDateTimeFormat(String dateTimeFormat) {
-		this.dateTimeFormat = dateTimeFormat;
+		return dateFormat + " " + timeFormat;
 	}
 
 	/**

@@ -39,15 +39,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Ensures only certain users are allowed to access certain urls
  *
  * @author Timothy Anyona
  */
-public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
+public class AuthorizationInterceptor implements HandlerInterceptor {
 	//https://stackoverflow.com/questions/23349180/java-config-for-spring-interceptor-where-interceptor-is-using-autowired-spring-b
 	//https://stackoverflow.com/questions/20243130/mvc-java-config-handlerinterceptor-not-excluding-paths
 	//https://stackoverflow.com/questions/18218386/cannot-autowire-service-in-handlerinterceptoradapter

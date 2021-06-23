@@ -39,14 +39,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Authorizes access to api endpoints
  *
  * @author Timothy Anyona
  */
-public class ApiInterceptor extends HandlerInterceptorAdapter {
+public class ApiInterceptor implements HandlerInterceptor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiInterceptor.class);
 

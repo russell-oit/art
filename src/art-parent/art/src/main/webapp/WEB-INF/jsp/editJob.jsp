@@ -98,12 +98,18 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-4.0.0/js/jasny-bootstrap.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-5.8.1/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.4.2/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
+			var tinymceLang = '${tinymceLang}';
+			if (tinymceLang) {
+				$.extend(tinymceConfig, {
+					language: tinymceLang
+				});
+			}
 			tinymce.init(tinymceConfig);
 		</script>
 

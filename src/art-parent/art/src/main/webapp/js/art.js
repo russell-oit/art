@@ -45,6 +45,7 @@ var reusableAlertCloseButton = '<button type="button" class="close" aria-hidden=
  */
 var tinymceConfig = {
 	selector: "textarea.editor",
+	height: "300",
 	plugins: [
 		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 		"searchreplace visualblocks visualchars code",
@@ -144,12 +145,12 @@ function setDatasourceFields(databaseType, driverElementId, urlElementId,
 	} else if (databaseType === "MySQL") {
 		//https://mariadb.com/kb/en/library/about-mariadb-connector-j/
 		$(databaseProtocolSelector).val('');
-		driverElement.value = "com.mysql.jdbc.Driver";
+		driverElement.value = "com.mysql.cj.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MemSQLMysql") {
 		$(databaseProtocolSelector).val('');
-		driverElement.value = "com.mysql.jdbc.Driver";
+		driverElement.value = "com.mysql.cj.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server>/<database>?disableMariaDbDriver";
 		testSqlElement.value = "select 1";
 	} else if (databaseType === "MariaDB") {
@@ -1212,29 +1213,6 @@ function addSelectDeselectAllHandler() {
 		$(item).multiSelect('deselect_all');
 	});
 }
-
-var workCount = 0;
-function artAddWork() {
-	workCount++;
-
-	if (workCount > 0) {
-//		Element.show('spinner');
-		jQuery('#spinner').show();
-	}
-
-//	console.log("artAddWork " + workCount);
-}
-function artRemoveWork() {
-	workCount--;
-
-	if (workCount <= 0) {
-//		Element.hide('spinner');
-		jQuery('#spinner').hide();
-	}
-
-//	console.log("artRemoveWork " + workCount);
-}
-
 
 function escapeRegExp(string) {
 	//return string.replace(/([.*+?^=!:$(){}|\[\]\/\\])/g, "\\$1");

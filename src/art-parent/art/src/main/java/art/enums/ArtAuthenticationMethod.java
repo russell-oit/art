@@ -29,8 +29,8 @@ import java.util.List;
 public enum ArtAuthenticationMethod {
 
 	//values used by the login page
-	Internal("Internal"), Auto("Auto"), WindowsDomain("windowsDomain"),
-	Database("Database"), LDAP("LDAP"), CAS("CAS"),
+	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
+	Database("database"), LDAP("ldap"), CAS("cas"),
 	//values used internally by ART
 	Repository("repository"), Custom("custom"), Public("public");
 

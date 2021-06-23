@@ -18,6 +18,11 @@
 package art.utils;
 
 import art.enums.ReportType;
+import art.servlets.Config;
+import java.io.File;
+import java.util.Locale;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.ui.Model;
 
 /**
  * Provides helper methods to be used within the application
@@ -51,6 +56,58 @@ public class ArtHelper {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/**
+	 * Sets the tinymce language attribute if the language file exists
+	 * 
+	 * @param locale the locale
+	 * @param model the model
+	 */
+	public void setTinymceLanguage(Locale locale, Model model) {
+		HttpServletRequest request = null;
+		setTinymceLanguage(locale, model, request);
+	}
+
+	/**
+	 * Sets the tinymce language attribute if the language file exists
+	 * 
+	 * @param locale the locale
+	 * @param request the request
+	 */
+	public void setTinymceLanguage(Locale locale, HttpServletRequest request) {
+		Model model = null;
+		setTinymceLanguage(locale, model, request);
+	}
+
+	/**
+	 * Sets the tinymce language attribute if the language file exists
+	 * 
+	 * @param locale the locale
+	 * @param model the model
+	 * @param request the request
+	 */
+	private void setTinymceLanguage(Locale locale, Model model, HttpServletRequest request) {
+		//https://www.tiny.cloud/docs/configure/localization/#language
+		String localeString = locale.toString();
+		String languageFileName = localeString + ".js";
+
+		String languageFilePath = Config.getJsPath()
+				+ "tinymce-5.8.1" + File.separator
+				+ "langs" + File.separator
+				+ languageFileName;
+
+		File languageFile = new File(languageFilePath);
+
+		if (languageFile.exists()) {
+			String tinymceLangAttribute = "tinymceLang";
+			if (model != null) {
+				model.addAttribute(tinymceLangAttribute, localeString);
+			}
+			if (request != null) {
+				request.setAttribute(tinymceLangAttribute, localeString);
+			}
 		}
 	}
 

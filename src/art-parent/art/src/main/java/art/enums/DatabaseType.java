@@ -188,13 +188,13 @@ public enum DatabaseType {
 			case Vertica:
 				return "Vertica - driver not included"; //license doesn't allow redistribution. http://vertica-forums.com/viewtopic.php?t=824
 			case CassandraAdejanovski:
-				return "Cassandra (adejanovski driver)";
+				return "Cassandra (adejanovski driver) - driver not included";
 			case CassandraCalcite:
-				return "Cassandra (Calcite driver)";
+				return "Cassandra (Calcite driver) - driver not included";
 			case MongoDBCalcite:
 				return "MongoDB (Calcite driver)";
 			case ElasticsearchCalcite:
-				return "Elasticsearch (Calcite driver)";
+				return "Elasticsearch (Calcite driver) - driver not included";
 			case Neo4j:
 				return "Neo4j - driver not included"; //causes issues when in a VM. https://sourceforge.net/p/art/discussion/352129/thread/aa8e9973/
 			case Exasol:
@@ -204,9 +204,9 @@ public enum DatabaseType {
 			case Teradata:
 				return "Teradata - driver not included"; //license issues. https://downloads.teradata.com/download/license?destination=download/files/7424/187200/1/TeraJDBC__indep_indep.14.10.00.39.zip&message=License%2520Agreement
 			case SnowflakeUsWest:
-				return "Snowflake (US West Region)";
+				return "Snowflake (US West Region) - driver not included";
 			case SnowflakeOther:
-				return "Snowflake (Other Regions)";
+				return "Snowflake (Other Regions) - driver not included";
 			case MemSQLMysql:
 				return "MemSQL (MySQL driver)";
 			case CitusPostgresql:
@@ -224,9 +224,11 @@ public enum DatabaseType {
 			case JsonCalciteArt:
 				return "JSON (Calcite - ART driver)";
 			case BigQueryStarschema:
-				return "BigQuery (Starschema driver)";
+				return "BigQuery (Starschema driver) - driver not included";
 			case CockroachDBPostgresql:
 				return "CockroachDB (PostgreSQL driver)";
+			case Presto:
+				return "Presto - driver not included";
 			default:
 				return toString();
 		}

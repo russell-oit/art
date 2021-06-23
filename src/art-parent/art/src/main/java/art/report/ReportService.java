@@ -293,7 +293,6 @@ public class ReportService {
 		report.setMaxRunningPerUser(rs.getInt("MAX_RUNNING_PER_USER"));
 		report.setReportFormats(rs.getString("REPORT_FORMATS"));
 		report.setTimeFormat(rs.getString("TIME_COLUMN_FORMAT"));
-		report.setDateTimeFormat(rs.getString("DATETIME_COLUMN_FORMAT"));
 		report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		report.setCreatedBy(rs.getString("CREATED_BY"));

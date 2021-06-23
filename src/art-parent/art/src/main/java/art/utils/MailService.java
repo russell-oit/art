@@ -44,20 +44,27 @@ public class MailService {
 	 * configuration defined in application settings
 	 *
 	 * @return a mailer object that can be used to send emails
+	 * @throws java.lang.Exception
 	 */
-	public Mailer getMailer() {
+	public Mailer getMailer() throws Exception {
 		logger.debug("Entering getMailer");
 
-		Mailer mailer = new Mailer();
+		SmtpServer otherSmtpServer = Config.getSettings().getOtherSmtpServer();
 
-		mailer.setHost(Config.getSettings().getSmtpServer());
-		mailer.setPort(Config.getSettings().getSmtpPort());
-		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
-		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
-		mailer.setUsername(Config.getSettings().getSmtpUsername());
-		mailer.setPassword(Config.getSettings().getSmtpPassword());
+		if (otherSmtpServer == null) {
+			Mailer mailer = new Mailer();
 
-		return mailer;
+			mailer.setHost(Config.getSettings().getSmtpServer());
+			mailer.setPort(Config.getSettings().getSmtpPort());
+			mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+			mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
+			mailer.setUsername(Config.getSettings().getSmtpUsername());
+			mailer.setPassword(Config.getSettings().getSmtpPassword());
+
+			return mailer;
+		} else {
+			return getMailer(otherSmtpServer);
+		}
 	}
 
 	/**

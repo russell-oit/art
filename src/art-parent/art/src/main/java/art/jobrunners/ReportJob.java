@@ -659,7 +659,7 @@ public class ReportJob implements org.quartz.Job {
 					mailer.send();
 				}
 			}
-		} catch (IOException | MessagingException | RuntimeException ex) {
+		} catch (Exception ex) {
 			logError(ex);
 		}
 	}

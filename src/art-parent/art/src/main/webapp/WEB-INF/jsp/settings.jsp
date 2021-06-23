@@ -289,6 +289,19 @@ Settings configuration page
 							<form:errors path="smtpFrom" cssClass="error"/>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="otherSmtpServer">
+							<spring:message code="settings.label.smtpServer"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="otherSmtpServer" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<form:options items="${smtpServers}" itemLabel="name" itemValue="smtpServerId"/>
+							</form:select>
+							<form:errors path="otherSmtpServer" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset>
@@ -729,15 +742,6 @@ Settings configuration page
 								</span>
 							</div>
 							<form:errors path="dateFormat" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="dateTimeFormat">
-							<spring:message code="page.label.dateTimeFormat"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="dateTimeFormat" maxlength="50" class="form-control"/>
-							<form:errors path="dateTimeFormat" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
