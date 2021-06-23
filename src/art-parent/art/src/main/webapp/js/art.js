@@ -45,6 +45,7 @@ var reusableAlertCloseButton = '<button type="button" class="close" aria-hidden=
  */
 var tinymceConfig = {
 	selector: "textarea.editor",
+	height: "300",
 	plugins: [
 		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 		"searchreplace visualblocks visualchars code",

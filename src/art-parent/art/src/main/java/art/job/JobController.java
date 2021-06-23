@@ -40,6 +40,7 @@ import art.user.User;
 import art.general.AjaxResponse;
 import art.startcondition.StartConditionService;
 import art.user.UserService;
+import art.utils.ArtHelper;
 import art.utils.ArtUtils;
 import art.utils.CronStringHelper;
 import art.utils.ExpressionHelper;
@@ -127,7 +128,7 @@ public class JobController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private StartConditionService startConditionService;
 
@@ -754,6 +755,9 @@ public class JobController {
 		model.addAttribute("serverTimeZoneDescription", Config.getServerTimeZoneDescription());
 		model.addAttribute("serverTimeZone", TimeZone.getDefault().getID());
 		model.addAttribute("timeZones", Config.getTimeZones());
+
+		ArtHelper artHelper = new ArtHelper();
+		artHelper.setTinymceLanguage(locale, model);
 
 		return "editJob";
 	}

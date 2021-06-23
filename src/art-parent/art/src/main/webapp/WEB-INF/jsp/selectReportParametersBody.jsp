@@ -237,8 +237,22 @@ Display section to allow selecting of report parameters and initiate running of 
 </script>
 
 <c:if test="${enableEmail}">
-	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.8.5/tinymce.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-5.8.1/tinymce.min.js"></script>
 	<script type="text/javascript">
+	//https://www.tiny.cloud/docs/integrations/bootstrap/
+	// Prevent Bootstrap dialog from blocking focusin
+	$(document).on('focusin', function(e) {
+	  if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root").length) {
+		e.stopImmediatePropagation();
+	  }
+	});
+
+	var tinymceLang = '${tinymceLang}';
+	if (tinymceLang) {
+		$.extend(tinymceConfig, {
+			language: tinymceLang
+		});
+	}
 	tinymce.init(tinymceConfig);
 	</script>
 
