@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.5"> 
+  <meta name="version" content="5.6"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -525,6 +525,7 @@
          <li><a href="#using-maven-without-an-ide">Using Maven without an IDE</a></li> 
          <li><a href="#using-maven-with-netbeans">Using Maven with NetBeans</a></li> 
          <li><a href="#using-maven-with-eclipse">Using Maven with Eclipse</a></li> 
+         <li><a href="#adding-database-drivers">Adding Database Drivers</a></li> 
         </ol></li> 
        <li><a href="#translating-art">Translating ART</a> 
         <ol> 
@@ -682,6 +683,10 @@
         <td>An email address to be used as the "From" email address for all jobs. Leave blank to use separate email addresses as configured in each job.</td> 
        </tr> 
        <tr> 
+        <td><strong>SMTP Server</strong></td> 
+        <td>An already configured smtp server that can be used for sending emails</td> 
+       </tr> 
+       <tr> 
         <td><strong>Default Authentication Method</strong></td> 
         <td>The authentication method that will be used by ART</td> 
        </tr> 
@@ -776,10 +781,6 @@
        <tr> 
         <td><strong>Date Format</strong></td> 
         <td>Format to be used for date fields. Format strings to be used is as per the Java <a class="" href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> class.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>DateTime Format</strong></td> 
-        <td>Format to be used for datetime fields. Format strings to be used is as per the Java <a class="" href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> class.</td> 
        </tr> 
        <tr> 
         <td><strong>Time Format</strong></td> 
@@ -1274,6 +1275,7 @@
      <p>Use the <strong>Configure | Settings</strong> menu to define the authentication method to be used by ART.</p> 
      <h2 id="internal-authentication">Internal Authentication</h2> 
      <p>Internal authentication authenticates users with a username and password combination defined and stored within ART. Users can change their passwords using the <strong>Password</strong> menu located under their username on the far right of the menu bar.</p> 
+     <p>You can explicitly specify to login using internal authentication using a url like <code>art/login?authenticationMethod=internal</code></p> 
      <h2 id="windows-domain-authentication">Windows Domain Authentication</h2> 
      <p>If the users are in a windows domain environment, you can have them log in to ART using the usernames and passwords they use to log in to windows.</p> 
      <p>Do the following to configure ART to use windows domain authentication.</p> 
@@ -1289,6 +1291,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>ART uses the <a class="" href="https://github.com/AgNO3/jcifs-ng" rel="nofollow">jcifs-ng</a> library to provide windows domain authentication. You can optionally specify configuration properties for this library by modifying the <strong>WEB-INF\classes\jcifs.properties</strong> file. An indication of available properties can be found <a class="" href="https://github.com/AgNO3/jcifs-ng/blob/master/src/main/java/jcifs/config/PropertyConfiguration.java" rel="nofollow">here</a>.</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their windows login username. Grant them appropriate access to reports. The users can now log in to ART using their windows username and password.</p> 
+     <p>You can explicitly specify to login using windows domain authentication using a url like <code>art/login?authenticationMethod=windowsDomain</code></p> 
      <h2 id="ldap-authentication">LDAP Authentication</h2> 
      <p>Do the following to configure ART to use LDAP authentication.</p> 
      <ul> 
@@ -1296,6 +1299,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>Provide values for the LDAP fields. If you fill the ldap server and port fields, leave the url field blank. If you use the url field, leave the server and port fields blank.</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their uid (or samAccountName for Active Directory). Grant them appropriate access to reports. The users can now log in to ART using their ldap uid and password.</p> 
+     <p>You can explicitly specify to login using ldap authentication using a url like <code>art/login?authenticationMethod=ldap</code></p> 
      <h2 id="database-authentication">Database Authentication</h2> 
      <p>Database logins can also be used to access ART. Do the following to use the database authentication that comes with ART.</p> 
      <ul> 
@@ -1304,6 +1308,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>Fill the Database Authentication JDBC fields. The JDBC driver for the database will need to be available in the <strong>ART_HOME\WEB-INF\lib</strong> directory or <strong>TOMCAT_HOME\lib</strong> directory if using Apache Tomcat.</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their database login username. Grant them appropriate access to reports. The users can now log in to ART using their database username and password.</p> 
+     <p>You can explicitly specify to login using database authentication using a url like <code>art/login?authenticationMethod=database</code></p> 
      <h2 id="cas-authentication">CAS Authentication</h2> 
      <p>ART can use an existing CAS server to do the authentication of users. To use CAS authentication, take the following steps</p> 
      <ul> 
@@ -1318,7 +1323,8 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>Start ART again</li> 
       <li>You should be redirected to the CAS login page where you will provide appropriate credentials, after which you will be redirected back to ART</li> 
      </ul> 
-     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their CAS login username. Grant them appropriate access to reports. </p> 
+     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their CAS login username. Grant them appropriate access to reports.</p> 
+     <p>You can explicitly specify to login using cas authentication using a url like <code>art/login?authenticationMethod=cas</code></p> 
      <h2 id="custom-authentication">Custom Authentication</h2> 
      <p>Custom authentication code can be written e.g. executing a query on a remote database. To do this, stop the application, modify the file <strong>CustomAuthenticationController.java</strong> in the <strong>art.login</strong> package as appropriate, recompile the application by running <strong>ant compile</strong> from the ART home directory (ant needs to be configured), restart the application and then use a url like <code>http://localhost:8080/art/customAuthentication</code> as per your custom code.</p> 
     </div> 
@@ -1510,15 +1516,11 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>DateTime Format</strong></td> 
-        <td>For tabular reports, the format that should be used for datetime columns. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
+        <td>For tabular reports, the format that should be used for date fields. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>Time Format</strong></td> 
-        <td>For tabular reports, the format that should be used for time columns. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
+        <td>For tabular reports, the format that should be used for time fields. Leave blank to use the default. The format is as per Java <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>Number Format</strong></td> 
@@ -1526,7 +1528,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Column Formats</strong></td> 
-        <td>For tabular reports, the formats that should be used for specific date or numeric columns. Each column specification comes in a new line. The specification is in the format <code>&lt;column index or column name&gt;:&lt;format&gt;</code>. Examples <code>1:dd/MM/yyyy</code> or <code>due_date:dd MMM yyyy</code> or <code>amount:#,##0.00</code>. For xls and xlsx report formats, one cannot use individual column formats so the formats specified in the Date Format, DateTime Format, Time Format and Number Format fields would be used for all respective columns.</td> 
+        <td>For tabular reports, the formats that should be used for specific date or numeric columns. Each column specification comes in a new line. The specification is in the format <code>&lt;column index or column name&gt;:&lt;format&gt;</code>. Examples <code>1:dd/MM/yyyy</code> or <code>due_date:dd MMM yyyy</code> or <code>amount:#,##0.00</code>. For xls and xlsx report formats, one cannot use individual column formats so the formats specified in the Date Format, Time Format and Number Format fields would be used for all respective columns.</td> 
        </tr> 
        <tr> 
         <td><strong>Null Number Display</strong></td> 
@@ -3980,7 +3982,7 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>Date Format</strong></td> 
-        <td>For <strong>Date</strong> and <strong>DateTime</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
+        <td>For <strong>Date</strong>, <strong>DateTime</strong> and <strong>Time</strong> data types, the date format to use. Leave blank to use the default. The format is as per <a class="" href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" rel="nofollow">Java SimpleDateFormat</a> format.</td> 
        </tr> 
        <tr> 
         <td><strong>Multiple Files</strong></td> 
@@ -4048,10 +4050,10 @@ FROM mytable
      <h2 id="single-value-parameters">Single-Value Parameters</h2> 
      <p>Single-value parameters are used to pass single values to the SQL query. For example, the following query has two parameters.</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    SELECT *</span>
-<span class="err">    FROM orders</span>
-<span class="err">    WHERE order_date &gt; #date#</span>
-<span class="err">    AND vendor_name like #vendor# -- do not put the ' character around the name</span>
+      <pre><span></span>    <span class="nv">SELECT</span> <span class="o">*</span>
+    <span class="nv">FROM</span> <span class="nv">orders</span>
+    <span class="nv">WHERE</span> <span class="nv">order_date</span> <span class="o">&gt;</span> #<span class="nv">date</span>#
+    <span class="nv">AND</span> <span class="nv">vendor_name</span> <span class="nv">like</span> #<span class="nv">vendor</span># <span class="o">--</span> <span class="k">do</span> <span class="nv">not</span> <span class="nv">put</span> <span class="nv">the</span> <span class="s1">'</span><span class="s"> character around the name</span>
 </pre> 
      </div> 
      <p>Take the following steps to use a single-value parameter</p> 
@@ -4100,29 +4102,29 @@ FROM mytable
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV report to return the boolean states true and false, as used in your database, and use that LOV report to provide the boolean parameter values.</p> 
      <p>Example main query</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#</span>
+      <pre><span></span>    SELECT * FROM mytable WHERE my_boolean_column=#boolean_param#
 </pre> 
      </div> 
      <p>Example static LOV query for boolean values</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    true|True</span>
-<span class="err">    false|False</span>
+      <pre><span></span>    true|True
+    false|False
 </pre> 
      </div> 
      <p>Lastly, create a <strong>Single-Value</strong> parameter named <code>boolean_param</code>, with data type as <strong>Varchar</strong>, set <strong>Use LOV</strong> to <strong>Yes</strong> and set the <strong>LOV Report</strong> to the report created for this purpose above.</p> 
      <p>If the boolean states are "1" and "0" instead of "true" and "false", you can create a static LOV query like the one below and set the parameter data type to <strong>Integer</strong> instead of Varchar.</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    1|True</span>
-<span class="err">    0|False</span>
+      <pre><span></span>    1|True
+    0|False
 </pre> 
      </div> 
      <p><br></p> 
      <h2 id="multi-value-parameters">Multi-Value Parameters</h2> 
      <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    SELECT *</span>
-<span class="err">    FROM orders</span>
-<span class="err">    WHERE product_name IN(#product_list#)</span>
+      <pre><span></span>    SELECT *
+    FROM orders
+    WHERE product_name IN(#product_list#)
 </pre> 
      </div> 
      <p>Take the following steps to use a multi-value parameter </p> 
@@ -4141,9 +4143,9 @@ FROM mytable
      <h3 id="in-not-in">IN, NOT IN</h3> 
      <p>This is used with multi-value parameters. IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
      <div class="codehilite"> 
-      <pre><span></span><span class="err">    SELECT *</span>
-<span class="err">    FROM orders</span>
-<span class="err">    WHERE $x{in,product_name,product_list}</span>
+      <pre><span></span>    SELECT *
+    FROM orders
+    WHERE $x{in,product_name,product_list}
 </pre> 
      </div> 
      <p>This syntax would particularly be used when running reports against Oracle databases and the multi-value parameter is expected to have more than 1000 items. Using the normal syntax would result in an error like the following <strong>ORA-01795: maximum number of expressions in a list is 1000</strong>.</p> 
@@ -7869,6 +7871,8 @@ a2enmod proxy_http
       <li>To test changes, set up a server. See <a href="https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse" rel="nofollow">https://github.com/OneBusAway/onebusaway/wiki/Setting-Up-a-Tomcat-Server-in-Eclipse</a> . Convert the art webapp project to a Dymanic Web Module and run the application. See <a href="https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast" rel="nofollow">https://wiki.base22.com/display/btg/How+to+create+a+Maven+web+app+and+deploy+to+Tomcat+-+fast</a></li> 
       <li>To generate a war file to deploy, click on the drop down on the <strong>Run As</strong> icon in the menu bar, and select the configuration you created e.g. package. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
      </ul> 
+     <h3 id="adding-database-drivers">Adding Database Drivers</h3> 
+     <p>Some database drivers may not be included in the default application but their configuration may be available in the art project pom.xml file. You can review the <code>PACKAGE_PATH\src\art-parent\art\pom.xml</code> file, uncomment any desired drivers to include them, recompile the application as described above and deploy the updated art.war file.</p> 
      <h2 id="translating-art">Translating ART</h2> 
      <p>You can translate ART so that the user interface is displayed in your own language.</p> 
      <h3 id="online">Online</h3> 
@@ -7879,7 +7883,7 @@ a2enmod proxy_http
       <li>Change all the text in your new properties file after the = signs to your language </li> 
       <li> <p>If your language uses a non ISO-8859-1 (Latin-1) character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to the ISO-8859-1 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
        <div class="codehilite"> 
-        <pre><span></span><span class="n">native2ascii</span> <span class="o">-</span><span class="k">encoding</span> <span class="n">utf</span><span class="o">-</span><span class="mi">8</span> <span class="n">ArtMessages_xx</span><span class="o">-</span><span class="n">UTF8</span><span class="p">.</span><span class="n">properties</span> <span class="n">ArtMessages_xx</span><span class="p">.</span><span class="n">properties</span>
+        <pre><span></span>native2ascii -encoding utf-8 ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
 </pre> 
        </div> </li> 
       <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
