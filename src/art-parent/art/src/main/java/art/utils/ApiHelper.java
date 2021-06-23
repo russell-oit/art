@@ -50,7 +50,7 @@ public class ApiHelper {
 
 		try {
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -90,7 +90,7 @@ public class ApiHelper {
 			}
 
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {
@@ -111,7 +111,7 @@ public class ApiHelper {
 			apiResponse.setArtStatus(ApiStatus.RECORD_NOT_FOUND);
 
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {
@@ -134,7 +134,7 @@ public class ApiHelper {
 			apiResponse.setData(data);
 
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setStatus(HttpStatus.OK.value());
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {
@@ -159,7 +159,7 @@ public class ApiHelper {
 			apiResponse.setMessage(message);
 
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {
@@ -184,7 +184,7 @@ public class ApiHelper {
 			apiResponse.setMessage(message);
 
 			String jsonString = ArtUtils.objectToJson(apiResponse);
-			response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.getWriter().write(jsonString);
 		} catch (IOException ex) {

@@ -5,6 +5,7 @@ ART 5.6
 * Enable CORS
 * Omitted some database drivers
 * Updated mysql driver to version 8
+* Updated spring to version 5
 * Updated some libraries
 
 ART 5.5

@@ -28,7 +28,6 @@
 		<thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
 		<xdocreport.version>2.0.2</xdocreport.version>
 		<jclouds.version>2.1.2</jclouds.version>
-		<spring.security.version>4.2.20.RELEASE</spring.security.version>
 		<morphia.version>1.5.8</morphia.version>
 		<calcite.version>1.23.0</calcite.version>
 		<jasperreports.version>6.8.1</jasperreports.version>
@@ -187,7 +186,14 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>4.3.30.RELEASE</version>
+				<version>5.3.8</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>5.5.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -1028,12 +1034,10 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zeroturnaround</groupId>
