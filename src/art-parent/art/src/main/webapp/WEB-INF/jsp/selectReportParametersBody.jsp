@@ -258,6 +258,10 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	<script>
 		$(function () {
+			$('#emailReportModal').on('hidden.bs.modal', function () {
+				$(this).find('form').trigger('reset');
+			});
+			
 			$("#emailReportSubmit").on("click", function (e) {
 				e.preventDefault();
 
