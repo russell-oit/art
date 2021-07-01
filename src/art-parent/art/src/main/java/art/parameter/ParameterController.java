@@ -271,11 +271,14 @@ public class ParameterController {
 	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			@RequestParam("action") String action, @RequestParam("reportId") Integer reportId,
-			@RequestParam("returnReportId") Integer returnReportId,
-			@RequestParam("reportParameterId") Integer reportParameterId,
+			@RequestParam("action") String action,
+			@RequestParam(value = "reportId", required = false) Integer reportId,
+			@RequestParam(value = "returnReportId", required = false) Integer returnReportId,
+			@RequestParam(value = "reportParameterId", required = false) Integer reportParameterId,
 			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
 			HttpSession session, Locale locale) {
+		
+		//https://github.com/spring-projects/spring-framework/issues/26088
 
 		logger.debug("Entering saveParameter: parameter={}, action='{}',"
 				+ " reportId={}, returnReportId={}, reportParameterId={}",
