@@ -594,14 +594,14 @@ public class ReportRunner {
 	 * @param sb the report source
 	 * @throws SQLException
 	 */
-	private Map<Object, String> applyRulesToStaticLov(Map<Object, String> lovValues) throws SQLException {
+	private Map<String, Object> applyRulesToStaticLov(Map<String, Object> lovValues) throws SQLException {
 		logger.debug("Entering applyRulesToStaticLov");
 
 		if (!useRules) {
 			return lovValues;
 		}
 
-		Map<Object, String> finalLovValues = new LinkedHashMap<>();
+		Map<String, Object> finalLovValues = new LinkedHashMap<>();
 
 		ReportRuleService reportRuleService = new ReportRuleService();
 
@@ -624,19 +624,19 @@ public class ReportRunner {
 				//ALL_ITEMS. effectively means the rule doesn't apply
 				//do nothing
 			} else {
-				for (Entry<Object, String> entry : lovValues.entrySet()) {
-					String staticValue = (String) entry.getKey();
-					String displayValue = entry.getValue();
+				for (Entry<String, Object> entry : lovValues.entrySet()) {
+					String staticValue = (String) entry.getValue();
+					String displayValue = entry.getKey();
 
 					for (String ruleValue : userRuleValues) {
 						if (StringUtils.equals(staticValue, ruleValue)) {
-							finalLovValues.put(staticValue, displayValue);
+							finalLovValues.put(displayValue, staticValue);
 						}
 					}
 
 					for (String ruleValue : userGroupRuleValues) {
 						if (StringUtils.equals(staticValue, ruleValue)) {
-							finalLovValues.put(staticValue, displayValue);
+							finalLovValues.put(displayValue, staticValue);
 						}
 					}
 
@@ -1440,7 +1440,7 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Runs an lov report and returns the lov values (value and label)
+	 * Runs an lov report and returns the lov values (label and value)
 	 *
 	 * @return the lov values
 	 * @throws SQLException
@@ -1476,11 +1476,11 @@ public class ReportRunner {
 
 		Map<String, String> lovValues = new LinkedHashMap<>();
 
-		Map<Object, String> lovValuesAsObjects = getLovValuesAsObjects(overrideUseRules, newUseRules);
+		Map<String, Object> lovValuesAsObjects = getLovValuesAsObjects(overrideUseRules, newUseRules);
 
-		for (Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
-			Object dataValue = entry.getKey();
-			String displayValue = entry.getValue();
+		for (Entry<String, Object> entry : lovValuesAsObjects.entrySet()) {
+			Object dataValue = entry.getValue();
+			String displayValue = entry.getKey();
 
 			String stringValue;
 			if (dataValue instanceof Date) {
@@ -1490,36 +1490,36 @@ public class ReportRunner {
 				stringValue = String.valueOf(dataValue);
 			}
 
-			lovValues.put(stringValue, displayValue);
+			lovValues.put(displayValue, stringValue);
 		}
 
 		return lovValues;
 	}
 
 	/**
-	 * Runs an lov report and returns the lov values (value and label)
+	 * Runs an lov report and returns the lov values (label and value)
 	 *
 	 * @return the lov values
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValuesAsObjects() throws SQLException {
+	public Map<String, Object> getLovValuesAsObjects() throws SQLException {
 		return getLovValuesAsObjects(false, false);
 	}
 
 	/**
-	 * Runs an lov report and returns the lov values (value and label), using
+	 * Runs an lov report and returns the lov values (label and value), using
 	 * the given use rules setting
 	 *
 	 * @param newUseRules the use rules setting to use
 	 * @return lov values
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValuesAsObjects(boolean newUseRules) throws SQLException {
+	public Map<String, Object> getLovValuesAsObjects(boolean newUseRules) throws SQLException {
 		return getLovValuesAsObjects(true, newUseRules);
 	}
 
 	/**
-	 * Runs an lov report and returns the lov values (value and label), using
+	 * Runs an lov report and returns the lov values (label and value), using
 	 * the given use rules setting
 	 *
 	 * @param overrideUseRules whether to override the report's use rules
@@ -1528,10 +1528,10 @@ public class ReportRunner {
 	 * @return lov values
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValuesAsObjects(boolean overrideUseRules, boolean newUseRules)
+	public Map<String, Object> getLovValuesAsObjects(boolean overrideUseRules, boolean newUseRules)
 			throws SQLException {
 
-		Map<Object, String> lovValues = new LinkedHashMap<>();
+		Map<String, Object> lovValues = new LinkedHashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
@@ -1547,7 +1547,7 @@ public class ReportRunner {
 				if (values.length > 1) {
 					displayValue = values[1];
 				}
-				lovValues.put(dataValue, displayValue);
+				lovValues.put(displayValue, dataValue);
 			}
 
 			//apply rules
@@ -1571,7 +1571,7 @@ public class ReportRunner {
 							displayValue = rs.getString(1);
 						}
 
-						lovValues.put(dataValue, displayValue);
+						lovValues.put(displayValue, dataValue);
 					}
 				} finally {
 					DatabaseUtils.close(rs);
@@ -1601,7 +1601,7 @@ public class ReportRunner {
 							} else {
 								displayValue = String.valueOf(dataValue);
 							}
-							lovValues.put(dataValue, displayValue);
+							lovValues.put(displayValue, dataValue);
 						} else if (row instanceof DynaBean) {
 							DynaBean rowBean = (DynaBean) row;
 							DynaProperty[] columns = rowBean.getDynaClass().getDynaProperties();
@@ -1615,14 +1615,14 @@ public class ReportRunner {
 							} else {
 								displayValue = String.valueOf(dataValue);
 							}
-							lovValues.put(dataValue, displayValue);
+							lovValues.put(displayValue, dataValue);
 						} else if (row instanceof Map) {
 							@SuppressWarnings("unchecked")
-							Map<? extends Object, String> rowMap = (Map<? extends Object, String>) row;
+							Map<String, ? extends Object> rowMap = (Map<String, ? extends Object>) row;
 							lovValues.putAll(rowMap);
 						} else {
 							String displayValue = String.valueOf(row);
-							lovValues.put(row, displayValue);
+							lovValues.put(displayValue, row);
 						}
 					}
 				}

@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.bidimap.DualLinkedHashBidiMap;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -52,7 +53,7 @@ public class ReportParameter implements Serializable {
 	@JsonIgnore
 	private String[] passedParameterValues; //used for run report logic
 	@JsonIgnore
-	private Map<Object, String> lovValues; //store value and label for lov parameters
+	private Map<String, Object> lovValues; //store label and value for lov parameters
 	@JsonIgnore
 	private List<Object> actualParameterValues = new ArrayList<>();
 	private String chainedParents;
@@ -64,6 +65,8 @@ public class ReportParameter implements Serializable {
 	@JsonIgnore
 	private Map<String, String> defaultValueLovValues;
 	private Parameter parameter;
+	@JsonIgnore
+	private DualLinkedHashBidiMap<String, Object> lovValuesBidiMap;
 
 	/**
 	 * @return the parentId
@@ -172,7 +175,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the value of lovValues
 	 */
-	public Map<Object, String> getLovValues() {
+	public Map<String, Object> getLovValues() {
 		return lovValues;
 	}
 
@@ -181,8 +184,10 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param lovValues new value of lovValues
 	 */
-	public void setLovValues(Map<Object, String> lovValues) {
+	public void setLovValues(Map<String, Object> lovValues) {
 		this.lovValues = lovValues;
+		lovValuesBidiMap = null;
+		lovValuesBidiMap = new DualLinkedHashBidiMap<>(lovValues);
 	}
 
 	/**
@@ -340,9 +345,9 @@ public class ReportParameter implements Serializable {
 			}
 
 			String displayValue = null;
-			if (parameter.isUseLov() && lovValues != null) {
+			if (parameter.isUseLov() && lovValuesBidiMap != null) {
 				//for lov parameters, show both parameter value and display string if any
-				displayValue = lovValues.get(paramValue);
+				displayValue = lovValuesBidiMap.getKey(paramValue);
 			}
 
 			String paramDisplayString;
@@ -587,12 +592,12 @@ public class ReportParameter implements Serializable {
 	 * @param lovValuesAsObjects lov values using objects
 	 * @return lov values using strings
 	 */
-	public Map<String, String> convertLovValuesFromObjectToString(Map<Object, String> lovValuesAsObjects) {
+	public Map<String, String> convertLovValuesFromObjectToString(Map<String, Object> lovValuesAsObjects) {
 		Map<String, String> stringLovValues = new LinkedHashMap<>();
 
-		for (Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
-			Object dataValue = entry.getKey();
-			String displayValue = entry.getValue();
+		for (Entry<String, Object> entry : lovValuesAsObjects.entrySet()) {
+			Object dataValue = entry.getValue();
+			String displayValue = entry.getKey();
 
 			String stringValue;
 			switch (parameter.getDataType()) {
@@ -609,7 +614,7 @@ public class ReportParameter implements Serializable {
 					stringValue = String.valueOf(dataValue);
 			}
 
-			stringLovValues.put(stringValue, displayValue);
+			stringLovValues.put(displayValue, stringValue);
 		}
 
 		return stringLovValues;
@@ -754,7 +759,7 @@ public class ReportParameter implements Serializable {
 					}
 
 					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
-						for (String value : defaultValueLovValues.keySet()) {
+						for (String value : defaultValueLovValues.values()) {
 							if (StringUtils.equalsIgnoreCase(value, lovValue)) {
 								return true;
 							}
@@ -782,7 +787,7 @@ public class ReportParameter implements Serializable {
 					}
 
 					if (MapUtils.isNotEmpty(defaultValueLovValues)) {
-						for (String value : defaultValueLovValues.keySet()) {
+						for (String value : defaultValueLovValues.values()) {
 							if (StringUtils.equalsIgnoreCase(value, lovValue)) {
 								return true;
 							}
