@@ -1866,11 +1866,11 @@ public class ReportRunner {
 		querySql = StringUtils.replaceIgnoreCase(querySql, ":time:", "'" + time + "'");
 
 		//replace :reportId:
-		querySql = StringUtils.replace(querySql, ":reportId:", String.valueOf(report.getReportId()));
+		querySql = StringUtils.replaceIgnoreCase(querySql, ":reportId:", String.valueOf(report.getReportId()));
 
 		//replace :jobId:
 		if (job != null) {
-			querySql = StringUtils.replace(querySql, ":jobId:", String.valueOf(job.getJobId()));
+			querySql = StringUtils.replaceIgnoreCase(querySql, ":jobId:", String.valueOf(job.getJobId()));
 		}
 
 		//update querySb with new sql
