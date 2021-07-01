@@ -60,9 +60,11 @@ public class ExpressionHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionHelper.class);
 
 	public static final String GROOVY_START_STRING = "g[";
-	public final String GROOVY_END_STRING = "]g";
-	public final String FIELD_START_STRING = "f[";
-	public final String FIELD_END_STRING = "]f";
+	public static final String GROOVY_END_STRING = "]g";
+	public static final String FIELD_START_STRING = "f[";
+	public static final String FIELD_END_STRING = "]f";
+	public static final String DATA_FIELD = FIELD_START_STRING + "data" + FIELD_END_STRING;
+	public static final String USERNAME_FIELD = FIELD_START_STRING + "username" + FIELD_END_STRING;
 
 	/**
 	 * Processes a string that may have parameter or field expressions and
@@ -231,8 +233,7 @@ public class ExpressionHelper {
 			replaceString = username;
 		}
 
-		String fieldName = FIELD_START_STRING + "username" + FIELD_END_STRING;
-		String finalString = StringUtils.replace(string, fieldName, replaceString);
+		String finalString = StringUtils.replace(string, USERNAME_FIELD, replaceString);
 		return finalString;
 	}
 

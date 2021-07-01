@@ -234,7 +234,7 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	private PipelineRunningJobService pipelineRunningJobService;
-	
+
 	@Autowired
 	private PipelineScheduledJobService pipelineScheduledJobService;
 
@@ -259,7 +259,7 @@ public class ReportJob implements org.quartz.Job {
 			jobId = dataMap.getInt("jobId");
 			runUsername = dataMap.getString("username");
 			serial = dataMap.getString("serial");
-			
+
 			MDC.put("jobId", String.valueOf(jobId));
 
 			if (dataMap.containsKey("pipelineId")) {
@@ -467,7 +467,7 @@ public class ReportJob implements org.quartz.Job {
 
 			cacheHelper.clearPipelines();
 		}
-		
+
 		MDC.remove("jobId");
 	}
 
@@ -495,8 +495,8 @@ public class ReportJob implements org.quartz.Job {
 		if (pipelineService.isPipelineCancelled(pipelineId)) {
 			return;
 		}
-		
-		if(StringUtils.isBlank(serial)){
+
+		if (StringUtils.isBlank(serial)) {
 			return;
 		}
 
@@ -2010,9 +2010,13 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			Context ctx = new Context(locale);
+			if (StringUtils.containsIgnoreCase(mainMessage, ExpressionHelper.DATA_FIELD)) {
+				mainMessage = StringUtils.replace(mainMessage, ExpressionHelper.DATA_FIELD, messageData);
+			} else {
+				ctx.setVariable("data", messageData);
+			}
 			ctx.setVariable("mainMessage", mainMessage);
 			ctx.setVariable("job", job);
-			ctx.setVariable("data", messageData);
 
 			//pass report parameters
 			for (ReportParameter reportParam : reportParamsList) {
