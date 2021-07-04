@@ -1537,8 +1537,8 @@ public class ReportController {
 
 		for (Map.Entry<String, String> entry : values.entrySet()) {
 			Map<String, String> value = new HashMap<>();
-			String encodedValue = Encode.forHtmlContent(entry.getValue());
-			value.put(entry.getKey(), encodedValue);
+			String encodedDisplayValue = Encode.forHtmlContent(entry.getKey());
+			value.put(entry.getValue(), encodedDisplayValue);
 			list.add(value);
 		}
 

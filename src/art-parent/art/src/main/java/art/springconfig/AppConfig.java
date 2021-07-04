@@ -288,6 +288,11 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 	public void addCorsMappings(CorsRegistry registry) {
 		//https://www.baeldung.com/spring-cors
 		//https://spring.io/blog/2015/06/08/cors-support-in-spring-framework
+		//https://stackoverflow.com/questions/37980914/spring-global-cors-configuration-not-working-but-controller-level-config-does
+		//https://stackoverflow.com/questions/35091524/spring-cors-no-access-control-allow-origin-header-is-present
+		//https://docs.spring.io/spring-framework/docs/4.2.x/spring-framework-reference/html/cors.html
+		//https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/cors.html
+		//https://howtodoinjava.com/spring5/webmvc/spring-mvc-cors-configuration/#global-cors
 		registry.addMapping("/**");
 	}
 

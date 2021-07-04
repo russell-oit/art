@@ -97,8 +97,14 @@ Edit parameter definition
 				$("#lovReport").on("change", function () {
 					toggleEditLovReport();
 				});
-				
+
 				toggleEditLovReport();
+
+				$('#useLov').on('switchChange.bootstrapSwitch', function (event, state) {
+					toggleLovReportEnabled();
+				});
+
+				toggleLovReportEnabled();
 
 				$('#name').trigger("focus");
 
@@ -193,6 +199,15 @@ Edit parameter definition
 					$('#editLovReport').attr('href', newUrl);
 					$("#editLovReport").show();
 				}
+			}
+
+			function toggleLovReportEnabled() {
+				if ($('#useLov').is(':checked')) {
+					$('#lovReport').prop('disabled', false);
+				} else {
+					$('#lovReport').prop('disabled', true);
+				}
+				$('#lovReport').selectpicker('refresh');
 			}
 		</script>
 	</jsp:attribute>

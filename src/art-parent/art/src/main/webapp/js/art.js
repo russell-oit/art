@@ -49,7 +49,7 @@ var tinymceConfig = {
 	plugins: [
 		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 		"searchreplace visualblocks visualchars code",
-		"nonbreaking table contextmenu directionality",
+		"nonbreaking table directionality",
 		"paste textcolor"
 	],
 	toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",

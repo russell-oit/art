@@ -25,7 +25,7 @@ Display report parameter that uses dropdown input
 		${reportParam.parameter.parameterType == 'MultiValue' ? 'multiple data-actions-box="true"' : ""}>
 
 	<c:forEach var="lovValue" items="${lovValues}">
-		<option value="${encode:forHtmlAttribute(lovValue.key)}" ${reportParam.selectLovValue(lovValue.key) ? "selected" : ""}>${encode:forHtmlContent(lovValue.value)}</option>
+		<option value="${encode:forHtmlAttribute(lovValue.value)}" ${reportParam.selectLovValue(lovValue.value) ? "selected" : ""}>${encode:forHtmlContent(lovValue.key)}</option>
 	</c:forEach>
 </select>
 		

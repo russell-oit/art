@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.6"> 
+  <meta name="version" content="5.7"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -2195,7 +2195,7 @@ FROM mytable
     FROM cities
 </pre> 
      </div> 
-     <p>If using groovy data, return a List of the values to be used, or if you require the value and display text to be different, return a Map whose keys are the values to be used and whose value is a String representing the display text.</p> 
+     <p>If using groovy data, return a List of the values to be used, or if you require the value and display text to be different, return a List of GroovyRowResult or DynaBean where the first column is the value to be used and the second is the display text. If using a Map, return a List of Maps whose keys are the display text and whose values are the values to be used.</p> 
      <h3 id="lov-static">LOV: Static</h3> 
      <p>Creates an LOV query whose values are set in the sql source section. Values are separated by new lines. If the value and display text need to be different, separate the two with a |</p> 
      <div class="codehilite"> 
@@ -4275,7 +4275,7 @@ FROM mytable
       <li>Report source</li> 
      </ul> 
      <h2 id="field-expressions">Field Expressions</h2> 
-     <p>Field expressions substitue certain known items. Field expressions start with <code>f[</code> and end with <code>]f</code>. Field expression names are case sensitive.</p> 
+     <p>Field expressions substitute certain known items. Field expressions start with <code>f[</code> and end with <code>]f</code>. Field expression names are case sensitive.</p> 
      <h3 id="username">Username</h3> 
      <p>You can use a field expression to substitute the username of the currently logged in user, or for jobs, the job owner. Use the value <code>f[username]f</code> to substitute the username.</p> 
      <h3 id="dates">Dates</h3> 
@@ -5793,7 +5793,7 @@ WHERE {#!saleTypes#}
        </tr> 
        <tr> 
         <td><strong>Message</strong></td> 
-        <td>The body contents of the email</td> 
+        <td>The body contents of the email. For email inline jobs you can use <code>f[data]f</code> to specify where the report data should go. If not specified, the data will come after the message.</td> 
        </tr> 
        <tr> 
         <td><strong>Manual</strong></td> 
@@ -5905,9 +5905,9 @@ WHERE {#!saleTypes#}
      <p>Send an email to the specified recipients if the first column of the first row in the query result has a value greater than zero. You can construct a simple SQL query to return a non zero value in case of a certain business condition.</p> 
      <p>Example query to be used for an alert. Send an email if a big order is made</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
-    <span class="k">FROM</span> <span class="n">todays_order_details</span>
-    <span class="k">WHERE</span> <span class="n">quantity</span><span class="o">&gt;</span><span class="mi">100</span>
+      <pre><span></span>    SELECT count(*)
+    FROM todays_order_details
+    WHERE quantity&gt;100
 </pre> 
      </div> 
      <h3 id="just-run-it">Just Run It</h3> 

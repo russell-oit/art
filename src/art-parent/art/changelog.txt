@@ -1,3 +1,8 @@
+ART 5.7
+* Allow having signature in email inline jobs
+* Fix for error when adding a report parameter
+* Changed semantics of dynamic lov map to label-value instead of value-label
+
 ART 5.6
 * Added jasperreports-functions jar
 * Removed ART-DBCP connection pool library option

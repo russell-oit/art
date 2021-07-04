@@ -624,7 +624,7 @@ public class ParameterProcessor {
 		Date dateValue = expressionHelper.convertStringToDate(value, dateFormat, locale);
 		return dateValue;
 	}
-	
+
 	/**
 	 * Converts a string parameter value to a date object representing the time
 	 *
@@ -808,7 +808,7 @@ public class ParameterProcessor {
 						lovReportRunner.setUser(user);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
+						Map<String, Object> lovValues = lovReportRunner.getLovValuesAsObjects();
 						reportParam.setLovValues(lovValues);
 						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 						reportParam.setLovValuesAsString(lovValuesAsString);
@@ -842,14 +842,14 @@ public class ParameterProcessor {
 					defaultValueLovReportRunner.setReport(defaultValueReport);
 					defaultValueLovReportRunner.setReportParamsMap(reportParamsMap);
 
-					Map<Object, String> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
+					Map<String, Object> lovValues = defaultValueLovReportRunner.getLovValuesAsObjects();
 					if (reportParam.getPassedParameterValues() == null
 							|| (isJob && param.isUseDefaultValueInJobs())) {
 						if (param.getParameterType() == ParameterType.SingleValue) {
-							List<Object> values = new ArrayList<>(lovValues.keySet());
+							List<Object> values = new ArrayList<>(lovValues.values());
 							reportParam.setActualParameterValues(values);
 						} else {
-							reportParam.getActualParameterValues().addAll(lovValues.keySet());
+							reportParam.getActualParameterValues().addAll(lovValues.values());
 						}
 					}
 
@@ -892,10 +892,10 @@ public class ParameterProcessor {
 							lovReportRunner.setUser(user);
 							lovReportRunner.setReport(lovReport);
 							lovReportRunner.setReportParamsMap(reportParamsMap);
-							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
+							Map<String, Object> lovValues = lovReportRunner.getLovValuesAsObjects();
 
-							for (Entry<Object, String> entry2 : lovValues.entrySet()) {
-								Object actualValue = entry2.getKey();
+							for (Entry<String, Object> entry2 : lovValues.entrySet()) {
+								Object actualValue = entry2.getValue();
 								actualValues.add(actualValue);
 							}
 						} finally {
