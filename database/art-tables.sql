@@ -6,12 +6,12 @@
 
 
 -- NOTES:
--- for sql server, mysql replace TIMESTAMP with DATETIME
+-- for SQL Server AND MySQL replace TIMESTAMP with DATETIME
 
--- for sql server, replace CLOB with VARCHAR(MAX)
--- for mysql, replace CLOB with LONGTEXT
--- for postgresql, replace CLOB with TEXT
--- for hsqldb, replace CLOB with LONGVARCHAR
+-- for SQL Server replace CLOB with VARCHAR(MAX)
+-- for MySQL replace CLOB with LONGTEXT
+-- for PostgreSQL replace CLOB with TEXT
+-- for HSQLDB replace CLOB with LONGVARCHAR
 
 -- ------------------------------------------------
 
