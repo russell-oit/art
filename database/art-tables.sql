@@ -6,7 +6,7 @@
 
 
 -- NOTES:
--- for SQL Server AND MySQL replace TIMESTAMP with DATETIME
+-- for MySQL and SQL Server replace TIMESTAMP with DATETIME
 
 -- for SQL Server replace CLOB with VARCHAR(MAX)
 -- for MySQL replace CLOB with LONGTEXT
