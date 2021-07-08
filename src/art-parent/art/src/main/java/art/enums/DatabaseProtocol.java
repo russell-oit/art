@@ -17,6 +17,7 @@
  */
 package art.enums;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -158,6 +159,52 @@ public enum DatabaseProtocol {
 				return "fetch first {0} rows only";
 			default:
 				return "limit {0}";
+		}
+	}
+
+	/**
+	 * Returns the limit clause with offset to use for this database type
+	 *
+	 * @return the limit clause with offset to use
+	 */
+	public String limitClauseWithOffset() {
+		//http://www.jooq.org/doc/3.1/manual/sql-building/sql-statements/select-statement/limit-clause/
+		switch (this) {
+			case Informix:
+				return "skip {1} first {0}";
+			case Firebird:
+				return "first {0} skip {1}";
+			case Oracle: //oracle 12c+
+			case SqlServer: //sql server 2012+
+				//sql:2008 standard
+				return "offset {1} rows fetch next {0} rows only";
+			default:
+				return "limit {0} offset {1}";
+		}
+	}
+
+	/**
+	 * Returns a select statement to use with limit clause applied
+	 *
+	 * @param body the main body of the select statement, after "select"
+	 * @param limit the limit count i.e. number of rows to be returned
+	 * @param offset the limit offset i.e. number of rows to skip
+	 * @return a select statement to use with limit clause applied
+	 */
+	public String processSelect(String body, int limit, int offset) {
+		String limitClause;
+		if (limit < 0) {
+			limitClause = "";
+		} else {
+			limitClause = MessageFormat.format(limitClauseWithOffset(), limit, offset);
+		}
+
+		switch (this) {
+			case Informix:
+			case Firebird:
+				return "select " + limitClause + " " + body;
+			default:
+				return "select " + body + " " + limitClause;
 		}
 	}
 
