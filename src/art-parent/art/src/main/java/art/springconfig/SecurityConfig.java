@@ -57,26 +57,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest().permitAll();
 	}
 
-	@Bean
-	public HttpFirewall httpFirewall() {
-		//https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
-		//https://stackoverflow.com/questions/48453980/spring-5-0-3-requestrejectedexception-the-request-was-rejected-because-the-url
-		//https://stackoverflow.com/questions/44673490/how-to-prevent-the-jsessionid-showing-in-the-url
-		//https://stackoverflow.com/questions/29692353/how-to-prevent-adding-jsessionid-at-the-end-of-redirected-url
-		//https://stackoverflow.com/questions/962729/is-it-possible-to-disable-jsessionid-in-tomcat-servlet
-		//https://fralef.me/tomcat-disable-jsessionid-in-url.html
-		StrictHttpFirewall firewall = new StrictHttpFirewall();
-		firewall.setAllowSemicolon(true);
-		//https://sourceforge.net/p/art/discussion/352129/thread/c7387c3221/
-		//https://stackoverflow.com/questions/53300497/encoded-precent25-with-spring-requestmapping-path-param-gives-http-400
-		firewall.setAllowUrlEncodedPercent(true);
-		return firewall;
-	}
-
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		super.configure(web);
-		web.httpFirewall(httpFirewall());
-	}
+//	@Bean
+//	public HttpFirewall httpFirewall() {
+//		//https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
+//		//https://stackoverflow.com/questions/48453980/spring-5-0-3-requestrejectedexception-the-request-was-rejected-because-the-url
+//		//https://stackoverflow.com/questions/44673490/how-to-prevent-the-jsessionid-showing-in-the-url
+//		//https://stackoverflow.com/questions/29692353/how-to-prevent-adding-jsessionid-at-the-end-of-redirected-url
+//		//https://stackoverflow.com/questions/962729/is-it-possible-to-disable-jsessionid-in-tomcat-servlet
+//		//https://fralef.me/tomcat-disable-jsessionid-in-url.html
+//		StrictHttpFirewall firewall = new StrictHttpFirewall();
+//		firewall.setAllowSemicolon(true);
+//		//https://sourceforge.net/p/art/discussion/352129/thread/c7387c3221/
+//		//https://stackoverflow.com/questions/53300497/encoded-precent25-with-spring-requestmapping-path-param-gives-http-400
+//		firewall.setAllowUrlEncodedPercent(true);
+//		return firewall;
+//	}
+//
+//	@Override
+//	public void configure(WebSecurity web) throws Exception {
+//		super.configure(web);
+//		web.httpFirewall(httpFirewall());
+//	}
 
 }

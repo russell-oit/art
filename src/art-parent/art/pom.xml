@@ -31,6 +31,7 @@
 		<morphia.version>1.5.8</morphia.version>
 		<calcite.version>1.23.0</calcite.version>
 		<jasperreports.version>6.8.1</jasperreports.version>
+		<springfox.version>3.0.0</springfox.version>
 	</properties>
 
 	<build>
@@ -104,7 +105,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 			</plugin>
-<!--			<plugin>
+			<!--			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
 				<version>6.2.2</version>
@@ -503,7 +504,7 @@
 			<version>3.0.11</version>
 			<scope>runtime</scope>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>com.github.adejanovski</groupId>
 			<artifactId>cassandra-jdbc-wrapper</artifactId>
 			<version>3.1.0</version>
@@ -535,13 +536,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>net.snowflake</groupId>
 			<artifactId>snowflake-jdbc</artifactId>
 			<version>3.13.4</version>
 			<scope>runtime</scope>
 		</dependency>-->
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>com.facebook.presto</groupId>
 			<artifactId>presto-jdbc</artifactId>
 			<version>0.253</version>
@@ -559,13 +560,13 @@
 			<version>20181113</version>
 			<scope>runtime</scope>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>org.influxdb</groupId>
 			<artifactId>influxdb-java</artifactId>
 			<version>2.14</version>
 			<scope>runtime</scope>
 		</dependency>-->
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>com.datastax.cassandra</groupId>
 			<artifactId>cassandra-driver-core</artifactId>
 			<version>3.6.0</version>
@@ -610,7 +611,7 @@
 			<version>${calcite.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>org.apache.calcite</groupId>
 			<artifactId>calcite-cassandra</artifactId>
 			<version>${calcite.version}</version>
@@ -622,7 +623,7 @@
 			<version>${calcite.version}</version>
 			<scope>runtime</scope>
 		</dependency>-->
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>com.github.jonathanswenson</groupId>
 			<artifactId>bqjdbc</artifactId>
 			<version>2.3.2</version>
@@ -1079,6 +1080,16 @@
 			<artifactId>liquibase-slf4j</artifactId>
 			<version>4.0.0</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-oas</artifactId>
+			<version>${springfox.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox.version}</version>
 		</dependency>
 	</dependencies>
 </project>

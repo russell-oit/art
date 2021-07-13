@@ -54,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -65,6 +66,7 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 
 /**
  * Provides spring configuration
@@ -74,6 +76,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 @Configuration
 @EnableWebMvc
 @ComponentScan("art")
+@EnableOpenApi
 public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 
 	@Autowired
@@ -156,6 +159,16 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 		registry.addResourceHandler("/wcf/**").addResourceLocations("/wcf/");
 		registry.addResourceHandler("/js-templates/**").addResourceLocations("/js-templates/");
 		registry.addResourceHandler("/saiku/**").addResourceLocations("/saiku/");
+
+		registry.addResourceHandler("/swagger-ui/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+				.resourceChain(false);
+	}
+
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/swagger-ui/")
+				.setViewName("forward:" + "/swagger-ui/index.html");
 	}
 
 	@Bean
@@ -236,7 +249,8 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 						"/error-403", "/error-500",
 						"/css/**", "/js/**", "/images/**", "/docs/**",
 						"/jpivot/**", "/wcf/**", "/js-templates/**",
-						"/saiku/**");
+						"/saiku/**",
+						"/v2/**", "/v3/**", "/swagger-ui/**", "/swagger-resources/**");
 
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");
