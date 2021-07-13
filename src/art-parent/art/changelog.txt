@@ -1,3 +1,6 @@
+ART 5.8
+* Added timeOnly option for date range picker
+
 ART 5.7
 * Allow having signature in email inline jobs
 * Fix for error when adding a report parameter

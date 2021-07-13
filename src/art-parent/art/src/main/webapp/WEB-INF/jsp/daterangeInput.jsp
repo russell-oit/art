@@ -210,7 +210,7 @@
 		delete dateRangeOptions.ranges;
 		$.extend(options, dateRangeOptions);
 	}
-	
+
 	var selector = '#${encode:forJavaScript(reportParam.htmlElementName)}';
 </script>
 
@@ -219,7 +219,16 @@
 </c:if>
 
 <script>
-	$(selector).daterangepicker(options, rangeUpdated);
+	var drp = $(selector).daterangepicker(options, rangeUpdated);
+
+	//https://stackoverflow.com/questions/39384836/how-to-show-only-time-picker-in-date-range-picker
+	if (options.timeOnly) {
+		drp.on('show.daterangepicker', function (ev, picker) {
+			picker.container.find(".calendar-table").hide();
+		}).on('showCalendar.daterangepicker', function (ev, picker) {
+			picker.container.find('.calendar-date').remove();
+		});
+	}
 </script>
 
 <script>

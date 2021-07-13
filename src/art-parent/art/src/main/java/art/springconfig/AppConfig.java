@@ -248,8 +248,7 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 						"/error", "/error-404", "/error-405", "/error-400",
 						"/error-403", "/error-500",
 						"/css/**", "/js/**", "/images/**", "/docs/**",
-						"/jpivot/**", "/wcf/**", "/js-templates/**",
-						"/saiku/**",
+						"/jpivot/**", "/wcf/**", "/js-templates/**", "/saiku/**",
 						"/v2/**", "/v3/**", "/swagger-ui/**", "/swagger-resources/**");
 
 		registry.addInterceptor(apiInterceptor())
