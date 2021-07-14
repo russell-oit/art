@@ -66,7 +66,6 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
-import springfox.documentation.oas.annotations.EnableOpenApi;
 
 /**
  * Provides spring configuration
@@ -76,7 +75,6 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 @Configuration
 @EnableWebMvc
 @ComponentScan("art")
-@EnableOpenApi
 public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 
 	@Autowired
@@ -249,7 +247,7 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 						"/error-403", "/error-500",
 						"/css/**", "/js/**", "/images/**", "/docs/**",
 						"/jpivot/**", "/wcf/**", "/js-templates/**", "/saiku/**",
-						"/v2/**", "/v3/**", "/swagger-ui/**", "/swagger-resources/**");
+						"/v3/**", "/swagger-ui/**", "/swagger-resources/**");
 
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");
