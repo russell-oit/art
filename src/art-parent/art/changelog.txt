@@ -1,5 +1,6 @@
 ART 5.8
 * Added timeOnly option for date range picker
+* Included api documentation within the application
 
 ART 5.7
 * Allow having signature in email inline jobs
