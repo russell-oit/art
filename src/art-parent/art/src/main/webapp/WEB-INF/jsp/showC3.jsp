@@ -32,6 +32,8 @@
 
 
 <script type="text/javascript">
+	var chartId = "${chartId}";
+	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {

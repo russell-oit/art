@@ -17,6 +17,8 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/apexcharts.js-3.26.0/apexcharts.min.js"></script>
 
 <script>
+	var chartId = "${chartId}";
+	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {

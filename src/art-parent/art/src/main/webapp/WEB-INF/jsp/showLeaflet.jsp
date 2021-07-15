@@ -42,7 +42,8 @@
 	//https://cimbura.com/2016/05/02/anatomy-web-map/
 	//https://en.wikipedia.org/wiki/Web_mapping
 	//https://en.wikipedia.org/wiki/Tiled_web_map
-	mapId = '${mapId}';
+	var mapId = '${mapId}';
+	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {

@@ -43,6 +43,8 @@
 	//https://codeburst.io/notes-from-the-latest-plotly-js-release-b035a5b43e21
 	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
 	//https://plot.ly/javascript/line-charts/
+	var chartId = "${chartId}";
+
 	var dataString = '${encode:forJavaScript(data)}';
 	var data = [];
 	if (dataString) {
