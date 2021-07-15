@@ -778,6 +778,7 @@ Edit report page
 					case 147: //openlayers
 					case 117: //jxls template
 					case 118: //jxls art
+					case 142: //c3
 					case 154: //org chart database
 					case 155: //org chart json
 					case 156: //org chart list
@@ -785,6 +786,7 @@ Edit report page
 					case 122: //freemarker
 					case 131: //thymeleaf
 					case 153: //velocity
+					case 160: //plotly
 					case 166: //jqplot
 						$("#resourcesDiv").show();
 						break;
