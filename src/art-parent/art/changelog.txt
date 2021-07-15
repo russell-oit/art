@@ -2,6 +2,7 @@ ART 5.8
 * Added timeOnly option for date range picker
 * Added postTemplate option for plotly.js reports
 * Included api documentation within the application
+* Added jqPlot report type
 
 ART 5.7
 * Allow having signature in email inline jobs

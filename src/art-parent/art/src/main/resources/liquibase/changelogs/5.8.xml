@@ -11,4 +11,10 @@
 			<column name="DATABASE_VERSION" value="5.8"/>
 		</update>
 	</changeSet>
+	<changeSet id="2" author="art">
+		<insert tableName="ART_REPORT_TYPES">
+			<column name="REPORT_TYPE" valueNumeric="166"/>
+			<column name="DESCRIPTION" value="jqPlot"/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

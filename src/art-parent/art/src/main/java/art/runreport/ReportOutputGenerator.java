@@ -76,6 +76,7 @@ import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.JFreeChartOptions;
+import art.reportoptions.JqPlotOptions;
 import art.reportoptions.MongoDbOptions;
 import art.reportoptions.OrgChartOptions;
 import art.reportoptions.PivotTableJsOptions;
@@ -426,6 +427,8 @@ public class ReportOutputGenerator {
 				generateAwesomeChartJsReport();
 			} else if (reportType == ReportType.ApexChartsJs) {
 				generateApexChartsJsReport();
+			} else if (reportType == ReportType.JqPlot) {
+				generateJqPlotReport();
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
@@ -1905,7 +1908,7 @@ public class ReportOutputGenerator {
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
-		
+
 		String cssFileName = c3Options.getCssFile();
 
 		logger.debug("cssFileName='{}'", cssFileName);
@@ -2699,11 +2702,11 @@ public class ReportOutputGenerator {
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
-		
+
 		String postTemplateFileName = plotlyOptions.getPostTemplate();
-		
+
 		logger.debug("postTemplateFileName='{}'", templateFileName);
-		
+
 		if (StringUtils.isNotBlank(postTemplateFileName)) {
 			String fullPostTemplateFileName = jsTemplatesPath + postTemplateFileName;
 			File postTemplateFile = new File(fullPostTemplateFileName);
@@ -2858,6 +2861,109 @@ public class ReportOutputGenerator {
 		request.setAttribute("data", jsonData);
 		request.setAttribute("templateFileName", templateFileName);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showApexChartsJs.jsp").include(request, response);
+	}
+
+	/**
+	 * Generates a jqPlot report
+	 * 
+	 * @throws Exception 
+	 */
+	private void generateJqPlotReport() throws Exception {
+		logger.debug("Entering generateJqPlotReport");
+
+		if (isJob) {
+			throw new RuntimeException("jqPlot report type not supported for jobs");
+		}
+
+		rs = reportRunner.getResultSet();
+
+		JsonOutput jsonOutput = new JsonOutput();
+		JsonOutputResult jsonOutputResult;
+		if (groovyData == null) {
+			jsonOutputResult = jsonOutput.generateOutput(rs);
+		} else {
+			jsonOutputResult = jsonOutput.generateOutput(groovyData, report);
+		}
+		String jsonData = jsonOutputResult.getJsonData();
+		rowsRetrieved = jsonOutputResult.getRowCount();
+
+		JqPlotOptions jqPlotOptions;
+		String options = report.getOptions();
+		if (StringUtils.isBlank(options)) {
+			jqPlotOptions = new JqPlotOptions();
+		} else {
+			jqPlotOptions = ArtUtils.jsonToObject(options, JqPlotOptions.class);
+		}
+
+		String templateFileName = report.getTemplate();
+		String jsTemplatesPath = Config.getJsTemplatesPath();
+		String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new RuntimeException("Template file not found: " + fullTemplateFileName);
+		}
+
+		String postTemplateFileName = jqPlotOptions.getPostTemplate();
+
+		logger.debug("postTemplateFileName='{}'", templateFileName);
+
+		if (StringUtils.isNotBlank(postTemplateFileName)) {
+			String fullPostTemplateFileName = jsTemplatesPath + postTemplateFileName;
+			File postTemplateFile = new File(fullPostTemplateFileName);
+			if (!postTemplateFile.exists()) {
+				throw new RuntimeException("Post template file not found: " + fullPostTemplateFileName);
+			}
+			request.setAttribute("postTemplateFileName", postTemplateFileName);
+		}
+
+		String cssFileName = jqPlotOptions.getCssFile();
+
+		logger.debug("cssFileName='{}'", cssFileName);
+
+		//need to explicitly check if file name is empty string
+		//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+		if (StringUtils.isNotBlank(cssFileName)) {
+			String fullCssFileName = jsTemplatesPath + cssFileName;
+			File cssFile = new File(fullCssFileName);
+			if (!cssFile.exists()) {
+				throw new RuntimeException("Css file not found: " + fullCssFileName);
+			}
+			request.setAttribute("cssFileName", cssFileName);
+		}
+
+		String pluginsPath = Config.getJsPath()
+				+ "jqPlot-1.0.9" + File.separator
+				+ "plugins" + File.separator;
+
+		List<String> plugins = jqPlotOptions.getPlugins();
+		if (CollectionUtils.isNotEmpty(plugins)) {
+			for (String plugin : plugins) {
+				if (StringUtils.isNotBlank(plugin)) {
+					String fullPluginFileName = pluginsPath + "jqplot." + plugin + ".js";
+					File jsFile = new File(fullPluginFileName);
+					if (!jsFile.exists()) {
+						throw new RuntimeException("Plugin file not found: " + fullPluginFileName);
+					}
+				}
+			}
+		}
+
+		String chartId = "chart-" + RandomStringUtils.randomAlphanumeric(5);
+		request.setAttribute("chartId", chartId);
+		request.setAttribute("data", jsonData);
+		request.setAttribute("options", jqPlotOptions);
+		request.setAttribute("optionsString", options);
+		request.setAttribute("templateFileName", templateFileName);
+		servletContext.getRequestDispatcher("/WEB-INF/jsp/showJqPlot.jsp").include(request, response);
 	}
 
 }

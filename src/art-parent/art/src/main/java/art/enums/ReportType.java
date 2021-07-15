@@ -53,7 +53,7 @@ public enum ReportType {
 	Leaflet(146), OpenLayers(147),
 	OrgChartDatabase(154), OrgChartJson(155), OrgChartList(156), OrgChartAjax(157),
 	ReportEngine(158), ReportEngineFile(159), View(161), File(162), Link(163),
-	AwesomeChartJs(164), ApexChartsJs(165);
+	AwesomeChartJs(164), ApexChartsJs(165), JqPlot(166);
 
 	private final int value;
 
@@ -163,6 +163,7 @@ public enum ReportType {
 			case OrgChartAjax:
 			case Plotly:
 			case ApexChartsJs:
+			case JqPlot:
 				return true;
 			default:
 				return false;
@@ -210,6 +211,7 @@ public enum ReportType {
 			case Link:
 			case AwesomeChartJs:
 			case ApexChartsJs:
+			case JqPlot:
 				return false;
 			default:
 				return true;
@@ -802,6 +804,8 @@ public enum ReportType {
 				return "Plotly.js";
 			case ApexChartsJs:
 				return "ApexCharts.js";
+			case JqPlot:
+				return "jqPlot";
 			default:
 				return this.name();
 		}

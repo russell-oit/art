@@ -30,6 +30,7 @@
 	if (dataString) {
 		jsonData = JSON.parse(dataString);
 	}
+	
 	var config = {};
 </script>
 
