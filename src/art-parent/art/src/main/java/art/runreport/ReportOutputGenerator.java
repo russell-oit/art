@@ -1905,7 +1905,7 @@ public class ReportOutputGenerator {
 			}
 			request.setAttribute("templateFileName", templateFileName);
 		}
-
+		
 		String cssFileName = c3Options.getCssFile();
 
 		logger.debug("cssFileName='{}'", cssFileName);
@@ -2698,6 +2698,19 @@ public class ReportOutputGenerator {
 				throw new RuntimeException("Template file not found: " + fullTemplateFileName);
 			}
 			request.setAttribute("templateFileName", templateFileName);
+		}
+		
+		String postTemplateFileName = plotlyOptions.getPostTemplate();
+		
+		logger.debug("postTemplateFileName='{}'", templateFileName);
+		
+		if (StringUtils.isNotBlank(postTemplateFileName)) {
+			String fullPostTemplateFileName = jsTemplatesPath + postTemplateFileName;
+			File postTemplateFile = new File(fullPostTemplateFileName);
+			if (!postTemplateFile.exists()) {
+				throw new RuntimeException("Post template file not found: " + fullPostTemplateFileName);
+			}
+			request.setAttribute("postTemplateFileName", postTemplateFileName);
 		}
 
 		String localeString = locale.toString();

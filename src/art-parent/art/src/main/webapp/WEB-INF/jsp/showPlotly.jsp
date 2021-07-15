@@ -44,6 +44,7 @@
 	//http://terokarvinen.com/2016/simple-line-graph-with-plotly-js
 	//https://plot.ly/javascript/line-charts/
 	var chartId = "${chartId}";
+	var contextPath = "${pageContext.request.contextPath}";
 
 	var dataString = '${encode:forJavaScript(data)}';
 	var data = [];
@@ -172,6 +173,7 @@
 
 <script>
 	Plotly.newPlot('${chartId}', traces, layout, config);
+	
 	function changeChartType() {
 		//https://stackoverflow.com/questions/39104292/best-way-of-create-delete-restyle-graph-dynamically-with-plotly-js
 		var newChartType = $('#select-${chartId} option:selected').val();
@@ -222,3 +224,7 @@
 	//https://api.jquery.com/on/
 	$("#select-${chartId}").on("change", changeChartType);
 </script>
+
+<c:if test="${not empty postTemplateFileName}">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${encode:forHtmlAttribute(postTemplateFileName)}"></script>
+</c:if>

@@ -43,6 +43,7 @@
 	//https://gis.stackexchange.com/questions/191505/openlayer-3-popup-on-marker-mouseover
 	//https://gis.stackexchange.com/questions/188865/error-with-popup-overlay-in-openlayers-3
 	var mapId = '${mapId}';
+	var contextPath = "${pageContext.request.contextPath}";
 	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];

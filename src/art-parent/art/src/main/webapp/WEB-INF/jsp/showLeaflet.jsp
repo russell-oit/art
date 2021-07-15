@@ -43,6 +43,7 @@
 	//https://en.wikipedia.org/wiki/Web_mapping
 	//https://en.wikipedia.org/wiki/Tiled_web_map
 	var mapId = '${mapId}';
+	var contextPath = "${pageContext.request.contextPath}";
 	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];

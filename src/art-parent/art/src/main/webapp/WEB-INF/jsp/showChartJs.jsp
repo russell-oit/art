@@ -23,6 +23,7 @@
 	//http://www.chartjs.org/docs/
 	//https://www.sitepoint.com/introduction-chart-js-2-0-six-examples/
 	var chartId = "${chartId}";
+	var contextPath = "${pageContext.request.contextPath}";
 	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];

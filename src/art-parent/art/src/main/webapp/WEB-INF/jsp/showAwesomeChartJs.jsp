@@ -16,8 +16,6 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/AwesomeChartJS-0.2/awesomechart.js"></script>
 
 <script>
-	var chartId = "${chartId}";
-	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {
