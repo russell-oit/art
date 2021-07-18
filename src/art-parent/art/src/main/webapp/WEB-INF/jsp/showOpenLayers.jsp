@@ -42,7 +42,9 @@
 	//https://stackoverflow.com/questions/24315801/how-to-add-markers-with-openlayers-3
 	//https://gis.stackexchange.com/questions/191505/openlayer-3-popup-on-marker-mouseover
 	//https://gis.stackexchange.com/questions/188865/error-with-popup-overlay-in-openlayers-3
-	mapId = '${mapId}';
+	var mapId = '${mapId}';
+	var contextPath = "${pageContext.request.contextPath}";
+	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {

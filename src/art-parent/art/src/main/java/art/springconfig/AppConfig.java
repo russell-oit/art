@@ -54,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -156,6 +157,16 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 		registry.addResourceHandler("/wcf/**").addResourceLocations("/wcf/");
 		registry.addResourceHandler("/js-templates/**").addResourceLocations("/js-templates/");
 		registry.addResourceHandler("/saiku/**").addResourceLocations("/saiku/");
+
+		registry.addResourceHandler("/swagger-ui/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+				.resourceChain(false);
+	}
+
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/swagger-ui/")
+				.setViewName("forward:" + "/swagger-ui/index.html");
 	}
 
 	@Bean
@@ -235,8 +246,8 @@ public class AppConfig implements WebMvcConfigurer, ApplicationContextAware {
 						"/error", "/error-404", "/error-405", "/error-400",
 						"/error-403", "/error-500",
 						"/css/**", "/js/**", "/images/**", "/docs/**",
-						"/jpivot/**", "/wcf/**", "/js-templates/**",
-						"/saiku/**");
+						"/jpivot/**", "/wcf/**", "/js-templates/**", "/saiku/**",
+						"/v3/**", "/swagger-ui/**", "/swagger-resources/**");
 
 		registry.addInterceptor(apiInterceptor())
 				.addPathPatterns("/api/**");

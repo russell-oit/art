@@ -757,6 +757,7 @@ Edit report page
 					case 159: //reportengine file
 					case 160: //plotly
 					case 165: //apexcharts.js
+					case 166: //jqPlot
 						$("#templateDiv").show();
 						break;
 					default:
@@ -777,6 +778,7 @@ Edit report page
 					case 147: //openlayers
 					case 117: //jxls template
 					case 118: //jxls art
+					case 142: //c3
 					case 154: //org chart database
 					case 155: //org chart json
 					case 156: //org chart list
@@ -784,6 +786,8 @@ Edit report page
 					case 122: //freemarker
 					case 131: //thymeleaf
 					case 153: //velocity
+					case 160: //plotly
+					case 166: //jqplot
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -915,6 +919,7 @@ Edit report page
 					case 163: //link
 					case 164: //awesomechartjs
 					case 165: //apexcharts.js
+					case 166: //jqPlot
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

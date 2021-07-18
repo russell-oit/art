@@ -17,6 +17,11 @@
  */
 package art.user;
 
+import art.artdatabase.ArtDatabase;
+import art.datatables.DataTablesRequest;
+import art.datatables.DataTablesResponse;
+import art.datatables.DataTablesUtils;
+import art.datatables.WhereClauseResult;
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
 import art.dbutils.DatabaseUtils;
@@ -30,6 +35,7 @@ import art.permission.Permission;
 import art.permission.PermissionService;
 import art.role.Role;
 import art.role.RoleService;
+import art.servlets.Config;
 import art.userpermission.UserPermissionService;
 import art.userrole.UserRoleService;
 import art.utils.ArtUtils;
@@ -37,6 +43,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -237,6 +244,48 @@ public class UserService {
 
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 		return dbService.query(sql, h, idsArray);
+	}
+
+	/**
+	 * Returns user from a datatables search using server side processing
+	 * 
+	 * @param request the datatables request
+	 * @return the datatables response
+	 * @throws SQLException 
+	 */
+	public DataTablesResponse<User> getUsers(DataTablesRequest request) throws SQLException {
+		logger.debug("Entering getUsers");
+
+		DataTablesResponse<User> response = new DataTablesResponse<>();
+		response.setDraw(request.getDraw());
+
+//		if (!request.hasSearchValue()) {
+//			//return blank/empty table on first load
+//			return response;
+//		}
+
+		String from = "FROM ART_USERS";
+
+		List<String> dbColumnNames = Arrays.asList("", "USER_ID", "USERNAME",
+				"FULL_NAME", "ACTIVE", "");
+
+		WhereClauseResult whereClauseResult = DataTablesUtils.count(request, dbColumnNames, from, response);
+		String where = whereClauseResult.getWhereClause();
+		Object[] values = whereClauseResult.getValues();
+
+		String primaryKey = "USER_ID";
+		String order = DataTablesUtils.orderClause(request, dbColumnNames, primaryKey);
+
+		String select = "*";
+		String body = StringUtils.joinWith(" ", select, from, where, order);
+
+		ArtDatabase artDbConfig = Config.getArtDbConfig();
+		String sql = artDbConfig.getEffectiveDatabaseProtocol().processSelect(body, request.getLength(), request.getStart());
+		ResultSetHandler<List<User>> h3 = new BeanListHandler<>(User.class, new BasicUserMapper());
+		List<User> users = dbService.query(sql, h3, values);
+		response.setData(users);
+
+		return response;
 	}
 
 	/**

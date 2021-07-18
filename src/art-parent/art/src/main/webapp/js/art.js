@@ -810,6 +810,59 @@ function initAjaxTable(tbl, pageLength, showAllRowsText, contextPath, localeCode
 	return oTable;
 }
 
+function initServerSideTable(tbl, pageLength, showAllRowsText,
+		contextPath, localeCode, dataUrl, errorOccurredText, showErrors,
+		columnDefs, columns) {
+
+	var hasSelect = true;
+	var options = getConfigTableOptions(pageLength, showAllRowsText,
+			contextPath, localeCode, columnDefs, hasSelect);
+
+	$.extend(options, {
+		processing: true,
+		serverSide: true,
+		deferRender: true,
+		ajax: {
+			type: "POST",
+			dataType: "json",
+			url: dataUrl,
+			contentType: 'application/json',
+			data: function (data) {
+				return JSON.stringify(data);
+			},
+			dataSrc: function (response) {
+				if (response.success) {
+					return response.data.data;
+				} else {
+					notifyActionErrorReusable(errorOccurredText, response.errorMessage, showErrors);
+					return "";
+				}
+			},
+			error: ajaxErrorHandler
+		},
+		columns: columns,
+		autoWidth: false,
+		drawCallback: function () {
+			initializeButtonHover();
+		},
+		createdRow: function (row, data, dataIndex) {
+			$(row).attr('data-id', data.dtId);
+			$(row).attr('data-name', data.dtName);
+		},
+		rowId: function (data) {
+			//https://datatables.net/reference/option/rowId
+			//https://stackoverflow.com/questions/36663037/datatables-rowid-starting-with-a-number-issue/36663176#36663176
+			return 'row_' + data.dtId;
+		}
+	});
+
+	//use initialization that returns a jquery object. to be able to use plugins
+	/** @type {jQuery} */
+	var oTable = tbl.dataTable(options);
+
+	return oTable;
+}
+
 /**
  * Error handler for http errors after ajax calls
  * 

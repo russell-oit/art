@@ -362,6 +362,7 @@ public class RunReportHelper {
 			case XDocReportVelocityPptx:
 			case AwesomeChartJs:
 			case ApexChartsJs:
+			case JqPlot:
 				enableReportFormats = false;
 				break;
 			default:
@@ -478,6 +479,7 @@ public class RunReportHelper {
 			case Plotly:
 			case AwesomeChartJs:
 			case ApexChartsJs:
+			case JqPlot:
 				enablePrint = false;
 				break;
 			default:
@@ -548,6 +550,7 @@ public class RunReportHelper {
 			case Plotly:
 			case AwesomeChartJs:
 			case ApexChartsJs:
+			case JqPlot:
 				enableEmail = false;
 				break;
 			default:

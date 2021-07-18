@@ -330,6 +330,13 @@ Header that appears at the top of all pages, except the login and logs pages
 											<spring:message code="header.link.documentation"/>
 										</a>
 									</li>
+									<c:if test="${sessionUser.hasPermission('use_api')}">
+										<li>
+											<a href="${pageContext.request.contextPath}/swagger-ui/">
+												API
+											</a>
+										</li>
+									</c:if>
 									<c:if test="${sessionUser.hasPermission('view_logs')}">
 										<li>
 											<a href="${pageContext.request.contextPath}/logs">

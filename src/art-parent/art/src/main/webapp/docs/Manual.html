@@ -4,7 +4,7 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta name="pdfTitle" content="ART Admin Manual"> 
-  <meta name="version" content="5.7"> 
+  <meta name="version" content="5.8"> 
   <title>Admin Manual - ART</title> 
   <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
@@ -152,6 +152,7 @@
          <li><a href="#link">Link</a></li> 
          <li><a href="#awesomechartjs">AwesomeChartJs</a></li> 
          <li><a href="#apexchartsjs">ApexCharts.js</a></li> 
+         <li><a href="#jqplot">jqPlot</a></li> 
         </ol></li> 
        <li><a href="#general-report-options">General Report Options</a> 
         <ol> 
@@ -2567,6 +2568,12 @@ FROM mytable
         <td>An optional file name of a javascript file that contains chart configuration. If the file was selected using the <strong>Template</strong> field, this is not needed.</td> 
        </tr> 
        <tr> 
+        <td><strong>postTemplate</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>An optional file name of a javascript file that contains chart configuration. This javascript is run after the plot has been produced and so can be used to include event handlers. This file can be uploaded using the <strong>Add files</strong> button.</td> 
+       </tr> 
+       <tr> 
         <td><strong>barmode</strong></td> 
         <td>String</td> 
         <td></td> 
@@ -3331,12 +3338,44 @@ FROM mytable
         <td><strong>chartType</strong></td> 
         <td>String</td> 
         <td>bar</td> 
-        <td>The type of chart. One of pie, doughnut, exploded pie, horizontal bars, pareto, bar/default</td> 
+        <td>The type of chart. One of <strong>pie</strong>, <strong>doughnut</strong>, <strong>exploded pie</strong>, <strong>horizontal bars</strong>, <strong>pareto</strong>, <strong>bar</strong></td> 
        </tr> 
       </tbody> 
      </table> 
      <h3 id="apexchartsjs">ApexCharts.js</h3> 
      <p>Generates charts using the <a class="" href="https://apexcharts.com/" rel="nofollow">ApexCharts.js</a> library. A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field.</p> 
+     <h3 id="jqplot">jqPlot</h3> 
+     <p>Generates charts using the <a class="" href="http://www.jqplot.com/" rel="nofollow">jqPlot</a> library. A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. A number of options can be specified in the <strong>Options</strong> field. This is in addition to other other <a class="" href="http://www.music.mcgill.ca/~ich/classes/mumt301_11/js/jqPlot/docs/files/jqPlotOptions-txt.html" rel="nofollow">jqPlot options</a> that can also be specified in the options field.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Default</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>cssFile</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>The file name of a css file that contains custom css to be used with the report. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>plugins</strong></td> 
+        <td>String[]</td> 
+        <td></td> 
+        <td>Names of plugins to be used, that correspond to file names that will be included e.g. "barRenderer"</td> 
+       </tr> 
+       <tr> 
+        <td><strong>postTemplate</strong></td> 
+        <td>String</td> 
+        <td></td> 
+        <td>An optional file name of a javascript file that contains chart configuration. This javascript is run after the plot has been produced and so can be used to include event handlers. This file can be uploaded using the <strong>Add files</strong> button.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
      <p><br></p> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -4006,7 +4045,7 @@ FROM mytable
        </tr> 
        <tr> 
         <td><strong>Template</strong></td> 
-        <td>An optional javascript file for additional configuration. For <strong>DateRange</strong> data types, the file can be used to customize the date range picker. You can override the <strong>overallOptions</strong>, <strong>ranges</strong> or <strong>localeOptions</strong> variables as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file. For masks, the file may contain additional configuration options. For "mask1" masks, specify the additional options in a variable named <strong>mask1Options</strong>. For <strong>Date</strong> and <strong>DateTime</strong> data types, datepicker options can be specified in a variable named <strong>datepickerOptions</strong>.</td> 
+        <td>An optional javascript file for additional configuration. For <strong>DateRange</strong> data types, the file can be used to customize the date range picker. You can override the <strong>options</strong> variable as per the <strong>WEB-INF\jsp\daterangeInput.jsp</strong> file. For masks, the file may contain additional configuration options. For "mask1" masks, specify the additional options in a variable named <strong>mask1Options</strong>. For <strong>Date</strong> and <strong>DateTime</strong> data types, datepicker options can be specified in a variable named <strong>datepickerOptions</strong>.</td> 
        </tr> 
        <tr> 
         <td><strong>Shared</strong></td> 
@@ -4234,6 +4273,12 @@ FROM mytable
         <td>String</td> 
         <td></td> 
         <td>A specification of the end date when the date range picker is first displayed. Similar to <strong>startDate</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>timeOnly</strong></td> 
+        <td>Boolean</td> 
+        <td>false</td> 
+        <td>Whether the picker should only show time values. Useful when <strong>timePicker: true</strong> has also been specified and there's need for only time ranges.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -6796,7 +6841,7 @@ spnego-server {
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="api">API</h1> 
-     <p>A REST API is provided to facilitate interacting with some aspects of ART in a programmatic fashion, as opposed to using the browser.</p> 
+     <p>A REST API is provided to facilitate interacting with some aspects of ART in a programmatic fashion, as opposed to using the browser. Documentation of rest endpoints is available from within the application by using the <strong>View | API</strong> menu.</p> 
      <h2 id="base-url">Base URL</h2> 
      <p>The base URL for all api calls is <strong>/art/api/</strong></p> 
      <h2 id="responses">Responses</h2> 
@@ -6860,7 +6905,7 @@ spnego-server {
        </tr> 
        <tr> 
         <td>409</td> 
-        <td>A delete could not be perfomed because related records exist or a new record could not be added because a similar record already exists</td> 
+        <td>A delete could not be performed because related records exist or a new record could not be added because a similar record already exists</td> 
        </tr> 
        <tr> 
         <td>500</td> 
@@ -6892,7 +6937,7 @@ spnego-server {
        </tr> 
        <tr> 
         <td><strong>UNAUTHORIZED</strong></td> 
-        <td>The operation could not be perfomed because authorization is not available. This may mean that the user whose credentials have been supplied does not exist, is disabled or doesn't have the <strong>use_api</strong> permission. It may also mean that token based authentication is not configured i.e. the <strong>jwtSecret</strong> field in the <strong>WEB-INF\art-custom-settings.json</strong> file has not been set.</td> 
+        <td>The operation could not be performed because authorization is not available. This may mean that the user whose credentials have been supplied does not exist, is disabled or doesn't have the <strong>use_api</strong> permission. It may also mean that token based authentication is not configured i.e. the <strong>jwtSecret</strong> field in the <strong>WEB-INF\art-custom-settings.json</strong> file has not been set.</td> 
        </tr> 
        <tr> 
         <td><strong>RECORD_NOT_FOUND</strong></td> 
@@ -6900,11 +6945,11 @@ spnego-server {
        </tr> 
        <tr> 
         <td><strong>LINKED_RECORDS_EXIST</strong></td> 
-        <td>Indicates that a delete operation could not be perfomed because some related records exist e.g. you can't delete a user if that user is the owner of some jobs.</td> 
+        <td>Indicates that a delete operation could not be performed because some related records exist e.g. you can't delete a user if that user is the owner of some jobs.</td> 
        </tr> 
        <tr> 
         <td><strong>RECORD_EXISTS</strong></td> 
-        <td>Indicates that an add operation could not be perfomed because a similar record already exists e.g. if trying to add a user but another user with the same username already exists.</td> 
+        <td>Indicates that an add operation could not be performed because a similar record already exists e.g. if trying to add a user but another user with the same username already exists.</td> 
        </tr> 
        <tr> 
         <td><strong>INVALID_VALUE</strong></td> 
@@ -6915,44 +6960,44 @@ spnego-server {
      <h2 id="authentication">Authentication</h2> 
      <p>All calls to the api must contain authentication information. This is contained in the <strong>Authorization</strong> HTTP header. API authentication always uses the Internal authentication method even though ART may be configured to use other authentication methods.</p> 
      <h3 id="basic-authentication">Basic Authentication</h3> 
-     <p>One can use the HTTP <a class="" href="https://en.wikipedia.org/wiki/Basic_access_authentication" rel="nofollow">Basic authentication</a> method to provide authentication credentials where the Authorization header cotains the username and password encoded in base 64 format i.e. <code>Authorization: Basic &lt;base 64 credentials&gt;</code></p> 
+     <p>One can use the HTTP <a class="" href="https://en.wikipedia.org/wiki/Basic_access_authentication" rel="nofollow">Basic authentication</a> method to provide authentication credentials where the Authorization header contains the username and password encoded in base 64 format i.e. <code>Authorization: Basic &lt;base 64 credentials&gt;</code></p> 
      <h3 id="bearer-authentication">Bearer Authentication</h3> 
      <p>One can also obtain a token from the application and supply that with subsequent api calls. The <strong>jwtSecret</strong> in the <strong>WEB-INF\art-custom-settings.json</strong> file must have been set to a non-blank string. To obtain a token, perform a <strong>POST</strong> to the <strong>/api/login</strong> endpoint providing <strong>username</strong> and <strong>password</strong> form parameters. If authenticated, you will receive a response that contains an access token. This token should then be provided in the Authorization header using the <strong>Bearer</strong> scheme i.e. <code>Authorization: Bearer &lt;token&gt;</code>. By default, tokens expire after 60 minutes. This can be changed from the <strong>Settings</strong> page using the <strong>JWT Token Expiry (Mins)</strong> field.</p> 
      <h2 id="login">Login</h2> 
      <h3 id="request">Request</h3> 
      <p>If using bearer authentication, you obtain an access token by performing the following request, passing <strong>username</strong> and <strong>password</strong> form parameters</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">login</span>
+      <pre><span></span>    POST /api/login
 </pre> 
      </div> 
      <h3 id="response">Response</h3> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"accessToken"</span><span class="p">:</span> <span class="ss">"&lt;token&gt;"</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "accessToken": "&lt;token&gt;"
+        }
+    }
 </pre> 
      </div> 
      <p>In case the <strong>jwtSecret</strong> is not set, or the user provided doesn't exist or is disabled or doesn't have the <strong>use_api</strong> permission, a 401 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">401</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"UNAUTHORIZED"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 401,
+        "artStatus": "UNAUTHORIZED",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h2 id="users">Users</h2> 
      <h3 id="getting-all-users">Getting all users</h3> 
      <h4 id="request_1">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span>
+      <pre><span></span>    GET /api/users
 </pre> 
      </div> 
      <h4 id="response_1">Response</h4> 
@@ -6996,12 +7041,12 @@ spnego-server {
      <h4 id="request_2">Request</h4> 
      <p>Get by user id</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    GET /api/users/{id}
 </pre> 
      </div> 
      <p>Get by username</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="err">{</span><span class="n">username</span><span class="err">}</span>
+      <pre><span></span>    GET /api/users/username/{username}
 </pre> 
      </div> 
      <h4 id="response_2">Response</h4> 
@@ -7041,146 +7086,146 @@ spnego-server {
      </div> 
      <p>In case the user doesn't exist, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 404,
+        "artStatus": "RECORD_NOT_FOUND",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="deleting-a-user">Deleting a user</h3> 
      <h4 id="request_3">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    DELETE /api/users/{id}
 </pre> 
      </div> 
      <h4 id="response_3">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the jobs that the user owns.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"User not deleted because linked jobs exist"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="ss">"A report (5)"</span><span class="p">,</span>
-            <span class="ss">"Pie (8)"</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "LINKED_RECORDS_EXIST",
+        "message": "User not deleted because linked jobs exist",
+        "data": [
+            "A report (5)",
+            "Pie (8)",
+        ]
+    }
 </pre> 
      </div> 
      <h3 id="adding-a-user">Adding a user</h3> 
      <h4 id="request_4">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span>
-        <span class="err">{</span>
-            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    POST /api/users
+        {
+            "username": "test",
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a user object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>User</strong> object, you can look at the <strong>WEB-INF\classes\art\user\User.java</strong> file. If using a clear text <strong>password</strong>, include the <strong>clearTextPassword</strong> field and set it to <strong>true</strong>.</p> 
      <h4 id="response_4">Response</h4> 
      <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created user. The created user is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"userId"</span><span class="p">:</span> <span class="mi">41</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 201,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "userId": 41,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <p>If the username is not provided or is blank, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"username field not provided or blank"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 400,
+        "artStatus": "INVALID_VALUE",
+        "message": "username field not provided or blank",
+        "data": null
+    }
 </pre> 
      </div> 
      <p>If a user with the supplied username already exists, a 409 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A user with the given username already exists"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "RECORD_EXISTS",
+        "message": "A user with the given username already exists",
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="updating-a-user">Updating a user</h3> 
      <h4 id="request_5">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
-        <span class="err">{</span>
-            <span class="ss">"username"</span><span class="p">:</span> <span class="ss">"test"</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    PUT /api/users/{id}
+        {
+            "username": "test"
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a user object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>User</strong> object, you can look at the <strong>WEB-INF\classes\art\user\User.java</strong> file. If using a clear text <strong>password</strong>, include the <strong>clearTextPassword</strong> field and set it to <strong>true</strong>.</p> 
      <h4 id="response_5">Response</h4> 
      <p>If successful, a 200 response like the following would be returned. The updated user is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"userId"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "userId": 12,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <h3 id="disabling-a-user">Disabling a user</h3> 
      <h4 id="request_6">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">disable</span>
+      <pre><span></span>    POST /api/users/{id}/disable
 </pre> 
      </div> 
      <h4 id="response_6">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="enabling-a-user">Enabling a user</h3> 
      <h4 id="request_7">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">users</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">enable</span>
+      <pre><span></span>    POST /api/users/{id}/enable
 </pre> 
      </div> 
      <h4 id="response_7">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h2 id="reports">Reports</h2> 
@@ -7188,448 +7233,448 @@ spnego-server {
      <h4 id="request_8">Request</h4> 
      <p>Get by id</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    GET /api/reports/{id}
 </pre> 
      </div> 
      <p>Get by name</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="err">{</span><span class="n">name</span><span class="err">}</span>
+      <pre><span></span>    GET /api/reports/name/{name}
 </pre> 
      </div> 
      <h4 id="response_8">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="ss">"shortDescription"</span><span class="p">:</span> <span class="ss">"short desc"</span><span class="p">,</span>
-            <span class="ss">"description"</span><span class="p">:</span> <span class="ss">"long desc"</span><span class="p">,</span>
-            <span class="ss">"contactPerson"</span><span class="p">:</span> <span class="ss">"contact"</span><span class="p">,</span>
-            <span class="ss">"usesRules"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"parametersInOutput"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"xAxisLabel"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"yAxisLabel"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"chartOptionsSetting"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"template"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"displayResultset"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"xmlaDatasource"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"xmlaCatalog"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"creationDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"updateDate"</span><span class="p">:</span> <span class="mi">1560255530000</span><span class="p">,</span>
-            <span class="ss">"reportSource"</span><span class="p">:</span> <span class="ss">"select * from mytable"</span><span class="p">,</span>
-            <span class="ss">"createdBy"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"createdById"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"updatedBy"</span><span class="p">:</span> <span class="ss">"admin"</span><span class="p">,</span>
-            <span class="ss">"reportType"</span><span class="p">:</span> <span class="ss">"Tabular"</span><span class="p">,</span>
-            <span class="ss">"groupColumn"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"active"</span><span class="p">:</span> <span class="k">true</span><span class="p">,</span>
-            <span class="ss">"hidden"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"defaultReportFormat"</span><span class="p">:</span> <span class="ss">"default"</span><span class="p">,</span>
-            <span class="ss">"secondaryCharts"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"hiddenColumns"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"totalColumns"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"dateFormat"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"numberFormat"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"columnFormats"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"locale"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"nullNumberDisplay"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"nullStringDisplay"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"fetchSize"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"options"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"pageOrientation"</span><span class="p">:</span> <span class="ss">"Portrait"</span><span class="p">,</span>
-            <span class="ss">"omitTitleRow"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"lovUseDynamicDatasource"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"openPassword"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"modifyPassword"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"sourceReportId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"reportGroups"</span><span class="p">:</span> <span class="p">[</span>
-                <span class="err">{</span>
-                    <span class="ss">"parentId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                    <span class="ss">"reportGroupId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                    <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
-                    <span class="ss">"description"</span><span class="p">:</span> <span class="ss">"test group"</span><span class="p">,</span>
-                    <span class="ss">"creationDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-                    <span class="ss">"updateDate"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-                    <span class="ss">"createdBy"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-                    <span class="ss">"updatedBy"</span><span class="p">:</span> <span class="k">null</span>
-                <span class="err">}</span>
-            <span class="p">],</span>
-            <span class="ss">"clearTextPasswords"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"useGroovy"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
-            <span class="ss">"pivotTableJsSavedOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"gridstackSavedOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"name2"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"comment"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"viewReportId"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="ss">"selfServiceOptions"</span><span class="p">:</span> <span class="ss">""</span><span class="p">,</span>
-            <span class="ss">"datasource"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"encryptor"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"reportParams"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"userRuleValues"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"userGroupRuleValues"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"reportRules"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"userReportRights"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"userGroupReportRights"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"drilldowns"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"description2"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"dtActiveStatus"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"dtAction"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-            <span class="ss">"reportGroupNames"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
-            <span class="ss">"reportGroupNamesHtml"</span><span class="p">:</span> <span class="ss">"Test"</span><span class="p">,</span>
-            <span class="ss">"dtId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="ss">"dtName"</span><span class="p">:</span> <span class="ss">"test"</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "reportId": 1,
+            "name": "test",
+            "shortDescription": "short desc",
+            "description": "long desc",
+            "contactPerson": "contact",
+            "usesRules": false,
+            "parametersInOutput": false,
+            "xAxisLabel": "",
+            "yAxisLabel": "",
+            "chartOptionsSetting": null,
+            "template": "",
+            "displayResultset": 0,
+            "xmlaDatasource": "",
+            "xmlaCatalog": "",
+            "creationDate": null,
+            "updateDate": 1560255530000,
+            "reportSource": "select * from mytable",
+            "createdBy": null,
+            "createdById": 0,
+            "updatedBy": "admin",
+            "reportType": "Tabular",
+            "groupColumn": 0,
+            "active": true,
+            "hidden": false,
+            "defaultReportFormat": "default",
+            "secondaryCharts": "",
+            "hiddenColumns": "",
+            "totalColumns": "",
+            "dateFormat": "",
+            "numberFormat": "",
+            "columnFormats": "",
+            "locale": "",
+            "nullNumberDisplay": "",
+            "nullStringDisplay": "",
+            "fetchSize": 0,
+            "options": "",
+            "pageOrientation": "Portrait",
+            "omitTitleRow": false,
+            "lovUseDynamicDatasource": false,
+            "openPassword": null,
+            "modifyPassword": null,
+            "sourceReportId": 0,
+            "reportGroups": [
+                {
+                    "parentId": 0,
+                    "reportGroupId": 2,
+                    "name": "Test",
+                    "description": "test group",
+                    "creationDate": null,
+                    "updateDate": null,
+                    "createdBy": null,
+                    "updatedBy": null
+                }
+            ],
+            "clearTextPasswords": false,
+            "useGroovy": false,
+            "pivotTableJsSavedOptions": "",
+            "gridstackSavedOptions": "",
+            "name2": null,
+            "comment": "",
+            "viewReportId": 0,
+            "selfServiceOptions": "",
+            "datasource": null,
+            "encryptor": null,
+            "reportParams": null,
+            "userRuleValues": null,
+            "userGroupRuleValues": null,
+            "reportRules": null,
+            "userReportRights": null,
+            "userGroupReportRights": null,
+            "drilldowns": null,
+            "description2": null,
+            "dtActiveStatus": null,
+            "dtAction": null,
+            "reportGroupNames": "Test",
+            "reportGroupNamesHtml": "Test",
+            "dtId": 1,
+            "dtName": "test"
+        }
+    }
 </pre> 
      </div> 
      <p>In case the report doesn't exist, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 404,
+        "artStatus": "RECORD_NOT_FOUND",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="deleting-a-report">Deleting a report</h3> 
      <h4 id="request_9">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    DELETE /api/reports/{id}
 </pre> 
      </div> 
      <h4 id="response_9">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the jobs that use the report.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"Report not deleted because linked jobs exist"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="ss">"A report (5)"</span><span class="p">,</span>
-            <span class="ss">"Pie (8)"</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "LINKED_RECORDS_EXIST",
+        "message": "Report not deleted because linked jobs exist",
+        "data": [
+            "A report (5)",
+            "Pie (8)",
+        ]
+    }
 </pre> 
      </div> 
      <h3 id="adding-a-report">Adding a report</h3> 
      <h4 id="request_10">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span>
-        <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    POST /api/reports
+        {
+            "name": "test",
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a report object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>Report</strong> object, you can look at the <strong>WEB-INF\classes\art\report\Report.java</strong> file.</p> 
      <h4 id="response_10">Response</h4> 
      <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created report. The created report is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">41</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 201,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "reportId": 41,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <p>If the name is not provided or is blank, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"name field not provided or blank"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 400,
+        "artStatus": "INVALID_VALUE",
+        "message": "name field not provided or blank",
+        "data": null
+    }
 </pre> 
      </div> 
      <p>If a report with the supplied name already exists, a 409 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A report with the given name already exists"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "RECORD_EXISTS",
+        "message": "A report with the given name already exists",
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="updating-a-report">Updating a report</h3> 
      <h4 id="request_11">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
-        <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    PUT /api/reports/{id}
+        {
+            "name": "test",
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a report object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>Report</strong> object, you can look at the <strong>WEB-INF\classes\art\report\Report.java</strong> file.</p> 
      <h4 id="response_11">Response</h4> 
      <p>If successful, a 200 response like the following would be returned. The updated report is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"reportId"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "reportId": 12,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <h3 id="disabling-a-report">Disabling a report</h3> 
      <h4 id="request_12">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">disable</span>
+      <pre><span></span>    POST /api/reports/{id}/disable
 </pre> 
      </div> 
      <h4 id="response_12">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="enabling-a-report">Enabling a report</h3> 
      <h4 id="request_13">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span><span class="o">/</span><span class="n">enable</span>
+      <pre><span></span>    POST /api/reports/{id}/enable
 </pre> 
      </div> 
      <h4 id="response_13">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="running-a-report">Running a report</h3> 
      <h4 id="request_14">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">reports</span><span class="o">/</span><span class="n">run</span>
+      <pre><span></span>    POST /api/reports/run
 </pre> 
      </div> 
      <p>As part of the request, form parameters need to be included to provide parameters to be used to run the report, similar to running a report via url in the browser. The <strong>reportId</strong> parameter is mandatory in order to specify which report to run e.g. <code>.../api/reports/run?reportId=1</code>. Html report formats are not supported when running a report via api.</p> 
      <h4 id="response_14">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"fileName"</span><span class="p">:</span> <span class="ss">"report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
-            <span class="ss">"url"</span><span class="p">:</span> <span class="ss">"http://localhost:8080/art/export/reports/report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
-            <span class="ss">"rowsRetrieved"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-            <span class="ss">"rowsUpdated"</span><span class="p">:</span> <span class="k">null</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    <span class="p">{</span>
+        <span class="s2">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s2">"artStatus"</span><span class="p">:</span> <span class="s2">"OK"</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="nb nb-Type">null</span><span class="p">,</span>
+        <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"fileName"</span><span class="p">:</span> <span class="s2">"report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"http://localhost:8080/art/export/reports/report1-2019_06_20-10_50_52_700-WP985-1-0.pdf"</span><span class="p">,</span>
+            <span class="s2">"rowsRetrieved"</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="s2">"rowsUpdated"</span><span class="p">:</span> <span class="nb nb-Type">null</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 </pre> 
      </div> 
      <p>If the report is not found, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 404,
+        "artStatus": "RECORD_NOT_FOUND",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <p>If a html report format is specified, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"report format not allowed: html"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 400,
+        "artStatus": "INVALID_VALUE",
+        "message": "report format not allowed: html",
+        "data": null
+    }
 </pre> 
      </div> 
      <h2 id="user-groups">User Groups</h2> 
      <h3 id="getting-all-user-groups">Getting all user groups</h3> 
      <h4 id="request_15">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span>
+      <pre><span></span>    GET /api/user-groups
 </pre> 
      </div> 
      <h4 id="response_15">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="err">{</span>
-                <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-                <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-            <span class="err">}</span>
-        <span class="p">]</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": [
+            {
+                "userGroupId": 4,
+                &lt;other fields&gt;
+            }
+        ]
+    }
 </pre> 
      </div> 
      <h3 id="getting-a-particular-user-group">Getting a particular user group</h3> 
      <h4 id="request_16">Request</h4> 
      <p>Get by id</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    GET /api/user-groups/{id}
 </pre> 
      </div> 
      <p>Get by name</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="err">{</span><span class="n">name</span><span class="err">}</span>
+      <pre><span></span>    GET /api/user-groups/name/{name}
 </pre> 
      </div> 
      <h4 id="response_16">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "userGroupId": 1,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <p>In case the user group doesn't exist, a 404 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_NOT_FOUND"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 404,
+        "artStatus": "RECORD_NOT_FOUND",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="deleting-a-user-group">Deleting a user group</h3> 
      <h4 id="request_17">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="k">DELETE</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+      <pre><span></span>    DELETE /api/user-groups/{id}
 </pre> 
      </div> 
      <h4 id="response_17">Response</h4> 
      <p>If successful, a 200 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": null
+    }
 </pre> 
      </div> 
      <p>In case related records exist, a 409 response like the following would be returned. The data attribute would contain a list of strings which represent the users that the user group contains.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"LINKED_RECORDS_EXIST"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"User Group not deleted because linked users exist"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="p">[</span>
-            <span class="ss">"user1"</span><span class="p">,</span>
-            <span class="ss">"test"</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "LINKED_RECORDS_EXIST",
+        "message": "User Group not deleted because linked users exist",
+        "data": [
+            "user1",
+            "test",
+        ]
+    }
 </pre> 
      </div> 
      <h3 id="adding-a-user-group">Adding a user group</h3> 
      <h4 id="request_18">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span>
-        <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    POST /api/user-groups
+        {
+            "name": "test",
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a user group object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>UserGroup</strong> object, you can look at the <strong>WEB-INF\classes\art\usergroup\UserGroup.java</strong> file.</p> 
      <h4 id="response_18">Response</h4> 
      <p>If successful, a 201 response like the following would be returned. The <strong>Location</strong> header in the response will contain the url for the newly created user group. The created user group is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 201,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "userGroupId": 5,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
      <p>If the name is not provided or is blank, a 400 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"INVALID_VALUE"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"name field not provided or blank"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 400,
+        "artStatus": "INVALID_VALUE",
+        "message": "name field not provided or blank",
+        "data": null
+    }
 </pre> 
      </div> 
      <p>If a user group with the supplied name already exists, a 409 response like the following would be returned</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">409</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"RECORD_EXISTS"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="ss">"A user group with the given name already exists"</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="k">null</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 409,
+        "artStatus": "RECORD_EXISTS",
+        "message": "A user group with the given name already exists",
+        "data": null
+    }
 </pre> 
      </div> 
      <h3 id="updating-a-user-group">Updating a user group</h3> 
      <h4 id="request_19">Request</h4> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="n">PUT</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="k">user</span><span class="o">-</span><span class="n">groups</span><span class="o">/</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
-        <span class="err">{</span>
-            <span class="ss">"name"</span><span class="p">:</span> <span class="ss">"test"</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
+      <pre><span></span>    PUT /api/user-groups/{id}
+        {
+            "name": "test",
+            &lt;other fields&gt;
+        }
 </pre> 
      </div> 
      <p>The request body should contain a user group object. You can use JSON format and set the <strong>Content-Type</strong> header to <strong>application/json</strong>. For the applicable field names of the <strong>UserGroup</strong> object, you can look at the <strong>WEB-INF\classes\art\usergroup\UserGroup.java</strong> file.</p> 
      <h4 id="response_19">Response</h4> 
      <p>If successful, a 200 response like the following would be returned. The updated user group is included in the response.</p> 
      <div class="codehilite"> 
-      <pre><span></span>    <span class="err">{</span>
-        <span class="ss">"httpStatus"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="ss">"artStatus"</span><span class="p">:</span> <span class="ss">"OK"</span><span class="p">,</span>
-        <span class="ss">"message"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span>
-        <span class="ss">"data"</span><span class="p">:</span> <span class="err">{</span>
-            <span class="ss">"userGroupId"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-            <span class="o">&lt;</span><span class="n">other</span> <span class="n">fields</span><span class="o">&gt;</span>
-        <span class="err">}</span>
-    <span class="err">}</span>
+      <pre><span></span>    {
+        "httpStatus": 200,
+        "artStatus": "OK",
+        "message": null,
+        "data": {
+            "userGroupId": 10,
+            &lt;other fields&gt;
+        }
+    }
 </pre> 
      </div> 
     </div> 

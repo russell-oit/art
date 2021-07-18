@@ -50,6 +50,21 @@ public class PlotlyOptions implements Serializable {
 	private String hoverInfo;
 	private String orientation;
 	private String pieValueColumn;
+	private String postTemplate;
+
+	/**
+	 * @return the postTemplate
+	 */
+	public String getPostTemplate() {
+		return postTemplate;
+	}
+
+	/**
+	 * @param postTemplate the postTemplate to set
+	 */
+	public void setPostTemplate(String postTemplate) {
+		this.postTemplate = postTemplate;
+	}
 
 	/**
 	 * @return the showLegend

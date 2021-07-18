@@ -22,8 +22,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
  * Spring security configuration to provide csrf protection
@@ -65,12 +65,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		//https://stackoverflow.com/questions/29692353/how-to-prevent-adding-jsessionid-at-the-end-of-redirected-url
 		//https://stackoverflow.com/questions/962729/is-it-possible-to-disable-jsessionid-in-tomcat-servlet
 		//https://fralef.me/tomcat-disable-jsessionid-in-url.html
-		StrictHttpFirewall firewall = new StrictHttpFirewall();
-		firewall.setAllowSemicolon(true);
-		//https://sourceforge.net/p/art/discussion/352129/thread/c7387c3221/
-		//https://stackoverflow.com/questions/53300497/encoded-precent25-with-spring-requestmapping-path-param-gives-http-400
-		firewall.setAllowUrlEncodedPercent(true);
-		return firewall;
+//		StrictHttpFirewall firewall = new StrictHttpFirewall();
+//		firewall.setAllowSemicolon(true);
+//		//https://sourceforge.net/p/art/discussion/352129/thread/c7387c3221/
+//		//https://stackoverflow.com/questions/53300497/encoded-precent25-with-spring-requestmapping-path-param-gives-http-400
+//		firewall.setAllowUrlEncodedPercent(true);
+//		return firewall;
+
+		//use default firewall as swagger ui requires // in the url which strict firewall doesn't allow
+		return new DefaultHttpFirewall();
 	}
 
 	@Override

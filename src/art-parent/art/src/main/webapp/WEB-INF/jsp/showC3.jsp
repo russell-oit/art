@@ -32,6 +32,9 @@
 
 
 <script type="text/javascript">
+	var chartId = "${chartId}";
+	var contextPath = "${pageContext.request.contextPath}";
+	
 	var dataString = '${encode:forJavaScript(data)}';
 	var jsonData = [];
 	if (dataString) {
