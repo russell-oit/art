@@ -11,7 +11,7 @@
     <context-param>
         <description>ART Version Number</description>
         <param-name>versionNumber</param-name>
-        <param-value>5.8</param-value>
+        <param-value>5.9-snapshot</param-value>
     </context-param>
     <error-page>
         <exception-type>java.lang.Throwable</exception-type>
