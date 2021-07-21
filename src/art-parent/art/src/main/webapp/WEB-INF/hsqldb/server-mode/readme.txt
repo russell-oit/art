@@ -11,13 +11,10 @@ To run the databases in server mode, run start-databases.bat
 (or ./start-databases.sh on linux)
 To stop the databases, run stop-databases.bat (./stop-databases.sh on linux)
 
-You'll need to provide the passwords for the databases when stopping them. 
-The passwords to use are "SAMPLE" for the sample database
-and "ART" for the art repository database.
-
 When you run ART, change the jdbc url for the ArtRepository datasource
 to jdbc:hsqldb:hsql://localhost/artrepository
 and for SampleDB to jdbc:hsqldb:hsql://localhost/sampledb
+and for OrgChartDB to jdbc:hsqldb:hsql://localhost/orgchartdb
 
 
 Description of files
