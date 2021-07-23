@@ -273,6 +273,20 @@ Display art database configuration page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="artDatabase.label.connectionPoolLibrary"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="connectionPoolLibrary" items="${connectionPoolLibraries}">
+							<label class="radio-inline">
+								<form:radiobutton path="connectionPoolLibrary"
+												  value="${connectionPoolLibrary}"/> ${connectionPoolLibrary.description}
+							</label>
+						</c:forEach>
+						<form:errors path="connectionPoolLibrary" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>

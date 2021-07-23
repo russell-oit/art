@@ -240,6 +240,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.art</groupId>
+			<artifactId>art-dbcp</artifactId>
+			<version>5.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
 			<version>5.9-SNAPSHOT</version>
 		</dependency>

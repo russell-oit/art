@@ -170,6 +170,8 @@ public class DbConnections {
 		if (datasource.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
 			pool = new JndiConnectionPool();
+		} else if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
+			pool = new ArtDBCPConnectionPool();
 		} else {
 			pool = new HikariCPConnectionPool();
 		}
