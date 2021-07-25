@@ -534,13 +534,33 @@ public class Config extends HttpServlet {
 	 * @throws java.lang.Exception
 	 */
 	public static void initializeArtDatabase() throws Exception {
-		loadArtDatabaseConfiguration();
+		ArtDatabase artDatabase = null;
+		initializeArtDatabase(artDatabase);
+	}
 
-		if (artDbConfig == null) {
-			SettingsService settingsService = new SettingsService();
-			settings = new Settings();
-			settingsService.setSettingsDefaults(settings);
-			return;
+	/**
+	 * Initializes the art database and report datasource connection pools, runs
+	 * upgrade steps on the art database and starts the quartz scheduler
+	 *
+	 * @param artDatabase art database configuration
+	 * @throws java.lang.Exception
+	 */
+	public static void initializeArtDatabase(ArtDatabase artDatabase) throws Exception {
+		if (artDatabase == null) {
+			loadArtDatabaseConfiguration();
+
+			if (artDbConfig == null) {
+				SettingsService settingsService = new SettingsService();
+				settings = new Settings();
+				settingsService.setSettingsDefaults(settings);
+				return;
+			}
+		} else {
+			artDbConfig = null;
+			artDbConfig = artDatabase;
+
+			//set defaults for invalid values
+			setArtDatabaseDefaults(artDbConfig);
 		}
 
 		try {
