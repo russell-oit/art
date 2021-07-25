@@ -564,18 +564,29 @@ public class Config extends HttpServlet {
 		}
 
 		try {
-			//create connection pools
-			DbConnections.createConnectionPools(artDbConfig);
+			//reset connection pools
+			DbConnections.resetConnectionPools();
 
-			//create quartz scheduler. must be done before upgrade is run
-			createQuartzScheduler();
+			//create connection pool for the art database
+			DbConnections.createArtDbConnectionPool(artDbConfig);
 
 			//upgrade art database
 			performLiquibaseUpgrade();
 
 			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
-			upgradeHelper.upgrade(templatesPath);
+			upgradeHelper.upgradeDatabase(templatesPath);
+
+			ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
+			int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
+			//create connection pools for active datasources
+			DbConnections.createDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
+			
+			//create quartz scheduler
+			createQuartzScheduler();
+			
+			//migrate jobs to quartz
+			upgradeHelper.migrateJobsToQuartz();
 		} finally {
 			//load settings
 			//put in finally block so that a settings object is always available
