@@ -228,9 +228,9 @@ public class ArtDatabaseController {
 				ps.executeBatch();
 			}
 
-			Config.saveArtDatabaseConfiguration(artDatabase);
+			Config.initializeArtDatabase(artDatabase);
 
-			Config.initializeArtDatabase();
+			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			cacheHelper.clearAll(session);
 

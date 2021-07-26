@@ -1,0 +1,14 @@
+urlid artdb
+url jdbc:hsqldb:hsql://localhost/ArtRepository
+username ART
+password ART
+
+urlid sample
+url jdbc:hsqldb:hsql://localhost/SampleDB
+username SAMPLE
+password SAMPLE
+
+urlid orgchart
+url jdbc:hsqldb:hsql://localhost/OrgChartDB
+username ORGCHART
+password ORGCHART

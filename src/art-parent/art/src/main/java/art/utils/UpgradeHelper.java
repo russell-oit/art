@@ -59,22 +59,11 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Runs upgrade steps
-	 *
-	 * @param templatesPath the path to the templates directory
-	 * @throws java.lang.Exception
-	 */
-	public void upgrade(String templatesPath) throws Exception {
-		upgradeDatabase(templatesPath);
-		migrateJobsToQuartz();
-	}
-
-	/**
 	 * Migrates art jobs to quartz jobs
 	 *
 	 * @throws java.sql.SQLException
 	 */
-	private void migrateJobsToQuartz() throws SQLException {
+	public void migrateJobsToQuartz() throws SQLException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -133,7 +122,7 @@ public class UpgradeHelper {
 	 * @param templatesPath the path to the templates directory
 	 * @throws java.lang.Exception
 	 */
-	private void upgradeDatabase(String templatesPath) throws Exception {
+	public void upgradeDatabase(String templatesPath) throws Exception {
 		upgradeDatabaseTo30(templatesPath);
 		upgradeDatabaseTo31();
 		upgradeDatabaseTo38();

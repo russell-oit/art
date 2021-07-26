@@ -64,10 +64,7 @@ public class DbConnections {
 
 		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
 
-		//reset pools map
-		closeAllConnections();
-		connectionPoolMap = new HashMap<>();
-		mongodbConnections = new HashMap<>();
+		resetConnectionPools();
 
 		//create connection pool for the art database
 		createArtDbConnectionPool(artDbConfig);
@@ -81,6 +78,16 @@ public class DbConnections {
 		//create connection pools for active datasources
 		createDatasourceConnectionPools(maxPoolSize, connectionPoolLibrary);
 	}
+	
+	/**
+	 * Closes all connection pools and resets the connection pools map
+	 */
+	public static void resetConnectionPools(){
+		//reset pools map
+		closeAllConnections();
+		connectionPoolMap = new HashMap<>();
+		mongodbConnections = new HashMap<>();
+	}
 
 	/**
 	 * Create connection pools for active datasources
@@ -89,7 +96,7 @@ public class DbConnections {
 	 * @param connectionPoolLibrary the connection pool library
 	 * @throws SQLException
 	 */
-	private static void createDatasourceConnectionPools(int maxPoolSize,
+	public static void createDatasourceConnectionPools(int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) throws SQLException {
 
 		logger.debug("Entering createDatasourceConnectionPools");
@@ -170,6 +177,8 @@ public class DbConnections {
 		if (datasource.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
 			pool = new JndiConnectionPool();
+		} else if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
+			pool = new ArtDBCPConnectionPool();
 		} else {
 			pool = new HikariCPConnectionPool();
 		}
