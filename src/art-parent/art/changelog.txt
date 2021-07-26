@@ -1,3 +1,6 @@
+ART 5.9
+* Re-introduced ART-DBCP
+
 ART 5.8
 * Added timeOnly option for date range picker
 * Added postTemplate option for plotly.js reports
